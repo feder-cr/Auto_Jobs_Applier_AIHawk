@@ -22,47 +22,72 @@ class ConfigValidator:
     def validate_email(email: str) -> bool:
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(email_regex, email) is not None
-
+    
     @staticmethod
     def validate_config(config_yaml_path: Path) -> dict:
         try:
             with open(config_yaml_path, 'r') as stream:
                 parameters = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
-            raise ConfigError(f"Error reading config file: {exc}")
+            raise ConfigError(f"Error reading config file {config_yaml_path}: {exc}")
         except FileNotFoundError:
             raise ConfigError(f"Config file not found: {config_yaml_path}")
 
-        mandatory_params = [
-            'remote', 'experienceLevel',
-            'jobTypes', 'date', 'positions', 'locations', 'distance'
-        ]
+        # Validate 'remote'
+        if 'remote' not in parameters or not isinstance(parameters['remote'], bool):
+            raise ConfigError(f"'remote' in config file {config_yaml_path} must be a boolean value.")
 
-        for param in mandatory_params:
-            if param not in parameters:
-                raise ConfigError(f"Missing parameter in config file: {param}")
-
-        if not isinstance(parameters['remote'], bool):
-            raise ConfigError("'remote' must be a boolean value.")
-
+        # Validate 'experienceLevel'
         experience_level = parameters.get('experienceLevel', {})
+        valid_experience_levels = [
+            'internship', 'entry', 'associate', 'mid-senior level', 'director', 'executive'
+        ]
+        for level in valid_experience_levels:
+            if level not in experience_level or not isinstance(experience_level[level], bool):
+                raise ConfigError(f"Experience level '{level}' must be a boolean value in config file {config_yaml_path}.")
+
+        # Validate 'jobTypes'
         job_types = parameters.get('jobTypes', {})
+        valid_job_types = [
+            'full-time', 'contract', 'part-time', 'temporary', 'internship', 'other', 'volunteer'
+        ]
+        for job_type in valid_job_types:
+            if job_type not in job_types or not isinstance(job_types[job_type], bool):
+                raise ConfigError(f"Job type '{job_type}' must be a boolean value in config file {config_yaml_path}.")
+
+        # Validate 'date'
         date = parameters.get('date', {})
+        valid_dates = ['all time', 'month', 'week', '24 hours']
+        for date_filter in valid_dates:
+            if date_filter not in date or not isinstance(date[date_filter], bool):
+                raise ConfigError(f"Date filter '{date_filter}' must be a boolean value in config file {config_yaml_path}.")
 
-        if not experience_level or not any(experience_level.values()):
-            raise ConfigError("At least one experience level must be selected.")
-        if not job_types or not any(job_types.values()):
-            raise ConfigError("At least one job type must be selected.")
-        if not date or not any(date.values()):
-            raise ConfigError("At least one date filter must be selected.")
+        # Validate 'positions'
+        positions = parameters.get('positions', [])
+        if not isinstance(positions, list) or not all(isinstance(pos, str) for pos in positions):
+            raise ConfigError(f"'positions' must be a list of strings in config file {config_yaml_path}.")
+        
+        # Validate 'locations'
+        locations = parameters.get('locations', [])
+        if not isinstance(locations, list) or not all(isinstance(loc, str) for loc in locations):
+            raise ConfigError(f"'locations' must be a list of strings in config file {config_yaml_path}.")
 
+        # Validate 'distance'
         approved_distances = {0, 5, 10, 25, 50, 100}
-        if parameters['distance'] not in approved_distances:
-            raise ConfigError(f"Invalid distance value. Must be one of: {approved_distances}")
-        if not parameters['positions']:
-            raise ConfigError("'positions' list cannot be empty.")
-        if not parameters['locations']:
-            raise ConfigError("'locations' list cannot be empty.")
+        distance = parameters.get('distance')
+        if distance not in approved_distances:
+            raise ConfigError(f"Invalid distance value in config file {config_yaml_path}. Must be one of: {approved_distances}")
+
+        # Validate 'companyBlacklist'
+        company_blacklist = parameters.get('companyBlacklist', [])
+        if not isinstance(company_blacklist, list) or not all(isinstance(comp, str) for comp in company_blacklist):
+            raise ConfigError(f"'companyBlacklist' must be a list of strings in config file {config_yaml_path}.")
+
+        # Validate 'titleBlacklist'
+        title_blacklist = parameters.get('titleBlacklist', [])
+        if not isinstance(title_blacklist, list) or not all(isinstance(word, str) for word in title_blacklist):
+            raise ConfigError(f"'titleBlacklist' must be a list of strings in config file {config_yaml_path}.")
+
         return parameters
 
     @staticmethod
@@ -71,7 +96,7 @@ class ConfigValidator:
             with open(secrets_yaml_path, 'r') as stream:
                 secrets = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
-            raise ConfigError(f"Error reading secrets file: {exc}")
+            raise ConfigError(f"Error reading secrets file {secrets_yaml_path}: {exc}")
         except FileNotFoundError:
             raise ConfigError(f"Secrets file not found: {secrets_yaml_path}")
 
@@ -79,14 +104,14 @@ class ConfigValidator:
 
         for secret in mandatory_secrets:
             if secret not in secrets:
-                raise ConfigError(f"Missing secret: {secret}")
+                raise ConfigError(f"Missing secret in file {secrets_yaml_path}: {secret}")
            
         if not ConfigValidator.validate_email(secrets['email']):
-            raise ConfigError("Invalid email format in secrets file.")
+            raise ConfigError(f"Invalid email format in secrets file {secrets_yaml_path}.")
         if not secrets['password']:
-            raise ConfigError("Password cannot be empty in secrets file.")
+            raise ConfigError(f"Password cannot be empty in secrets file {secrets_yaml_path}.")
         if not secrets['openai_api_key']:
-            raise ConfigError("OpenAI API key cannot be empty in secrets file.")
+            raise ConfigError(f"OpenAI API key cannot be empty in secrets file {secrets_yaml_path}.")
 
         return secrets['email'], str(secrets['password']), secrets['openai_api_key']
 
@@ -177,12 +202,18 @@ def main(resume: Path = None):
         create_and_run_bot(email, password, parameters, openai_api_key)
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
+        print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except FileNotFoundError as fnf:
         print(f"File not found: {str(fnf)}")
+        print("Ensure all required files are present in the data folder.")
+        print("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
         print(f"Runtime error: {str(re)}")
+        print("Check browser setup and other runtime issues.")
+        print("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
+        print("Refer to the general troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
 
 if __name__ == "__main__":
     main()
