@@ -78,8 +78,8 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-repo/LinkedInJobBot.git
-   cd LinkedInJobBot
+   git https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
+   cd LinkedIn_AIHawk_automatic_job_application
    ```
 
 2. **Install the required packages:**
