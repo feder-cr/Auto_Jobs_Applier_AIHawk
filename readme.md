@@ -11,6 +11,7 @@
 7. [Contributors](#contributors)
 8. [License](#license)
 9. [Conclusion](#conclusion)
+10. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
@@ -126,6 +127,12 @@ LinkedIn_AIHawk offers flexibility in how it handles your resume:
    - `resume.pdf` (optional)
 
 2. **Run the Bot:**
+
+   ```bash
+   python main.py
+   ```
+   or
+   
    ```bash
    python main.py [--resume PATH_TO_RESUME_PDF]
    ```
@@ -151,3 +158,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Conclusion
 
 LinkedIn_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, LinkedIn_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
+
+## Disclaimer
+LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service and any applicable laws and regulations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
