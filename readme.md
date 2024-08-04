@@ -151,6 +151,8 @@ For detailed information on each component and their respective roles, please re
 
 - [feder-cr](https://github.com/your-github-profile) - Creator and Maintainer
 
+LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make LinkedIn_AIHawk an even more powerful tool for job seekers worldwide.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

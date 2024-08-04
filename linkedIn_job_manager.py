@@ -58,12 +58,13 @@ class LinkedInJobManager:
         """
         self.set_old_answers = {}
         file_path = 'data_folder/output/old_Questions.csv'
-        with open(file_path, 'r', newline='', encoding='utf-8', errors='ignore') as file:
-            csv_reader = csv.reader(file, delimiter=',', quotechar='"')
-            for row in csv_reader:
-                if len(row) == 3:
-                    answer_type, question_text, answer = row
-                    self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer
+        if os.path.exists(file_path):
+            with open(file_path, 'r', newline='', encoding='utf-8', errors='ignore') as file:
+                csv_reader = csv.reader(file, delimiter=',', quotechar='"')
+                for row in csv_reader:
+                    if len(row) == 3:
+                        answer_type, question_text, answer = row
+                        self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer
 
 
     def start_applying(self):
