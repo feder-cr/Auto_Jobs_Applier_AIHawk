@@ -60,6 +60,22 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Installation
 
+1. **Download and Install Python:**
+
+   Ensure you have Python installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
+
+   - [How to Install Python on Windows](https://www.geeksforgeeks.org/how-to-install-python-on-windows/)
+   - [How to Install Python on Linux](https://www.geeksforgeeks.org/how-to-install-python-on-linux/)
+   - [How to Download and Install Python on macOS](https://www.geeksforgeeks.org/how-to-download-and-install-python-latest-version-on-macos-mac-os-x/)
+
+2. **Download and Install Google Chrome:**
+   - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
+
+3. **Download and Install ChromeDriver:**
+   - Download the appropriate ChromeDriver version for your installed Google Chrome from the [ChromeDriver download page](https://googlechromelabs.github.io/chrome-for-testing/).
+   - Place the downloaded `chromedriver` executable in the same location where Google Chrome is installed.
+
+
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/your-repo/LinkedInJobBot.git
@@ -70,8 +86,6 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    ```bash
    pip install -r requirements.txt
    ```
-
-
 
 ## Configuration
 
