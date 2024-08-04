@@ -81,13 +81,14 @@ class ConfigValidator:
         # Validate 'companyBlacklist'
         company_blacklist = parameters.get('companyBlacklist', [])
         if not isinstance(company_blacklist, list) or not all(isinstance(comp, str) for comp in company_blacklist):
-            raise ConfigError(f"'companyBlacklist' must be a list of strings in config file {config_yaml_path}.")
+            company_blacklist = []
+        parameters['companyBlacklist'] = company_blacklist
 
         # Validate 'titleBlacklist'
         title_blacklist = parameters.get('titleBlacklist', [])
         if not isinstance(title_blacklist, list) or not all(isinstance(word, str) for word in title_blacklist):
-            raise ConfigError(f"'titleBlacklist' must be a list of strings in config file {config_yaml_path}.")
-
+            title_blacklist = []
+        parameters['titleBlacklist'] = title_blacklist
         return parameters
 
     @staticmethod
