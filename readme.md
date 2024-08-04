@@ -72,10 +72,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    pip install -r requirements.txt
    ```
 
-3. **Install ChromeDriver:**
-   ```bash
-   python -c "from webdriver_manager.chrome import ChromeDriverManager; ChromeDriverManager().install()"
-   ```
+
 
 ## Configuration
 
