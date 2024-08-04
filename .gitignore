@@ -6,6 +6,6 @@ open_ai_calls.log
 test*
 openaiSelenium*
 my*
-.venv
+.*
 open_ai_calls.json
 _*
