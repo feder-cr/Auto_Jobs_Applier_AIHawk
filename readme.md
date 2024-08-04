@@ -7,12 +7,10 @@
 3. [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Usage](#usage)
-6. [Optional Resume Feature](#optional-resume-feature)
-7. [Documentation](#documentation)
-8. [Troubleshooting](#troubleshooting)
-9. [Contributors](#contributors)
-10. [License](#license)
-11. [Conclusion](#conclusion)
+6. [Troubleshooting](#troubleshooting)
+7. [Contributors](#contributors)
+8. [License](#license)
+9. [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -104,6 +102,20 @@ Defines your job search parameters and bot behavior.
 
 Contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
 
+### Optional Resume Feature
+
+LinkedIn_AIHawk offers flexibility in how it handles your resume:
+
+- **Using a Specific Resume:**
+  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
+  ```bash
+  python main.py --resume /path/to/your/resume.pdf
+  ```
+
+- **Dynamic Resume Generation:**
+  If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
+
+
 ## Usage
 
 1. **Prepare the Data Folder:**
@@ -117,19 +129,6 @@ Contains your resume information in a structured format. Fill it out with your p
    ```bash
    python main.py [--resume PATH_TO_RESUME_PDF]
    ```
-
-## Optional Resume Feature
-
-LinkedIn_AIHawk offers flexibility in how it handles your resume:
-
-- **Using a Specific Resume:**
-  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
-  ```bash
-  python main.py --resume /path/to/your/resume.pdf
-  ```
-
-- **Dynamic Resume Generation:**
-  If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
 
 ## Documentation
 
