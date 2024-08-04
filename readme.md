@@ -117,20 +117,6 @@ Defines your job search parameters and bot behavior.
 
 Contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
 
-### Optional Resume Feature
-
-LinkedIn_AIHawk offers flexibility in how it handles your resume:
-
-- **Using a Specific Resume:**
-  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
-  ```bash
-  python main.py --resume /path/to/your/resume.pdf
-  ```
-
-- **Dynamic Resume Generation:**
-  If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
-
-
 ## Usage
 
 1. **Prepare the Data Folder:**
@@ -141,15 +127,20 @@ LinkedIn_AIHawk offers flexibility in how it handles your resume:
    - `resume.pdf` (optional)
 
 2. **Run the Bot:**
+3. 
+### Optional Resume Feature
+LinkedIn_AIHawk offers flexibility in how it handles your pdf resume:
 
+- **Dynamic Resume Generation:**
+  If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
    ```bash
    python main.py
    ```
-   or
-   
-   ```bash
-   python main.py [--resume PATH_TO_RESUME_PDF]
-   ```
+- **Using a Specific Resume:**
+  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
+  ```bash
+  python main.py --resume /path/to/your/resume.pdf
+  ```
 
 ## Documentation
 
