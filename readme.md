@@ -7,12 +7,10 @@
 3. [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Usage](#usage)
-6. [Optional Resume Feature](#optional-resume-feature)
-7. [Documentation](#documentation)
-8. [Troubleshooting](#troubleshooting)
-9. [Contributors](#contributors)
-10. [License](#license)
-11. [Conclusion](#conclusion)
+6. [Troubleshooting](#troubleshooting)
+7. [Contributors](#contributors)
+8. [License](#license)
+9. [Conclusion](#conclusion)
 
 ## Introduction
 
