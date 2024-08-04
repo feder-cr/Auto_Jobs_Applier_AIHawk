@@ -73,7 +73,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 3. **Download and Install ChromeDriver:**
    - Download the appropriate ChromeDriver version for your installed Google Chrome from the [ChromeDriver download page](https://googlechromelabs.github.io/chrome-for-testing/).
-   - Place the downloaded `chromedriver` executable in the same location where Google Chrome is installed.
+
 
 
 1. **Clone the repository:**
