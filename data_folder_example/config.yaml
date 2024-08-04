@@ -1,39 +1,40 @@
 remote: true
 
 experienceLevel:
- internship: false
- entry: true
- associate: true
- mid-senior level: true
- director: true
- executive: true
+  internship: true
+  entry: false
+  associate: true
+  mid-senior level: false
+  director: true
+  executive: false
 
 jobTypes:
- full-time: true
- contract: true
- part-time: true
- temporary: true
- internship: false
- other: true
- volunteer: false
+  full-time: true
+  contract: false
+  part-time: false
+  temporary: true
+  internship: false
+  other: false
+  volunteer: true
 
 date:
- all time: false
- month: false
- week: true
- 24 hours: false
+  all time: false
+  month: true
+  week: false
+  24 hours: true
 
 positions:
- - Software engineer
+  - Software developer
 
 locations:
- - Germany
+  - Germany
 
 distance: 100
 
 companyBlacklist:
-- Noir
-- Crossover
+  - Noir
+  - Crossover
 
 titleBlacklist:
- - Stage
+  - low
+  - stage
