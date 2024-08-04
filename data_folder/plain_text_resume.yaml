@@ -1,0 +1,105 @@
+{
+  "personalInformation": {
+    "name": "[Your name]",
+    "surname": "[Your surname]",
+    "dateOfBirth": "[Your Date of Birth]",
+    "country": "[Your country]",
+    "city": "[Your city]",
+    "address": "[Your address]",
+    "phonePrefix": "[Your phone number prefix]",
+    "phone": "[Your phone number]",
+    "email": "[Your email]",
+    "github": "[Link]",
+    "linkedin": "[Link]"
+  },
+  "selfIdentification": {
+    "gender": "[Specific gender identification]",
+    "pronouns": "[Your Pronouns]",
+    "veteran": "[Yes/No]",
+    "disability": "[Yes/No]",
+    "ethnicity": "[Specify ethnicity]"
+  },
+  "legalAuthorization": {
+    "euWorkAuthorization": "[Yes/No]",
+    "usWorkAuthorization": "[Yes/No]",
+    "requiresUsVisa": "[Yes/No]",
+    "legallyAllowedToWorkInUs": "[Yes/No]",
+    "requiresUsSponsorship": "[Yes/No]",
+    "requiresEuVisa": "[Yes/No]",
+    "legallyAllowedToWorkInEu": "[Yes/No]",
+    "requiresEuSponsorship": "[Yes/No]"
+  },
+  "workPreferences": {
+    "remoteWork": "[Yes/No]",
+    "inPersonWork": "[Yes/No]",
+    "openToRelocation": "[Yes/No]",
+    "willingToCompleteAssessments": "[Yes/No]",
+    "willingToUndergoDrugTests": "[Yes/No]",
+    "willingToUndergoBackgroundChecks": "[Yes/No]"
+  },
+  "educationDetails": [
+    {
+      "degree": "[Bachelor's/Master's/Ph.D.]",
+      "university": "[Name of University]",
+      "gpa": "[Your GPA]",
+      "graduationYear": "[Year of Graduation]",
+      "fieldOfStudy": "[Your Field of Study]",
+      "skillsAcquired": {
+        "blockchain": "[Years]",
+        "iot": "[Years]",
+        "python": "[Years]"
+      }
+    }
+  ],
+  "experienceDetails": [
+    {
+      "position": "[Job Title]",
+      "company": "[Company Name]",
+      "employmentPeriod": "[Month, Year] - [Month, Year]",
+      "location": "[City, Country]",
+      "industry": "[Industry of the Company]",
+      "keyResponsibilities": {
+        "responsibility1": "[Years]",
+        "responsibility2": "[Years]",
+        "responsibility3": "[Years]"
+      },
+      "skillsAcquired": {
+        "php": "[Years]",
+        "python": "[Years]",
+        "leadership": "[Years]",
+        "problemSolving": "[Years]",
+        "criticalThinking": "[Years]",
+        "adaptability": "[Years]",
+        "perfectionism": "[Years]"
+      }
+    }
+  ],
+  "projects": {
+    "project1": "[Description of significant projects you've worked on + if available repo link]",
+    "project2": "[Description of significant projects you've worked on + if available repo link]"
+  },
+  "availability": {
+    "noticePeriod": "[Specify notice period]"
+  },
+  "salaryExpectations": {
+    "salaryRangeUSD": "[Specify your salary expectations in USD]"
+  },
+  "certifications": [
+    "[Certification 1]",
+    "[Certification 2]",
+    "[Certification 3]"
+  ],
+  "languages": [
+    {
+      "language": "Italian",
+      "proficiency": "Native"
+    },
+    {
+      "language": "English",
+      "proficiency": "Professional"
+    }
+  ],
+  "interests": [
+    "[List any hobbies or interests relevant to your professional profile]"
+  ]
+}
