@@ -24,19 +24,18 @@ date:
  24 hours: [true/false]
 
 positions:
- - [Positions 1]
- - [Positions 2]
+  - Software developer
 
 locations:
- - [Locations 1]
- - [Locations 2]
+  - Country1
+  - Country2
 
-distance: [0 or 5 or 10 or 25 or 50 or 100]
+distance: 100
 
 companyBlacklist:
- - [Company Name 1]
- - [Company Name 2]
+  - Company1
+  - Company2
 
 titleBlacklist:
- - [Word 1]
- - [Word 2]
+  - word1
+  - word2
