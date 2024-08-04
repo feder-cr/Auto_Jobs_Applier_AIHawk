@@ -73,7 +73,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 3. **Download and Install ChromeDriver:**
    - Download the appropriate ChromeDriver version for your installed Google Chrome from the [ChromeDriver download page](https://googlechromelabs.github.io/chrome-for-testing/).
-   - Place the downloaded `chromedriver` executable in the same location where Google Chrome is installed.
+
 
 
 1. **Clone the repository:**
@@ -127,9 +127,8 @@ Contains your resume information in a structured format. Fill it out with your p
    - `resume.pdf` (optional)
 
 2. **Run the Bot:**
-3. 
-### Optional Resume Feature
-LinkedIn_AIHawk offers flexibility in how it handles your pdf resume:
+
+   LinkedIn_AIHawk offers flexibility in how it handles your pdf resume:
 
 - **Dynamic Resume Generation:**
   If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
