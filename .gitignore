@@ -2,6 +2,9 @@
 __pycache__/**
 .idea/**
 data_folder/output
+data_folder/config.yaml
+data_folder/plain_text_resume.yaml
+data_folder/secrets.yaml
 open_ai_calls.log
 test*
 openaiSelenium*
