@@ -1,0 +1,42 @@
+remote: [true/false]
+
+experienceLevel:
+ internship: [true/false]
+ entry: [true/false]
+ associate: [true/false]
+ mid-senior level: [true/false]
+ director: [true/false]
+ executive: [true/false]
+
+jobTypes:
+ full-time: [true/false]
+ contract: [true/false]
+ part-time: [true/false]
+ temporary: [true/false]
+ internship: [true/false]
+ other: [true/false]
+ volunteer: [true/false]
+
+date:
+ all time: [true/false]
+ month: [true/false]
+ week: [true/false]
+ 24 hours: [true/false]
+
+positions:
+ - [Positions 1]
+ - [Positions 2]
+
+locations:
+ - [Locations 1]
+ - [Locations 2]
+
+distance: [0 or 5 or 10 or 25 or 50 or 100]
+
+companyBlacklist:
+ - [Company Name 1]
+ - [Company Name 2]
+
+titleBlacklist:
+ - [Word 1]
+ - [Word 2]
