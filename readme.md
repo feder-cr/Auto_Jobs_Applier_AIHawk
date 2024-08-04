@@ -126,6 +126,12 @@ LinkedIn_AIHawk offers flexibility in how it handles your resume:
    - `resume.pdf` (optional)
 
 2. **Run the Bot:**
+
+   ```bash
+   python main.py
+   ```
+   or
+   
    ```bash
    python main.py [--resume PATH_TO_RESUME_PDF]
    ```
