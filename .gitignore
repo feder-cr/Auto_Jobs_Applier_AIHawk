@@ -1,0 +1,11 @@
+*.csv
+__pycache__/**
+.idea/**
+data_folder/output
+open_ai_calls.log
+test*
+openaiSelenium*
+my*
+.venv
+open_ai_calls.json
+_*
