@@ -80,41 +80,41 @@ class LinkedInJobManager:
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
-            print(f"Starting the search for {position} in {location}.")
+            utils.printyellow(f"Starting the search for {position} in {location}.")
 
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    print(f"Going to job page {job_page_number}")
+                    utils.printyellow(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
-                    print("Starting the application process for this page...")
+                    utils.printyellow("Starting the application process for this page...")
                     self.apply_jobs()
-                    print("Applying to jobs on this page has been completed!")
+                    utils.printyellow("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
                     if time_left > 0:
-                        print(f"Sleeping for {time_left} seconds.")
+                        utils.printyellow(f"Sleeping for {time_left} seconds.")
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
-                        print(f"Sleeping for {sleep_time / 60} minutes.")
+                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                         time.sleep(sleep_time)
                         page_sleep += 1
             except Exception:
-                traceback.print_exc()
+                traceback.format_exc()
                 pass
 
             time_left = minimum_page_time - time.time()
             if time_left > 0:
-                print(f"Sleeping for {time_left} seconds.")
+                utils.printyellow(f"Sleeping for {time_left} seconds.")
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                print(f"Sleeping for {sleep_time / 60} minutes.")
+                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                 time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -140,20 +140,21 @@ class LinkedInJobManager:
             
             for job in job_list:
                 if self.is_blacklisted(job.title, job.company, job.link):
-                    print(f"Blacklisted {job.title} at {job.company}, skipping...")
+                    utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                     self.write_to_file(job.company, job.location, job.title, job.link, "skipped")
                     continue
 
                 try:
                     if job.apply_method not in {"Continue", "Applied", "Apply"}:
                         self.easy_applier_component.job_apply(job)
-                except Exception:
+                except Exception as e:
+                    utils.printred(traceback.format_exc())
                     self.write_to_file(job.company, job.location, job.title, job.link, "failed")
                     continue  
                 self.write_to_file(job.company, job.location, job.title, job.link, "success")
         
         except Exception as e:
-            traceback.print_exc()
+            traceback.format_exc()
             raise e
     
     def write_to_file(self, company, job_title, link, job_location, file_name):
@@ -171,8 +172,8 @@ class LinkedInJobManager:
                 writer = csv.writer(f)
                 writer.writerow(to_write)
         except Exception as e:
-            print(f"Error writing registered job: {e}")
-            print(f"Details: Answer type: {answer_type}, Question: {question_text}")
+            utils.printred(f"Error writing registered job: {e}")
+            utils.printred(f"Details: Answer type: {answer_type}, Question: {question_text}")
 
     def get_base_search_url(self, parameters):
         remote_url = "f_CF=f_WRA" if parameters['remote'] else ""

@@ -94,17 +94,22 @@ class LinkedInEasyApplier:
     def _fill_application_form(self):
         while True:
             self.fill_up()
-            self._next_or_submit()
+            if self._next_or_submit():
+                break
+
 
     def _next_or_submit(self):
         next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
         button_text = next_button.text.lower()
         if 'submit application' in button_text:
             self._unfollow_company()
+            next_button.click()
+            return True
         time.sleep(random.uniform(1.5, 2.5))
         next_button.click()
         time.sleep(random.uniform(3.0, 5.0))
         self._check_for_errors()
+
 
 
     def _unfollow_company(self) -> None:
@@ -130,10 +135,14 @@ class LinkedInEasyApplier:
             pass
 
     def fill_up(self) -> None:
-        easy_apply_content = self.driver.find_element(By.CLASS_NAME, 'jobs-easy-apply-content')
-        pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
-        for element in pb4_elements:
-            self._process_form_element(element)
+        try:
+            easy_apply_content = self.driver.find_element(By.CLASS_NAME, 'jobs-easy-apply-content')
+            pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
+            for element in pb4_elements:
+                self._process_form_element(element)
+        except Exception as e:
+            pass
+        
 
 
     def _process_form_element(self, element: WebElement) -> None:

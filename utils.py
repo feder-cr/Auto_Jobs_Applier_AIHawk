@@ -66,3 +66,17 @@ def chromeBrowserOptions():
     else:
         options.add_argument("--incognito")
     return options
+
+def printred(text):
+    # Codice colore ANSI per il rosso
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    # Stampa il testo in rosso
+    print(f"{RED}{text}{RESET}")
+
+def printyellow(text):
+    # Codice colore ANSI per il giallo
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+    # Stampa il testo in giallo
+    print(f"{YELLOW}{text}{RESET}")

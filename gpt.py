@@ -224,7 +224,7 @@ class GPTAnswerer:
         }
         section_prompt = (
             f"For the following question: '{question}', which section of the resume is relevant? "
-            "Respond with one of the following: Personal information, Self-Identification, Legal Authorization, "
+            "Respond with one of the following: Personal information, Self Identification, Legal Authorization, "
             "Work Preferences, Education Details, Experience Details, Projects, Availability, Salary Expectations, "
             "Certifications, Languages, Interests."
         )
