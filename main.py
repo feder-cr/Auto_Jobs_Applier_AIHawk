@@ -32,6 +32,7 @@ class ConfigValidator:
             raise ConfigError(f"Error reading config file {config_yaml_path}: {exc}")
         except FileNotFoundError:
             raise ConfigError(f"Config file not found: {config_yaml_path}")
+        
 
         # Validate 'remote'
         if 'remote' not in parameters or not isinstance(parameters['remote'], bool):
