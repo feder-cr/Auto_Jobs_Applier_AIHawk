@@ -153,7 +153,7 @@ For detailed information on each component and their respective roles, please re
 
 ## Contributors
 
-- [feder-cr](https://github.com/your-github-profile) - Creator and Maintainer
+- [feder-cr](https://github.com/feder-cr/) - Creator and Maintainer
 
 LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make LinkedIn_AIHawk an even more powerful tool for job seekers worldwide.
 
