@@ -8,3 +8,5 @@ open_ai_calls.json
 _*
 data_folder*
 .venv
+generated_cv
+resume.html

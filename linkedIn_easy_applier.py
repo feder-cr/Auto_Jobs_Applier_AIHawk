@@ -6,6 +6,7 @@ import time
 import traceback
 from datetime import date
 from typing import List, Optional, Any, Tuple
+import uuid
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException
@@ -179,24 +180,44 @@ class LinkedInEasyApplier:
                 self._create_and_upload_cover_letter(element)
 
     def _create_and_upload_resume(self, element):
-        """Creates a resume in PDF format, uploads it using the upload element, and ensures cleanup of the temporary file."""
         max_retries = 3
         retry_delay = 1  # seconds
+        folder_path = 'generated_cv'
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
 
         for attempt in range(max_retries):
             try:
                 html_string = self.gpt_answerer.get_resume_html()
-                html_string = html_string.replace('\n', '')
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-                    pdf_path = temp_file.name
+                file_name = 'resume.html'
+                with open(file_name, 'w', encoding='utf-8') as file:
+                    file.write(html_string)
+                file_path = os.path.abspath(file_name)               
+                self.driver.execute_script("window.open('');")
+                self.driver.switch_to.window(self.driver.window_handles[1]) 
+                self.driver.get(f"file:///{file_path}")
+                time.sleep(1)
+                page_source = self.driver.page_source
+                self.driver.close()
+                self.driver.switch_to.window(self.driver.window_handles[0])
 
-                    # Convert HTML to PDF
-                    pisa_status = pisa.CreatePDF(html_string, dest=temp_file)
-                    element.send_keys(pdf_path)
-                    if pisa_status.err:
-                        raise Exception(f"PDF generation failed with error: {pisa_status.err}")
-                    time.sleep(2)
+                file_name_pdf = f"resume_{uuid.uuid4().hex}.pdf"
+                file_path_pdf = os.path.join(folder_path, file_name_pdf)
 
+                # Convert HTML to PDF and save it to the specified folder
+                with open(file_path_pdf, 'wb') as pdf_file:
+                    pisa_status = pisa.CreatePDF(page_source, dest=pdf_file)
+                    
+                file_path_pdf = os.path.abspath(file_path_pdf)
+                # Upload the file
+                element.send_keys(file_path_pdf)
+                
+                if pisa_status.err:
+                    raise Exception(f"PDF generation failed with error: {pisa_status.err}")
+                
+                time.sleep(2)  # Give some time for the upload process
                 return True
 
             except Exception:
@@ -205,10 +226,6 @@ class LinkedInEasyApplier:
                 else:
                     tb_str = traceback.format_exc()
                     raise Exception(f"Max retries reached. Upload failed: \nTraceback:\n{tb_str}")
-            
-            finally:
-                if os.path.exists(pdf_path):
-                    os.remove(pdf_path)
 
     def _upload_resume(self, element: WebElement) -> None:
         element.send_keys(str(self.resume_dir))

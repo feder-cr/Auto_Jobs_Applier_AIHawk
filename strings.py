@@ -139,8 +139,8 @@ html_template = """
 </span>
 <span style="
   position: fixed;
-  top: 50%;
-  left: 50%; 
+  top: 16.5%;
+  left: 18%; 
   transform: translate(-50%, -50%);
   padding: 6px;
   text-align: center;
