@@ -163,31 +163,21 @@ class GPTAnswerer:
         output = chain.invoke({"text": text})
         return output
     
-    """def get_resume_html(self):
-        latex_resume_template = self._preprocess_template_string(strings.latex_resume_template)
-        prompt = ChatPromptTemplate.from_template(latex_resume_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({"resume": self.resume, "job_description": self.job.summarize_job_description})
-        return output"""
-    
 
     def get_resume_html(self):
-        # Crea i prompt a partire dai template
-        prepare_info_prompt = ChatPromptTemplate.from_template(strings.prepare_info_template)
-        format_resume_prompt = ChatPromptTemplate.from_template(strings.format_resume_template)
-        review_and_optimize_prompt = ChatPromptTemplate.from_template(strings.review_and_optimize_template)
+        resume_markdown_prompt = ChatPromptTemplate.from_template(strings.resume_markdown_template)
+        fusion_job_description_resume_prompt = ChatPromptTemplate.from_template(strings.fusion_job_description_resume_template)
+       
+        resume_markdown_chain = resume_markdown_prompt | self.llm_cheap | StrOutputParser()
+        fusion_job_description_resume_chain = fusion_job_description_resume_prompt | self.llm_cheap | StrOutputParser()
 
-        # Creazione delle catene
-        prepare_info_chain = prepare_info_prompt | self.llm_cheap | StrOutputParser()
-        format_resume_chain = format_resume_prompt | self.llm_cheap | StrOutputParser()
-        review_and_optimize_chain = review_and_optimize_prompt | self.llm_cheap | StrOutputParser()
+        html_template = strings.html_template.format(email_address=self.resume.personal_information.email, phone_number=self.resume.personal_information.phonePrefix + self.resume.personal_information.phone , github_link=self.resume.personal_information.github, linkedin_link=self.resume.personal_information.linkedin,city=self.resume.personal_information.city,country=self.resume.personal_information.country)
 
         composed_chain = (
-            prepare_info_chain
-            | (lambda output: {"formatted_resume": output})
-            | format_resume_chain
-            | (lambda output: {"final_resume_html": output})
-            | review_and_optimize_chain
+            resume_markdown_chain
+            | (lambda output: {"job_description": self.job.summarize_job_description, "formatted_resume": output})
+            | fusion_job_description_resume_chain
+            | (lambda formatted_resume: html_template + formatted_resume)
         )
 
         try:

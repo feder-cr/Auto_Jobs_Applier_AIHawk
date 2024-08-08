@@ -1,121 +1,153 @@
-prepare_info_template = """
-**Prompt for HR Expert and Resume Writer:**
+resume_markdown_template = """
+Act as an HR expert and resume writer specializing in ATS-friendly resumes. Your task is twofold:
 
-Act as an HR expert and skilled resume writer specializing in creating ATS-compatible resumes. Your task is to identify and outline the key skills and requirements necessary for the position of this job, using the provided job description and resume. Use the job description as input to extract all relevant information and optimize the resume to highlight the relevant skills and experiences for the role.
+1. **Review and Extract Information**: Carefully examine the candidate's current resume to extract the following critical details:
+   - Work experience
+   - Educational background
+   - Relevant skills
+   - Achievements
+   - Certifications
 
-### Information to Collect and Analyze
-- **Resume:**  
+2. **Optimize the Resume**: Using the provided template, create a highly optimized resume for the relevant industry. The resume should:
+   - Include commonly required skills and keywords for the industry
+   - Utilize ATS-friendly phrases and terminology to ensure compatibility with automated systems
+   - Highlight strengths and achievements relevant to the industry
+   - Present experience, skills, and accomplishments in a compelling and professional manner
+   - Maintain a clear, that is easily readable by both ATS and human reviewers
+
+Provide guidance on how to enhance the presentation of the information to maximize impact and readability. Offer advice on tailoring the content to general industry standards, ensuring the resume passes ATS filters and captures the attention of recruiters, thereby increasing the candidate’s chances of securing an interview.
+
+## Information to Collect and Analyze
+- **My information eesume:**  
   {resume}
 
-- **Job Description:**  
+## Template to Use
+```
+# [Full Name]
+
+## Summary
+
+[Brief professional summary highlighting your experience, key skills, and career objectives. 2-3 sentences.]
+
+## Skills
+
+- **Skill1:** [details (max 15 word)]
+- **Skill2:** [details (max 15 word)]
+- **Skill3:** [details (max 15 word)]
+- **Skill4:** [details (max 15 word)]
+- **Skill4:** [details (max 15 word)]
+- **Skill5:** [details (max 15 word)]
+
+## Professional Experience
+
+### [Job Title]
+**[Company Name]** – [City, State]
+*[Start Date – End Date]*
+
+1. [Achievement or responsibility]
+2. [Achievement or responsibility]
+3. [Achievement or responsibility]
+4. [Achievement or responsibility]
+5. [Achievement or responsibility]
+
+### [Job Title]
+**[Company Name]** – [City, State]
+*[Start Date – End Date]*
+
+1. [Achievement or responsibility]
+2. [Achievement or responsibility]
+3. [Achievement or responsibility]
+4. [Achievement or responsibility]
+5. [Achievement or responsibility]
+
+### [Job Title]
+**[Company Name]** – [City, State]
+*[Start Date – End Date]*
+
+1. [Achievement or responsibility]
+2. [Achievement or responsibility]
+3. [Achievement or responsibility]
+4. [Achievement or responsibility]
+5. [Achievement or responsibility]
+
+## Education
+
+**[Degree] in [Field of Study]**
+[University Name] – [City, State]
+*Graduated: [Month Year]*
+
+## Certifications
+
+1. [Certification Name]
+2. [Certification Name]
+3. [Certification Name]
+
+## Projects
+
+### [Project Name]
+1. [Brief description of the project and your role]
+
+### [Project Name]
+1. [Brief description of the project and your role]
+
+### [Project Name]
+1. [Brief description of the project and your role]
+
+## Languages
+
+1. **[Language]:** [Proficiency Level]
+2. **[Language]:** [Proficiency Level]
+```
+The results should be provided in **markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```markdown ```
+"""
+
+fusion_job_description_resume_template = """
+
+Act as an HR expert and resume writer with a strategic approach. Customize the resume to highlight the candidate’s
+strengths, skills, and achievements that are most relevant to the provided job description. 
+Use a smart and targeted approach, incorporating key skills and abilities as well as important aspects of the job 
+description into the resume. 
+Ensure that the resume grabs the attention of hiring managers within the first few seconds and uses specific keywords and phrases from the job description to pass through Applicant Tracking Systems (ATS).
+
+Important Note: While making the necessary adjustments to align the resume with the job description, ensure that the overall structure of the resume remains intact. Do not drastically alter the organization of the document, but optimize it to highlight the most relevant points for the desired position.
+
+- **Most important infomation on job descrptio:**  
   {job_description}
 
-### Analysis and Planning
+- **My information eesume:**  
+  {formatted_resume}
 
-1. **Analyze the Job Description**: 
-   - Identify the required technical and soft skills.
-   - List the essential educational qualifications and certifications.
-   - Describe the relevant work experiences.
-   - Reflect on the role's evolution, considering future trends.
-
-2. **Analyze the Current Resume**:
-   - Identify the existing skills and experiences in the resume.
-
-3. **Optimize the Resume**:
-   - Plan the resume to highlight experiences and skills relevant to the job requirements.
-   - Ensure it includes pertinent keywords, a clear structure, and is tailored to emphasize the candidate's strengths and achievements.
-   - Avoid including information not requested by the job description.
-
-### Creating a "Smart" Resume
-
-- **ATS Compatibility**: Ensure the resume is optimized for applicant tracking systems (ATS) by including relevant keywords.
-- **Adaptation to the Job Description**: Strategically tailor the resume to reflect the skills and experiences required by the job description.
-- **Highlighting Strengths**: Customize the resume to showcase the most relevant skills, experiences, and achievements for the role.
-- **Clear Structure**: Use a clear and readable structure.
-- **Showcasing Experiences and Achievements**: Provide guidance on effectively presenting experience, skills, and achievements in a compelling and professional manner.
-- **Formatting and Design**: Offer advice on formatting and design to maintain readability and professionalism, ensuring the resume stands out in a competitive job market.
-
-### Final Result
-
-Your analysis and the optimized resume should be structured in a clear and organized document, with distinct sections for each point listed above. Each section should contain:
+The results should be provided in **markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```markdown ```
+  """
 
 
-The results should be provided in **Markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```md ```
-"""
 
-format_resume_template = """
-Transform the provided Markdown output into HTML format. Ensure that the HTML document uses a simple, clear style that maintains ATS compatibility and is easy for recruiters to read.
-
-### HTML Styling and Design Guidelines
-
-1. **Font and Color Scheme**:
-   - Use a standard sans-serif font such as "Arial" or "Verdana."
-   - Ensure dark text on a light background for optimal readability.
-
-2. **Headings and Titles**:
-   - **Main Titles**:
-     - Font: Arial, sans-serif
-     - Font Size: 16 px
-     - Color: Black
-     - Alignment: Left-aligned
-     - Spacing: 20 px above and below the title
-     - Formatting: Bold
-
-   - **Subtitles**:
-     - Font: Arial, sans-serif
-     - Font Size: 14 px
-     - Color: Black
-     - Alignment: Left-aligned
-     - Spacing: 10 px above and below the subtitle
-     - Formatting: Bold
-
-3. **Spacing and Margins**:
-   - General Margins: 1 inch (2.54 cm) on all sides
-   - Spacing between Titles and Content:
-     - After Main Titles: 20 px of spacing
-     - After Subtitles: 10 px of spacing
-   - Text Alignment: Left-aligned
-
-4. **Color Matching**:
-   - Use a consistent color scheme for headings and body text.
-   - Avoid bright colors and multiple shades to ensure clarity.
-
-### Output Requirements
-
-- **Convert Markdown to HTML**: Use the provided content and apply the specified styles.
-- **Apply Styling**: Follow the guidelines for font, size, color, and spacing.
-- **Ensure ATS Compatibility**: Maintain clear formatting to ensure the document is easily parsed by ATS systems.
-
-Provide only the HTML code for the resume, without any explanations or additional text and also without ```HTML ```, Ensure the final HTML document is simple, professional, and optimized for ATS.
-
-Resume in Markdown format:
-{formatted_resume}
-"""
-
-review_and_optimize_template = """
-Act as an HR expert and resume writer. Your task is to meticulously review and optimize the resume to ensure it stands out in a competitive job market.
-
-### Tasks:
-
-- **Proofreading:**
-  - Carefully check for spelling, grammar, and punctuation errors.
-
-- **Enhance Clarity and Impact:**
-  - Improve the clarity and impact of the content.
-  - Refine the language use and optimize the structure to highlight the candidate’s strengths and achievements.
-  - Ensure there is a clear visual distinction between section titles and the content.
-
-- **Final Output:**
-  - Ensure the resume is professionally polished, visually appealing, and formatted correctly in HTML.
-  - Ensure that section titles are centered.
-  - Ensure there is a noticeable visual difference between section titles and the content.
-  - Remove any unnecessary content, such as "Salary Expectations: €50,000."
-  - Make sure the resume does not contain any placeholder text or irrelevant information.
-
-**Resume:**
-{final_resume_html}
-
-Provide only the HTML code for the resume, without any explanations or additional text and also without ```HTML ```
+html_template = """
+<!DOCTYPE html>
+<title>Resume</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/casualwriter/casual-markdown/dist/casual-markdown.css">
+<script src="https://cdn.jsdelivr.net/gh/casualwriter/casual-markdown/dist/casual-markdown.js"></script>
+<style>  
+  body {{ line-height:1.5; margin:auto; padding:3px; max-width:1024px; display:none; FONT-FAMILY:"Segoe UI",ARIAL; }}
+  h1  {{ font-size:200%; padding:16px; border:1px solid lightgrey; BACKGROUND:#f0f0f0; }}
+  h2  {{ border-bottom:1px solid grey; padding:2px }}
+</style>
+<body onload="document.body.innerHTML=md.html(document.body.innerHTML); document.body.style.display='block';">
+<span style="float:right; padding:6px; display:block; text-align: center; width:250px;"> 
+  {email_address} <br> {phone_number} <a href="{github_link}" style="color: #0366d6; text-decoration: none;">GitHub</a> - <a href="{linkedin_link}" style="color: #0366d6; text-decoration: none;">LinkedIn</a>
+</span>
+<span style="
+  position: fixed;
+  top: 50%;
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  padding: 6px;
+  text-align: center;
+  z-index: 1000; 
+">
+  {city}, {country}
+</span>
 """
 
 
