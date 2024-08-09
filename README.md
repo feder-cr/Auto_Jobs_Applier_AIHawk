@@ -8,10 +8,11 @@
 4. [Configuration](#configuration)
 5. [Usage](#usage)
 6. [Troubleshooting](#troubleshooting)
-7. [Contributors](#contributors)
-8. [License](#license)
-9. [Conclusion](#conclusion)
-10. [Disclaimer](#Disclaimer)
+7. [Conclusion](#conclusion)
+8. [Contributors](#contributors)
+9. [Credits](#credits)
+10. [License](#license)
+11. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
@@ -150,6 +151,10 @@ For detailed information on each component and their respective roles, please re
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
 - **Invalid YAML:** Check your YAML files for syntax errors.
+- 
+## Conclusion
+
+LinkedIn_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, LinkedIn_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
 
 ## Contributors
 
@@ -157,13 +162,17 @@ For detailed information on each component and their respective roles, please re
 
 LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make LinkedIn_AIHawk an even more powerful tool for job seekers worldwide.
 
+## Credits
+
+### casual-markdown
+- **Description:** This project uses the casual-markdown library, a lightweight regex-based Markdown parser with Table of Contents (TOC) support.
+- **Author:** [casualwriter](https://github.com/casualwriter)
+- **Repository:** [casual-markdown](https://github.com/casualwriter/casual-markdown)
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Conclusion
-
-LinkedIn_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, LinkedIn_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
 
 ## Disclaimer
 LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service and any applicable laws and regulations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
