@@ -167,17 +167,19 @@ class GPTAnswerer:
     def get_resume_html(self):
         resume_markdown_prompt = ChatPromptTemplate.from_template(strings.resume_markdown_template)
         fusion_job_description_resume_prompt = ChatPromptTemplate.from_template(strings.fusion_job_description_resume_template)
-       
         resume_markdown_chain = resume_markdown_prompt | self.llm_cheap | StrOutputParser()
         fusion_job_description_resume_chain = fusion_job_description_resume_prompt | self.llm_cheap | StrOutputParser()
+        
+        casual_markdown_path = os.path.abspath("resume_template/casual_markdown.js")
+        reorganize_header_path = os.path.abspath("resume_template/reorganizeHeader.js")
+        resume_css_path = os.path.abspath("resume_template/resume.css")
 
-        #html_template = strings.html_template.format(email_address=self.resume.personal_information.email, phone_number=self.resume.personal_information.phonePrefix + self.resume.personal_information.phone , github_link=self.resume.personal_information.github, linkedin_link=self.resume.personal_information.linkedin,city=self.resume.personal_information.city,country=self.resume.personal_information.country)
-
+        html_template = strings.html_template.format(casual_markdown=casual_markdown_path, reorganize_header=reorganize_header_path, resume_css=resume_css_path)
         composed_chain = (
             resume_markdown_chain
             | (lambda output: {"job_description": self.job.summarize_job_description, "formatted_resume": output})
             | fusion_job_description_resume_chain
-            | (lambda formatted_resume: strings.html_template + formatted_resume)
+            | (lambda formatted_resume: html_template + formatted_resume)
         )
 
         try:

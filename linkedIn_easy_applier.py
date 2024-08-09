@@ -87,8 +87,8 @@ class LinkedInEasyApplier:
 
     def _scroll_page(self) -> None:
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
-        # utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
-        # utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
+        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
+        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self):
         while True:
@@ -195,9 +195,9 @@ class LinkedInEasyApplier:
                 file_path_pdf = os.path.join(folder_path, file_name_pdf)
                 
                 with open(file_path_pdf, "wb") as f:
-                    f.write(base64.b64decode(utils.HTML_to_PDF(file_name_HTML,True)))
+                    f.write(base64.b64decode(utils.HTML_to_PDF(file_name_HTML)))
                     
-                element.send_keys(file_path_pdf)
+                element.send_keys(os.path.abspath(file_path_pdf))
                 time.sleep(2)  # Give some time for the upload process
                 os.remove(file_name_HTML)
                 return True

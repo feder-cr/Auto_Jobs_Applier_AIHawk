@@ -25,6 +25,12 @@ Provide guidance on how to enhance the presentation of the information to maximi
 ```
 # [Full Name]
 
+[Your City, Your Country](Maps link)
+[Your Prefix Phone number](tel: Your Prefix Phone number)
+[Your Email](mailto:Your Email)
+[LinkedIn](Link LinkedIn account)
+[GitHub](Link GitHub account)
+
 ## Summary
 
 [Brief professional summary highlighting your experience, key skills, and career objectives. 2-3 sentences.]
@@ -38,7 +44,7 @@ Provide guidance on how to enhance the presentation of the information to maximi
 - **Skill4:** [details (max 15 word)]
 - **Skill5:** [details (max 15 word)]
 
-## Professional Experience
+## Working Experience
 
 ### [Job Title]
 **[Company Name]** – [City, State]
@@ -126,37 +132,11 @@ html_template = """
 <!DOCTYPE html>
 <title>Resume</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/casualwriter/casual-markdown/dist/casual-markdown.css">
-<script src="https://cdn.jsdelivr.net/gh/casualwriter/casual-markdown/dist/casual-markdown.js"></script>
-<style>  
-  body {{ line-height:1.5; margin:auto; padding:3px; max-width:1024px; display:none; FONT-FAMILY:"Segoe UI",ARIAL; }}
-  h1  {{ font-size:200%; padding:16px; border:1px solid lightgrey; BACKGROUND:#f0f0f0; }}
-  h2  {{ border-bottom:1px solid grey; padding:2px }}
-</style>
+<script src="{casual_markdown}"></script>
+<script src="{reorganize_header}"></script>
+<link rel="stylesheet" href="{resume_css}">
 <body onload="document.body.innerHTML=md.html(document.body.innerHTML); document.body.style.display='block';">
-<span style="float:right; padding:6px; display:block; text-align: center; width:250px;"> 
-  {email_address} <br> {phone_number} <a href="{github_link}" style="color: #0366d6; text-decoration: none;">GitHub</a> - <a href="{linkedin_link}" style="color: #0366d6; text-decoration: none;">LinkedIn</a>
-</span>
-<span style="
-  position: fixed;
-  top: 16.5%;
-  left: 18%; 
-  transform: translate(-50%, -50%);
-  padding: 6px;
-  text-align: center;
-  z-index: 1000; 
-">
-  {city}, {country}
-</span>
 """
-
-
-
-
-
-
-
-
 
 
 # Personal Information Template

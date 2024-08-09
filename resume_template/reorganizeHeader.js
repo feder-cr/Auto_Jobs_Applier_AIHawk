@@ -40,4 +40,4 @@ function reorganizeHeader() {
 
   setTimeout(function() {
     reorganizeHeader();
-  }, 100); 
+  }, 1000); 

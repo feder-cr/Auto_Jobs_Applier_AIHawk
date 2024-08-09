@@ -51,7 +51,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
         print(f"Exception occurred: {e}")
 
 
-def HTML_to_PDF(FilePath, Hide_Window=True):
+def HTML_to_PDF(FilePath):
     # Validate and prepare file paths
     if not os.path.isfile(FilePath):
         raise FileNotFoundError(f"The specified file does not exist: {FilePath}")
@@ -60,8 +60,6 @@ def HTML_to_PDF(FilePath, Hide_Window=True):
     
     # Set up Chrome options
     chrome_options = webdriver.ChromeOptions()
-    if Hide_Window:
-        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
 
     # Initialize Chrome driver
     service = ChromeService(ChromeDriverManager().install())
@@ -70,7 +68,7 @@ def HTML_to_PDF(FilePath, Hide_Window=True):
     try:
         # Load the HTML file
         driver.get(FilePath)
-
+        time.sleep(3)  # Adjust the sleep time if necessary
         start_time = time.time()
         pdf_base64 = driver.execute_cdp_cmd("Page.printToPDF", {
             "printBackground": True,    # Incluir los fondos en el PDF
