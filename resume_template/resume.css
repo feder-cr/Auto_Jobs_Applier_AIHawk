@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap');
+
+/* Reset generale per uniformità */
+body, h2, h3, h4, p, ul, ol {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    margin: auto;
+    padding: 20px;
+    max-width: 1024px;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* Header Style */
+header {
+    background-color: #e9ecef; /* Sfondo leggermente più scuro */
+    padding: 15px 20px 0 20px; /* Padding: 15px sopra, 20px a destra e a sinistra, 0px sotto */
+    border-bottom: 2px solid #d1d1d1; /* Bordo sottile per separare il header dal resto del contenuto */
+    font-family: 'Roboto', sans-serif; /* Font per il testo generico */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-info {
+    flex: 1;
+}
+
+.header-info h1 {
+    margin: 0;
+    font-size: 30px; /* Dimensione del font aumentata per il nome */
+    color: #000; /* Colore nero per il testo del nome */
+    font-family: 'Montserrat', sans-serif; /* Font più accattivante per il nome */
+}
+
+.header-info a {
+    color: #0056b3; /* Colore blu intenso per i link */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.header-info a:hover {
+    text-decoration: underline;
+}
+
+.contact-info {
+    flex: 0;
+    text-align: center; /* Centratura del testo */
+}
+
+.contact-info a {
+    display: block;
+    color: #0056b3; /* Colore blu intenso per i link */
+    text-decoration: none;
+    margin-bottom: 5px; /* Spaziatura tra i contatti */
+    font-size: 14px; /* Dimensione del font per i dettagli di contatto */
+    font-family: 'Roboto', sans-serif; /* Font moderno per i dettagli di contatto */
+    font-weight: bold;
+}
+
+.contact-info a:hover {
+    color: #ff5722; /* Colore arancione per i link al passaggio del mouse */
+}
+
+.contact-info a:visited {
+    color: #666; /* Colore grigio scuro per i link visitati */
+}
+
+/* Stile per i titoli delle sezioni */
+h2 {
+    font-size: 24px;
+    color: #0056b3;
+    border-bottom: 1px solid #d1d1d1;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Stile per le esperienze professionali */
+h3 {
+    font-size: 20px;
+    color: #212529;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+em {
+    color: #555;
+}
+
+ol, ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* Stile per le sezioni secondarie */
+p {
+    margin-bottom: 15px;
+}
+
+b {
+    color: #212529;
+}
+
+/* Stile per i link */
+a {
+    color: #0056b3;
+}
+
+a:hover {
+    color: #ff5722;
+    text-decoration: underline;
+}
+
+/* Responsività per schermi più piccoli */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .contact-info {
+        text-align: center;
+        margin-top: 10px;
+    }
+}
+
+.markdown code { background:#f0f0f0; color:navy; border-radius:6px; padding:2px; } 
+.markdown pre  { background:#f0f0f0; margin:12px; border:1px solid #ddd; padding:20px 12px; border-radius:6px; } 
+.markdown pre:hover button { display:block; }
+.markdown pre button { display:none; position:relative; float:right; top:-16px }
+.markdown blockquote { background:#f0f0f0; border-left:6px solid grey; padding:8px }
+.markdown table { margin:12px; border-collapse: collapse; }
+.markdown th    { border:1px solid grey; background:lightgrey; padding:6px; } 
+.markdown td    { border:1px solid grey;  padding:6px; }
+.markdown tr:nth-child(even) {  background:#f0f0f0;  }
+.markdown ins { color:#890604 } 
+.markdown rem { color:#198964 }
+.toc ul  { padding: 0 12px; }
+.toc h3  { color:#0057b7; border-bottom:1px dotted  grey }
+.toc .H1 { list-style-type:none; font-weight:600; margin:4px; background:#eee }
+.toc .H2 { list-style-type:none; font-weight:600; margin:4px; }
+.toc .H3 { margin-left:2em }
+.toc .H4 { margin-left:4em }
+.toc .active { color:#0057b7  }
+.toc li:hover { background:#f0f0f0 }

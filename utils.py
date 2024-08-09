@@ -1,6 +1,13 @@
+import json
+import os
 import random
 import time
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium import webdriver
+import time
+import glob
+from webdriver_manager.chrome import ChromeDriverManager
 
 headless = False
 chromeProfilePath = r"/home/.config/google-chrome/linkedin_profile"
@@ -42,6 +49,58 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
             print("The element is not visible.")
     except Exception as e:
         print(f"Exception occurred: {e}")
+
+
+def HTML_to_PDF(FilePath, Hide_Window=True):
+    # Validate and prepare file paths
+    if not os.path.isfile(FilePath):
+        raise FileNotFoundError(f"The specified file does not exist: {FilePath}")
+    
+    FilePath = f"file:///{os.path.abspath(FilePath).replace(os.sep, '/')}"
+    
+    # Set up Chrome options
+    chrome_options = webdriver.ChromeOptions()
+    if Hide_Window:
+        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+
+    # Initialize Chrome driver
+    service = ChromeService(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    try:
+        # Load the HTML file
+        driver.get(FilePath)
+
+        start_time = time.time()
+        pdf_base64 = driver.execute_cdp_cmd("Page.printToPDF", {
+            "printBackground": True,    # Incluir los fondos en el PDF
+            "landscape": False,          # Orientación vertical
+            "paperWidth": 10,           # Ancho en pulgadas (Carta: 8.5)
+            "paperHeight": 11,           # Alto en pulgadas (Carta: 11)
+            "marginTop": 0,            # Márgenes en pulgadas
+            "marginBottom": 0,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "displayHeaderFooter": False, # No mostrar encabezado y pie de página
+            "preferCSSPageSize": True,   # Preferir el tamaño de página definido por CSS
+            "generateDocumentOutline": False, # No generar un índice en el PDF
+            "generateTaggedPDF": False,  # No generar PDF accesible
+            "transferMode": "ReturnAsBase64"  # Retornar el PDF como base64
+        })
+        
+
+        # Check if PDF generation was successful
+        if time.time() - start_time > 120:
+            raise TimeoutError("PDF generation exceeded the specified timeout limit.")
+        # Return the base64-encoded PDF
+        return pdf_base64['data']
+
+    except WebDriverException as e:
+        raise RuntimeError(f"WebDriver exception occurred: {e}")
+    
+    finally:
+        # Ensure the driver is closed
+        driver.quit()
 
 def chromeBrowserOptions():
     options = webdriver.ChromeOptions()

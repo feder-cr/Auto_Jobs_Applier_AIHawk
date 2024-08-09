@@ -1,4 +1,4 @@
-import io
+import base64
 import os
 import random
 import tempfile
@@ -23,12 +23,10 @@ import io
 import time
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from xhtml2pdf import pisa    
+from xhtml2pdf import pisa
+
+import utils    
 
 class LinkedInEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]], gpt_answerer: Any):
@@ -181,45 +179,28 @@ class LinkedInEasyApplier:
 
     def _create_and_upload_resume(self, element):
         max_retries = 3
-        retry_delay = 1  # seconds
+        retry_delay = 1
         folder_path = 'generated_cv'
 
-        # Create the directory if it doesn't exist
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-
         for attempt in range(max_retries):
             try:
                 html_string = self.gpt_answerer.get_resume_html()
-                file_name = 'resume.html'
-                with open(file_name, 'w', encoding='utf-8') as file:
-                    file.write(html_string)
-                file_path = os.path.abspath(file_name)               
-                self.driver.execute_script("window.open('');")
-                self.driver.switch_to.window(self.driver.window_handles[1]) 
-                self.driver.get(f"file:///{file_path}")
-                time.sleep(1)
-                page_source = self.driver.page_source
-                self.driver.close()
-                self.driver.switch_to.window(self.driver.window_handles[0])
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as temp_html_file:
+                    temp_html_file.write(html_string)
+                    file_name_HTML = temp_html_file.name
 
                 file_name_pdf = f"resume_{uuid.uuid4().hex}.pdf"
                 file_path_pdf = os.path.join(folder_path, file_name_pdf)
-
-                # Convert HTML to PDF and save it to the specified folder
-                with open(file_path_pdf, 'wb') as pdf_file:
-                    pisa_status = pisa.CreatePDF(page_source, dest=pdf_file)
+                
+                with open(file_path_pdf, "wb") as f:
+                    f.write(base64.b64decode(utils.HTML_to_PDF(file_name_HTML,True)))
                     
-                file_path_pdf = os.path.abspath(file_path_pdf)
-                # Upload the file
                 element.send_keys(file_path_pdf)
-                
-                if pisa_status.err:
-                    raise Exception(f"PDF generation failed with error: {pisa_status.err}")
-                
                 time.sleep(2)  # Give some time for the upload process
+                os.remove(file_name_HTML)
                 return True
-
             except Exception:
                 if attempt < max_retries - 1:
                     time.sleep(retry_delay)

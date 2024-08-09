@@ -10,3 +10,4 @@ data_folder*
 .venv
 generated_cv
 resume.html
+.vscode
