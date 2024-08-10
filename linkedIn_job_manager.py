@@ -5,10 +5,8 @@ import time
 import traceback
 from itertools import product
 from pathlib import Path
-
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-
 import utils
 from job import Job
 from linkedIn_easy_applier import LinkedInEasyApplier
@@ -106,7 +104,6 @@ class LinkedInJobManager:
             except Exception:
                 traceback.format_exc()
                 pass
-
             time_left = minimum_page_time - time.time()
             if time_left > 0:
                 utils.printyellow(f"Sleeping for {time_left} seconds.")
@@ -176,22 +173,27 @@ class LinkedInJobManager:
             utils.printred(f"Details: Answer type: {answer_type}, Question: {question_text}")
 
     def get_base_search_url(self, parameters):
-        remote_url = "f_CF=f_WRA" if parameters['remote'] else ""
-        experience_url = "f_E=" + "%2C".join(
-            str(i+1) for i, v in enumerate(parameters.get('experienceLevel', [])) if v
-        )
-        distance_url = "?distance=" + str(parameters['distance'])
-        job_types_url = "f_JT=" + "%2C".join(
-            k[0].upper() for k, v in parameters.get('experienceLevel', {}).items() if v
-        )
-        date_url = next(
-            (v for k, v in {
-                "all time": "", "month": "&f_TPR=r2592000", "week": "&f_TPR=r604800", "24 hours": "&f_TPR=r86400"
-            }.items() if parameters.get('date', {}).get(k)), ""
-        )
-        easy_apply_url = "&f_LF=f_AL"
-        return f"{distance_url}&{remote_url}&{job_types_url}&{experience_url}{easy_apply_url}{date_url}"
-
+        url_parts = []
+        if parameters['remote']:
+            url_parts.append("f_CF=f_WRA")
+        experience_levels = [str(i+1) for i, v in enumerate(parameters.get('experienceLevel', [])) if v]
+        if experience_levels:
+            url_parts.append(f"f_E={','.join(experience_levels)}")
+        url_parts.append(f"distance={parameters['distance']}")
+        job_types = [key[0].upper() for key, value in parameters.get('jobTypes', {}).items() if value]
+        if job_types:
+            url_parts.append(f"f_JT={','.join(job_types)}")
+        date_mapping = {
+            "all time": "",
+            "month": "&f_TPR=r2592000",
+            "week": "&f_TPR=r604800",
+            "24 hours": "&f_TPR=r86400"
+        }
+        date_param = next((v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), "")
+        url_parts.append("f_LF=f_AL")  # Easy Apply
+        base_url = "&".join(url_parts)
+        return f"?{base_url}{date_param}"
+    
     def next_job_page(self, position, location, job_page):
         self.driver.get(f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
     
