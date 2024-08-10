@@ -14,27 +14,27 @@ personalInformation:
 selfIdentification:
   gender: "[Specific gender identification]"
   pronouns: "[Your Pronouns]"
-  veteran: "[Yes/No]"
-  disability: "[Yes/No]"
+  veteran: [true/false]
+  disability: [true/false]
   ethnicity: "[Specify ethnicity]"
 
 legalAuthorization:
-  euWorkAuthorization: "[Yes/No]"
-  usWorkAuthorization: "[Yes/No]"
-  requiresUsVisa: "[Yes/No]"
-  legallyAllowedToWorkInUs: "[Yes/No]"
-  requiresUsSponsorship: "[Yes/No]"
-  requiresEuVisa: "[Yes/No]"
-  legallyAllowedToWorkInEu: "[Yes/No]"
-  requiresEuSponsorship: "[Yes/No]"
+  euWorkAuthorization: [true/false]
+  usWorkAuthorization: [true/false]
+  requiresUsVisa: [true/false]
+  legallyAllowedToWorkInUs: [true/false]
+  requiresUsSponsorship: [true/false]
+  requiresEuVisa: [true/false]
+  legallyAllowedToWorkInEu: [true/false]
+  requiresEuSponsorship: [true/false]
 
 workPreferences:
-  remoteWork: "[Yes/No]"
-  inPersonWork: "[Yes/No]"
-  openToRelocation: "[Yes/No]"
-  willingToCompleteAssessments: "[Yes/No]"
-  willingToUndergoDrugTests: "[Yes/No]"
-  willingToUndergoBackgroundChecks: "[Yes/No]"
+  remoteWork: [true/false]
+  inPersonWork: [true/false]
+  openToRelocation: [true/false]
+  willingToCompleteAssessments: [true/false]
+  willingToUndergoDrugTests: [true/false]
+  willingToUndergoBackgroundChecks: [true/false]
 
 educationDetails:
   - degree: "[Bachelor's/Master's/Ph.D.]"
