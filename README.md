@@ -7,12 +7,13 @@
 3. [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Usage](#usage)
-6. [Troubleshooting](#troubleshooting)
-7. [Conclusion](#conclusion)
-8. [Contributors](#contributors)
-9. [Credits](#credits)
-10. [License](#license)
-11. [Disclaimer](#Disclaimer)
+6. [Documentation](#Documentation)
+7. [Troubleshooting](#troubleshooting)
+8. [Conclusion](#conclusion)
+9. [Contributors](#contributors)
+10. [Credits](#credits)
+11. [License](#license)
+12. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
@@ -79,7 +80,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 1. **Clone the repository:**
    ```bash
-   git https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
+   git clone https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
@@ -144,14 +145,14 @@ Contains your resume information in a structured format. Fill it out with your p
 
 ## Documentation
 
-For detailed information on each component and their respective roles, please refer to the [Documentation](docs/documentation.md) file.
+For detailed information on each component and their respective roles, please refer to the [Documentation](documentation.md) file.
 
 ## Troubleshooting
 
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
 - **Invalid YAML:** Check your YAML files for syntax errors.
-- 
+
 ## Conclusion
 
 LinkedIn_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, LinkedIn_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
@@ -175,4 +176,4 @@ LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributi
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service and any applicable laws and regulations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
+LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service, any applicable laws and regulations, and ethical considerations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
