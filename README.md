@@ -73,18 +73,13 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 2. **Download and Install Google Chrome:**
    - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
 
-3. **Download and Install ChromeDriver:**
-   - Download the appropriate ChromeDriver version for your installed Google Chrome from the [ChromeDriver download page](https://googlechromelabs.github.io/chrome-for-testing/).
-
-
-
-1. **Clone the repository:**
+3. **Clone the repository:**
    ```bash
    git clone https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
-2. **Install the required packages:**
+4. **Install the required packages:**
    ```bash
    pip install -r requirements.txt
    ```
