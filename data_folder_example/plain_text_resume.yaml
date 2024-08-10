@@ -79,6 +79,39 @@ certifications:
   - "AWS Certified Solutions Architect"
   - "Oracle Certified Professional, Java SE 11 Developer"
   - "Certified Scrum Master"
+  
+skills:
+  leadership: 6
+  problemSolving: 4
+  criticalThinking: 3
+  adaptability: 2
+  perfectionism: 2
+  blockchain: 3
+  iot: 3
+  python: 3
+  fullStackDevelopment: 3
+  databaseManagement: 3
+  versionControl: 3
+  agileMethodologies: 2
+  devOpsPractices: 2
+  algorithmDesign: 3
+  mobileAppDevelopment: 2
+  softwareArchitecture: 3
+  teamCollaboration: 2
+  documentation: 2
+  java: 3
+  cSharp: 3
+  c: 3
+  cPlusPlus: 3
+  javascript: 3
+  php: 3
+  sql: 3
+  noSql: 3
+  mysql: 3
+  firebase: 3
+  continuousIntegration: 2
+  continuousDeployment: 2
+  optimization: 3
 
 languages:
   - language: "Italian"

@@ -8,6 +8,6 @@ open_ai_calls.json
 _*
 data_folder*
 .venv
-generated_cv
+generated_cv*
 resume.html
 .vscode
