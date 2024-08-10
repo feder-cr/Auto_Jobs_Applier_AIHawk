@@ -7,12 +7,13 @@
 3. [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Usage](#usage)
-6. [Troubleshooting](#troubleshooting)
-7. [Conclusion](#conclusion)
-8. [Contributors](#contributors)
-9. [Credits](#credits)
-10. [License](#license)
-11. [Disclaimer](#Disclaimer)
+6. [Documentation](#Documentation)
+7. [Troubleshooting](#troubleshooting)
+8. [Conclusion](#conclusion)
+9. [Contributors](#contributors)
+10. [Credits](#credits)
+11. [License](#license)
+12. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
