@@ -1,4 +1,4 @@
-personalInformation:
+personal_information:
   name: "[Your name]"
   surname: "[Your surname]"
   dateOfBirth: "[Your Date of Birth]"
@@ -11,14 +11,14 @@ personalInformation:
   github: "[Link]"
   linkedin: "[Link]"
 
-selfIdentification:
+self_identification:
   gender: "[Specific gender identification]"
   pronouns: "[Your Pronouns]"
   veteran: [true/false]
   disability: [true/false]
   ethnicity: "[Specify ethnicity]"
 
-legalAuthorization:
+legal_authorization:
   euWorkAuthorization: [true/false]
   usWorkAuthorization: [true/false]
   requiresUsVisa: [true/false]
@@ -28,7 +28,7 @@ legalAuthorization:
   legallyAllowedToWorkInEu: [true/false]
   requiresEuSponsorship: [true/false]
 
-workPreferences:
+work_preferences:
   remoteWork: [true/false]
   inPersonWork: [true/false]
   openToRelocation: [true/false]
@@ -36,18 +36,22 @@ workPreferences:
   willingToUndergoDrugTests: [true/false]
   willingToUndergoBackgroundChecks: [true/false]
 
-educationDetails:
+education_details:
   - degree: "[Bachelor's/Master's/Ph.D.]"
     university: "[Name of University]"
     gpa: "[Your GPA]"
     graduationYear: "[Year of Graduation]"
     fieldOfStudy: "[Your Field of Study]"
     skillsAcquired:
-      blockchain: "[Years]"
-      iot: "[Years]"
-      python: "[Years]"
+      leadership: "[Years]"
+      problemSolving: "[Years]"
+      criticalThinking: "[Years]"
+      adaptability: "[Years]"
+      perfectionism: "[Years]"
+      yourSkill: "[Years]"
+      yourSkill: "[Years]"
 
-experienceDetails:
+experience_details:
   - position: "[Job Title]"
     company: "[Company Name]"
     employmentPeriod: "[Month, Year] - [Month, Year]"
@@ -58,13 +62,13 @@ experienceDetails:
       responsibility2: "[Description of responsibility1]"
       responsibility3: "[Description of responsibility1]"
     skillsAcquired:
-      php: "[Years]"
-      python: "[Years]"
       leadership: "[Years]"
       problemSolving: "[Years]"
       criticalThinking: "[Years]"
       adaptability: "[Years]"
       perfectionism: "[Years]"
+      yourSkill: "[Years]"
+      yourSkill: "[Years]"
 
 projects:
   project1: "[Description of significant projects you've worked on + if available repo link]"
@@ -73,13 +77,21 @@ projects:
 availability:
   noticePeriod: "[Specify notice period]"
 
-salaryExpectations:
+salary_expectations:
   salaryRangeUSD: "[Specify your salary expectations in USD]"
 
 certifications:
   - "[Certification 1]"
   - "[Certification 2]"
   - "[Certification 3]"
+
+skills:
+  problemSolving: "[Years]"
+  criticalThinking: "[Years]"
+  adaptability: "[Years]"
+  perfectionism: "[Years]"
+  yourSkill: "[Years]"
+  yourSkill: "[Years]"
 
 languages:
   - language: "Italian"
