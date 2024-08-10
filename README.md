@@ -176,4 +176,4 @@ LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributi
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service and any applicable laws and regulations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
+LinkedIn_AIHawk is developed for educational purposes only. The creator does not assume any responsibility for its use. Users should ensure they comply with LinkedIn's terms of service, any applicable laws and regulations, and ethical considerations when using this tool. The use of automated tools for job applications may have implications on user accounts, and caution is advised.
