@@ -117,10 +117,10 @@ Ensure that the resume grabs the attention of hiring managers within the first f
 
 Important Note: While making the necessary adjustments to align the resume with the job description, ensure that the overall structure of the resume remains intact. Do not drastically alter the organization of the document, but optimize it to highlight the most relevant points for the desired position.
 
-- **Most important infomation on job descrptio:**  
+- **Most important infomation on job descrption:**  
   {job_description}
 
-- **My information eesume:**  
+- **My information resume:**  
   {formatted_resume}
 
 The results should be provided in **markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```markdown ```

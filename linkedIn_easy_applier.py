@@ -96,7 +96,6 @@ class LinkedInEasyApplier:
             if self._next_or_submit():
                 break
 
-
     def _next_or_submit(self):
         next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
         button_text = next_button.text.lower()
@@ -110,7 +109,6 @@ class LinkedInEasyApplier:
         next_button.click()
         time.sleep(random.uniform(3.0, 5.0))
         self._check_for_errors()
-
 
 
     def _unfollow_company(self) -> None:
