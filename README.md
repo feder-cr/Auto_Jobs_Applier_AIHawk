@@ -145,7 +145,7 @@ Contains your resume information in a structured format. Fill it out with your p
 
 ## Documentation
 
-For detailed information on each component and their respective roles, please refer to the [Documentation](docs/documentation.md) file.
+For detailed information on each component and their respective roles, please refer to the [Documentation](documentation.md) file.
 
 ## Troubleshooting
 
