@@ -91,37 +91,163 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Configuration
 
-LinkedIn_AIHawk relies on three main configuration files:
-
 ### 1. secrets.yaml
 
-Contains sensitive information. Never share or commit this file to version control.
+This file contains sensitive information. Never share or commit this file to version control.
 
-- `email`: Your LinkedIn account email
-- `password`: Your LinkedIn account password
-- `openai_api_key`: Your OpenAI API key for GPT integration
+- `email: [Your LinkedIn email]`
+  - Replace with your LinkedIn account email address
+- `password: [Your LinkedIn password]`
+  - Replace with your LinkedIn account password
+- `openai_api_key: [Your OpenAI API key]`
+  - Replace with your OpenAI API key for GPT integration
+  - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
 
 ### 2. config.yaml
 
-Defines your job search parameters and bot behavior.
+This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
-- `remote`: Set to `true` to include remote jobs, `false` to exclude them
-- `experienceLevel`: Set desired experience levels to `true`
-- `jobTypes`: Set desired job types to `true`
-- `date`: Choose one time range for job postings
-- `positions`: List job titles you're interested in
-- `locations`: List locations you want to search in
-- `distance`: Set the radius for your job search (in miles)
-- `companyBlacklist`: List companies you want to exclude from your search
-- `titleBlacklist`: List keywords in job titles you want to avoid
+- `remote: [true/false]`
+  - Set to `true` to include remote jobs, `false` to exclude them
 
-### 3. plain_text_resume_template.yaml
+- `experienceLevel:`
+  - Set desired experience levels to `true`, others to `false`
+  - Options: `internship`, `entry`, `associate`, `mid-senior level`, `director`, `executive`
+  - Example: `internship: true`
 
-Contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
+- `jobTypes:`
+  - Set desired job types to `true`, others to `false`
+  - Options: `full-time`, `contract`, `part-time`, `temporary`, `internship`, `other`, `volunteer`
+  - Example: `full-time: true`
+
+- `date:`
+  - Choose one time range for job postings by setting it to `true`, others to `false`
+  - Options: `all time`, `month`, `week`, `24 hours`
+  - Example: `month: true`
+
+- `positions:`
+  - List job titles you're interested in, one per line
+  - Example:
+    ```yaml
+    positions:
+      - Software Developer
+      - Data Scientist
+    ```
+
+- `locations:`
+  - List locations you want to search in, one per line
+  - Example:
+    ```yaml
+    locations:
+      - New York, USA
+      - London, UK
+    ```
+
+- `distance: [number]`
+  - Set the radius for your job search in miles
+  - Example: `distance: 50`
+
+- `companyBlacklist:`
+  - List companies you want to exclude from your search, one per line
+  - Example:
+    ```yaml
+    companyBlacklist:
+      - Company X
+      - Company Y
+    ```
+
+- `titleBlacklist:`
+  - List keywords in job titles you want to avoid, one per line
+  - Example:
+    ```yaml
+    titleBlacklist:
+      - Sales
+      - Marketing
+    ```
+
+### 3. plain_text_resume.yaml
+
+This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
+
+Each section has specific fields to fill out:
+
+- `personal_information:`
+  - Contains basic personal details
+  - Example: `name: "John Doe"`
+
+- `self_identification:`
+  - Optional demographic information
+  - Example: `gender: "Male"`
+
+- `legal_authorization:`
+  - Work authorization status
+  - Use `true` or `false` for each field
+  - Example: `usWorkAuthorization: true`
+
+- `work_preferences:`
+  - Your work-related preferences
+  - Use `true` or `false` for each field
+  - Example: `remoteWork: true`
+
+- `education_details:`
+  - List your educational background
+  - Include degree, university, GPA, graduation year, field of study, and skills acquired
+  - Example:
+    ```yaml
+    - degree: "Bachelor's"
+      university: "University of Example"
+      gpa: "3.8"
+      graduationYear: "2022"
+      fieldOfStudy: "Computer Science"
+      skillsAcquired:
+        problemSolving: "4"
+    ```
+
+- `experience_details:`
+  - List your work experiences
+  - Include position, company, employment period, location, industry, key responsibilities, and skills acquired
+  - Example:
+    ```yaml
+    - position: "Software Developer"
+      company: "Tech Corp"
+      employmentPeriod: "Jan 2020 - Present"
+      location: "San Francisco, USA"
+      industry: "Technology"
+      keyResponsibilities:
+        responsibility1: "Developed web applications using React"
+      skillsAcquired:
+        adaptability: "3"
+    ```
+
+- Other sections like `projects`, `availability`, `salary_expectations`, `certifications`, `skills`, `languages`, and `interests` follow a similar format, with each item on a new line.
+
+### data_folder_example
+
+The `data_folder_example` folder contains a working example of how the files necessary for the bot's operation should be structured and filled out. This folder serves as a practical reference to help you correctly set up your work environment for the LinkedIn job search bot.
+
+#### Contents
+
+Inside this folder, you'll find example versions of the key files:
+
+- `secrets.yaml`
+- `config.yaml`
+- `plain_text_resume.yaml`
+
+These files are already populated with fictitious but realistic data. They show you the correct format and type of information to enter in each file.
+
+#### Usage
+
+Using this folder as a guide can be particularly helpful for:
+
+1. Understanding the correct structure of each configuration file
+2. Seeing examples of valid data for each field
+3. Having a reference point while filling out your personal files
+
+#### Important Note
 
 ## Usage
 
-1. **Prepare the Data Folder:**
+1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
