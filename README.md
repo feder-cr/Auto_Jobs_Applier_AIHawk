@@ -112,18 +112,13 @@ This file defines your job search parameters and bot behavior. Each section cont
 
 - `experienceLevel:`
   - Set desired experience levels to `true`, others to `false`
-  - Options: `internship`, `entry`, `associate`, `mid-senior level`, `director`, `executive`
-  - Example: `internship: true`
 
 - `jobTypes:`
   - Set desired job types to `true`, others to `false`
-  - Options: `full-time`, `contract`, `part-time`, `temporary`, `internship`, `other`, `volunteer`
-  - Example: `full-time: true`
 
 - `date:`
   - Choose one time range for job postings by setting it to `true`, others to `false`
-  - Options: `all time`, `month`, `week`, `24 hours`
-  - Example: `month: true`
+
 
 - `positions:`
   - List job titles you're interested in, one per line
@@ -139,8 +134,8 @@ This file defines your job search parameters and bot behavior. Each section cont
   - Example:
     ```yaml
     locations:
-      - New York, USA
-      - London, UK
+      - Itally
+      - London
     ```
 
 - `distance: [number]`
