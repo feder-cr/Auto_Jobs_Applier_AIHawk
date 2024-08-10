@@ -127,7 +127,6 @@ class GPTAnswerer:
 
     @staticmethod
     def find_best_match(text: str, options: list[str]) -> str:
-        # Find the best match for the given text from a list of options using Levenshtein distance.
         distances = [
             (option, distance(text.lower(), option.lower())) for option in options
         ]
@@ -136,7 +135,6 @@ class GPTAnswerer:
 
     @staticmethod
     def _remove_placeholders(text: str) -> str:
-        # Remove placeholder text from a string.
         text = text.replace("PLACEHOLDER", "")
         return text.strip()
 
@@ -181,14 +179,12 @@ class GPTAnswerer:
             | fusion_job_description_resume_chain
             | (lambda formatted_resume: html_template + formatted_resume)
         )
-
         try:
             output = composed_chain.invoke({
                 "resume": self.resume,
                 "job_description": self.job.summarize_job_description
             })
             return output
-
         except Exception as e:
             #print(f"Error during elaboration: {e}")
             pass
