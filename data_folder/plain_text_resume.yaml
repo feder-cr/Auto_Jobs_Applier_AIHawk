@@ -1,5 +1,5 @@
 {
-  "personalInformation": {
+  "personal_information": {
     "name": "[Your name]",
     "surname": "[Your surname]",
     "dateOfBirth": "[Your Date of Birth]",
@@ -12,14 +12,14 @@
     "github": "[Link]",
     "linkedin": "[Link]"
   },
-  "selfIdentification": {
+  "self_identification": {
     "gender": "[Specific gender identification]",
     "pronouns": "[Your Pronouns]",
     "veteran": "[Yes/No]",
     "disability": "[Yes/No]",
     "ethnicity": "[Specify ethnicity]"
   },
-  "legalAuthorization": {
+  "legal_authorization": {
     "euWorkAuthorization": "[Yes/No]",
     "usWorkAuthorization": "[Yes/No]",
     "requiresUsVisa": "[Yes/No]",
@@ -29,7 +29,7 @@
     "legallyAllowedToWorkInEu": "[Yes/No]",
     "requiresEuSponsorship": "[Yes/No]"
   },
-  "workPreferences": {
+  "work_preferences": {
     "remoteWork": "[Yes/No]",
     "inPersonWork": "[Yes/No]",
     "openToRelocation": "[Yes/No]",
@@ -37,7 +37,7 @@
     "willingToUndergoDrugTests": "[Yes/No]",
     "willingToUndergoBackgroundChecks": "[Yes/No]"
   },
-  "educationDetails": [
+  "education_details": [
     {
       "degree": "[Bachelor's/Master's/Ph.D.]",
       "university": "[Name of University]",
@@ -51,7 +51,7 @@
       }
     }
   ],
-  "experienceDetails": [
+  "experience_details": [
     {
       "position": "[Job Title]",
       "company": "[Company Name]",
@@ -81,7 +81,7 @@
   "availability": {
     "noticePeriod": "[Specify notice period]"
   },
-  "salaryExpectations": {
+  "salary_expectations": {
     "salaryRangeUSD": "[Specify your salary expectations in USD]"
   },
   "certifications": [
