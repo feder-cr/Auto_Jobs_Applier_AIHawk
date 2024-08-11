@@ -73,18 +73,13 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 2. **Download and Install Google Chrome:**
    - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
 
-3. **Download and Install ChromeDriver:**
-   - Download the appropriate ChromeDriver version for your installed Google Chrome from the [ChromeDriver download page](https://googlechromelabs.github.io/chrome-for-testing/).
-
-
-
-1. **Clone the repository:**
+3. **Clone the repository:**
    ```bash
    git clone https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
-2. **Install the required packages:**
+4. **Install the required packages:**
    ```bash
    pip install -r requirements.txt
    ```
@@ -241,15 +236,16 @@ Using this folder as a guide can be particularly helpful for:
 #### Important Note
 
 ## Usage
-
-1. **Data Folder:**
+0. **LinkedIn language**
+   To ensure the bot works, your LinkedIn language must be set to English.
+   
+2. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
-   - `resume.pdf` (optional)
 
-2. **Run the Bot:**
+3. **Run the Bot:**
 
    LinkedIn_AIHawk offers flexibility in how it handles your pdf resume:
 
