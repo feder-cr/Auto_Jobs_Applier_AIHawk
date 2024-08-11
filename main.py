@@ -175,10 +175,8 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
         gpt_answerer_component = GPTAnswerer(openai_api_key)
-
         with open(parameters['uploads']['plainTextResume'], "r") as file:
             plain_text_resume_file = file.read()
-        
         resume_object = Resume(plain_text_resume_file)
         bot = LinkedInBotFacade(login_component, apply_component)
         bot.set_secrets(email, password)

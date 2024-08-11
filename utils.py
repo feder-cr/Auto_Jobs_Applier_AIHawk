@@ -10,10 +10,17 @@ import glob
 from webdriver_manager.chrome import ChromeDriverManager
 
 headless = False
-chromeProfilePath = r"/home/.config/google-chrome/linkedin_profile"
+chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
+
+def ensure_chrome_profile():
+    profile_dir = os.path.dirname(chromeProfilePath)
+    if not os.path.exists(profile_dir):
+        os.makedirs(profile_dir)
+    if not os.path.exists(chromeProfilePath):
+        os.makedirs(chromeProfilePath)
+    return chromeProfilePath
 
 def is_scrollable(element):
-    """Controlla se un elemento è scrollabile."""
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")
     return int(scroll_height) > int(client_height)
@@ -22,13 +29,9 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
     if reverse:
         start, end = end, start
         step = -step
-
     if step == 0:
         raise ValueError("Step cannot be zero.")
-
-    # Script di scrolling che utilizza scrollTop
     script_scroll_to = "arguments[0].scrollTop = arguments[1];"
-
     try:
         if scrollable_element.is_displayed():
             if not is_scrollable(scrollable_element):
@@ -55,12 +58,9 @@ def HTML_to_PDF(FilePath):
     # Validate and prepare file paths
     if not os.path.isfile(FilePath):
         raise FileNotFoundError(f"The specified file does not exist: {FilePath}")
-    
     FilePath = f"file:///{os.path.abspath(FilePath).replace(os.sep, '/')}"
-    
     # Set up Chrome options
     chrome_options = webdriver.ChromeOptions()
-
     # Initialize Chrome driver
     service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -68,29 +68,26 @@ def HTML_to_PDF(FilePath):
     try:
         # Load the HTML file
         driver.get(FilePath)
-        time.sleep(3)  # Adjust the sleep time if necessary
+        time.sleep(3)
         start_time = time.time()
         pdf_base64 = driver.execute_cdp_cmd("Page.printToPDF", {
-            "printBackground": True,    # Incluir los fondos en el PDF
-            "landscape": False,          # Orientación vertical
-            "paperWidth": 10,           # Ancho en pulgadas (Carta: 8.5)
-            "paperHeight": 11,           # Alto en pulgadas (Carta: 11)
-            "marginTop": 0,            # Márgenes en pulgadas
+            "printBackground": True,    
+            "landscape": False,         
+            "paperWidth": 10,           
+            "paperHeight": 11,           
+            "marginTop": 0,            
             "marginBottom": 0,
             "marginLeft": 0,
             "marginRight": 0,
-            "displayHeaderFooter": False, # No mostrar encabezado y pie de página
-            "preferCSSPageSize": True,   # Preferir el tamaño de página definido por CSS
-            "generateDocumentOutline": False, # No generar un índice en el PDF
-            "generateTaggedPDF": False,  # No generar PDF accesible
-            "transferMode": "ReturnAsBase64"  # Retornar el PDF como base64
+            "displayHeaderFooter": False,
+            "preferCSSPageSize": True,   
+            "generateDocumentOutline": False, 
+            "generateTaggedPDF": False,
+            "transferMode": "ReturnAsBase64"
         })
         
-
-        # Check if PDF generation was successful
         if time.time() - start_time > 120:
             raise TimeoutError("PDF generation exceeded the specified timeout limit.")
-        # Return the base64-encoded PDF
         return pdf_base64['data']
 
     except WebDriverException as e:
@@ -108,21 +105,27 @@ def chromeBrowserOptions():
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--remote-debugging-port=9222')
-    if(headless):
+    if headless:
         options.add_argument("--headless")
     options.add_argument("--start-maximized")
     options.add_argument("--disable-blink-features")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option('useAutomationExtension', False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    if(len(chromeProfilePath)>0):
-        initialPath = chromeProfilePath[0:chromeProfilePath.rfind("/")]
-        profileDir = chromeProfilePath[chromeProfilePath.rfind("/")+1:]
-        options.add_argument('--user-data-dir=' +initialPath)
-        options.add_argument("--profile-directory=" +profileDir)
+    
+    # Assicurati che la directory del profilo Chrome esista
+    ensure_chrome_profile()
+
+    if len(chromeProfilePath) > 0:
+        initialPath = os.path.dirname(chromeProfilePath)
+        profileDir = os.path.basename(chromeProfilePath)
+        options.add_argument('--user-data-dir=' + initialPath)
+        options.add_argument("--profile-directory=" + profileDir)
     else:
         options.add_argument("--incognito")
+        
     return options
+
 
 def printred(text):
     # Codice colore ANSI per il rosso
