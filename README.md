@@ -137,7 +137,7 @@ This file defines your job search parameters and bot behavior. Each section cont
   - Example:
     ```yaml
     locations:
-      - Itally
+      - Italy
       - London
     ```
 
