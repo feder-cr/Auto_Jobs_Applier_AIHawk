@@ -1,5 +1,16 @@
 # LinkedIn_AIHawk
 
+🚀 **Join Our Telegram Community!** 🚀
+
+Join our **Telegram community** for:
+- **Support with AIHawk software**
+- **Share your experiences** with AIhawk and learn from others
+- **Job search tips** and **resume advice**
+- **Idea exchange** and resources for your projects
+
+📲 **[Join now!](https://t.me/AIhawkCommunity)**
+
+#Networking #JobOpportunities #ResumeTips #AIhawkSupport #CareerSupport
 ## Table of Contents
 
 1. [Introduction](#introduction)
@@ -98,6 +109,9 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
 
+  **P.S.:**You need to add some credit to your OpenAI account to continue using the API. Without credit, the API will not function properly.
+  You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
+
 ### 2. config.yaml
 
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
@@ -129,7 +143,7 @@ This file defines your job search parameters and bot behavior. Each section cont
   - Example:
     ```yaml
     locations:
-      - Itally
+      - Italy
       - London
     ```
 
