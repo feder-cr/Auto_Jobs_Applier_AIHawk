@@ -123,24 +123,18 @@ class LinkedInJobManager:
                     raise Exception("No more jobs on this page")
             except NoSuchElementException:
                 pass
-            
             job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
             utils.scroll_slow(self.driver, job_results)
             utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-            
             job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            
             if not job_list_elements:
                 raise Exception("No job class elements found on page")
-            
             job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
-            
             for job in job_list:
                 if self.is_blacklisted(job.title, job.company, job.link):
                     utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                     self.write_to_file(job.company, job.location, job.title, job.link, "skipped")
                     continue
-
                 try:
                     if job.apply_method not in {"Continue", "Applied", "Apply"}:
                         self.easy_applier_component.job_apply(job)
@@ -149,7 +143,6 @@ class LinkedInJobManager:
                     self.write_to_file(job.company, job.location, job.title, job.link, "failed")
                     continue  
                 self.write_to_file(job.company, job.location, job.title, job.link, "success")
-        
         except Exception as e:
             traceback.format_exc()
             raise e
@@ -219,7 +212,6 @@ class LinkedInJobManager:
             apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
         except:
             apply_method = "Applied"
-
         return job_title, company, job_location, link, apply_method
     
     def is_blacklisted(self, job_title, company, link):

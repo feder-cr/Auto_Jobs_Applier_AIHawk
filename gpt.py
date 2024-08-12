@@ -17,7 +17,6 @@ import strings
 
 load_dotenv()
 
-
 class LLMLogger:
     
     def __init__(self, llm: ChatOpenAI):
@@ -94,7 +93,6 @@ class LoggerChatModel:
         response_metadata = llmresult.response_metadata
         id_ = llmresult.id
         usage_metadata = llmresult.usage_metadata
-
         parsed_result = {
             "content": content,
             "response_metadata": {
@@ -114,6 +112,7 @@ class LoggerChatModel:
 
 
 class GPTAnswerer:
+
     def __init__(self, openai_api_key):
         self.llm_cheap = LoggerChatModel(
             ChatOpenAI(
@@ -140,8 +139,7 @@ class GPTAnswerer:
 
     @staticmethod
     def _preprocess_template_string(template: str) -> str:
-        # Preprocess a template string to remove unnecessary indentation.
-        return textwrap.dedent(template)
+        return textwrap.dedent(template) # remove unnecessary indentation.
 
     def set_resume(self, resume):
         self.resume = resume
@@ -158,8 +156,7 @@ class GPTAnswerer:
         )
         prompt = ChatPromptTemplate.from_template(strings.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({"text": text})
-        return output
+        return chain.invoke({"text": text})
     
 
     def get_resume_html(self):
@@ -167,11 +164,9 @@ class GPTAnswerer:
         fusion_job_description_resume_prompt = ChatPromptTemplate.from_template(strings.fusion_job_description_resume_template)
         resume_markdown_chain = resume_markdown_prompt | self.llm_cheap | StrOutputParser()
         fusion_job_description_resume_chain = fusion_job_description_resume_prompt | self.llm_cheap | StrOutputParser()
-        
         casual_markdown_path = os.path.abspath("resume_template/casual_markdown.js")
         reorganize_header_path = os.path.abspath("resume_template/reorganizeHeader.js")
         resume_css_path = os.path.abspath("resume_template/resume.css")
-
         html_template = strings.html_template.format(casual_markdown=casual_markdown_path, reorganize_header=reorganize_header_path, resume_css=resume_css_path)
         composed_chain = (
             resume_markdown_chain
@@ -180,22 +175,16 @@ class GPTAnswerer:
             | (lambda formatted_resume: html_template + formatted_resume)
         )
         try:
-            output = composed_chain.invoke({
-                "resume": self.resume,
-                "job_description": self.job.summarize_job_description
-            })
-            return output
+            return composed_chain.invoke({"resume": self.resume,"job_description": self.job.summarize_job_description})
         except Exception as e:
             #print(f"Error during elaboration: {e}")
             pass
-        
 
     def _create_chain(self, template: str):
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
 
     def answer_question_textual_wide_range(self, question: str) -> str:
-        # Define chains for each section of the resume
         self.chains = {
             "personal_information": self._create_chain(strings.personal_information_template),
             "self_identification": self._create_chain(strings.self_identification_template),
@@ -216,29 +205,23 @@ class GPTAnswerer:
             "Work Preferences, Education Details, Experience Details, Projects, Availability, Salary Expectations, "
             "Certifications, Languages, Interests."
         )
-
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
         section_name = output.lower().replace(" ", "_")
-
         resume_section = getattr(self.resume, section_name, None)
         if resume_section is None:
             raise ValueError(f"Section '{section_name}' not found in the resume.")
-
-        # Use the corresponding chain to answer the question
         chain = self.chains.get(section_name)
         if chain is None:
             raise ValueError(f"Chain not defined for section '{section_name}'")
-        output_str = chain.invoke({"resume_section": resume_section, "question": question})
-        return output_str
+        return chain.invoke({"resume_section": resume_section, "question": question})
 
     def answer_question_textual(self, question: str) -> str:
         template = self._preprocess_template_string(strings.resume_stuff_template)
         prompt = ChatPromptTemplate.from_template(template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({"resume": self.resume, "question": question})
-        return output
+        return chain.invoke({"resume": self.resume, "question": question})
 
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
         func_template = self._preprocess_template_string(strings.numeric_question_template)
@@ -263,5 +246,4 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke({"resume": self.resume, "question": question, "options": options})
-        best_option = self.find_best_match(output_str, options)
-        return best_option
+        return self.find_best_match(output_str, options)

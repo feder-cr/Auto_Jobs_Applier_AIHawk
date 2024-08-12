@@ -4,9 +4,10 @@ import random
 import tempfile
 import time
 import traceback
-from datetime import date
-from typing import List, Optional, Any, Tuple
 import uuid
+from datetime import date
+from typing import Any, List, Optional, Tuple
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException
@@ -15,20 +16,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-import tempfile
-import time
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-import io
-import time
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from xhtml2pdf import pisa
 
-import utils    
+import utils
+
 
 class LinkedInEasyApplier:
+    
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]], gpt_answerer: Any):
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
@@ -51,7 +44,6 @@ class LinkedInEasyApplier:
             tb_str = traceback.format_exc()
             self._discard_application()
             raise Exception(f"Failed to apply to job! Original exception: \nTraceback:\n{tb_str}")
-
 
     def _find_easy_apply_button(self) -> WebElement:
         buttons = WebDriverWait(self.driver, 10).until(
@@ -179,7 +171,6 @@ class LinkedInEasyApplier:
         max_retries = 3
         retry_delay = 1
         folder_path = 'generated_cv'
-
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         for attempt in range(max_retries):
@@ -188,13 +179,10 @@ class LinkedInEasyApplier:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as temp_html_file:
                     temp_html_file.write(html_string)
                     file_name_HTML = temp_html_file.name
-
                 file_name_pdf = f"resume_{uuid.uuid4().hex}.pdf"
                 file_path_pdf = os.path.join(folder_path, file_name_pdf)
-                
                 with open(file_path_pdf, "wb") as f:
                     f.write(base64.b64decode(utils.HTML_to_PDF(file_name_HTML)))
-                    
                 element.send_keys(os.path.abspath(file_path_pdf))
                 time.sleep(2)  # Give some time for the upload process
                 os.remove(file_name_HTML)
@@ -253,14 +241,12 @@ class LinkedInEasyApplier:
             radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
             if not radios:
                 return
-
             question_text = element.text.lower()
             options = [radio.text.lower() for radio in radios]
 
             answer = self._get_answer_from_set('radio', question_text, options)
             if not answer:
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-
             self._select_radio(radios, answer)
         except Exception:
             pass
@@ -270,13 +256,10 @@ class LinkedInEasyApplier:
             question = element.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
             question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
             text_field = self._find_text_field(question)
-
             is_numeric = self._is_numeric_field(text_field)
             answer = self._get_answer_from_set('numeric' if is_numeric else 'text', question_text)
-
             if not answer:
                 answer = self.gpt_answerer.answer_question_numeric(question_text) if is_numeric else self.gpt_answerer.answer_question_textual_wide_range(question_text)
-
             self._enter_text(text_field, answer)
             self._handle_form_errors(element, question_text, answer, text_field)
         except Exception:
@@ -300,11 +283,9 @@ class LinkedInEasyApplier:
             dropdown = question.find_element(By.TAG_NAME, 'select')
             select = Select(dropdown)
             options = [option.text for option in select.options]
-
             answer = self._get_answer_from_set('dropdown', question_text, options)
             if not answer:
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-
             self._select_dropdown(dropdown, answer)
         except Exception:
             pass
