@@ -1,11 +1,9 @@
 # LinkedIn_AIHawk
-
 🚀 **Join Our Telegram Community!** 🚀
 
 Looking for job opportunities, want to develop new projects, or need help with AIhawk software? Join our **Telegram community** for:
 - **Support with AIhawk software**
 - **Job search tips** and **resume advice**
-- **Networking and assistance** to get **referrals** and advance your career
 - **Idea exchange** and resources for your projects
 
 📲 **[Join now!](https://t.me/AIhawkCommunity)**
