@@ -196,7 +196,7 @@ class GPTAnswerer:
 
     def answer_question_textual_wide_range(self, question: str) -> str:
         # Define chains for each section of the resume
-        self.chains = {
+        chains = {
             "personal_information": self._create_chain(strings.personal_information_template),
             "self_identification": self._create_chain(strings.self_identification_template),
             "legal_authorization": self._create_chain(strings.legal_authorization_template),
@@ -209,29 +209,29 @@ class GPTAnswerer:
             "certifications": self._create_chain(strings.certifications_template),
             "languages": self._create_chain(strings.languages_template),
             "interests": self._create_chain(strings.interests_template),
+            "cover_letter": self._create_chain(strings.coverletter_template),
         }
         section_prompt = (
             f"For the following question: '{question}', which section of the resume is relevant? "
             "Respond with one of the following: Personal information, Self Identification, Legal Authorization, "
             "Work Preferences, Education Details, Experience Details, Projects, Availability, Salary Expectations, "
-            "Certifications, Languages, Interests."
+            "Certifications, Languages, Interests, Cover letter"
         )
-
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
         section_name = output.lower().replace(" ", "_")
-
+        if section_name == "cover_letter":
+            chain = chains.get(section_name)
+            output= chain.invoke({"resume": self.resume, "job_description": self.job_description})
+            return output
         resume_section = getattr(self.resume, section_name, None)
         if resume_section is None:
             raise ValueError(f"Section '{section_name}' not found in the resume.")
-
-        # Use the corresponding chain to answer the question
-        chain = self.chains.get(section_name)
+        chain = chains.get(section_name)
         if chain is None:
             raise ValueError(f"Chain not defined for section '{section_name}'")
-        output_str = chain.invoke({"resume_section": resume_section, "question": question})
-        return output_str
+        return chain.invoke({"resume_section": resume_section, "question": question})
 
     def answer_question_textual(self, question: str) -> str:
         template = self._preprocess_template_string(strings.resume_stuff_template)

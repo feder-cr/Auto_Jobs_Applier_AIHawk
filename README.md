@@ -108,9 +108,9 @@ This file contains sensitive information. Never share or commit this file to ver
 - `openai_api_key: [Your OpenAI API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
+  - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
 
-  **P.S.:**You need to add some credit to your OpenAI account to continue using the API. Without credit, the API will not function properly.
-  You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
+
 
 ### 2. config.yaml
 
