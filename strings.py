@@ -18,7 +18,7 @@ Act as an HR expert and resume writer specializing in ATS-friendly resumes. Your
 Provide guidance on how to enhance the presentation of the information to maximize impact and readability. Offer advice on tailoring the content to general industry standards, ensuring the resume passes ATS filters and captures the attention of recruiters, thereby increasing the candidate’s chances of securing an interview.
 
 ## Information to Collect and Analyze
-- **My information eesume:**  
+- **My information resume:**  
   {resume}
 
 ## Template to Use
