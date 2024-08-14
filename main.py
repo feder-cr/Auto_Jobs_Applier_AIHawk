@@ -7,7 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import click
 
 from utils import chromeBrowserOptions
-from gpt import GPTAnswerer
+from ai_adapter import GPTAnswerer
 from linkedIn_authenticator import LinkedInAuthenticator
 from linkedIn_bot_facade import LinkedInBotFacade
 from linkedIn_job_manager import LinkedInJobManager
@@ -33,7 +33,6 @@ class ConfigValidator:
         except FileNotFoundError:
             raise ConfigError(f"Config file not found: {config_yaml_path}")
         
-
         # Validate 'remote'
         if 'remote' not in parameters or not isinstance(parameters['remote'], bool):
             raise ConfigError(f"'remote' in config file {config_yaml_path} must be a boolean value.")
@@ -102,7 +101,7 @@ class ConfigValidator:
         except FileNotFoundError:
             raise ConfigError(f"Secrets file not found: {secrets_yaml_path}")
 
-        mandatory_secrets = ['email', 'password', 'openai_api_key']
+        mandatory_secrets = ['email', 'password', 'ai_api_key', 'ai_model']
 
         for secret in mandatory_secrets:
             if secret not in secrets:
@@ -112,10 +111,12 @@ class ConfigValidator:
             raise ConfigError(f"Invalid email format in secrets file {secrets_yaml_path}.")
         if not secrets['password']:
             raise ConfigError(f"Password cannot be empty in secrets file {secrets_yaml_path}.")
-        if not secrets['openai_api_key']:
-            raise ConfigError(f"OpenAI API key cannot be empty in secrets file {secrets_yaml_path}.")
+        if not secrets['ai_api_key']:
+            raise ConfigError(f"AI API key cannot be empty in secrets file {secrets_yaml_path}.")
+        if secrets['ai_model'] not in ['openai', 'claude', 'gemini']:
+            raise ConfigError(f"Invalid AI model in secrets file {secrets_yaml_path}. Must be 'openai', 'claude', or 'gemini'.")
 
-        return secrets['email'], str(secrets['password']), secrets['openai_api_key']
+        return secrets['email'], str(secrets['password']), secrets['ai_api_key'], secrets['ai_model']
 
 class FileManager:
     @staticmethod
@@ -169,12 +170,12 @@ def init_browser():
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
-def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
+def create_and_run_bot(email: str, password: str, parameters: dict, ai_api_key: str, ai_model: str):
     try:
         browser = init_browser()
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
-        gpt_answerer_component = GPTAnswerer(openai_api_key)
+        gpt_answerer_component = GPTAnswerer(ai_model, ai_api_key)
         with open(parameters['uploads']['plainTextResume'], "r") as file:
             plain_text_resume_file = file.read()
         resume_object = Resume(plain_text_resume_file)
@@ -195,11 +196,11 @@ def main(resume: Path = None):
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
         parameters = ConfigValidator.validate_config(config_file)
-        email, password, openai_api_key = ConfigValidator.validate_secrets(secrets_file)
+        email, password, ai_api_key, ai_model = ConfigValidator.validate_secrets(secrets_file)
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
 
-        create_and_run_bot(email, password, parameters, openai_api_key)
+        create_and_run_bot(email, password, parameters, ai_api_key, ai_model)
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
         print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
