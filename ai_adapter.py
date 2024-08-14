@@ -22,22 +22,13 @@ class ClaudeModel(AIModel):
         self.client = Anthropic(api_key=api_key)
 
     def generate_response(self, prompt: str) -> str:
+        formatted_prompt = f"\n\nHuman: {prompt}\n\nAssistant:"
         response = self.client.completions.create(
             model="claude-2",
-            prompt=prompt,
+            prompt=formatted_prompt,
             max_tokens_to_sample=300
         )
-        return response.completion
-
-class GeminiModel(AIModel):
-    def __init__(self, api_key: str):
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
-
-    def generate_response(self, prompt: str) -> str:
-        response = self.model.generate_content(prompt)
-        return response.text
+        return response.completion.strip()
 
 class AIAdapter:
     def __init__(self, model_type: str, api_key: str):
@@ -48,8 +39,6 @@ class AIAdapter:
             return OpenAIModel(api_key)
         elif model_type == "claude":
             return ClaudeModel(api_key)
-        elif model_type == "gemini":
-            return GeminiModel(api_key)
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
