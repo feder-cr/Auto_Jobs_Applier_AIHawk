@@ -18,7 +18,7 @@ Act as an HR expert and resume writer specializing in ATS-friendly resumes. Your
 Provide guidance on how to enhance the presentation of the information to maximize impact and readability. Offer advice on tailoring the content to general industry standards, ensuring the resume passes ATS filters and captures the attention of recruiters, thereby increasing the candidate’s chances of securing an interview.
 
 ## Information to Collect and Analyze
-- **My information eesume:**  
+- **My information resume:**  
   {resume}
 
 ## Template to Use
@@ -117,7 +117,7 @@ Ensure that the resume grabs the attention of hiring managers within the first f
 
 Important Note: While making the necessary adjustments to align the resume with the job description, ensure that the overall structure of the resume remains intact. Do not drastically alter the organization of the document, but optimize it to highlight the most relevant points for the desired position.
 
-- **Most important infomation on job descrption:**  
+- **Most important information on job description:**  
   {job_description}
 
 - **My information resume:**  
