@@ -176,7 +176,7 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i+1) for i, v in enumerate(parameters.get('experienceLevel', [])) if v]
+        experience_levels = [str(i+1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
         url_parts.append(f"distance={parameters['distance']}")
