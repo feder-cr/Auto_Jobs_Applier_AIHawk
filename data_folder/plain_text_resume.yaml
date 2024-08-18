@@ -1,6 +1,6 @@
 personal_information:
-  name: "[Your name]"
-  surname: "[Your surname]"
+  name: "Sherman"
+  surname: "Page"
   dateOfBirth: "[Your Date of Birth]"
   country: "[Your country]"
   city: "[Your city]"
@@ -14,30 +14,30 @@ personal_information:
 self_identification:
   gender: "[Specific gender identification]"
   pronouns: "[Your Pronouns]"
-  veteran: [true/false]
-  disability: [true/false]
-  ethnicity: "[Specify ethnicity]"
+  veteran: false
+  disability: false
+  ethnicity: "Asian"
 
 legal_authorization:
-  euWorkAuthorization: [true/false]
-  usWorkAuthorization: [true/false]
-  requiresUsVisa: [true/false]
-  legallyAllowedToWorkInUs: [true/false]
-  requiresUsSponsorship: [true/false]
-  requiresEuVisa: [true/false]
-  legallyAllowedToWorkInEu: [true/false]
-  requiresEuSponsorship: [true/false]
+  euWorkAuthorization: false
+  usWorkAuthorization: false
+  requiresUsVisa: true
+  legallyAllowedToWorkInUs: false
+  requiresUsSponsorship: true
+  requiresEuVisa: true
+  legallyAllowedToWorkInEu: false
+  requiresEuSponsorship: true
 
 work_preferences:
-  remoteWork: [true/false]
-  inPersonWork: [true/false]
-  openToRelocation: [true/false]
-  willingToCompleteAssessments: [true/false]
-  willingToUndergoDrugTests: [true/false]
-  willingToUndergoBackgroundChecks: [true/false]
+  remoteWork: true
+  inPersonWork: true
+  openToRelocation: true
+  willingToCompleteAssessments: true
+  willingToUndergoDrugTests: true
+  willingToUndergoBackgroundChecks: true
 
 education_details:
-  - degree: "[Bachelor's/Master's/Ph.D.]"
+  - degree: "Master's"
     university: "[Name of University]"
     gpa: "[Your GPA]"
     graduationYear: "[Year of Graduation]"

@@ -6,9 +6,10 @@ test*
 openaiSelenium*
 open_ai_calls.json
 _*
-data_folder*
+data_folder/secrets.yaml
 .venv
 generated_cv*
 resume.html
 .vscode
 chrome_profile
+secrets.yaml
