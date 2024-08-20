@@ -2,17 +2,17 @@ personal_information:
   name: "Sherman"
   surname: "Page"
   dateOfBirth: "[Your Date of Birth]"
-  country: "[Your country]"
-  city: "[Your city]"
-  address: "[Your address]"
-  phonePrefix: "[Your phone number prefix]"
-  phone: "[Your phone number]"
-  email: "[Your email]"
-  github: "[Link]"
-  linkedin: "[Link]"
+  country: "India"
+  city: "Delhi"
+  address: "Delhi"
+  phonePrefix: "+91"
+  phone: "9977997799"
+  email: "email@gmail.com"
+  github: "github.com"
+  linkedin: "linkedin.com"
 
 self_identification:
-  gender: "[Specific gender identification]"
+  gender: "Male"
   pronouns: "[Your Pronouns]"
   veteran: false
   disability: false
@@ -38,16 +38,16 @@ work_preferences:
 
 education_details:
   - degree: "Master's"
-    university: "[Name of University]"
-    gpa: "[Your GPA]"
-    graduationYear: "[Year of Graduation]"
-    fieldOfStudy: "[Your Field of Study]"
+    university: "University"
+    gpa: "3"
+    graduationYear: "2021"
+    fieldOfStudy: "MBA"
     skillsAcquired:
-      leadership: "[Years]"
-      problemSolving: "[Years]"
-      criticalThinking: "[Years]"
-      adaptability: "[Years]"
-      perfectionism: "[Years]"
+      leadership: "1"
+      problemSolving: "1"
+      criticalThinking: "1"
+      adaptability: "1"
+      perfectionism: "1"
       yourSkill: "[Years]"
       yourSkill: "[Years]"
 

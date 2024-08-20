@@ -72,17 +72,21 @@ class LinkedInAuthenticator:
     def is_logged_in(self):
         """Check if the user is already logged in to LinkedIn."""
         self.driver.get('https://www.linkedin.com/feed')
-        try:
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
-            )
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            if any(button.text.strip() == 'Start a post' for button in buttons):
-                print("User is already logged in.")
-                return True
-        except TimeoutException:
-            pass
-        return False
+        # print(self.driver.title.lower())
+        # try:
+        #     WebDriverWait(self.driver, 10).until(
+        #         EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
+        #     )
+        #     buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
+        #     if any(button.text.strip() == 'Start a post' for button in buttons):
+        #         print("User is already logged in.")
+        #         return True
+        # except TimeoutException:
+        #     pass
+        if "login" in self.driver.title.lower():
+            return False
+        else:
+            return True
 
     def wait_for_page_load(self, timeout=10):
         """Wait for the page to fully load."""

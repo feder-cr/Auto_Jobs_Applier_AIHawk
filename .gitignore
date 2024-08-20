@@ -13,3 +13,4 @@ resume.html
 .vscode
 chrome_profile
 secrets.yaml
+data_folder/secrets.yaml
