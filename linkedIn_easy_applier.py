@@ -174,6 +174,13 @@ class LinkedInEasyApplier:
                     self._create_and_upload_resume(element)
             elif 'cover' in parent.text.lower():
                 self._create_and_upload_cover_letter(element)
+            else:
+                if self.resume_dir != None:
+                    resume_path = self.resume_dir.resolve()
+                if self.resume_dir != None and resume_path.exists() and resume_path.is_file():
+                    element.send_keys(str(resume_path))
+                else:
+                    self._create_and_upload_resume(element)
 
     def _create_and_upload_resume(self, element):
         max_retries = 3
