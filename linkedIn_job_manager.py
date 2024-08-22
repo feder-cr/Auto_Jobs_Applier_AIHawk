@@ -40,9 +40,9 @@ class LinkedInJobManager:
         self.seen_jobs = []
         resume_path = parameters.get('uploads', {}).get('resume', None)
         if resume_path is not None and Path(resume_path).exists():
-            self.resume_dir = Path(resume_path)
+            self.resume_path = Path(resume_path)
         else:
-            self.resume_dir = None
+            self.resume_path = None
         self.output_file_directory = Path(parameters['outputFileDirectory'])
         self.env_config = EnvironmentKeys()
         #self.old_question()
@@ -66,7 +66,7 @@ class LinkedInJobManager:
 
 
     def start_applying(self):
-        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_dir, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
+        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0

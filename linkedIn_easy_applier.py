@@ -23,7 +23,7 @@ class LinkedInEasyApplier:
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
         self.driver = driver
-        self.resume_dir = resume_dir
+        self.resume_path = resume_dir
         self.set_old_answers = set_old_answers
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
@@ -154,12 +154,10 @@ class LinkedInEasyApplier:
             self.driver.execute_script("arguments[0].classList.remove('hidden')", element)
             output = self.gpt_answerer.resume_or_cover(parent.text.lower())
             if 'resume' in output:
-                if self.resume_dir:
-                    resume_path = self.resume_dir.resolve()
-                    if resume_path.exists() and resume_path.is_file():
-                        element.send_keys(str(resume_path))
-                    else:
-                        self._create_and_upload_resume(element, job)
+                if self.resume_path is not None and self.resume_path.resolve().is_file():
+                    element.send_keys(str(self.resume_path.resolve()))
+                else:
+                    self._create_and_upload_resume(element, job)
             elif 'cover' in output:
                 self._create_and_upload_cover_letter(element)
 
