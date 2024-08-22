@@ -253,9 +253,12 @@ class LinkedInEasyApplier:
             return True
         return False
 
-    def _is_numeric_field(self, element: WebElement) -> bool:
-        input_type = element.get_attribute('type')
-        return input_type == 'number'
+    def _is_numeric_field(self, field: WebElement) -> bool:
+        field_type = field.get_attribute('type').lower()
+        if 'numeric' in field_type:
+            return True
+        class_attribute = field.get_attribute("id")
+        return class_attribute and 'numeric' in class_attribute
 
     def _enter_text(self, element: WebElement, text: str) -> None:
         element.clear()

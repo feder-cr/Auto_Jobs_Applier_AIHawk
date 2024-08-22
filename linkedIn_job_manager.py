@@ -115,37 +115,34 @@ class LinkedInJobManager:
 
     def apply_jobs(self):
         try:
-            try:
-                no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-                if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                    raise Exception("No more jobs on this page")
-            except NoSuchElementException:
-                pass
-            
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            if not job_list_elements:
-                raise Exception("No job class elements found on page")
-            job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
-            for job in job_list:
-                if self.is_blacklisted(job.title, job.company, job.link):
-                    utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
-                    self.write_to_file(job, "skipped")
-                    continue
-                try:
-                    if job.apply_method not in {"Continue", "Applied", "Apply"}:
-                        self.easy_applier_component.job_apply(job)
-                        self.write_to_file(job, "success")
-                except Exception as e:
-                    utils.printred(traceback.format_exc())
-                    self.write_to_file(job, "failed")
-                    continue
+            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
+            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
+                raise Exception("No more jobs on this page")
+        except NoSuchElementException:
+            pass
         
-        except Exception as e:
-            traceback.format_exc()
-            raise e
+        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+        utils.scroll_slow(self.driver, job_results)
+        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        if not job_list_elements:
+            raise Exception("No job class elements found on page")
+        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        for job in job_list:
+            if self.is_blacklisted(job.title, job.company, job.link):
+                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                self.write_to_file(job, "skipped")
+                continue
+            try:
+                if job.apply_method not in {"Continue", "Applied", "Apply"}:
+                    self.easy_applier_component.job_apply(job)
+                    self.write_to_file(job, "success")
+            except Exception as e:
+                utils.printred(traceback.format_exc())
+                self.write_to_file(job, "failed")
+                continue
+        
+
     
     def write_to_file(self, job, file_name):
         data = {
@@ -156,6 +153,7 @@ class LinkedInJobManager:
             "pdf_path": job.pdf_path
         }
         file_path = self.output_file_directory / f"{file_name}.json"
+        file_path = file_path.as_posix()
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
