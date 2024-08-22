@@ -8,9 +8,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
-
-sys.path.append('C:\\Users\\loren\\OneDrive\\Desktop\\Nuovacartella\\LinkedIn-GPT-EasyApplyBot-master\\LinkedIn_AIHawk_automatic_job_application\\lib_resume_builder_AIHawk')
-
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
 from utils import chromeBrowserOptions
 from gpt import GPTAnswerer
