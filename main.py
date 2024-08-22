@@ -157,6 +157,7 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         resume_generator_manager = FacadeManager(openai_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
         os.system('cls' if os.name == 'nt' else 'clear')
         resume_generator_manager.choose_style()
+        os.system('cls' if os.name == 'nt' else 'clear')
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
         browser = init_browser()
