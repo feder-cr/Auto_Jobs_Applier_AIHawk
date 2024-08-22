@@ -153,8 +153,8 @@ class LinkedInJobManager:
             "pdf_path": job.pdf_path
         }
         file_path = self.output_file_directory / f"{file_name}.json"
-        file_path = file_path.as_posix()
         if not file_path.exists():
+            job.pdf_path = file_path.as_posix()
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
         else:

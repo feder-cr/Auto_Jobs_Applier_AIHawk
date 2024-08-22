@@ -267,9 +267,6 @@ class GPTAnswerer:
 
         Provide only the exact name of the section from the list above with no additional text.
         """
-
-
-
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})

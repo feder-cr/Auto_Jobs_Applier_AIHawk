@@ -191,7 +191,9 @@ class LinkedInEasyApplier:
     def _fill_additional_questions(self) -> None:
         form_sections = self.driver.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
         for section in form_sections:
+            outer_html = section.get_attribute('outerHTML')
             self._process_form_section(section)
+            
 
     def _process_form_section(self, section: WebElement) -> None:
         if self._handle_terms_of_service(section):
@@ -243,15 +245,18 @@ class LinkedInEasyApplier:
         return False
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
-        dropdowns = section.find_elements(By.CLASS_NAME, 'fb-dropdown__select')
-        if dropdowns:
-            dropdown = dropdowns[0]
-            question_text = section.text.lower()
-            select = Select(dropdown)
-            answer = self.gpt_answerer.answer_question_from_options(question_text, [option.text.lower() for option in select.options])
-            self._select_dropdown_option(select, answer)
-            return True
-        return False
+        try:
+            question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+            question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
+            dropdown = question.find_element(By.TAG_NAME, 'select')
+            if dropdown:
+                select = Select(dropdown)
+                options = [option.text for option in select.options]
+                answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+                self._select_dropdown_option(dropdown, answer)
+                return True
+        except Exception:
+            return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
         field_type = field.get_attribute('type').lower()
@@ -270,8 +275,6 @@ class LinkedInEasyApplier:
                 radio.click()
                 break
 
-    def _select_dropdown_option(self, select: Select, answer: str) -> None:
-        for option in select.options:
-            if option.text.lower() == answer.lower():
-                select.select_by_visible_text(option.text)
-                break
+    def _select_dropdown_option(self, element: WebElement, text: str) -> None:
+        select = Select(element)
+        select.select_by_visible_text(text)
