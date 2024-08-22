@@ -145,16 +145,16 @@ class LinkedInJobManager:
 
     
     def write_to_file(self, job, file_name):
+        pdf_path = Path(job.pdf_path).as_uri()
         data = {
             "company": job.company,
             "job_title": job.title,
             "link": job.link,
             "job_location": job.location,
-            "pdf_path": job.pdf_path
+            "pdf_path": pdf_path
         }
         file_path = self.output_file_directory / f"{file_name}.json"
         if not file_path.exists():
-            job.pdf_path = file_path.as_posix()
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
         else:

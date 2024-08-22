@@ -215,7 +215,8 @@ class LinkedInEasyApplier:
         return False
 
     def _find_and_handle_radio_question(self, section: WebElement) -> bool:
-        radios = section.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
+        question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+        radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
         if radios:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
@@ -223,6 +224,7 @@ class LinkedInEasyApplier:
             self._select_radio(radios, answer)
             return True
         return False
+
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
@@ -271,9 +273,10 @@ class LinkedInEasyApplier:
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
         for radio in radios:
-            if radio.text.lower() == answer.lower():
-                radio.click()
-                break
+            if answer in radio.text.lower():
+                radio.find_element(By.TAG_NAME, 'label').click()
+                return
+        radios[-1].find_element(By.TAG_NAME, 'label').click()
 
     def _select_dropdown_option(self, element: WebElement, text: str) -> None:
         select = Select(element)
