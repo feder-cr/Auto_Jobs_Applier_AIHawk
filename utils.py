@@ -9,6 +9,32 @@ import time
 import glob
 from webdriver_manager.chrome import ChromeDriverManager
 
+import logging 
+import sys
+
+class Logger:
+    levels = {
+        "1" : logging.DEBUG,
+        "2" : logging.INFO,
+        "3" : logging.WARNING,
+        "4" : logging.ERROR,
+        "5" : logging.CRITICAL
+    }
+    def __init__(self, name: str, out=sys.stderr):
+        level = self.levels[os.environ.get("LOGLEVEL", "3")]
+
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(level)
+        
+        handler = logging.StreamHandler(out)
+        handler.setLevel(level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
+    def get_logger(self):
+        return self.logger
+
 headless = False
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 

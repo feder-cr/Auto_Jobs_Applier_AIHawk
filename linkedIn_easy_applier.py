@@ -26,7 +26,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from xhtml2pdf import pisa
 
-import utils    
+import utils  
+logger = utils.Logger("easyapplier").get_logger()
 
 class LinkedInEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]], gpt_answerer: Any):
@@ -276,6 +277,7 @@ class LinkedInEasyApplier:
 
             if not answer:
                 answer = self.gpt_answerer.answer_question_numeric(question_text) if is_numeric else self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                logger.debug(answer)
 
             self._enter_text(text_field, answer)
             self._handle_form_errors(element, question_text, answer, text_field)
