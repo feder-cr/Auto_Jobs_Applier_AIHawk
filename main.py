@@ -149,26 +149,20 @@ def init_browser() -> webdriver.Chrome:
 
 def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
     try:
-        
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
+        with open(parameters['uploads']['plainTextResume'], "r") as file:
+            plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(openai_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
+        os.system('cls' if os.name == 'nt' else 'clear')
+        resume_generator_manager.choose_style()
+        job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
-
         browser = init_browser()
-
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
         gpt_answerer_component = GPTAnswerer(openai_api_key)
-        
-        with open(parameters['uploads']['plainTextResume'], "r") as file:
-            plain_text_resume = file.read()
-        
-
-        job_application_profile_object = JobApplicationProfile(plain_text_resume)
-        
-
         bot = LinkedInBotFacade(login_component, apply_component)
         bot.set_secrets(email, password)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
