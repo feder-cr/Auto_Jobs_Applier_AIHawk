@@ -1,57 +1,73 @@
-class LinkedInBotFacade:
+class LinkedInBotState:
+    def __init__(self):
+        self.reset()
 
+    def reset(self):
+        self.credentials_set = False
+        self.api_key_set = False
+        self.job_application_profile_set = False
+        self.gpt_answerer_set = False
+        self.parameters_set = False
+        self.logged_in = False
+
+    def validate_state(self, required_keys):
+        for key in required_keys:
+            if not getattr(self, key):
+                raise ValueError(f"{key.replace('_', ' ').capitalize()} must be set before proceeding.")
+
+class LinkedInBotFacade:
     def __init__(self, login_component, apply_component):
         self.login_component = login_component
         self.apply_component = apply_component
-        self.state = {
-            "credentials_set": False,
-            "api_key_set": False,
-            "resume_set": False,
-            "gpt_answerer_set": False,
-            "parameters_set": False,
-            "logged_in": False
-        }
+        self.state = LinkedInBotState()
+        self.job_application_profile = None
+        self.resume = None
+        self.email = None
+        self.password = None
+        self.parameters = None
 
-    def set_resume(self, resume):
-        if not resume:
-            raise ValueError("Plain text resume cannot be empty.")
+    def set_job_application_profile_and_resume(self, job_application_profile, resume):
+        self._validate_non_empty(job_application_profile, "Job application profile")
+        self._validate_non_empty(resume, "Resume")
+        self.job_application_profile = job_application_profile
         self.resume = resume
-        self.state["resume_set"] = True
+        self.state.job_application_profile_set = True
 
-    def set_secrets(self, email, password):  # Aggiunto openai_api_key
-        if not email or not password :
-            raise ValueError("Email and password cannot be empty.")
+    def set_secrets(self, email, password):
+        self._validate_non_empty(email, "Email")
+        self._validate_non_empty(password, "Password")
         self.email = email
         self.password = password
-        self.state["credentials_set"] = True
+        self.state.credentials_set = True
 
-    def set_gpt_answerer(self, gpt_answerer_component):
-        self.gpt_answerer = gpt_answerer_component 
-        self.gpt_answerer.set_resume(self.resume)
-        self.apply_component.set_gpt_answerer(self.gpt_answerer)
-        self.state["gpt_answerer_set"] = True
+    def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
+        self._ensure_job_profile_and_resume_set()
+        gpt_answerer_component.set_job_application_profile(self.job_application_profile)
+        gpt_answerer_component.set_resume(self.resume)
+        self.apply_component.set_gpt_answerer(gpt_answerer_component)
+        self.apply_component.set_resume_generator_manager(resume_generator_manager)
+        self.state.gpt_answerer_set = True
 
     def set_parameters(self, parameters):
-        if not parameters:
-            raise ValueError("Parameters cannot be None or empty.")
+        self._validate_non_empty(parameters, "Parameters")
         self.parameters = parameters
         self.apply_component.set_parameters(parameters)
-        self.state["parameters_set"] = True
+        self.state.parameters_set = True
 
     def start_login(self):
-        if not self.state["credentials_set"]:
-            raise ValueError("Email and password must be set before logging in.")
+        self.state.validate_state(['credentials_set'])
         self.login_component.set_secrets(self.email, self.password)
         self.login_component.start()
-        self.state["logged_in"] = True
+        self.state.logged_in = True
 
     def start_apply(self):
-        if not self.state["logged_in"]:
-            raise ValueError("You must be logged in before applying.")
-        if not self.state["resume_set"]:
-            raise ValueError("Plain text resume must be set before applying.")
-        if not self.state["gpt_answerer_set"]:
-            raise ValueError("GPT Answerer must be set before applying.")
-        if not self.state["parameters_set"]:
-            raise ValueError("Parameters must be set before applying.")
+        self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
         self.apply_component.start_applying()
+
+    def _validate_non_empty(self, value, name):
+        if not value:
+            raise ValueError(f"{name} cannot be empty.")
+
+    def _ensure_job_profile_and_resume_set(self):
+        if not self.state.job_application_profile_set:
+            raise ValueError("Job application profile and resume must be set before proceeding.")

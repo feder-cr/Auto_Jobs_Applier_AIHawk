@@ -1,15 +1,9 @@
-import json
 import os
 import random
 import time
-from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium import webdriver
-import time
-import glob
-from webdriver_manager.chrome import ChromeDriverManager
 
-headless = False
+from selenium import webdriver
+
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
 def ensure_chrome_profile():
@@ -53,68 +47,36 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
     except Exception as e:
         print(f"Exception occurred: {e}")
 
-
-def HTML_to_PDF(FilePath):
-    # Validate and prepare file paths
-    if not os.path.isfile(FilePath):
-        raise FileNotFoundError(f"The specified file does not exist: {FilePath}")
-    FilePath = f"file:///{os.path.abspath(FilePath).replace(os.sep, '/')}"
-    # Set up Chrome options
-    chrome_options = webdriver.ChromeOptions()
-    # Initialize Chrome driver
-    service = ChromeService(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    
-    try:
-        # Load the HTML file
-        driver.get(FilePath)
-        time.sleep(3)
-        start_time = time.time()
-        pdf_base64 = driver.execute_cdp_cmd("Page.printToPDF", {
-            "printBackground": True,    
-            "landscape": False,         
-            "paperWidth": 10,           
-            "paperHeight": 11,           
-            "marginTop": 0,            
-            "marginBottom": 0,
-            "marginLeft": 0,
-            "marginRight": 0,
-            "displayHeaderFooter": False,
-            "preferCSSPageSize": True,   
-            "generateDocumentOutline": False, 
-            "generateTaggedPDF": False,
-            "transferMode": "ReturnAsBase64"
-        })
-        
-        if time.time() - start_time > 120:
-            raise TimeoutError("PDF generation exceeded the specified timeout limit.")
-        return pdf_base64['data']
-
-    except WebDriverException as e:
-        raise RuntimeError(f"WebDriver exception occurred: {e}")
-    
-    finally:
-        # Ensure the driver is closed
-        driver.quit()
-
 def chromeBrowserOptions():
-    options = webdriver.ChromeOptions()
-    options.add_argument('--no-sandbox')
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--disable-extensions")
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--remote-debugging-port=9222')
-    if headless:
-        options.add_argument("--headless")
-    options.add_argument("--start-maximized")
-    options.add_argument("--disable-blink-features")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_experimental_option('useAutomationExtension', False)
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    
-    # Assicurati che la directory del profilo Chrome esista
     ensure_chrome_profile()
+    options = webdriver.ChromeOptions()
+    """options.add_argument("--start-maximized")  # Avvia il browser a schermo intero
+    options.add_argument("--no-sandbox")  # Disabilita la sandboxing per migliorare le prestazioni
+    options.add_argument("--disable-dev-shm-usage")  # Utilizza una directory temporanea per la memoria condivisa
+    options.add_argument("--ignore-certificate-errors")  # Ignora gli errori dei certificati SSL
+    options.add_argument("--disable-extensions")  # Disabilita le estensioni del browser
+    options.add_argument("--disable-gpu")  # Disabilita l'accelerazione GPU
+    options.add_argument("window-size=1200x800")  # Imposta la dimensione della finestra del browser
+    options.add_argument("--disable-background-timer-throttling")  # Disabilita il throttling dei timer in background
+    options.add_argument("--disable-backgrounding-occluded-windows")  # Disabilita la sospensione delle finestre occluse
+    options.add_argument("--disable-translate")  # Disabilita il traduttore automatico
+    options.add_argument("--disable-popup-blocking")  # Disabilita il blocco dei popup
+    options.add_argument("--no-first-run")  # Disabilita la configurazione iniziale del browser
+    options.add_argument("--no-default-browser-check")  # Disabilita il controllo del browser predefinito
+    options.add_argument("--single-process")  # Esegui Chrome in un solo processo
+    options.add_argument("--disable-logging")  # Disabilita il logging
+    options.add_argument("--disable-autofill")  # Disabilita l'autocompletamento dei moduli
+    options.add_argument("--disable-plugins")  # Disabilita i plugin del browser
+    options.add_argument("--disable-animations")  # Disabilita le animazioni
+    options.add_argument("--disable-cache")  # Disabilita la cache 
+    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])  # Esclude switch della modalità automatica e logging
+
+    # Preferenze per contenuti
+    prefs = {
+        "profile.default_content_setting_values.images": 2,  # Disabilita il caricamento delle immagini
+        "profile.managed_default_content_settings.stylesheets": 2,  # Disabilita il caricamento dei fogli di stile
+    }
+    options.add_experimental_option("prefs", prefs)
 
     if len(chromeProfilePath) > 0:
         initialPath = os.path.dirname(chromeProfilePath)
@@ -122,8 +84,11 @@ def chromeBrowserOptions():
         options.add_argument('--user-data-dir=' + initialPath)
         options.add_argument("--profile-directory=" + profileDir)
     else:
-        options.add_argument("--incognito")
-        
+        options.add_argument("--incognito")"""
+    initialPath = os.path.dirname(chromeProfilePath)
+    profileDir = os.path.basename(chromeProfilePath)  
+    options.add_argument('--user-data-dir=' + initialPath)
+    options.add_argument("--profile-directory=" + profileDir)  
     return options
 
 

@@ -1,144 +1,3 @@
-resume_markdown_template = """
-Act as an HR expert and resume writer specializing in ATS-friendly resumes. Your task is twofold:
-
-1. **Review and Extract Information**: Carefully examine the candidate's current resume to extract the following critical details:
-   - Work experience
-   - Educational background
-   - Relevant skills
-   - Achievements
-   - Certifications
-
-2. **Optimize the Resume**: Using the provided template, create a highly optimized resume for the relevant industry. The resume should:
-   - Include commonly required skills and keywords for the industry
-   - Utilize ATS-friendly phrases and terminology to ensure compatibility with automated systems
-   - Highlight strengths and achievements relevant to the industry
-   - Present experience, skills, and accomplishments in a compelling and professional manner
-   - Maintain a clear, that is easily readable by both ATS and human reviewers
-
-Provide guidance on how to enhance the presentation of the information to maximize impact and readability. Offer advice on tailoring the content to general industry standards, ensuring the resume passes ATS filters and captures the attention of recruiters, thereby increasing the candidate’s chances of securing an interview.
-
-## Information to Collect and Analyze
-- **My information eesume:**  
-  {resume}
-
-## Template to Use
-```
-# [Full Name]
-
-[Your City, Your Country](Maps link)
-[Your Prefix Phone number](tel: Your Prefix Phone number)
-[Your Email](mailto:Your Email)
-[LinkedIn](Link LinkedIn account)
-[GitHub](Link GitHub account)
-
-## Summary
-
-[Brief professional summary highlighting your experience, key skills, and career objectives. 2-3 sentences.]
-
-## Skills
-
-- **Skill1:** [details (max 15 word)]
-- **Skill2:** [details (max 15 word)]
-- **Skill3:** [details (max 15 word)]
-- **Skill4:** [details (max 15 word)]
-- **Skill4:** [details (max 15 word)]
-- **Skill5:** [details (max 15 word)]
-
-## Working Experience
-
-### [Job Title]
-**[Company Name]** – [City, State]
-*[Start Date – End Date]*
-
-1. [Achievement or responsibility]
-2. [Achievement or responsibility]
-3. [Achievement or responsibility]
-4. [Achievement or responsibility]
-5. [Achievement or responsibility]
-
-### [Job Title]
-**[Company Name]** – [City, State]
-*[Start Date – End Date]*
-
-1. [Achievement or responsibility]
-2. [Achievement or responsibility]
-3. [Achievement or responsibility]
-4. [Achievement or responsibility]
-5. [Achievement or responsibility]
-
-### [Job Title]
-**[Company Name]** – [City, State]
-*[Start Date – End Date]*
-
-1. [Achievement or responsibility]
-2. [Achievement or responsibility]
-3. [Achievement or responsibility]
-4. [Achievement or responsibility]
-5. [Achievement or responsibility]
-
-## Education
-
-**[Degree] in [Field of Study]**
-[University Name] – [City, State]
-*Graduated: [Month Year]*
-
-## Certifications
-
-1. [Certification Name]
-2. [Certification Name]
-3. [Certification Name]
-
-## Projects
-
-### [Project Name]
-1. [Brief description of the project and your role]
-
-### [Project Name]
-1. [Brief description of the project and your role]
-
-### [Project Name]
-1. [Brief description of the project and your role]
-
-## Languages
-
-1. **[Language]:** [Proficiency Level]
-2. **[Language]:** [Proficiency Level]
-```
-The results should be provided in **markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```markdown ```
-"""
-
-fusion_job_description_resume_template = """
-
-Act as an HR expert and resume writer with a strategic approach. Customize the resume to highlight the candidate’s
-strengths, skills, and achievements that are most relevant to the provided job description. 
-Use a smart and targeted approach, incorporating key skills and abilities as well as important aspects of the job 
-description into the resume. 
-Ensure that the resume grabs the attention of hiring managers within the first few seconds and uses specific keywords and phrases from the job description to pass through Applicant Tracking Systems (ATS).
-
-Important Note: While making the necessary adjustments to align the resume with the job description, ensure that the overall structure of the resume remains intact. Do not drastically alter the organization of the document, but optimize it to highlight the most relevant points for the desired position.
-
-- **Most important infomation on job descrption:**  
-  {job_description}
-
-- **My information resume:**  
-  {formatted_resume}
-
-The results should be provided in **markdown** format, Provide only the markdown code for the resume, without any explanations or additional text and also without ```markdown ```
-  """
-
-
-
-html_template = """
-<!DOCTYPE html>
-<title>Resume</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="{casual_markdown}"></script>
-<script src="{reorganize_header}"></script>
-<link rel="stylesheet" href="{resume_css}">
-<body onload="document.body.innerHTML=md.html(document.body.innerHTML); document.body.style.display='block';">
-"""
-
-
 # Personal Information Template
 personal_information_template = """
 Answer the following question based on the provided personal information.
@@ -420,61 +279,74 @@ Please write the cover letter in a way that directly addresses the job role and 
 ```
 """
 
-
-resume_stuff_template = """
-The following is a resume, personal data, and an answered question using this information, being answered by the person who's resume it is (first person).
-
-## Rules
-- Answer questions directly
-- If seems likely that you have the experience, even if is not explicitly defined, answer as if you have the experience
-- If you cannot answer the question, answer things like "I have no experience with that, but I learn fast, very fast", "not yet, but I will learn"...
-- The answer must not be longer than a tweet (140 characters)
-- Only add periods if the answer has multiple sentences/paragraphs
-
-## Example 1
-My resume: I'm a software engineer with 10 years of experience in  swift .
-Question: What is your experience with swift?
-10 years
-
------
-
-## My resume:
-```
-{resume}
-```
-        
-## Question:
-{question}
-
-## """
+numeric_question_template = """
+Read the following resume carefully and answer the specific questions regarding the candidate's experience with a number of years. Follow these strategic guidelines when responding:
 
 
-numeric_question_template = """The following is a resume and an answered question about the resume, being answered by the person who's resume it is (first person).
+1. **Related and Inferred Experience:**
+   - **Similar Technologies:** If experience with a technology is not explicitly stated, but the candidate has experience with similar or related technologies, respond with a number of years that reflects this related experience. For example, if the candidate has experience with Python and projects that involve technologies similar to Java, consider a plausible number of years for Java.
+   - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Complex and advanced projects often indicate deeper expertise. For instance, if a project involves MQTT, you might infer IoT experience even if it's not explicitly mentioned.
+
+2. **Indirect Experience and Academic Background:**
+   - **Relevant Projects:** Consider the types of projects the candidate has worked on and the time spent on each project. Advanced projects suggest deeper skills. For example, a project involving MQTT packet parsing suggests MQTT and possibly IoT skills.
+   - **Roles and Responsibilities:** Evaluate the roles and responsibilities held. If a role suggests knowledge of specific technologies or skills, provide a number based on that experience.
+   - **Type of University and Studies:** Also consider the type of university and the duration of studies. Prestigious universities and advanced coursework may indicate solid theoretical knowledge. However, give less weight to academic skills compared to practical experience and projects. For example, a degree from a high-level university should influence answers to technical questions minimally.
+
+3. **Inference Over Default Response:** Always strive to infer experience based on the available information. If direct experience cannot be confirmed, use related skills, projects, and academic background to estimate a plausible number of years. Avoid defaulting to 0 if you can infer any relevant experience.
+
+4. **Handling Experience Estimates:**
+   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience for lower amounts of experience (up to 5 years). Use related skills and projects to estimate these numbers reasonably.
+   - **For High Experience:** For high levels of experience, ensure the number provided is as certain as possible and based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
+
 
 ## Rules
 - Answer the question directly (only number).
-- Regarding work experience just check the Experience Details -> Skills Acquired section.
-- Regarding experience in general just check the section Experience Details -> Skills Acquired and also Education Details -> Skills Acquired.
-- If it seems likely that you have the experience based on the resume, even if not explicitly stated on the resume, answer as if you have the experience.
-- If you cannot answer the question, provide answers like "I have no experience with that, but I learn fast, very fast", "not yet, but I will learn".
-- The answer must not be larger than a tweet (140 characters).
 
-## Example
-My resume: I'm a software engineer with 10 years of experience on both swift and python.
-Question: how much years experience with swift?
-10
-
------
-
-## My resume:
+## Example 1
 ```
-{resume}
+## Curriculum
+
+I am a software engineer with 10 years of experience in Swift and Python. I have worked on projects including an i work 2 years with  MQTT protocol.
+
+## Question
+
+How many years of experience do you have with IoT?
+
+## Answer
+
+2
+```
+
+## Example 2
+```
+## Curriculum
+
+I am a software engineer with 5 years of experience in Swift and Python. I have worked on a AI project.
+
+## Question
+
+How many years of experience do you have with AI?
+
+## Answer
+
+2
+```
+
+## Resume:
+```
+{resume_educations}
+{resume_jobs}
+{resume_projects}
 ```
         
 ## Question:
 {question}
 
-## """
+---
+
+When responding, consider all available information, including projects, work experience, and academic background, to provide an accurate and well-reasoned answer. Make every effort to infer relevant experience and avoid defaulting to 0 if any related experience can be estimated.
+
+"""
 
 options_template = """The following is a resume and an answered question about the resume, the answer is one of the options.
 
