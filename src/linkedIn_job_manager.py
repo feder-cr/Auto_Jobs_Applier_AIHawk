@@ -1,4 +1,3 @@
-import csv
 import os
 import random
 import time
@@ -7,9 +6,10 @@ from itertools import product
 from pathlib import Path
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-import utils
+import src.utils as utils
 from job import Job
-from linkedIn_easy_applier import LinkedInEasyApplier
+from src.linkedIn_easy_applier import LinkedInEasyApplier
+import json
 
 
 class EnvironmentKeys:
@@ -40,20 +40,20 @@ class LinkedInJobManager:
         self.seen_jobs = []
         resume_path = parameters.get('uploads', {}).get('resume', None)
         if resume_path is not None and Path(resume_path).exists():
-            self.resume_dir = Path(resume_path)
+            self.resume_path = Path(resume_path)
         else:
-            self.resume_dir = None
+            self.resume_path = None
         self.output_file_directory = Path(parameters['outputFileDirectory'])
         self.env_config = EnvironmentKeys()
-        self.old_question()
+        #self.old_question()
 
     def set_gpt_answerer(self, gpt_answerer):
         self.gpt_answerer = gpt_answerer
 
-    def old_question(self):
-        """
-        Load old answers from a CSV file into a dictionary.
-        """
+    def set_resume_generator_manager(self, resume_generator_manager):
+        self.resume_generator_manager = resume_generator_manager
+
+    """ def old_question(self):
         self.set_old_answers = {}
         file_path = 'data_folder/output/old_Questions.csv'
         if os.path.exists(file_path):
@@ -62,13 +62,11 @@ class LinkedInJobManager:
                 for row in csv_reader:
                     if len(row) == 3:
                         answer_type, question_text, answer = row
-                        self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer
+                        self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer"""
 
 
     def start_applying(self):
-        self.easy_applier_component = LinkedInEasyApplier(
-            self.driver, self.resume_dir, self.set_old_answers, self.gpt_answerer
-        )
+        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
@@ -117,60 +115,58 @@ class LinkedInJobManager:
 
     def apply_jobs(self):
         try:
-            try:
-                no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-                if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                    raise Exception("No more jobs on this page")
-            except NoSuchElementException:
-                pass
-            
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-            
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            
-            if not job_list_elements:
-                raise Exception("No job class elements found on page")
-            
-            job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
-            
-            for job in job_list:
-                if self.is_blacklisted(job.title, job.company, job.link):
-                    utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
-                    self.write_to_file(job.company, job.location, job.title, job.link, "skipped")
-                    continue
-
-                try:
-                    if job.apply_method not in {"Continue", "Applied", "Apply"}:
-                        self.easy_applier_component.job_apply(job)
-                except Exception as e:
-                    utils.printred(traceback.format_exc())
-                    self.write_to_file(job.company, job.location, job.title, job.link, "failed")
-                    continue  
-                self.write_to_file(job.company, job.location, job.title, job.link, "success")
+            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
+            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
+                raise Exception("No more jobs on this page")
+        except NoSuchElementException:
+            pass
         
-        except Exception as e:
-            traceback.format_exc()
-            raise e
-    
-    def write_to_file(self, company, job_title, link, job_location, file_name):
-        to_write = [company, job_title, link, job_location]
-        file_path = self.output_file_directory / f"{file_name}.csv"
-        with open(file_path, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(to_write)
-
-    def record_gpt_answer(self, answer_type, question_text, gpt_response):
-        to_write = [answer_type, question_text, gpt_response]
-        file_path = self.output_file_directory / "registered_jobs.csv"
-        try:
-            with open(file_path, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
-                writer.writerow(to_write)
-        except Exception as e:
-            utils.printred(f"Error writing registered job: {e}")
-            utils.printred(f"Details: Answer type: {answer_type}, Question: {question_text}")
+        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+        utils.scroll_slow(self.driver, job_results)
+        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        if not job_list_elements:
+            raise Exception("No job class elements found on page")
+        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        for job in job_list:
+            if self.is_blacklisted(job.title, job.company, job.link):
+                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                self.write_to_file(job, "skipped")
+                continue
+            try:
+                if job.apply_method not in {"Continue", "Applied", "Apply"}:
+                    self.easy_applier_component.job_apply(job)
+                    self.write_to_file(job, "success")
+            except Exception as e:
+                utils.printred(traceback.format_exc())
+                self.write_to_file(job, "failed")
+                continue
+        
+    def write_to_file(self, job, file_name):
+        pdf_path = Path(job.pdf_path).resolve()
+        pdf_path = pdf_path.as_uri()
+        data = {
+            "company": job.company,
+            "job_title": job.title,
+            "link": job.link,
+            "job_recruiter": job.recruiter_link,
+            "job_location": job.location,
+            "pdf_path": pdf_path
+        }
+        file_path = self.output_file_directory / f"{file_name}.json"
+        if not file_path.exists():
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump([data], f, indent=4)
+        else:
+            with open(file_path, 'r+', encoding='utf-8') as f:
+                try:
+                    existing_data = json.load(f)
+                except json.JSONDecodeError:
+                    existing_data = []
+                existing_data.append(data)
+                f.seek(0)
+                json.dump(existing_data, f, indent=4)
+                f.truncate()
 
     def get_base_search_url(self, parameters):
         url_parts = []
@@ -203,12 +199,6 @@ class LinkedInJobManager:
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').text
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
             company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-        except:
-            pass
-        try:
-            hiring_line = job_tile.find_element(By.XPATH, '//span[contains(.,\' is hiring for this\')]')
-            hiring_line_text = hiring_line.text
-            name_terminating_index = hiring_line_text.find(' is hiring for this')
         except:
             pass
         try:

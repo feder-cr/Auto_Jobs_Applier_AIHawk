@@ -24,7 +24,8 @@ date:
  24 hours: [true/false]
 
 positions:
-  - Software developer
+  - position1
+  - position2
 
 locations:
   - Country1

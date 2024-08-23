@@ -2,10 +2,10 @@ remote: true
 
 experienceLevel:
   internship: true
-  entry: false
+  entry: true
   associate: true
-  mid-senior level: false
-  director: true
+  mid-senior level: true
+  director: false
   executive: false
 
 jobTypes:
@@ -24,10 +24,11 @@ date:
   24 hours: true
 
 positions:
-  - Software developer
+  - Software Tester
+
 
 locations:
-  - Germany
+  - USA
 
 distance: 100
 
