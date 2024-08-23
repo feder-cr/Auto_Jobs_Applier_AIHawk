@@ -10,7 +10,6 @@ Join our **Telegram community** for:
 
 📲 **[Join now!](https://t.me/AIhawkCommunity)**
 
-#Networking #JobOpportunities #ResumeTips #AIhawkSupport #CareerSupport
 ## Table of Contents
 
 1. [Introduction](#introduction)
