@@ -117,13 +117,12 @@ class LinkedInEasyApplier:
             recruiter_link = recruiter_element.get_attribute('href')
             return recruiter_link
         except Exception as e:
-            print(f"Errore durante l'estrazione del link del recruiter: {e}")
             return ""
 
     def _scroll_page(self) -> None:
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
-        #utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
-        #utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
+        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
+        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
         while True:
