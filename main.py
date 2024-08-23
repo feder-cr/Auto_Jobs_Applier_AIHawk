@@ -37,10 +37,10 @@ class ConfigValidator:
         except FileNotFoundError:
             raise ConfigError(f"File not found: {yaml_path}")
     
-    @staticmethod
+
+
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
-
         required_keys = {
             'remote': bool,
             'experienceLevel': dict,
@@ -52,10 +52,18 @@ class ConfigValidator:
             'companyBlacklist': list,
             'titleBlacklist': list
         }
-        
+
         for key, expected_type in required_keys.items():
-            if key not in parameters or not isinstance(parameters[key], expected_type):
-                raise ConfigError(f"Missing or invalid key '{key}' in config file {config_yaml_path}")
+            if key not in parameters:
+                if key in ['companyBlacklist', 'titleBlacklist']:
+                    parameters[key] = []
+                else:
+                    raise ConfigError(f"Missing or invalid key '{key}' in config file {config_yaml_path}")
+            elif not isinstance(parameters[key], expected_type):
+                if key in ['companyBlacklist', 'titleBlacklist'] and parameters[key] is None:
+                    parameters[key] = []
+                else:
+                    raise ConfigError(f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}.")
 
         experience_levels = ['internship', 'entry', 'associate', 'mid-senior level', 'director', 'executive']
         for level in experience_levels:
@@ -82,10 +90,14 @@ class ConfigValidator:
             raise ConfigError(f"Invalid distance value in config file {config_yaml_path}. Must be one of: {approved_distances}")
 
         for blacklist in ['companyBlacklist', 'titleBlacklist']:
-            if not all(isinstance(item, str) for item in parameters.get(blacklist, [])):
+            if not isinstance(parameters.get(blacklist), list):
+                raise ConfigError(f"'{blacklist}' must be a list in config file {config_yaml_path}")
+            if parameters[blacklist] is None:
                 parameters[blacklist] = []
 
         return parameters
+
+
 
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:

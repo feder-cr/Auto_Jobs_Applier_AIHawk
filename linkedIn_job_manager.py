@@ -142,8 +142,6 @@ class LinkedInJobManager:
                 self.write_to_file(job, "failed")
                 continue
         
-
-    
     def write_to_file(self, job, file_name):
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
