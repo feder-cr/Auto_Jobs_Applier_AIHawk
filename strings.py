@@ -295,7 +295,7 @@ Read the following resume carefully and answer the specific questions regarding 
 3. **Inference Over Default Response:** Always strive to infer experience based on the available information. If direct experience cannot be confirmed, use related skills, projects, and academic background to estimate a plausible number of years. Avoid defaulting to 0 if you can infer any relevant experience.
 
 4. **Handling Experience Estimates:**
-   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience for lower amounts of experience (up to 5 years). Use related skills and projects to estimate these numbers reasonably.
+   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience a lot. Use related skills and projects to estimate these numbers reasonably. Aim to keep the values as high as possible and avoid using "0" as a response unless absolutely necessary.
    - **For High Experience:** For high levels of experience, ensure the number provided is as certain as possible and based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
 
@@ -306,7 +306,7 @@ Read the following resume carefully and answer the specific questions regarding 
 ```
 ## Curriculum
 
-I am a software engineer with 10 years of experience in Swift and Python. I have worked on projects including an i work 2 years with  MQTT protocol.
+I am a software engineer with 3 years of experience in Swift and Python. I have worked on projects including an i work 2 years with  MQTT protocol.
 
 ## Question
 
