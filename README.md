@@ -228,7 +228,7 @@ Each section has specific fields to fill out:
         Web Development: "B"
   ```
 
-- `experience_details`
+- `experience_details:`
   - This section details your work experience, including job roles, companies, and key responsibilities.
     - **position**: Your job title or role.
     - **company**: The name of the company or organization where you worked.
@@ -256,7 +256,7 @@ Each section has specific fields to fill out:
         - "Software Troubleshooting"
   ```
 
-- `projects`
+- `projects:`
   - Include notable projects you have worked on, including personal or professional projects.
     - **name**: The name or title of the project.
     - **description**: A brief summary of what the project involves or its purpose.
@@ -273,7 +273,7 @@ Each section has specific fields to fill out:
         link: "https://github.com/janedoe/task-manager"
     ```
 
-- `achievements`
+- `achievements:`
   - Highlight notable accomplishments or awards you have received.
     - **name**: The title or name of the achievement.
     - **description**: A brief explanation of the achievement and its significance.
@@ -287,7 +287,7 @@ Each section has specific fields to fill out:
       description: "Won first place in a national hackathon competition."
   ```
 
-- `certifications`
+- `certifications:`
   - Include any professional certifications you have earned.
     - **certification_name**: The name of the certification.
 
@@ -298,7 +298,7 @@ Each section has specific fields to fill out:
     - "AWS Certified Solutions Architect"
   ```
 
-- `languages`
+- `languages:`
   - Detail the languages you speak and your proficiency level in each.
     - **language**: The name of the language.
     - **proficiency**: Your level of proficiency (e.g., Native, Fluent, Intermediate).
@@ -312,7 +312,7 @@ Each section has specific fields to fill out:
       proficiency: "Intermediate"
   ```
 
-- `interests`
+- `interests:`
 
   - Mention your professional or personal interests that may be relevant to your career.
     - **interest**: A list of interests or hobbies.
@@ -327,7 +327,7 @@ Each section has specific fields to fill out:
     - "Entrepreneurship"
   ```
 
-- `availability`
+- `availability:`
   - State your current availability or notice period.
     - **notice_period**: The amount of time required before you can start a new role (e.g., "2 weeks", "1 month").
 
@@ -337,7 +337,7 @@ Each section has specific fields to fill out:
     notice_period: "2 weeks"
   ```
 
-- `salary Expectations`
+- `salary_expectations:`
   - Provide your expected salary range.
     - **salary_range_usd**: The salary range you are expecting, expressed in USD.
 
@@ -347,7 +347,7 @@ Each section has specific fields to fill out:
     salary_range_usd: "80000 - 100000"
   ```
 
-- `self_identification`
+- `self_identification:`
   - Provide information related to personal identity, including gender and pronouns.
     - **gender**: Your gender identity.
     - **pronouns**: The pronouns you use (e.g., He/Him, She/Her, They/Them).
@@ -365,8 +365,7 @@ Each section has specific fields to fill out:
     ethnicity: "Asian"
   ```
 
-- `legal_authorization`
-
+- `legal_authorization:`
   - Indicate your legal ability to work in various locations.
     - **eu_work_authorization**: Whether you are authorized to work in the European Union (Yes/No).
     - **us_work_authorization**: Whether you are authorized to work in the United States (Yes/No).
@@ -378,19 +377,19 @@ Each section has specific fields to fill out:
     - **requires_eu_sponsorship**: Whether you require sponsorship to work in the EU (Yes/No).
 
   - Example:
-  ```yaml
-  legal_authorization:
-    eu_work_authorization: "Yes"
-    us_work_authorization: "No"
-    requires_us_visa: "Yes"
-    requires_us_sponsorship: "Yes"
-    requires_eu_visa: "No"
-    legally_allowed_to_work_in_eu: "Yes"
-    legally_allowed_to_work_in_us: "No"
-    requires_eu_sponsorship: "No"
-  ```
+     ```yaml
+     legal_authorization:
+       eu_work_authorization: "Yes"
+       us_work_authorization: "No"
+       requires_us_visa: "Yes"
+       requires_us_sponsorship: "Yes"
+       requires_eu_visa: "No"
+       legally_allowed_to_work_in_eu: "Yes"
+       legally_allowed_to_work_in_us: "No"
+       requires_eu_sponsorship: "No"
+     ```
 
-- `work_preferences`
+- `work_preferences:`
   - Specify your preferences for work arrangements and conditions.
     - **remote_work**: Whether you are open to remote work (Yes/No).
     - **in_person_work**: Whether you are open to in-person work (Yes/No).
