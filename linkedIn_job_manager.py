@@ -145,7 +145,8 @@ class LinkedInJobManager:
 
     
     def write_to_file(self, job, file_name):
-        pdf_path = Path(job.pdf_path).as_uri()
+        pdf_path = Path(job.pdf_path).resolve()
+        pdf_path = pdf_path.as_uri()
         data = {
             "company": job.company,
             "job_title": job.title,
