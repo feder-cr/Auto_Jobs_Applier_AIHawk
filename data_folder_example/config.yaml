@@ -1,0 +1,39 @@
+remote: true
+
+experienceLevel:
+  internship: true
+  entry: true
+  associate: true
+  mid-senior level: true
+  director: false
+  executive: false
+
+jobTypes:
+  full-time: true
+  contract: false
+  part-time: false
+  temporary: true
+  internship: false
+  other: false
+  volunteer: true
+
+date:
+  all time: false
+  month: true
+  week: false
+  24 hours: true
+
+positions:
+  - Software Tester
+
+
+locations:
+  - USA
+
+distance: 100
+
+companyBlacklist:
+  - Noir
+  - Crossover
+
+titleBlacklist:

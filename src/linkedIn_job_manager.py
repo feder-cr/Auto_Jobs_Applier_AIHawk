@@ -149,6 +149,7 @@ class LinkedInJobManager:
             "company": job.company,
             "job_title": job.title,
             "link": job.link,
+            "job_recruiter": job.recruiter_link,
             "job_location": job.location,
             "pdf_path": pdf_path
         }

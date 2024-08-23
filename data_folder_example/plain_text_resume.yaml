@@ -1,0 +1,133 @@
+personal_information:
+  name: "Liam"
+  surname: "Murphy"
+  date_of_birth: "15/08/1995"
+  country: "Ireland"
+  city: "Galway"
+  address: "Galway City Center"
+  phone_prefix: "+353"
+  phone: "871234567"
+  email: "liam.murphy@gmail.com"
+  github: "https://github.com/liam-murphy"
+  linkedin: "https://www.linkedin.com/in/liam-murphy/"
+  
+education_details:
+  - degree: "Bachelor's Degree"
+    university: "National University of Ireland, Galway"
+    gpa: "4/4"
+    graduation_year: "2020"
+    field_of_study: "Computer Science"
+    exam:
+      Information Theory and Inference: "4"
+      Algorithm Analysis and Design: "4"
+      Object-Oriented Languages and Programming: "4"
+      Linear Algebra and Numerical Analysis: "4"
+      Database: "4"
+
+experience_details:
+  - position: "Co-Founder & Software Engineer"
+    company: "CryptoWave Solutions"
+    employment_period: "03/2021 - Present"
+    location: "Ireland"
+    industry: "Blockchain Technology"
+    key_responsibilities:
+      - responsibility_1: "Co-founded and led a startup specializing in app and software development with a focus on blockchain technology"
+      - responsibility_2: "Provided blockchain consultations for 10+ companies, enhancing their software capabilities with secure, decentralized solutions"
+      - responsibility_3: "Developed blockchain applications, integrated cutting-edge technology to meet client needs and drive industry innovation"
+    skills_acquired:
+      - "Blockchain development"
+      - "Software engineering"
+      - "Consultancy"
+
+  - position: "Research Intern"
+    company: "National University of Ireland, Galway"
+    employment_period: "11/2022 - 03/2023"
+    location: "Galway, Ireland"
+    industry: "IoT Security Research"
+    key_responsibilities:
+      - responsibility_1: "Conducted in-depth research on IoT security, focusing on binary instrumentation and runtime monitoring"
+      - responsibility_2: "Performed in-depth study of the MQTT protocol and Falco"
+      - responsibility_3: "Developed multiple software components including MQTT packet analysis library, Falco adapter, and RML monitor in Prolog"
+      - responsibility_4: "Authored thesis 'Binary Instrumentation for Runtime Monitoring of Internet of Things Systems Using Falco'"
+    skills_acquired:
+      - "IoT security"
+      - "Binary instrumentation"
+      - "MQTT protocol"
+      - "Prolog programming"
+
+  - position: "Software Engineer"
+    company: "University Hospital Galway"
+    employment_period: "05/2022 - 11/2022"
+    location: "Galway, Ireland"
+    industry: "Healthcare IT"
+    key_responsibilities:
+      - responsibility_1: "Integrated and enforced robust security protocols"
+      - responsibility_2:  "Developed and maintained a critical software tool for password validation used by over 1,600 employees"
+      - responsibility_3:  "Played an integral role in the hospital's cybersecurity team"
+    skills_acquired:
+      - "Cybersecurity"
+      - "Software development"
+      - "Password validation"
+
+projects:
+  - name: "JobBot"
+    description: "AI-driven tool to automate and personalize job applications on LinkedIn, gained over 3000 stars on GitHub, improving efficiency and reducing application time"
+    link: "https://github.com/liam-murphy/jobbot"
+  - name: "mqtt-packet-parser"
+    description: "Developed a Node.js module for parsing MQTT packets, improved parsing efficiency by 40%"
+    link: "https://github.com/liam-murphy/mqtt-packet-parser"
+
+achievements:
+  - name: "Winner of an Irish public competition"
+    description: "Won first place in a public competition with a perfect score of 70/70, securing a Software Developer position at University Hospital Galway"
+  - name: "Galway Merit Scholarship"
+    description: "Awarded annually from 2018 to 2020 in recognition of academic excellence and contribution"
+  - name: "GitHub Recognition"
+    description: "Gained over 3000 stars on GitHub with JobBot project"
+
+certifications:
+  - "C1"
+
+languages:
+  - language: "English"
+    proficiency: "Native"
+  - language: "Spanish"
+    proficiency: "Professional"
+
+interests:
+  - "Full-Stack Development"
+  - "Software Architecture"
+  - "IoT system design and development"
+  - "Artificial Intelligence"
+  - "Cloud Technologies"
+
+availability:
+  notice_period: "immediately"
+
+salary_expectations:
+  salary_range_usd: "100000"
+
+self_identification:
+  gender: "Male"
+  pronouns: "He"
+  veteran: "No"
+  disability: "No"
+  ethnicity: "white"
+
+legal_authorization:
+  eu_work_authorization: "Yes"
+  us_work_authorization: "No"
+  requires_us_visa: "Yes"
+  requires_us_sponsorship: "Yes"
+  requires_eu_visa: "No"
+  legally_allowed_to_work_in_eu: "Yes"
+  legally_allowed_to_work_in_us: "No"
+  requires_eu_sponsorship: "No"
+
+work_preferences:
+  remote_work: "Yes"
+  in_person_work: "Yes"
+  open_to_relocation: "Yes"
+  willing_to_complete_assessments: "Yes"
+  willing_to_undergo_drug_tests: "Yes"
+  willing_to_undergo_background_checks: "Yes"

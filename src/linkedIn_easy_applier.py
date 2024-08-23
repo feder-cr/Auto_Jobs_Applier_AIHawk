@@ -55,8 +55,8 @@ class LinkedInEasyApplier:
         time.sleep(random.uniform(3, 5))
         try:
             easy_apply_button = self._find_easy_apply_button()
-            job_description = self._get_job_description()
-            job.set_job_description(job_description)
+            job.set_job_description(self._get_job_description())
+            job.set_recruiter_link(self._get_job_recruiter())
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
             self.gpt_answerer.set_job(job)
@@ -106,6 +106,19 @@ class LinkedInEasyApplier:
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error getting Job description: \nTraceback:\n{tb_str}")
+
+
+    def _get_job_recruiter(self):
+        try:
+            hiring_team_section = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//h2[text()="Meet the hiring team"]'))
+            )
+            recruiter_element = hiring_team_section.find_element(By.XPATH, './/following::a[contains(@href, "linkedin.com/in/")]')
+            recruiter_link = recruiter_element.get_attribute('href')
+            return recruiter_link
+        except Exception as e:
+            print(f"Errore durante l'estrazione del link del recruiter: {e}")
+            return ""
 
     def _scroll_page(self) -> None:
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
@@ -269,8 +282,6 @@ class LinkedInEasyApplier:
             else:
                 question_type = 'textbox'
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
-            
-            
             existing_answer = None
             for item in self.all_data:
                 if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
