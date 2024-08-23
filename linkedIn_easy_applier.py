@@ -28,27 +28,23 @@ class LinkedInEasyApplier:
         self.set_old_answers = set_old_answers
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
-        self.questions_data = []
+        self.all_data = self._load_questions_from_json()
 
 
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
         try:
-            # Leggi i dati esistenti dal file
             try:
                 with open(output_file, 'r') as f:
                     try:
-                        all_data = json.load(f)
-                        if not isinstance(all_data, list):
+                        data = json.load(f)
+                        if not isinstance(data, list):
                             raise ValueError("JSON file format is incorrect. Expected a list of questions.")
                     except json.JSONDecodeError:
-                        # Se il file è vuoto o non contiene JSON valido, inizializza come lista vuota
-                        all_data = []
+                        data = []
             except FileNotFoundError:
-                # Se il file non esiste, inizializza come lista vuota
-                all_data = []
-
-            return all_data
+                data = []
+            return data
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
@@ -245,12 +241,21 @@ class LinkedInEasyApplier:
         if radios:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
+            
+            existing_answer = None
+            for item in self.all_data:
+                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
+                    existing_answer = item
+                    break
+            if existing_answer:
+                self._select_radio(radios, existing_answer['answer'])
+                return True
+
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-            self._select_radio(radios, answer)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+            self._select_radio(radios, answer)
             return True
         return False
-
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
@@ -259,13 +264,23 @@ class LinkedInEasyApplier:
             question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
             is_numeric = self._is_numeric_field(text_field)
             if is_numeric:
-                answer = self.gpt_answerer.answer_question_numeric(question_text)
                 question_type = 'numeric'
+                answer = self.gpt_answerer.answer_question_numeric(question_text)
             else:
-                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                 question_type = 'textbox'
-            self._enter_text(text_field, answer)
+                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+            
+            
+            existing_answer = None
+            for item in self.all_data:
+                if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
+                    existing_answer = item
+                    break
+            if existing_answer:
+                self._enter_text(text_field, existing_answer['answer'])
+                return True
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+            self._enter_text(text_field, answer)
             return True
         return False
 
@@ -273,9 +288,22 @@ class LinkedInEasyApplier:
         date_fields = section.find_elements(By.CLASS_NAME, 'artdeco-datepicker__input ')
         if date_fields:
             date_field = date_fields[0]
+            question_text = section.text.lower()
             answer_date = self.gpt_answerer.answer_question_date()
-            self._enter_text(date_field, answer_date.strftime("%Y-%m-%d"))
-            self._save_questions_to_json({'type': 'date', 'question': section.text.lower(), 'answer': answer_date.strftime("%Y-%m-%d")})
+            answer_text = answer_date.strftime("%Y-%m-%d")
+
+
+            existing_answer = None
+            for item in self.all_data:
+                if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
+                    existing_answer = item
+                    break
+            if existing_answer:
+                self._enter_text(date_field, existing_answer['answer'])
+                return True
+
+            self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+            self._enter_text(date_field, answer_text)
             return True
         return False
 
@@ -287,9 +315,19 @@ class LinkedInEasyApplier:
             if dropdown:
                 select = Select(dropdown)
                 options = [option.text for option in select.options]
+
+                existing_answer = None
+                for item in self.all_data:
+                    if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+                        existing_answer = item
+                        break
+                if existing_answer:
+                    self._select_dropdown_option(dropdown, existing_answer['answer'])
+                    return True
+
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-                self._select_dropdown_option(dropdown, answer)
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                self._select_dropdown_option(dropdown, answer)
                 return True
         except Exception:
             return False
@@ -323,22 +361,21 @@ class LinkedInEasyApplier:
             try:
                 with open(output_file, 'r') as f:
                     try:
-                        all_data = json.load(f)
-                        if not isinstance(all_data, list):
+                        data = json.load(f)
+                        if not isinstance(data, list):
                             raise ValueError("JSON file format is incorrect. Expected a list of questions.")
                     except json.JSONDecodeError:
-                        all_data = []
+                        data = []
             except FileNotFoundError:
-                all_data = []
-            all_data.append(question_data)
+                data = []
+            data.append(question_data)
             with open(output_file, 'w') as f:
-                json.dump(all_data, f, indent=4)
+                json.dump(data, f, indent=4)
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
 
-        
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower()
         sanitized_text = sanitized_text.strip()
