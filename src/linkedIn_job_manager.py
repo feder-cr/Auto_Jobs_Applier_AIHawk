@@ -6,9 +6,9 @@ from itertools import product
 from pathlib import Path
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-import utils
+import src.utils as utils
 from job import Job
-from linkedIn_easy_applier import LinkedInEasyApplier
+from src.linkedIn_easy_applier import LinkedInEasyApplier
 import json
 
 

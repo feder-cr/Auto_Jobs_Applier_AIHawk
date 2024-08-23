@@ -9,12 +9,12 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
-from utils import chromeBrowserOptions
-from gpt import GPTAnswerer
-from linkedIn_authenticator import LinkedInAuthenticator
-from linkedIn_bot_facade import LinkedInBotFacade
-from linkedIn_job_manager import LinkedInJobManager
-from job_application_profile import JobApplicationProfile
+from src.utils import chromeBrowserOptions
+from src.gpt import GPTAnswerer
+from src.linkedIn_authenticator import LinkedInAuthenticator
+from src.linkedIn_bot_facade import LinkedInBotFacade
+from src.linkedIn_job_manager import LinkedInJobManager
+from src.job_application_profile import JobApplicationProfile
 
 # Suppress stderr
 sys.stderr = open(os.devnull, 'w')

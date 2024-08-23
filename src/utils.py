@@ -50,7 +50,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
 def chromeBrowserOptions():
     ensure_chrome_profile()
     options = webdriver.ChromeOptions()
-    """options.add_argument("--start-maximized")  # Avvia il browser a schermo intero
+    options.add_argument("--start-maximized")  # Avvia il browser a schermo intero
     options.add_argument("--no-sandbox")  # Disabilita la sandboxing per migliorare le prestazioni
     options.add_argument("--disable-dev-shm-usage")  # Utilizza una directory temporanea per la memoria condivisa
     options.add_argument("--ignore-certificate-errors")  # Ignora gli errori dei certificati SSL
@@ -63,7 +63,6 @@ def chromeBrowserOptions():
     options.add_argument("--disable-popup-blocking")  # Disabilita il blocco dei popup
     options.add_argument("--no-first-run")  # Disabilita la configurazione iniziale del browser
     options.add_argument("--no-default-browser-check")  # Disabilita il controllo del browser predefinito
-    options.add_argument("--single-process")  # Esegui Chrome in un solo processo
     options.add_argument("--disable-logging")  # Disabilita il logging
     options.add_argument("--disable-autofill")  # Disabilita l'autocompletamento dei moduli
     options.add_argument("--disable-plugins")  # Disabilita i plugin del browser
@@ -84,11 +83,8 @@ def chromeBrowserOptions():
         options.add_argument('--user-data-dir=' + initialPath)
         options.add_argument("--profile-directory=" + profileDir)
     else:
-        options.add_argument("--incognito")"""
-    initialPath = os.path.dirname(chromeProfilePath)
-    profileDir = os.path.basename(chromeProfilePath)  
-    options.add_argument('--user-data-dir=' + initialPath)
-    options.add_argument("--profile-directory=" + profileDir)  
+        options.add_argument("--incognito")
+
     return options
 
 
