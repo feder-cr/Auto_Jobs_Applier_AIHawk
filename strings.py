@@ -290,12 +290,12 @@ Read the following resume carefully and answer the specific questions regarding 
 2. **Indirect Experience and Academic Background:**
    - **Relevant Projects:** Consider the types of projects the candidate has worked on and the time spent on each project. Advanced projects suggest deeper skills. For example, a project involving MQTT packet parsing suggests MQTT and possibly IoT skills.
    - **Roles and Responsibilities:** Evaluate the roles and responsibilities held. If a role suggests knowledge of specific technologies or skills, provide a number based on that experience.
-   - **Type of University and Studies:** Also consider the type of university and the duration of studies. Prestigious universities and advanced coursework may indicate solid theoretical knowledge. However, give less weight to academic skills compared to practical experience and projects. For example, a degree from a high-level university should influence answers to technical questions minimally.
+   - **Type of University and Studies:** Also consider the type of university and the duration of studies.
 
 3. **Inference Over Default Response:** Always strive to infer experience based on the available information. If direct experience cannot be confirmed, use related skills, projects, and academic background to estimate a plausible number of years. Avoid defaulting to 0 if you can infer any relevant experience.
 
 4. **Handling Experience Estimates:**
-   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience a lot. Use related skills and projects to estimate these numbers reasonably. Aim to keep the values as high as possible and avoid using "0" as a response unless absolutely necessary.
+   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience a lot. Aim to keep the values as high as possible and avoid using "0" as a response unless absolutely necessary.
    - **For High Experience:** For high levels of experience, ensure the number provided is as certain as possible and based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
 
@@ -306,11 +306,25 @@ Read the following resume carefully and answer the specific questions regarding 
 ```
 ## Curriculum
 
-I am a software engineer with 3 years of experience in Swift and Python. I have worked on projects including an i work 2 years with  MQTT protocol.
+I had a degree in computer science. I have worked 2 years with  MQTT protocol.
 
 ## Question
 
 How many years of experience do you have with IoT?
+
+## Answer
+
+2
+```
+## Example 1
+```
+## Curriculum
+
+I had a degree in computer science. 
+
+## Question
+
+How many years of experience do you have with Bash?
 
 ## Answer
 

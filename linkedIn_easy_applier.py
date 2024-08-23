@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 import random
 import re
@@ -27,6 +28,31 @@ class LinkedInEasyApplier:
         self.set_old_answers = set_old_answers
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
+        self.questions_data = []
+
+
+    def _load_questions_from_json(self) -> List[dict]:
+        output_file = 'answers.json'
+        try:
+            # Leggi i dati esistenti dal file
+            try:
+                with open(output_file, 'r') as f:
+                    try:
+                        all_data = json.load(f)
+                        if not isinstance(all_data, list):
+                            raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                    except json.JSONDecodeError:
+                        # Se il file è vuoto o non contiene JSON valido, inizializza come lista vuota
+                        all_data = []
+            except FileNotFoundError:
+                # Se il file non esiste, inizializza come lista vuota
+                all_data = []
+
+            return all_data
+        except Exception:
+            tb_str = traceback.format_exc()
+            raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
+
 
     def job_apply(self, job: Any):
         self.driver.get(job.link)
@@ -191,7 +217,6 @@ class LinkedInEasyApplier:
     def _fill_additional_questions(self) -> None:
         form_sections = self.driver.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
         for section in form_sections:
-            outer_html = section.get_attribute('outerHTML')
             self._process_form_section(section)
             
 
@@ -222,6 +247,7 @@ class LinkedInEasyApplier:
             options = [radio.text.lower() for radio in radios]
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._select_radio(radios, answer)
+            self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
             return True
         return False
 
@@ -232,8 +258,14 @@ class LinkedInEasyApplier:
             text_field = text_fields[0]
             question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
             is_numeric = self._is_numeric_field(text_field)
-            answer = self.gpt_answerer.answer_question_numeric(question_text) if is_numeric else self.gpt_answerer.answer_question_textual_wide_range(question_text)
+            if is_numeric:
+                answer = self.gpt_answerer.answer_question_numeric(question_text)
+                question_type = 'numeric'
+            else:
+                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                question_type = 'textbox'
             self._enter_text(text_field, answer)
+            self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             return True
         return False
 
@@ -243,6 +275,7 @@ class LinkedInEasyApplier:
             date_field = date_fields[0]
             answer_date = self.gpt_answerer.answer_question_date()
             self._enter_text(date_field, answer_date.strftime("%Y-%m-%d"))
+            self._save_questions_to_json({'type': 'date', 'question': section.text.lower(), 'answer': answer_date.strftime("%Y-%m-%d")})
             return True
         return False
 
@@ -256,6 +289,7 @@ class LinkedInEasyApplier:
                 options = [option.text for option in select.options]
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                 self._select_dropdown_option(dropdown, answer)
+                self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
                 return True
         except Exception:
             return False
@@ -281,3 +315,36 @@ class LinkedInEasyApplier:
     def _select_dropdown_option(self, element: WebElement, text: str) -> None:
         select = Select(element)
         select.select_by_visible_text(text)
+
+    def _save_questions_to_json(self, question_data: dict) -> None:
+        output_file = 'answers.json'
+        question_data['question'] = self._sanitize_text(question_data['question'])
+        try:
+            try:
+                with open(output_file, 'r') as f:
+                    try:
+                        all_data = json.load(f)
+                        if not isinstance(all_data, list):
+                            raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                    except json.JSONDecodeError:
+                        all_data = []
+            except FileNotFoundError:
+                all_data = []
+            all_data.append(question_data)
+            with open(output_file, 'w') as f:
+                json.dump(all_data, f, indent=4)
+        except Exception:
+            tb_str = traceback.format_exc()
+            raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
+
+
+        
+    def _sanitize_text(self, text: str) -> str:
+        sanitized_text = text.lower()
+        sanitized_text = sanitized_text.strip()
+        sanitized_text = sanitized_text.replace('"', '')
+        sanitized_text = sanitized_text.replace('\\', '')
+        sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text)
+        sanitized_text = sanitized_text.replace('\n', ' ').replace('\r', '')
+        sanitized_text = sanitized_text.rstrip(',')
+        return sanitized_text
