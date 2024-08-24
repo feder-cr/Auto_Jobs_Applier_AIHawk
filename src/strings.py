@@ -335,7 +335,7 @@ How many years of experience do you have with Bash?
 ```
 ## Curriculum
 
-I am a software engineer with 5 years of experience in Swift and Python. I have worked on a AI project.
+I am a software engineer with 5 years of experience in Swift and Python. I have worked on an AI project.
 
 ## Question
 
