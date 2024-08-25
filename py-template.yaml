@@ -1,0 +1,30 @@
+---
+project_name: py-example-project
+loglevel: info
+analyses:
+- analysis_name: py check
+  source_directory: .
+  only_permit_languages:
+  - py
+  only_permit_file_extensions:
+  - .py
+  ignore_directories_containing:
+  - __pycache__
+  - .venv
+  - chrome_profile
+  - data_folder
+  - .git
+  file_scan:
+  - number_of_methods
+  - source_lines_of_code
+  - dependency_graph
+  - louvain_modularity
+  - fan_in_out
+  - tfidf
+  export:
+  - directory: emerge
+  - graphml
+  - json
+  - tabular_file
+  - tabular_console_overall
+  - d3

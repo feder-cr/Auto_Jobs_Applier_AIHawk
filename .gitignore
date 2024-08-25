@@ -12,5 +12,6 @@ generated_cv*
 resume.html
 .vscode
 chrome_profile
-secrets.yaml
+*.log
 data_folder/secrets.yaml
+emerge/*
