@@ -14,24 +14,6 @@ Personal Information: {resume_section}
 Question: {question}
 """
 
-
-
-# Personal Information Template
-personal_information_template = """
-Answer the following question based on the provided personal information.
-
-## Rules
-- Answer questions directly.
-
-## Example
-My resume: John Doe, born on 01/01/1990, living in Milan, Italy.
-Question: What is your city?
- Milan
-
-Personal Information: {resume_section}
-Question: {question}
-"""
-
 # Self Identification Template
 self_identification_template = """
 Answer the following question based on the provided self-identification details.
