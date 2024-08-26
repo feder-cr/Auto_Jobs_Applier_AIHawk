@@ -264,31 +264,28 @@ Please write the cover letter in a way that directly addresses the job role and 
 numeric_question_template = """
 Read the following resume carefully and answer the specific questions regarding the candidate's experience with a number of years. Follow these strategic guidelines when responding:
 
-
 1. **Related and Inferred Experience:**
-   - **Similar Technologies:** If experience with a technology is not explicitly stated, but the candidate has experience with similar or related technologies, respond with a number of years that reflects this related experience. For example, if the candidate has experience with Python and projects that involve technologies similar to Java, consider a plausible number of years for Java.
-   - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Complex and advanced projects often indicate deeper expertise. For instance, if a project involves MQTT, you might infer IoT experience even if it's not explicitly mentioned.
+   - **Similar Technologies:** If experience with a specific technology is not explicitly stated, but the candidate has experience with similar or related technologies, provide a plausible number of years reflecting this related experience. For instance, if the candidate has experience with Python and projects involving technologies similar to Java, estimate a reasonable number of years for Java.
+   - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Complex and advanced projects often indicate deeper expertise.
 
 2. **Indirect Experience and Academic Background:**
-   - **Relevant Projects:** Consider the types of projects the candidate has worked on and the time spent on each project. Advanced projects suggest deeper skills. For example, a project involving MQTT packet parsing suggests MQTT and possibly IoT skills.
-   - **Roles and Responsibilities:** Evaluate the roles and responsibilities held. If a role suggests knowledge of specific technologies or skills, provide a number based on that experience.
+   - **Relevant Projects:** Consider the types of projects the candidate has worked on and the time spent on each. Advanced projects suggest deeper skills.
+   - **Roles and Responsibilities:** Evaluate the roles and responsibilities held to estimate experience with specific technologies or skills.
    - **Type of University and Studies:** Also consider the type of university and the duration of studies.
 
-3. **Inference Over Default Response:** Always strive to infer experience based on the available information. If direct experience cannot be confirmed, use related skills, projects, and academic background to estimate a plausible number of years. Avoid defaulting to 0 if you can infer any relevant experience.
+3. **Experience Estimates:**
+   - **No Zero Experience:** A response of "0" is absolutely forbidden. If direct experience cannot be confirmed, provide a minimum of "2" years based on inferred or related experience.
+   - **For Low Experience (up to 5 years):** Estimate experience based on inferred skills and projects, always providing at least "2" years when relevant.
+   - **For High Experience:** For high levels of experience, provide a number based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
-4. **Handling Experience Estimates:**
-   - **For Low Experience (up to 5 years):** It is acceptable to provide inferred experience a lot.Aim to keep the values as high as possible avoid using "0".
-   - **For High Experience:** For high levels of experience, ensure the number provided is as certain as possible and based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
-
-
-## Rules
-- Answer the question directly (only number).
+4. **Rules:**
+   - Answer the question directly with a number, avoiding "0" entirely.
 
 ## Example 1
 ```
 ## Curriculum
 
-I had a degree in computer science. I have worked 2 years with  MQTT protocol.
+I had a degree in computer science. I have worked  years with  MQTT protocol.
 
 ## Question
 
@@ -296,7 +293,7 @@ How many years of experience do you have with IoT?
 
 ## Answer
 
-2
+4
 ```
 ## Example 1
 ```
