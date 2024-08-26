@@ -21,9 +21,8 @@ Join our **Telegram community** for:
 7. [Troubleshooting](#troubleshooting)
 8. [Conclusion](#conclusion)
 9. [Contributors](#contributors)
-10. [Credits](#credits)
-11. [License](#license)
-12. [Disclaimer](#Disclaimer)
+10. [License](#license)
+11. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
@@ -478,13 +477,6 @@ LinkedIn_AIHawk provides a significant advantage in the modern job market by aut
 - [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
 
 LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make LinkedIn_AIHawk an even more powerful tool for job seekers worldwide.
-
-## Credits
-
-### casual-markdown
-- **Description:** This project uses the casual-markdown library, a lightweight regex-based Markdown parser with Table of Contents (TOC) support.
-- **Author:** [casualwriter](https://github.com/casualwriter)
-- **Repository:** [casual-markdown](https://github.com/casualwriter/casual-markdown)
 
 
 ## License
