@@ -11,6 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_huggingface import HuggingFaceEndpoint
 from Levenshtein import distance
 
 import src.strings as strings
@@ -325,3 +326,54 @@ class GPTAnswerer:
             return "cover"
         else:
             return "resume"
+
+
+class HfLLMLogger(LLMLogger):
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+
+    @staticmethod
+    def log_request(prompts, parsed_reply: Dict[str, Dict]):
+        calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
+        if isinstance(prompts, StringPromptValue):
+            prompts = prompts.text
+        elif isinstance(prompts, Dict):
+            # Convert prompts to a dictionary if they are not in the expected format
+            prompts = {
+                f"prompt_{i+1}": prompt.content
+                for i, prompt in enumerate(prompts.messages)
+            }
+        else:
+            prompts = {
+                f"prompt_{i+1}": prompt.content
+                for i, prompt in enumerate(prompts.messages)
+            }
+
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Create a log entry with all relevant information
+        log_entry = {
+            "time": current_time,
+            "prompts": prompts,
+            "replies": parsed_reply,  # Response content
+        }
+        # Write the log entry to the log file in JSON format
+        with open(calls_log, "a", encoding="utf-8") as f:
+            json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
+            f.write(json_string + "\n")
+
+
+
+class HfLoggerChatModel(LoggerChatModel):
+    def __init__(self, llm: ChatOpenAI):
+        self.llm = llm
+
+    def __call__(self, messages: List[Dict[str, str]]) -> str:
+        reply = self.llm.invoke(messages)
+        HfLLMLogger.log_request(prompts=messages, parsed_reply=reply)
+        return reply
+
+class HfAnswerer(GPTAnswerer):
+    def __init__(self, huggingface_token):
+        self.llm_cheap = HfLoggerChatModel(
+            HuggingFaceEndpoint(repo_id="tiiuae/falcon-7b-instruct", huggingfacehub_api_token=huggingface_token,temperature=0.8)
+        )
