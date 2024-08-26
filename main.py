@@ -10,7 +10,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
 from src.utils import chromeBrowserOptions
-from src.gpt import GPTAnswerer, HfAnswerer
+from src.gpt import GPTAnswerer
+from src.Hugging_Face import HfAnswerer
 from src.linkedIn_authenticator import LinkedInAuthenticator
 from src.linkedIn_bot_facade import LinkedInBotFacade
 from src.linkedIn_job_manager import LinkedInJobManager
@@ -99,7 +100,7 @@ class ConfigValidator:
 
 
     @staticmethod
-    def validate_secrets(secrets_yaml_path: Path) -> tuple:
+    def validate_secrets(secrets_yaml_path: Path, opensource) -> tuple:
         secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
         mandatory_secrets = ['email', 'password', 'openai_api_key','huggingfacehub_api_token']
 
@@ -111,12 +112,15 @@ class ConfigValidator:
             raise ConfigError(f"Invalid email format in secrets file {secrets_yaml_path}.")
         if not secrets['password']:
             raise ConfigError(f"Password cannot be empty in secrets file {secrets_yaml_path}.")
-        openai_api_key = secrets.get('openai_api_key')
-        huggingfacehub_api_token = secrets.get('huggingfacehub_api_token')
-        if not openai_api_key and not huggingfacehub_api_token:
-            raise ConfigError(f"Either OpenAI API key or Hugging Face API token must be provided in secrets file {secrets_yaml_path}.")
-        use_openai = bool(openai_api_key)
-        return secrets['email'], str(secrets['password']), openai_api_key or huggingfacehub_api_token, use_openai
+        if opensource and secrets['huggingfacehub_api_token']:
+            api_key=secrets['huggingfacehub_api_token']
+        elif opensource and not secrets['huggingfacehub_api_token']:
+            raise ConfigError(f"Hugging face API token cannot be empty in secrets file {secrets_yaml_path}.")
+        elif not secrets['openai_api_key']:
+            raise ConfigError(f"OpenAI API key cannot be empty in secrets file {secrets_yaml_path}.")
+        else:
+            api_key=secrets['openai_api_key']
+        return secrets['email'], str(secrets['password']), api_key
 
 class FileManager:
     @staticmethod
@@ -160,7 +164,7 @@ def init_browser() -> webdriver.Chrome:
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
-def create_and_run_bot(email: str, password: str, parameters: dict, api_key: str,use_openai: bool):
+def create_and_run_bot(email: str, password: str, parameters: dict, api_key: str, opensource):
     try:
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
@@ -177,7 +181,7 @@ def create_and_run_bot(email: str, password: str, parameters: dict, api_key: str
         browser = init_browser()
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
-        gpt_answerer_component = GPTAnswerer(api_key) if use_openai else HfAnswerer(api_key)
+        gpt_answerer_component = GPTAnswerer(api_key) if not opensource else HfAnswerer(api_key)
         bot = LinkedInBotFacade(login_component, apply_component)
         bot.set_secrets(email, password)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
@@ -193,18 +197,19 @@ def create_and_run_bot(email: str, password: str, parameters: dict, api_key: str
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
-def main(resume: Path = None):
+@click.option('--opensource', is_flag=True, help="Enable Hugging Face api token to use open source models from the hub")
+def main(resume: Path = None, opensource: bool = False):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
         
         parameters = ConfigValidator.validate_config(config_file)
-        email, password, api_key, use_openai = ConfigValidator.validate_secrets(secrets_file)
+        email, password, api_key = ConfigValidator.validate_secrets(secrets_file, opensource)
         
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         
-        create_and_run_bot(email, password, parameters, api_key, use_openai)
+        create_and_run_bot(email, password, parameters, api_key, opensource)
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
         print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")

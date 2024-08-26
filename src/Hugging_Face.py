@@ -10,7 +10,7 @@ from langchain_core.messages.ai import AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_huggingface import HuggingFaceEndpoint
 from Levenshtein import distance
 
 import src.strings as strings
@@ -18,9 +18,9 @@ import src.strings as strings
 load_dotenv()
 
 
-class LLMLogger:
+class HfLLMLogger:
     
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: HuggingFaceEndpoint):
         self.llm = llm
 
     @staticmethod
@@ -41,81 +41,33 @@ class LLMLogger:
             }
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # Extract token usage details from the response
-        token_usage = parsed_reply["usage_metadata"]
-        output_tokens = token_usage["output_tokens"]
-        input_tokens = token_usage["input_tokens"]
-        total_tokens = token_usage["total_tokens"]
-
-        # Extract model details from the response
-        model_name = parsed_reply["response_metadata"]["model_name"]
-        prompt_price_per_token = 0.00000015
-        completion_price_per_token = 0.0000006
-
-        # Calculate the total cost of the API call
-        total_cost = (input_tokens * prompt_price_per_token) + (
-            output_tokens * completion_price_per_token
-        )
-
         # Create a log entry with all relevant information
         log_entry = {
-            "model": model_name,
             "time": current_time,
             "prompts": prompts,
-            "replies": parsed_reply["content"],  # Response content
-            "total_tokens": total_tokens,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "total_cost": total_cost,
+            "replies": parsed_reply,  # Response content
         }
-
         # Write the log entry to the log file in JSON format
         with open(calls_log, "a", encoding="utf-8") as f:
             json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
             f.write(json_string + "\n")
 
+class HfLoggerChatModel:
 
-class LoggerChatModel:
-
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: HuggingFaceEndpoint):
         self.llm = llm
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
         # Call the LLM with the provided messages and log the response.
-        reply = self.llm(messages)
-        parsed_reply = self.parse_llmresult(reply)
-        LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
+        reply = self.llm.invoke(messages)
+        HfLLMLogger.log_request(prompts=messages, parsed_reply=reply)
         return reply
 
-    def parse_llmresult(self, llmresult: AIMessage) -> Dict[str, Dict]:
-        # Parse the LLM result into a structured format.
-        content = llmresult.content
-        response_metadata = llmresult.response_metadata
-        id_ = llmresult.id
-        usage_metadata = llmresult.usage_metadata
-        parsed_result = {
-            "content": content,
-            "response_metadata": {
-                "model_name": response_metadata.get("model_name", ""),
-                "system_fingerprint": response_metadata.get("system_fingerprint", ""),
-                "finish_reason": response_metadata.get("finish_reason", ""),
-                "logprobs": response_metadata.get("logprobs", None),
-            },
-            "id": id_,
-            "usage_metadata": {
-                "input_tokens": usage_metadata.get("input_tokens", 0),
-                "output_tokens": usage_metadata.get("output_tokens", 0),
-                "total_tokens": usage_metadata.get("total_tokens", 0),
-            },
-        }
-        return parsed_result
 
-
-class GPTAnswerer:
-    def __init__(self, openai_api_key):
-        self.llm_cheap = LoggerChatModel(
-            ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.8)
+class HfAnswerer:
+    def __init__(self, huggingfacehub_api_token):
+        self.llm_cheap = HfLoggerChatModel(
+            HuggingFaceEndpoint(repo_id="tiiuae/falcon-7b-instruct", huggingfacehub_api_token=huggingfacehub_api_token,temperature=0.8)
         )
     @property
     def job_description(self):
