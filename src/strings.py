@@ -269,13 +269,15 @@ Read the following resume carefully and answer the specific questions regarding 
    - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Complex and advanced projects often indicate deeper expertise.
 
 2. **Indirect Experience and Academic Background:**
-   - **Relevant Projects:** Consider the types of projects the candidate has worked on and the time spent on each. Advanced projects suggest deeper skills.
+   - **Type of University and Studies:** Consider the type of university and course followed.
+   - **Exam Grades:** Consider exam grades achieved. High grades in relevant subjects can indicate stronger proficiency and understanding.
+   - **Relevant thesis:** Consider the thesis of the candidate has worked. Advanced projects suggest deeper skills.
    - **Roles and Responsibilities:** Evaluate the roles and responsibilities held to estimate experience with specific technologies or skills.
-   - **Type of University and Studies:** Also consider the type of university and the duration of studies.
+
 
 3. **Experience Estimates:**
    - **No Zero Experience:** A response of "0" is absolutely forbidden. If direct experience cannot be confirmed, provide a minimum of "2" years based on inferred or related experience.
-   - **For Low Experience (up to 5 years):** Estimate experience based on inferred skills and projects, always providing at least "2" years when relevant.
+   - **For Low Experience (up to 5 years):** Estimate experience based on inferred bacherol, skills and projects, always providing at least "2" years when relevant.
    - **For High Experience:** For high levels of experience, provide a number based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
 4. **Rules:**
