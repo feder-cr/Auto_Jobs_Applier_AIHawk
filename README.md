@@ -89,7 +89,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
-4. **Install the required packages:**
+4. ** Install the required packages (Note , HIGHLY recommended to create a virtual enviornment before installing the packages) :**
    ```bash
    pip install -r requirements.txt
    ```
