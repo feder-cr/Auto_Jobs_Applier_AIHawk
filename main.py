@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
-from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
+from lib_resume_builder_AIHawk import Resume, StyleManager, FacadeManager, ResumeGenerator
 from src.utils import chromeBrowserOptions
 from src.gpt import GPTAnswerer
 from src.linkedIn_authenticator import LinkedInAuthenticator
@@ -37,7 +37,7 @@ class ConfigValidator:
         except FileNotFoundError:
             raise ConfigError(f"File not found: {yaml_path}")
     
-    
+    @staticmethod
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
         required_keys = {
@@ -50,6 +50,7 @@ class ConfigValidator:
             'distance': int,
             'companyBlacklist': list,
             'titleBlacklist': list
+            # 'education' is optional, so it's not included here
         }
 
         for key, expected_type in required_keys.items():
@@ -95,8 +96,6 @@ class ConfigValidator:
                 parameters[blacklist] = []
 
         return parameters
-
-
 
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:
@@ -148,6 +147,10 @@ class FileManager:
                 raise FileNotFoundError(f"Resume file not found: {resume_file}")
             result['resume'] = resume_file
 
+        # Optionally include the GitHub link if it is present
+        if 'githubLink' in parameters:
+            result['githubLink'] = parameters['githubLink']
+
         return result
 
 def init_browser() -> webdriver.Chrome:
@@ -171,7 +174,14 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         os.system('cls' if os.name == 'nt' else 'clear')
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
+
+        # Optional parameters
+        if 'education' in parameters:
+            job_application_profile_object.set_education(parameters['education'])
         
+        if 'githubLink' in parameters:
+            resume_object.set_github_link(parameters['githubLink'])
+
         browser = init_browser()
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
@@ -211,9 +221,7 @@ def main(resume: Path = None):
         print("Ensure all required files are present in the data folder.")
         print("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
-
         print(f"Runtime error: {str(re)}")
-
         print("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
