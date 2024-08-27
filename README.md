@@ -1,6 +1,40 @@
+<img src="./assets/linkedin_aihawk.png">
+
+<!-- At first glance, the branding and messaging clearly conveys what to expect -->
+<div align="center">
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/federico-elia-5199951b6/)
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
+
 # LinkedIn_AIHawk
 
-🚀 **Join Our Telegram Community!** 🚀
+#### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
+
+</div>
+<br />
+
+<!-- Message Clarity -->
+## 🚀 Join the AIHawk Community 🚀 
+
+Connect with like-minded individuals and get the most out of AIHawk.
+
+💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+
+🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
+
+🤝 **Network:** Connect with other professionals and explore new opportunities.
+
+🔔 **Stay updated:** Get the latest news and updates on AIHawk.
+
+<!-- Strong Call to Action -->
+### Join Now 👇
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
+)](https://t.me/AIhawkCommunity)
+
+
+
+
+<!-- 🚀 **Join Our Telegram Community!** 🚀
 
 Join our **Telegram community** for:
 - **Support with AIHawk software**
@@ -8,7 +42,7 @@ Join our **Telegram community** for:
 - **Job search tips** and **resume advice**
 - **Idea exchange** and resources for your projects
 
-📲 **[Join now!](https://t.me/AIhawkCommunity)**
+📲 **[Join now!](https://t.me/AIhawkCommunity)** -->
 
 ## Table of Contents
 
