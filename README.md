@@ -122,7 +122,16 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
-4. **Install the required packages:**
+4. **Activate virtual environment:**
+   ```bash
+   python3 -m venv virtual
+   ```
+
+   ```bash
+   source virtual/bin/activate
+   ```
+
+5. **Install the required packages:**
    ```bash
    pip install -r requirements.txt
    ```
@@ -485,7 +494,7 @@ Using this folder as a guide can be particularly helpful for:
    python main.py
    ```
 - **Using a Specific Resume:**
-  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
+  If you want to use a specific PDF resume for all applications, place your resume PDF in the `data_folder` directory and run the bot with the `--resume` option:
   ```bash
   python main.py --resume /path/to/your/resume.pdf
   ```
