@@ -10,7 +10,7 @@ from datetime import date
 from typing import List, Optional, Any, Tuple
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -18,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver import ActionChains
 import src.utils as utils
+from loguru import logger
 
 class LinkedInEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]], gpt_answerer: Any, resume_generator_manager):
@@ -39,6 +40,7 @@ class LinkedInEasyApplier:
                     try:
                         data = json.load(f)
                         if not isinstance(data, list):
+                            logger.error("JSON file format is incorrect. Expected a list of questions.")
                             raise ValueError("JSON file format is incorrect. Expected a list of questions.")
                     except json.JSONDecodeError:
                         data = []
@@ -47,6 +49,7 @@ class LinkedInEasyApplier:
             return data
         except Exception:
             tb_str = traceback.format_exc()
+            logger.error(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
 
@@ -56,6 +59,7 @@ class LinkedInEasyApplier:
         try:
             easy_apply_button = self._find_easy_apply_button()
             job.set_job_description(self._get_job_description())
+            # print("Job Description: " + job.description)
             job.set_recruiter_link(self._get_job_recruiter())
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
@@ -64,6 +68,7 @@ class LinkedInEasyApplier:
         except Exception:
             tb_str = traceback.format_exc()
             self._discard_application()
+            logger.error(f"Failed to apply to job! Original exception: \nTraceback:\n{tb_str}")
             raise Exception(f"Failed to apply to job! Original exception: \nTraceback:\n{tb_str}")
 
     def _find_easy_apply_button(self) -> WebElement:
@@ -102,9 +107,11 @@ class LinkedInEasyApplier:
             return description
         except NoSuchElementException:
             tb_str = traceback.format_exc()
+            logger.error(f"Job description 'See more' button not found: \nTraceback:\n{tb_str}")
             raise Exception("Job description 'See more' button not found: \nTraceback:\n{tb_str}")
         except Exception:
             tb_str = traceback.format_exc()
+            logger.error(f"Error getting Job description: \nTraceback:\n{tb_str}")
             raise Exception(f"Error getting Job description: \nTraceback:\n{tb_str}")
 
 
@@ -131,18 +138,22 @@ class LinkedInEasyApplier:
                 break
 
     def _next_or_submit(self):
-        next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
-        button_text = next_button.text.lower()
-        if 'submit application' in button_text:
-            self._unfollow_company()
+        try:
+            next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
+            button_text = next_button.text.lower()
+            if 'submit application' in button_text:
+                self._unfollow_company()
+                time.sleep(random.uniform(1.5, 2.5))
+                next_button.click()
+                time.sleep(random.uniform(1.5, 2.5))
+                logger.info("Application submitted successfully!")
+                return True
             time.sleep(random.uniform(1.5, 2.5))
             next_button.click()
-            time.sleep(random.uniform(1.5, 2.5))
-            return True
-        time.sleep(random.uniform(1.5, 2.5))
-        next_button.click()
-        time.sleep(random.uniform(3.0, 5.0))
-        self._check_for_errors()
+            time.sleep(random.uniform(3.0, 5.0))
+            self._check_for_errors()
+        except Exception as e:
+            logger.error(f"Failed to submit application. {str(e)}")
 
     def _unfollow_company(self) -> None:
         try:
@@ -155,6 +166,7 @@ class LinkedInEasyApplier:
     def _check_for_errors(self) -> None:
         error_elements = self.driver.find_elements(By.CLASS_NAME, 'artdeco-inline-feedback--error')
         if error_elements:
+            logger.error(f"Failed answering or file upload. {str([e.text for e in error_elements])}")
             raise Exception(f"Failed answering or file upload. {str([e.text for e in error_elements])}")
 
     def _discard_application(self) -> None:
@@ -199,9 +211,14 @@ class LinkedInEasyApplier:
         folder_path = 'generated_cv'
         os.makedirs(folder_path, exist_ok=True)
         try:
-            file_path_pdf = os.path.join(folder_path, f"CV_{random.randint(0, 9999)}.pdf")
+            logger.debug("Trying to create and upload resume")
+            file_path_pdf = os.path.join(folder_path, f"TJ_Resume_{random.randint(0, 9999)}.pdf")
+            raw_resume = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
+            b64_decoded_resume = base64.b64decode(raw_resume)
+            # print(b64_decoded_resume)
             with open(file_path_pdf, "xb") as f:
-                f.write(base64.b64decode(self.resume_generator_manager.pdf_base64(job_description_text=job.description)))
+                # f.write(base64.b64decode(self.resume_generator_manager.pdf_base64(job_description_text=job.description)))
+                f.write(b64_decoded_resume)
             element.send_keys(os.path.abspath(file_path_pdf))
             job.pdf_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
@@ -257,6 +274,7 @@ class LinkedInEasyApplier:
             existing_answer = None
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
+                    # logger.debug(f"Question already answered: {question_text}. Not saving to answers JSON file")
                     existing_answer = item
                     break
             if existing_answer:
@@ -270,54 +288,83 @@ class LinkedInEasyApplier:
         return False
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
-        text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
-        if text_fields:
-            text_field = text_fields[0]
-            question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
-            is_numeric = self._is_numeric_field(text_field)
-            if is_numeric:
-                question_type = 'numeric'
-                answer = self.gpt_answerer.answer_question_numeric(question_text)
-            else:
-                question_type = 'textbox'
-                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
-            existing_answer = None
-            for item in self.all_data:
-                if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
-                    existing_answer = item
-                    break
-            if existing_answer:
-                self._enter_text(text_field, existing_answer['answer'])
+        question_text = "Unknown question"  # Initialize question_text with a default value
+        try:
+            text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
+            if text_fields:
+                text_field = text_fields[0]
+                question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
+                is_numeric = self._is_numeric_field(text_field)
+                existing_answer = None
+                if is_numeric:
+                    question_type = 'numeric'
+                else:
+                    question_type = 'textbox'
+                for item in self.all_data:
+                    if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
+                        # logger.debug(f"Question already answered: {question_text}. Not saving to answers JSON file")
+                        existing_answer = item
+                        break
+                if existing_answer:
+                    self._enter_text(text_field, existing_answer['answer'])
+                else:
+                    logger.debug(f"Generating answer via LLM for question: {question_text} since it is not present in answers JSON file")
+                    if is_numeric:
+                        answer = self.gpt_answerer.answer_question_numeric(question_text)
+                    else:
+                        answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                    self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+                    self._enter_text(text_field, answer)
                 return True
-            self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
-            self._enter_text(text_field, answer)
-            return True
+            return False
+        except NoSuchElementException as e:
+            logger.error(f"Element not found: {str(e)} - Question: {question_text}")
+        except TimeoutException as e:
+            logger.error(f"Timeout while handling dropdown: {str(e)} - Question: {question_text}")
+        except WebDriverException as e:
+            logger.error(f"WebDriver error: {str(e)} - Question: {question_text}")
+        except Exception as e:
+            logger.error(
+                f"Unexpected error in _find_and_handle_dropdown_question: {str(e)} - Question: {question_text}")
         return False
 
     def _find_and_handle_date_question(self, section: WebElement) -> bool:
-        date_fields = section.find_elements(By.CLASS_NAME, 'artdeco-datepicker__input ')
-        if date_fields:
-            date_field = date_fields[0]
-            question_text = section.text.lower()
-            answer_date = self.gpt_answerer.answer_question_date()
-            answer_text = answer_date.strftime("%Y-%m-%d")
+        question_text = "Unknown question"  # Initialize question_text with a default value
+        try:
+            date_fields = section.find_elements(By.CLASS_NAME, 'artdeco-datepicker__input ')
+            if date_fields:
+                date_field = date_fields[0]
+                question_text = section.text.lower()
+                answer_date = self.gpt_answerer.answer_question_date()
+                answer_text = answer_date.strftime("%Y-%m-%d")
 
+                existing_answer = None
+                for item in self.all_data:
+                    if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
+                        # logger.debug(f"Question already answered: {question_text}. Not saving to answers JSON file")
+                        existing_answer = item
+                        break
+                if existing_answer:
+                    self._enter_text(date_field, existing_answer['answer'])
+                    return True
 
-            existing_answer = None
-            for item in self.all_data:
-                if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
-                    existing_answer = item
-                    break
-            if existing_answer:
-                self._enter_text(date_field, existing_answer['answer'])
+                self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+                self._enter_text(date_field, answer_text)
                 return True
-
-            self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
-            self._enter_text(date_field, answer_text)
-            return True
+            return False
+        except NoSuchElementException as e:
+            logger.error(f"Element not found: {str(e)} - Question: {question_text}")
+        except TimeoutException as e:
+            logger.error(f"Timeout while handling dropdown: {str(e)} - Question: {question_text}")
+        except WebDriverException as e:
+            logger.error(f"WebDriver error: {str(e)} - Question: {question_text}")
+        except Exception as e:
+            logger.error(
+                f"Unexpected error in _find_and_handle_dropdown_question: {str(e)} - Question: {question_text}")
         return False
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
+        question_text = "Unknown question"  # Initialize question_text with a default value
         try:
             question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
             question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
@@ -329,6 +376,7 @@ class LinkedInEasyApplier:
                 existing_answer = None
                 for item in self.all_data:
                     if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+                        # logger.debug(f"Question already answered: {question_text}. Not saving to answers JSON file")
                         existing_answer = item
                         break
                 if existing_answer:
@@ -339,8 +387,16 @@ class LinkedInEasyApplier:
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
                 self._select_dropdown_option(dropdown, answer)
                 return True
-        except Exception:
-            return False
+        except NoSuchElementException as e:
+            logger.error(f"Element not found: {str(e)} - Question: {question_text}")
+        except TimeoutException as e:
+            logger.error(f"Timeout while handling dropdown: {str(e)} - Question: {question_text}")
+        except WebDriverException as e:
+            logger.error(f"WebDriver error: {str(e)} - Question: {question_text}")
+        except Exception as e:
+            logger.error(
+                f"Unexpected error in _find_and_handle_dropdown_question: {str(e)} - Question: {question_text}")
+        return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
         field_type = field.get_attribute('type').lower()
@@ -352,6 +408,8 @@ class LinkedInEasyApplier:
     def _enter_text(self, element: WebElement, text: str) -> None:
         element.clear()
         element.send_keys(text)
+        time.sleep(random.uniform(0.5, 1.5))
+        element.send_keys(Keys.RETURN)
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
         for radio in radios:
@@ -367,23 +425,37 @@ class LinkedInEasyApplier:
     def _save_questions_to_json(self, question_data: dict) -> None:
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
-        try:
+        # logger.debug(f"Sanitized question: {question_data['question']}")
+        existing_answer = False
+
+        # Search for existing question and if present, do not save it again
+        for item in self.all_data:
+            if (self._sanitize_text(question_data['question']) in item['question']) and (question_data['type'] == item['type']):
+                # logger.debug(f"Question already answered: {question_data['question']}. Not saving to answers JSON file")
+                existing_answer = True
+                break
+
+        if existing_answer:
             try:
-                with open(output_file, 'r') as f:
-                    try:
-                        data = json.load(f)
-                        if not isinstance(data, list):
-                            raise ValueError("JSON file format is incorrect. Expected a list of questions.")
-                    except json.JSONDecodeError:
-                        data = []
-            except FileNotFoundError:
-                data = []
-            data.append(question_data)
-            with open(output_file, 'w') as f:
-                json.dump(data, f, indent=4)
-        except Exception:
-            tb_str = traceback.format_exc()
-            raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
+                try:
+                    with open(output_file, 'r') as f:
+                        try:
+                            data = json.load(f)
+                            if not isinstance(data, list):
+                                logger.error("JSON file format is incorrect. Expected a list of questions.")
+                                raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                        except json.JSONDecodeError:
+                            data = []
+                except FileNotFoundError:
+                    data = []
+                data.append(question_data)
+                logger.debug(f"Saving question data to JSON file: {question_data}")
+                with open(output_file, 'w') as f:
+                    json.dump(data, f, indent=4)
+            except Exception:
+                tb_str = traceback.format_exc()
+                logger.error(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
+                raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
 
     def _sanitize_text(self, text: str) -> str:

@@ -10,6 +10,7 @@ import src.utils as utils
 from src.job import Job
 from src.linkedIn_easy_applier import LinkedInEasyApplier
 import json
+from loguru import logger
 
 
 class EnvironmentKeys:
@@ -24,6 +25,7 @@ class EnvironmentKeys:
     @staticmethod
     def _read_env_key_bool(key: str) -> bool:
         return os.getenv(key) == "True"
+
 
 class LinkedInJobManager:
     def __init__(self, driver):
@@ -45,7 +47,7 @@ class LinkedInJobManager:
             self.resume_path = None
         self.output_file_directory = Path(parameters['outputFileDirectory'])
         self.env_config = EnvironmentKeys()
-        #self.old_question()
+        # self.old_question()
 
     def set_gpt_answerer(self, gpt_answerer):
         self.gpt_answerer = gpt_answerer
@@ -64,39 +66,39 @@ class LinkedInJobManager:
                         answer_type, question_text, answer = row
                         self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer"""
 
-
     def start_applying(self):
-        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
+        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers,
+                                                          self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
-        minimum_time = 60 * 15
+        minimum_time = 5  # 60 * 15
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
-            utils.printyellow(f"Starting the search for {position} in {location}.")
+            logger.info(f"Starting the search for {position} in {location}.")
 
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    utils.printyellow(f"Going to job page {job_page_number}")
+                    logger.info(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
-                    utils.printyellow("Starting the application process for this page...")
+                    logger.info("Starting the application process for this page...")
                     self.apply_jobs()
-                    utils.printyellow("Applying to jobs on this page has been completed!")
+                    logger.info("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
                     if time_left > 0:
-                        utils.printyellow(f"Sleeping for {time_left} seconds.")
+                        logger.info(f"Sleeping for {time_left} seconds.")
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
-                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                        logger.info(f"Sleeping for {sleep_time / 60} minutes.")
                         time.sleep(sleep_time)
                         page_sleep += 1
             except Exception:
@@ -104,12 +106,12 @@ class LinkedInJobManager:
                 pass
             time_left = minimum_page_time - time.time()
             if time_left > 0:
-                utils.printyellow(f"Sleeping for {time_left} seconds.")
+                logger.info(f"Sleeping for {time_left} seconds.")
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                logger.info(f"Sleeping for {sleep_time / 60} minutes.")
                 time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -120,17 +122,18 @@ class LinkedInJobManager:
                 raise Exception("No more jobs on this page")
         except NoSuchElementException:
             pass
-        
+
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        utils.scroll_slow(self.driver, job_results)
-        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        utils.scroll_slow(self.driver, job_results, step=random.randint(200,400))
+        utils.scroll_slow(self.driver, job_results, step=random.randint(200,400), reverse=True)
+        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
+            0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
             raise Exception("No job class elements found on page")
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                logger.info(f"Blacklisted {job.title} at {job.company}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
             try:
@@ -141,7 +144,7 @@ class LinkedInJobManager:
                 utils.printred(traceback.format_exc())
                 self.write_to_file(job, "failed")
                 continue
-        
+
     def write_to_file(self, job, file_name):
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
@@ -172,7 +175,8 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i+1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if v]
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if
+                             v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
         url_parts.append(f"distance={parameters['distance']}")
@@ -189,10 +193,11 @@ class LinkedInJobManager:
         url_parts.append("f_LF=f_AL")  # Easy Apply
         base_url = "&".join(url_parts)
         return f"?{base_url}{date_param}"
-    
+
     def next_job_page(self, position, location, job_page):
-        self.driver.get(f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
-    
+        self.driver.get(
+            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
+
     def extract_job_information_from_tile(self, job_tile):
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
@@ -211,7 +216,7 @@ class LinkedInJobManager:
             apply_method = "Applied"
 
         return job_title, company, job_location, link, apply_method
-    
+
     def is_blacklisted(self, job_title, company, link):
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)

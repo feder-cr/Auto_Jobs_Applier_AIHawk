@@ -15,6 +15,7 @@ from src.linkedIn_authenticator import LinkedInAuthenticator
 from src.linkedIn_bot_facade import LinkedInBotFacade
 from src.linkedIn_job_manager import LinkedInJobManager
 from src.job_application_profile import JobApplicationProfile
+from loguru import logger
 
 # Suppress stderr
 sys.stderr = open(os.devnull, 'w')
@@ -156,6 +157,7 @@ def init_browser() -> webdriver.Chrome:
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
     except Exception as e:
+        logger.error(f"Failed to initialize browser: {str(e)}")
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
 def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
