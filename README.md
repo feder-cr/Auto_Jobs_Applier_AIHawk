@@ -105,6 +105,8 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Installation
 
+**Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
+
 1. **Download and Install Python:**
 
    Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
