@@ -34,6 +34,7 @@ class LinkedInJobManager:
     def set_parameters(self, parameters):
         self.company_blacklist = parameters.get('companyBlacklist', []) or []
         self.title_blacklist = parameters.get('titleBlacklist', []) or []
+        self.job_description_blacklist = parameters.get('jobDescriptionBlacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
         self.base_search_url = self.get_base_search_url(parameters)
@@ -129,7 +130,7 @@ class LinkedInJobManager:
             raise Exception("No job class elements found on page")
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:
-            if self.is_blacklisted(job.title, job.company, job.link):
+            if self.is_blacklisted(job.title, job.company, job.link, job.description):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
@@ -212,9 +213,10 @@ class LinkedInJobManager:
 
         return job_title, company, job_location, link, apply_method
     
-    def is_blacklisted(self, job_title, company, link):
+    def is_blacklisted(self, job_title, company, link, description):
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
+        description_blacklisted = any(word in description for word in self.job_description_blacklist)
         link_seen = link in self.seen_jobs
-        return title_blacklisted or company_blacklisted or link_seen
+        return title_blacklisted or company_blacklisted or link_seen or description_blacklisted
