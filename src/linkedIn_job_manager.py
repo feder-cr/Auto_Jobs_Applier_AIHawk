@@ -70,7 +70,7 @@ class LinkedInJobManager:
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
-        minimum_time = 60 * 15
+        minimum_time = 20 * 15
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:
@@ -108,7 +108,7 @@ class LinkedInJobManager:
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
-                sleep_time = random.randint(50, 90)
+                sleep_time = random.randint(10, 40)
                 utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                 time.sleep(sleep_time)
                 page_sleep += 1
