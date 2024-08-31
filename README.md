@@ -152,7 +152,13 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-
+- `openai_api_free_hosted_url`: 
+  - Optional paramter, if you want to use freely hosted GPT model, set `openai_api_key: "freehosted"` and `openai_api_free_hosted_url` with the URL of the endpoint
+- Ollama local support
+  - If you want to use Ollama which is deployed locally, leave `openai_api_key` blank.
+  - To setup Ollama to run locally follow the instructions here: [Ollama installation](https://github.com/ollama/ollama).
+  - Download mistral model by pulling mistral:v0.3
+  
 
 
 ### 2. config.yaml
