@@ -106,7 +106,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 ## Installation
 
 **Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
-
+0. **Confirmed succesfull runs OSs & Python**: Python 3.10, 3.11.9(64b), 3.12.5(64b) . Windows 10, Ubuntu 22
 1. **Download and Install Python:**
 
    Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
@@ -507,11 +507,16 @@ TODO ):
 
 ## Troubleshooting
 
+- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse. 
+- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.  
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
-- **Invalid YAML:** Check your YAML files for syntax errors.
-
-  If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues). I'll be more than happy to assist you!
+- **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
+- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
+  
+If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
+  Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
+  I'll be more than happy to assist you!
 
 ## Conclusion
 
