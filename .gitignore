@@ -11,3 +11,5 @@ generated_cv*
 .vscode
 chrome_profile
 answers.json
+resume.yaml
+resume.yaml_validation_report.txt
