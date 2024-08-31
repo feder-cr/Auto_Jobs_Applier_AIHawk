@@ -79,23 +79,13 @@ def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key:
     Generate the YAML content that matches this schema based on the resume content provided, ensuring all format hints are followed and making educated guesses where necessary. Be sure to include best guesses for ALL fields, even if not explicitly mentioned in the resume.
     Enclose your response in <resume_yaml> tags. Only include the YAML content within these tags, without any additional text or code block markers.
     """
-    
-    model = "gpt-3.5-turbo-16k"  # This model has a 16k token limit
-    tokens = num_tokens_from_string(prompt, model)
-    max_tokens = min(16385 - tokens, 4000)  # Ensure we don't exceed model's limit
-
-    if tokens > 16385:
-        print(f"Warning: The input exceeds the model's context length. Tokens: {tokens}")
 
     response = client.chat.completions.create(
-        model=model,
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that generates structured YAML content from resume files, paying close attention to format requirements and schema structure."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=max_tokens,
-        n=1,
-        stop=None,
         temperature=0.5,
     )
 
@@ -106,8 +96,7 @@ def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key:
     if match:
         return match.group(1).strip()
     else:
-        raise ValueError("YAML content not found in the expected format")
-                                                                                                                                                                                                                                                                                                                                                                                        
+        raise ValueError("YAML content not found in the expected format")                                                                                                                                                                                                                                                                                                                                                                                        
 def save_yaml(data: str, output_file: str):
     with open(output_file, 'w') as file:
         file.write(data)
