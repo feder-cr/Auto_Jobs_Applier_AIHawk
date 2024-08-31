@@ -130,35 +130,32 @@ def generate_report(validation_result: Dict[str, Any], output_file: str):
         report += validation_result["errors"] + "\n"
     
     print(report)
-    with open(f"{output_file}_validation_report.txt", 'w') as file:
-        file.write(report)
 
 def main():
     parser = argparse.ArgumentParser(description="Generate a resume YAML file from a text resume using OpenAI API")
-    parser.add_argument("resume_file", help="Path to the input text resume file")
-    parser.add_argument("schema_file", help="Path to the YAML schema file")
-    parser.add_argument("output_file", help="Path to the output YAML file")
+    parser.add_argument("--input", required=True, help="Path to the input text resume file")
+    parser.add_argument("--output", default="data_folder/plain_text_resume.yaml", help="Path to the output YAML file")
     args = parser.parse_args()
 
     try:
         api_key = get_api_key()
-        schema = load_yaml(args.schema_file)
-        resume_text = load_resume_text(args.resume_file)
+        schema = load_yaml("assets/resume_schema.yaml")
+        resume_text = load_resume_text(args.input)
 
         generated_yaml = generate_yaml_from_resume(resume_text, schema, api_key)
-        save_yaml(generated_yaml, args.output_file)
+        save_yaml(generated_yaml, args.output)
 
-        print(f"Resume YAML generated and saved to {args.output_file}")
+        print(f"Resume YAML generated and saved to {args.output}")
 
         validation_result = validate_yaml(generated_yaml, schema)
-        generate_report(validation_result, args.output_file)
+        if validation_result["valid"]:
+            print("YAML is valid and conforms to the schema.")
+        else:
+            print("YAML is not valid. Errors:")
+            print(validation_result["errors"])
 
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-    except ValueError as e:
-        print(f"Error: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
