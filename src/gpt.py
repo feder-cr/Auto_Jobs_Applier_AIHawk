@@ -3,7 +3,7 @@ import os
 import re
 import textwrap
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.messages.ai import AIMessage
@@ -11,6 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from Levenshtein import distance
 
 import src.strings as strings
@@ -20,7 +21,7 @@ load_dotenv()
 
 class LLMLogger:
     
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: Union[ChatOpenAI, ChatOllama]):
         self.llm = llm
 
     @staticmethod
@@ -78,12 +79,12 @@ class LLMLogger:
 
 class LoggerChatModel:
 
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: Union[ChatOpenAI, ChatOllama]):
         self.llm = llm
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
         # Call the LLM with the provided messages and log the response.
-        reply = self.llm(messages)
+        reply = self.llm.invoke(messages)
         parsed_reply = self.parse_llmresult(reply)
         LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
         return reply
@@ -113,10 +114,18 @@ class LoggerChatModel:
 
 
 class GPTAnswerer:
-    def __init__(self, openai_api_key):
-        self.llm_cheap = LoggerChatModel(
-            ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
-        )
+    def __init__(self, openai_api_key, openai_api_free_hosted_url):
+        if openai_api_key == "":
+            print('Using locally hosted mistral:v0.3')
+            self.llm_model = ChatOllama(model = "mistral:v0.3", temperature = 0.4, num_predict = 256)
+        elif openai_api_key == "freehosted":
+            print('Using free hosted gpt-4o-mini')
+            self.llm_model = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key="anything", temperature=0.4,
+                                base_url=openai_api_free_hosted_url)
+        else: 
+            print("Using gpt-4o-mini")
+            self.llm_model = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
+        self.llm_cheap = LoggerChatModel(self.llm_model)
     @property
     def job_description(self):
         return self.job.description
