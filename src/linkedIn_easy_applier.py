@@ -87,10 +87,10 @@ class LinkedInEasyApplier:
                     pass
             if attempt == 0:
                 self.driver.refresh()
-                time.sleep(3)  
+                time.sleep(3)
             attempt += 1
         raise Exception("No clickable 'Easy Apply' button found")
-    
+
 
     def _get_job_description(self) -> str:
         try:
@@ -171,7 +171,7 @@ class LinkedInEasyApplier:
         pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
         for element in pb4_elements:
             self._process_form_element(element, job)
-        
+
     def _process_form_element(self, element: WebElement, job) -> None:
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job)
@@ -226,7 +226,7 @@ class LinkedInEasyApplier:
         form_sections = self.driver.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
         for section in form_sections:
             self._process_form_section(section)
-            
+
 
     def _process_form_section(self, section: WebElement) -> None:
         if self._handle_terms_of_service(section):
@@ -253,7 +253,7 @@ class LinkedInEasyApplier:
         if radios:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
-            
+
             existing_answer = None
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
@@ -350,7 +350,7 @@ class LinkedInEasyApplier:
         return class_attribute and 'numeric' in class_attribute
 
     def _enter_text(self, element: WebElement, text: str) -> None:
-        element.clear()
+        element.send_keys([Keys.BACKSPACE] * 1000)
         element.send_keys(text)
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
