@@ -57,7 +57,7 @@ def parse_wait_time_from_error_message(error_message: str) -> int:
         elif unit == 'd':
             return value * 86400
     logger.debug("Default wait time applied: 30 seconds")
-    return 30  # По умолчанию ждать 30 секунд, если не удалось разобрать время
+    return 30
 
 
 class LLMLogger:
