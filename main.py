@@ -26,7 +26,7 @@ class ConfigValidator:
     @staticmethod
     def validate_email(email: str) -> bool:
         return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is not None
-    
+
     @staticmethod
     def validate_yaml_file(yaml_path: Path) -> dict:
         try:
@@ -36,8 +36,20 @@ class ConfigValidator:
             raise ConfigError(f"Error reading file {yaml_path}: {exc}")
         except FileNotFoundError:
             raise ConfigError(f"File not found: {yaml_path}")
-    
-    
+
+    @staticmethod
+    def validate_secrets_file(secrets_path: Path) -> dict:
+        try:
+            secrets = {}
+            with open(secrets_path, 'r') as file:
+                for line in file:
+                    key, value = line.strip().split(':', 1)
+                    secrets[key.strip()] = value.strip()
+            return secrets
+        except Exception as exc:
+            raise ConfigError(f"Error reading secrets file {secrets_path}: {exc}")
+
+    @staticmethod
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
         required_keys = {
@@ -100,7 +112,7 @@ class ConfigValidator:
 
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:
-        secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
+        secrets = ConfigValidator.validate_secrets_file(secrets_yaml_path)
         mandatory_secrets = ['email', 'password', 'openai_api_key']
 
         for secret in mandatory_secrets:
@@ -114,7 +126,7 @@ class ConfigValidator:
         if not secrets['openai_api_key']:
             raise ConfigError(f"OpenAI API key cannot be empty in secrets file {secrets_yaml_path}.")
 
-        return secrets['email'], str(secrets['password']), secrets['openai_api_key']
+        return secrets['email'], secrets['password'], secrets['openai_api_key']
 
 class FileManager:
     @staticmethod
@@ -128,7 +140,7 @@ class FileManager:
 
         required_files = ['secrets.yaml', 'config.yaml', 'plain_text_resume.yaml']
         missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
-        
+
         if missing_files:
             raise FileNotFoundError(f"Missing files in the data folder: {', '.join(missing_files)}")
 
@@ -169,9 +181,9 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         os.system('cls' if os.name == 'nt' else 'clear')
         resume_generator_manager.choose_style()
         os.system('cls' if os.name == 'nt' else 'clear')
-        
+
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
-        
+
         browser = init_browser()
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
@@ -195,13 +207,13 @@ def main(resume: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
-        
+
         parameters = ConfigValidator.validate_config(config_file)
         email, password, openai_api_key = ConfigValidator.validate_secrets(secrets_file)
-        
+
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
-        
+
         create_and_run_bot(email, password, parameters, openai_api_key)
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
