@@ -10,28 +10,39 @@ import src.utils as utils
 from src.job import Job
 from src.linkedIn_easy_applier import LinkedInEasyApplier
 import json
+from src.utils import logger
 
 
 class EnvironmentKeys:
     def __init__(self):
+        logger.debug("Initializing EnvironmentKeys")
         self.skip_apply = self._read_env_key_bool("SKIP_APPLY")
         self.disable_description_filter = self._read_env_key_bool("DISABLE_DESCRIPTION_FILTER")
+        logger.debug("EnvironmentKeys initialized: skip_apply=%s, disable_description_filter=%s",
+                     self.skip_apply, self.disable_description_filter)
 
     @staticmethod
     def _read_env_key(key: str) -> str:
-        return os.getenv(key, "")
+        value = os.getenv(key, "")
+        logger.debug("Read environment key %s: %s", key, value)
+        return value
 
     @staticmethod
     def _read_env_key_bool(key: str) -> bool:
-        return os.getenv(key) == "True"
+        value = os.getenv(key) == "True"
+        logger.debug("Read environment key %s as bool: %s", key, value)
+        return value
 
 class LinkedInJobManager:
     def __init__(self, driver):
+        logger.debug("Initializing LinkedInJobManager")
         self.driver = driver
         self.set_old_answers = set()
         self.easy_applier_component = None
+        logger.debug("LinkedInJobManager initialized successfully")
 
     def set_parameters(self, parameters):
+        logger.debug("Setting parameters for LinkedInJobManager")
         self.company_blacklist = parameters.get('companyBlacklist', []) or []
         self.title_blacklist = parameters.get('titleBlacklist', []) or []
         self.positions = parameters.get('positions', [])
@@ -39,33 +50,21 @@ class LinkedInJobManager:
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
         resume_path = parameters.get('uploads', {}).get('resume', None)
-        if resume_path is not None and Path(resume_path).exists():
-            self.resume_path = Path(resume_path)
-        else:
-            self.resume_path = None
+        self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
         self.output_file_directory = Path(parameters['outputFileDirectory'])
         self.env_config = EnvironmentKeys()
-        #self.old_question()
+        logger.debug("Parameters set successfully")
 
     def set_gpt_answerer(self, gpt_answerer):
+        logger.debug("Setting GPT answerer")
         self.gpt_answerer = gpt_answerer
 
     def set_resume_generator_manager(self, resume_generator_manager):
+        logger.debug("Setting resume generator manager")
         self.resume_generator_manager = resume_generator_manager
 
-    """ def old_question(self):
-        self.set_old_answers = {}
-        file_path = 'data_folder/output/old_Questions.csv'
-        if os.path.exists(file_path):
-            with open(file_path, 'r', newline='', encoding='utf-8', errors='ignore') as file:
-                csv_reader = csv.reader(file, delimiter=',', quotechar='"')
-                for row in csv_reader:
-                    if len(row) == 3:
-                        answer_type, question_text, answer = row
-                        self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer"""
-
-
     def start_applying(self):
+        logger.debug("Starting job application process")
         self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
@@ -86,30 +85,40 @@ class LinkedInJobManager:
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the application process for this page...")
-                    self.apply_jobs()
+                    try:
+                        self.apply_jobs()
+                    except Exception as e:
+                        logger.error("Error during job application: %s", e)
+                        utils.printred(f"Error during job application: {e}")
+                        continue
                     utils.printyellow("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
                     if time_left > 0:
                         utils.printyellow(f"Sleeping for {time_left} seconds.")
+                        logger.debug("Sleeping for %d seconds", time_left)
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
                         utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                        logger.debug("Sleeping for %d seconds", sleep_time)
                         time.sleep(sleep_time)
                         page_sleep += 1
-            except Exception:
-                traceback.format_exc()
-                pass
+            except Exception as e:
+                logger.error("Unexpected error during job search: %s", e)
+                utils.printred(f"Unexpected error: {e}")
+                continue
             time_left = minimum_page_time - time.time()
             if time_left > 0:
                 utils.printyellow(f"Sleeping for {time_left} seconds.")
+                logger.debug("Sleeping for %d seconds", time_left)
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
                 utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                logger.debug("Sleeping for %d seconds", sleep_time)
                 time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -117,32 +126,40 @@ class LinkedInJobManager:
         try:
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                raise Exception("No more jobs on this page")
+                utils.printyellow("No matching jobs found on this page, moving to next.")
+                logger.debug("No matching jobs found on this page, skipping")
+                return  # Выход из метода, если нет больше подходящих вакансий
         except NoSuchElementException:
-            pass
-        
+            pass  # Если элемент не найден, просто продолжаем
+
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
         utils.scroll_slow(self.driver, job_results)
         utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
-            raise Exception("No job class elements found on page")
+            utils.printyellow("No job class elements found on page, moving to next page.")
+            logger.debug("No job class elements found on page, skipping")
+            return  # Выход из метода, если нет вакансий на странице
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                logger.debug("Job blacklisted: %s at %s", job.title, job.company)
                 self.write_to_file(job, "skipped")
                 continue
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
                     self.easy_applier_component.job_apply(job)
                     self.write_to_file(job, "success")
+                    logger.debug("Applied to job: %s at %s", job.title, job.company)
             except Exception as e:
-                utils.printred(traceback.format_exc())
+                logger.error("Failed to apply for %s at %s: %s", job.title, job.company, e)
+                utils.printred(f"Failed to apply for {job.title} at {job.company}: {e}")
                 self.write_to_file(job, "failed")
                 continue
         
     def write_to_file(self, job, file_name):
+        logger.debug("Writing job application result to file: %s", file_name)
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
         data = {
@@ -157,18 +174,22 @@ class LinkedInJobManager:
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
+                logger.debug("Job data written to new file: %s", file_path)
         else:
             with open(file_path, 'r+', encoding='utf-8') as f:
                 try:
                     existing_data = json.load(f)
                 except json.JSONDecodeError:
+                    logger.error("JSON decode error in file: %s", file_path)
                     existing_data = []
                 existing_data.append(data)
                 f.seek(0)
                 json.dump(existing_data, f, indent=4)
                 f.truncate()
+                logger.debug("Job data appended to existing file: %s", file_path)
 
     def get_base_search_url(self, parameters):
+        logger.debug("Constructing base search URL")
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
@@ -188,33 +209,45 @@ class LinkedInJobManager:
         date_param = next((v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), "")
         url_parts.append("f_LF=f_AL")  # Easy Apply
         base_url = "&".join(url_parts)
-        return f"?{base_url}{date_param}"
+        full_url = f"?{base_url}{date_param}"
+        logger.debug("Base search URL constructed: %s", full_url)
+        return full_url
     
     def next_job_page(self, position, location, job_page):
+        logger.debug("Navigating to next job page: %s in %s, page %d", position, location, job_page)
         self.driver.get(f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
     
     def extract_job_information_from_tile(self, job_tile):
+        logger.debug("Extracting job information from tile")
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').text
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
             company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-        except:
-            pass
+            logger.debug("Job information extracted: %s at %s", job_title, company)
+        except NoSuchElementException:
+            utils.printyellow("Some job information (title, link, or company) is missing.")
+            logger.warning("Some job information (title, link, or company) is missing.")
         try:
             job_location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
-        except:
-            pass
+        except NoSuchElementException:
+            utils.printyellow("Job location is missing.")
+            logger.warning("Job location is missing.")
         try:
             apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
-        except:
-            apply_method = "Applied"
+        except NoSuchElementException:
+            apply_method = "Applied"  # Подразумеваем, что вакансия уже подана
+            utils.printyellow("Apply method not found, assuming 'Applied'.")
+            logger.warning("Apply method not found, assuming 'Applied'.")
 
         return job_title, company, job_location, link, apply_method
     
     def is_blacklisted(self, job_title, company, link):
+        logger.debug("Checking if job is blacklisted: %s at %s", job_title, company)
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
-        return title_blacklisted or company_blacklisted or link_seen
+        is_blacklisted = title_blacklisted or company_blacklisted or link_seen
+        logger.debug("Job blacklisted status: %s", is_blacklisted)
+        return is_blacklisted

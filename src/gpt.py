@@ -12,20 +12,65 @@ from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from Levenshtein import distance
+import time
+from functools import wraps
+from openai import RateLimitError, OpenAIError, APIError
+
 
 import src.strings as strings
+from src.utils import logger
 
 load_dotenv()
+
+# Global timestamp for rate limiting
+last_call_time = 0
+
+
+def global_rate_limiter(min_interval):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            global last_call_time
+            elapsed = time.time() - last_call_time
+            if elapsed < min_interval:
+                logger.debug("Rate limit hit, sleeping for %s seconds", min_interval - elapsed)
+                time.sleep(min_interval - elapsed)
+            last_call_time = time.time()
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+def parse_wait_time_from_error_message(error_message: str) -> int:
+    logger.debug("Parsing wait time from error message: %s", error_message)
+    match = re.search(r"Please try again in (\d+)([smhd])", error_message)
+    if match:
+        value, unit = int(match.group(1)), match.group(2)
+        logger.debug("Extracted wait time: %d %s", value, unit)
+        if unit == 's':
+            return value
+        elif unit == 'm':
+            return value * 60
+        elif unit == 'h':
+            return value * 3600
+        elif unit == 'd':
+            return value * 86400
+    logger.debug("Default wait time applied: 30 seconds")
+    return 30  # По умолчанию ждать 30 секунд, если не удалось разобрать время
 
 
 class LLMLogger:
     
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
+        logger.debug("LLMLogger initialized with LLM: %s", llm)
 
     @staticmethod
     def log_request(prompts, parsed_reply: Dict[str, Dict]):
+        logger.debug("Logging request with prompts: %s", prompts)
         calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
+
         if isinstance(prompts, StringPromptValue):
             prompts = prompts.text
         elif isinstance(prompts, Dict):
@@ -41,6 +86,7 @@ class LLMLogger:
             }
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.debug("Current time: %s", current_time)
 
         # Extract token usage details from the response
         token_usage = parsed_reply["usage_metadata"]
@@ -48,7 +94,8 @@ class LLMLogger:
         input_tokens = token_usage["input_tokens"]
         total_tokens = token_usage["total_tokens"]
 
-        # Extract model details from the response
+        logger.debug("Token usage - Input: %d, Output: %d, Total: %d", input_tokens, output_tokens, total_tokens)
+
         model_name = parsed_reply["response_metadata"]["model_name"]
         prompt_price_per_token = 0.00000015
         completion_price_per_token = 0.0000006
@@ -58,7 +105,8 @@ class LLMLogger:
             output_tokens * completion_price_per_token
         )
 
-        # Create a log entry with all relevant information
+        logger.debug("Total cost calculated: %f", total_cost)
+
         log_entry = {
             "model": model_name,
             "time": current_time,
@@ -70,26 +118,41 @@ class LLMLogger:
             "total_cost": total_cost,
         }
 
-        # Write the log entry to the log file in JSON format
+        logger.debug("Log entry created: %s", log_entry)
+
         with open(calls_log, "a", encoding="utf-8") as f:
             json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
             f.write(json_string + "\n")
+            logger.debug("Log entry written to file: %s", calls_log)
 
 
 class LoggerChatModel:
 
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
+        logger.debug("LoggerChatModel initialized with LLM: %s", llm)
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
-        # Call the LLM with the provided messages and log the response.
-        reply = self.llm(messages)
-        parsed_reply = self.parse_llmresult(reply)
-        LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
-        return reply
+        logger.debug("Calling LoggerChatModel with messages: %s", messages)
+        while True:
+            try:
+                # Попытка вызвать модель
+                reply = self.llm(messages)
+                logger.debug("Model reply received: %s", reply)
+                parsed_reply = self.parse_llmresult(reply)
+                LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
+                return reply
+            except RateLimitError as err:
+                # Handle RateLimitError
+                wait_time = self.parse_wait_time_from_error_message(str(err))
+                logger.warning("Rate limit exceeded. Waiting for %d seconds before retrying...", wait_time)
+                time.sleep(wait_time)
+            except Exception as e:
+                logger.error("Unexpected error occurred: %s", str(e))
+                raise
 
     def parse_llmresult(self, llmresult: AIMessage) -> Dict[str, Dict]:
-        # Parse the LLM result into a structured format.
+        logger.debug("Parsing LLM result: %s", llmresult)
         content = llmresult.content
         response_metadata = llmresult.response_metadata
         id_ = llmresult.id
@@ -109,7 +172,26 @@ class LoggerChatModel:
                 "total_tokens": usage_metadata.get("total_tokens", 0),
             },
         }
+        logger.debug("Parsed LLM result: %s", parsed_result)
         return parsed_result
+
+    def parse_wait_time_from_error_message(self, error_message: str) -> int:
+        logger.debug("Parsing wait time from error message: %s", error_message)
+        match = re.search(r"Please try again in (\d+)([smhd])", error_message)
+        if match:
+            value, unit = match.groups()
+            value = int(value)
+            logger.debug("Extracted wait time: %d %s", value, unit)
+            if unit == "s":
+                return value
+            elif unit == "m":
+                return value * 60
+            elif unit == "h":
+                return value * 3600
+            elif unit == "d":
+                return value * 86400
+        logger.debug("Default wait time applied: 30 seconds")
+        return 30
 
 
 class GPTAnswerer:
@@ -117,53 +199,66 @@ class GPTAnswerer:
         self.llm_cheap = LoggerChatModel(
             ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
         )
+        logger.debug("GPTAnswerer initialized with API key")
+
     @property
     def job_description(self):
         return self.job.description
 
     @staticmethod
     def find_best_match(text: str, options: list[str]) -> str:
+        logger.debug("Finding best match for text: '%s' in options: %s", text, options)
         distances = [
             (option, distance(text.lower(), option.lower())) for option in options
         ]
         best_option = min(distances, key=lambda x: x[1])[0]
+        logger.debug("Best match found: %s", best_option)
         return best_option
 
     @staticmethod
     def _remove_placeholders(text: str) -> str:
+        logger.debug("Removing placeholders from text: %s", text)
         text = text.replace("PLACEHOLDER", "")
         return text.strip()
 
     @staticmethod
     def _preprocess_template_string(template: str) -> str:
-        # Preprocess a template string to remove unnecessary indentation.
+        logger.debug("Preprocessing template string")
         return textwrap.dedent(template)
 
     def set_resume(self, resume):
+        logger.debug("Setting resume: %s", resume)
         self.resume = resume
 
     def set_job(self, job):
+        logger.debug("Setting job: %s", job)
         self.job = job
         self.job.set_summarize_job_description(self.summarize_job_description(self.job.description))
 
     def set_job_application_profile(self, job_application_profile):
+        logger.debug("Setting job application profile: %s", job_application_profile)
         self.job_application_profile = job_application_profile
-        
+
+    @global_rate_limiter(25)
     def summarize_job_description(self, text: str) -> str:
+        logger.debug("Summarizing job description: %s", text)
         strings.summarize_prompt_template = self._preprocess_template_string(
             strings.summarize_prompt_template
         )
         prompt = ChatPromptTemplate.from_template(strings.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"text": text})
+        logger.debug("Summary generated: %s", output)
         return output
             
     def _create_chain(self, template: str):
+        logger.debug("Creating chain with template: %s", template)
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
-    
+
+    @global_rate_limiter(25)
     def answer_question_textual_wide_range(self, question: str) -> str:
-        # Define chains for each section of the resume
+        logger.debug("Answering textual question: %s", question)
         chains = {
             "personal_information": self._create_chain(strings.personal_information_template),
             "self_identification": self._create_chain(strings.self_identification_template),
@@ -270,47 +365,66 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
+        logger.debug("Section determined from question: %s", output)
         section_name = output.lower().replace(" ", "_")
         if section_name == "cover_letter":
             chain = chains.get(section_name)
             output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
+            logger.debug("Cover letter generated: %s", output)
             return output
         resume_section = getattr(self.resume, section_name, None) or getattr(self.job_application_profile, section_name, None)
         if resume_section is None:
+            logger.error("Section '%s' not found in either resume or job_application_profile.", section_name)
             raise ValueError(f"Section '{section_name}' not found in either resume or job_application_profile.")
         chain = chains.get(section_name)
         if chain is None:
+            logger.error("Chain not defined for section '%s'", section_name)
             raise ValueError(f"Chain not defined for section '{section_name}'")
-        return chain.invoke({"resume_section": resume_section, "question": question})
+        output = chain.invoke({"resume_section": resume_section, "question": question})
+        logger.debug("Question answered: %s", output)
+        return output
 
+    @global_rate_limiter(25)
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
+        logger.debug("Answering numeric question: %s", question)
         func_template = self._preprocess_template_string(strings.numeric_question_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke({"resume_educations": self.resume.education_details,"resume_jobs": self.resume.experience_details,"resume_projects": self.resume.projects , "question": question})
+        logger.debug("Raw output for numeric question: %s", output_str)
         try:
             output = self.extract_number_from_string(output_str)
+            logger.debug("Extracted number: %d", output)
         except ValueError:
+            logger.warning("Failed to extract number, using default experience: %d", default_experience)
             output = default_experience
         return output
 
     def extract_number_from_string(self, output_str):
+        logger.debug("Extracting number from string: %s", output_str)
         numbers = re.findall(r"\d+", output_str)
         if numbers:
+            logger.debug("Numbers found: %s", numbers)
             return int(numbers[0])
         else:
+            logger.error("No numbers found in the string")
             raise ValueError("No numbers found in the string")
 
+    @global_rate_limiter(25)
     def answer_question_from_options(self, question: str, options: list[str]) -> str:
+        logger.debug("Answering question from options: %s", question)
         func_template = self._preprocess_template_string(strings.options_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke({"resume": self.resume, "question": question, "options": options})
+        logger.debug("Raw output for options question: %s", output_str)
         best_option = self.find_best_match(output_str, options)
+        logger.debug("Best option determined: %s", best_option)
         return best_option
-    
+
+    @global_rate_limiter(25)
     def resume_or_cover(self, phrase: str) -> str:
-        # Define the prompt template
+        logger.debug("Determining if phrase refers to resume or cover letter: %s", phrase)
         prompt_template = """
         Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter. Do not provide any additional information or explanations.
         
@@ -319,6 +433,7 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         response = chain.invoke({"phrase": phrase})
+        logger.debug("Response for resume_or_cover: %s", response)
         if "resume" in response:
             return "resume"
         elif "cover" in response:
