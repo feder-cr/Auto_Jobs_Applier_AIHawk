@@ -114,17 +114,18 @@ class LoggerChatModel:
 
 
 class GPTAnswerer:
-    def __init__(self, openai_api_key, openai_api_free_hosted_url):
-        if openai_api_key == "":
-            print('Using locally hosted mistral:v0.3')
-            self.llm_model = ChatOllama(model = "mistral:v0.3", temperature = 0.4, num_predict = 256)
-        elif openai_api_key == "freehosted":
-            print('Using free hosted gpt-4o-mini')
-            self.llm_model = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key="anything", temperature=0.4,
-                                base_url=openai_api_free_hosted_url)
-        else: 
-            print("Using gpt-4o-mini")
-            self.llm_model = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
+    def __init__(self, config, llm_api_key):
+        llm_model_type = config['llm_model_type']
+        llm_model = config['llm_model']
+        llm_api_url = config['llm_api_url']
+
+        print('Using {0} with {1} from {2}'.format(llm_model_type, llm_model, llm_api_url))
+
+        if llm_model_type == "ollama":
+            self.llm_model = ChatOllama(model=llm_model, temperature = 0.4, base_url=llm_api_url)
+        elif llm_model_type == "openai":
+            self.llm_model = ChatOpenAI(model_name=llm_model, openai_api_key=llm_api_key, temperature=0.4,
+                                base_url=llm_api_url)
         self.llm_cheap = LoggerChatModel(self.llm_model)
     @property
     def job_description(self):

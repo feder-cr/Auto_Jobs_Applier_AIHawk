@@ -148,17 +148,10 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your LinkedIn account email address
 - `password: [Your LinkedIn password]`
   - Replace with your LinkedIn account password
-- `openai_api_key: [Your OpenAI API key]`
+- `llm_api_key: [Your OpenAI or Ollama API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-- `openai_api_free_hosted_url`: 
-  - Optional paramter, if you want to use freely hosted GPT model, set `openai_api_key: "freehosted"` and `openai_api_free_hosted_url` with the URL of the endpoint
-- Ollama local support
-  - If you want to use Ollama which is deployed locally, leave `openai_api_key` blank.
-  - To setup Ollama to run locally follow the instructions here: [Ollama installation](https://github.com/ollama/ollama).
-  - Download mistral model by pulling mistral:v0.3
-  
 
 
 ### 2. config.yaml
@@ -217,6 +210,14 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Sales
       - Marketing
     ```
+- `llm_model_type`: 
+  - Choose the model type, supported: openai / ollama
+- `llm_model`: 
+  - Choose the LLM model, currently supported: 
+    - openai: gpt-4o
+    - ollama: llama2, mistral:v0.3
+- `llm_api_url`: 
+  - Link of the API endpoint for the LLM model
 
 ### 3. plain_text_resume.yaml
 
