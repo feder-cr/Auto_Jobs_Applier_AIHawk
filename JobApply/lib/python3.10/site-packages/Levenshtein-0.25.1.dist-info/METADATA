@@ -1,0 +1,83 @@
+Metadata-Version: 2.1
+Name: Levenshtein
+Version: 0.25.1
+Summary: Python extension for computing string edit distances and similarities.
+Home-page: https://github.com/rapidfuzz/Levenshtein
+Author: Max Bachmann
+Author-email: pypi@maxbachmann.de
+License: GPL
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: COPYING
+Requires-Dist: rapidfuzz <4.0.0,>=3.8.0
+
+# Levenshtein
+
+<p>
+  <a href="https://github.com/rapidfuzz/Levenshtein/actions">
+    <img src="https://github.com/rapidfuzz/Levenshtein/workflows/Build/badge.svg"
+         alt="Continuous Integration">
+  </a>
+  <a href="https://pypi.org/project/levenshtein/">
+    <img src="https://img.shields.io/pypi/v/levenshtein"
+         alt="PyPI package version">
+  </a>
+  <a href="https://www.python.org">
+    <img src="https://img.shields.io/pypi/pyversions/levenshtein"
+         alt="Python versions">
+  </a>
+  <a href="https://rapidfuzz.github.io/Levenshtein">
+    <img src="https://img.shields.io/badge/-documentation-blue"
+         alt="Documentation">
+  </a>
+  <a href="https://github.com/rapidfuzz/Levenshtein/blob/main/COPYING">
+    <img src="https://img.shields.io/github/license/rapidfuzz/Levenshtein"
+         alt="GitHub license">
+  </a>
+</p>
+
+## Introduction
+The Levenshtein Python C extension module contains functions for fast
+computation of:
+
+* Levenshtein (edit) distance, and edit operations
+* string similarity
+* approximate median strings, and generally string averaging
+* string sequence and set similarity
+
+## Requirements
+* Python 3.8 or later
+
+## Installation
+```bash
+pip install levenshtein
+```
+
+## Documentation
+
+The documentation for the current version can be found at [https://rapidfuzz.github.io/Levenshtein/](https://rapidfuzz.github.io/Levenshtein/)
+
+## Support the project
+
+If you are using Levenshtein for your work and feel like giving a bit of your own benefit back to support the project, consider sending us money through GitHub Sponsors or PayPal that we can use to buy us free time for the maintenance of this great library, to fix bugs in the software, review and integrate code contributions, to improve its features and documentation, or to just take a deep breath and have a cup of tea every once in a while. Thank you for your support.
+
+Support the project through [GitHub Sponsors](https://github.com/sponsors/maxbachmann) or via [PayPal](https://www.paypal.com/donate/?hosted_button_id=VGWQBBD5CTWJU):
+
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=VGWQBBD5CTWJU).
+
+
+## License
+
+Levenshtein is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.
+
+See the file [COPYING](https://github.com/rapidfuzz/Levenshtein/blob/main/COPYING) for the full text of GNU General Public License version 2.

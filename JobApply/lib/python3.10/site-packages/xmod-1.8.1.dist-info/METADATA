@@ -1,0 +1,65 @@
+Metadata-Version: 2.1
+Name: xmod
+Version: 1.8.1
+Summary: 🌱 Turn any object into a module 🌱
+Home-page: https://github.com/rec/xmod
+License: MIT
+Author: Tom Ritchford
+Author-email: tom@swirly.com
+Requires-Python: >=3.8
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Project-URL: Documentation, https://rec.github.io/xmod
+Project-URL: Repository, https://github.com/rec/xmod
+Description-Content-Type: text/markdown
+
+# 🌱 Turn any object into a module 🌱
+
+Callable modules!  Indexable modules!?
+
+Ever wanted to call a module directly, or index it?  Or just sick of seeing
+`from foo import foo` in your examples?
+
+Give your module the awesome power of an object, or maybe just save a
+little typing, with `xmod`.
+
+`xmod` is a tiny library that lets a module to do things that normally
+only a class could do - handy for modules that "just do one thing".
+
+## Example: Make a module callable like a function!
+
+    # In your_module.py
+    import xmod
+
+    @xmod
+    def a_function():
+        return 'HERE!!'
+
+
+    # Test at the command line
+    >>> import your_module
+    >>> your_module()
+    HERE!!
+
+## Example: Make a module look like a list!?!
+
+    # In your_module.py
+    import xmod
+
+    xmod(list(), __name__)
+
+    # Test at the command line
+    >>> import your_module
+    >>> assert your_module == []
+    >>> your_module.extend(range(3))
+    >>> print(your_module)
+    [0, 1, 2]
+
+
+### [API Documentation](https://rec.github.io/xmod#xmod--api-documentation)
+

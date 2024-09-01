@@ -160,7 +160,7 @@ def init_browser() -> webdriver.Chrome:
 
 def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
     try:
-        style_manager = StyleManager()
+        style_manager    = StyleManager()
         resume_generator = ResumeGenerator()
         with open(parameters['uploads']['plainTextResume'], "r") as file:
             plain_text_resume = file.read()
@@ -203,6 +203,7 @@ def main(resume: Path = None):
         parameters['outputFileDirectory'] = output_folder
         
         create_and_run_bot(email, password, parameters, openai_api_key)
+        
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
         print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
@@ -211,9 +212,7 @@ def main(resume: Path = None):
         print("Ensure all required files are present in the data folder.")
         print("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
-
         print(f"Runtime error: {str(re)}")
-
         print("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")

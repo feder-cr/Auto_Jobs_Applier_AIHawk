@@ -1,42 +1,48 @@
-remote: [true/false]
+remote: [true]
 
 experienceLevel:
- internship: [true/false]
- entry: [true/false]
- associate: [true/false]
- mid-senior level: [true/false]
- director: [true/false]
- executive: [true/false]
+  internship: [false]
+  entry: [false]
+  associate: [true]
+  mid-senior level: [true]
+  director: [false]
+  executive: [false]
 
 jobTypes:
- full-time: [true/false]
- contract: [true/false]
- part-time: [true/false]
- temporary: [true/false]
- internship: [true/false]
- other: [true/false]
- volunteer: [true/false]
+  full-time: [true]
+  contract: [true]
+  part-time: [true]
+  temporary: [false]
+  internship: [false]
+  other: [false]
+  volunteer: [false]
 
 date:
- all time: [true/false]
- month: [true/false]
- week: [true/false]
- 24 hours: [true/false]
+  all time: [true]
+  month: [true]
+  week: [true]
+  24 hours: [true]
 
 positions:
-  - position1
-  - position2
+  - product manager
+  - senior product manager
+  - category manager
+  - ecommerce business manager
+  - business analyst
+  - supply chain management
+  - data analysts
 
 locations:
-  - Country1
-  - Country2
+  - bengaluru
+  - bangalore
+  - hyderabad
 
-distance: 100
+distance: 50
 
 companyBlacklist:
-  - Company1
-  - Company2
+#   - Company1
+#   - Company2
 
 titleBlacklist:
-  - word1
-  - word2
+#   - word1
+#   - word2
