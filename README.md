@@ -577,7 +577,6 @@ For further assistance, please create an issue on the [GitHub repository](https:
 - [LinkedIn Developer Documentation](https://developer.linkedin.com/)
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
-Remember to always use LinkedIn_AIHawk responsibly and in compliance with LinkedIn's terms of service.
 
 If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  

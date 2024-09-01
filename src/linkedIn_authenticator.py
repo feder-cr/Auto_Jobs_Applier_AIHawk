@@ -65,18 +65,8 @@ class LinkedInAuthenticator:
             print("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
-        self.driver.get('https://www.linkedin.com/feed')
-        try:
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
-            )
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            if any(button.text.strip() == 'Start a post' for button in buttons):
-                print("User is already logged in.")
-                return True
-        except TimeoutException:
-            pass
-        return False
+        self.driver.get('https://www.linkedin.com/')
+        return self.driver.current_url == 'https://www.linkedin.com/feed/'
 
     def wait_for_page_load(self, timeout=10):
         try:
