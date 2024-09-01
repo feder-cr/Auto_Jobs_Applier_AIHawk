@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 import click
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
@@ -32,11 +32,8 @@ class ConfigValidator:
         try:
             with open(yaml_path, 'r') as stream:
                 return yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
+        except (yaml.YAMLError, FileNotFoundError) as exc:
             raise ConfigError(f"Error reading file {yaml_path}: {exc}")
-        except FileNotFoundError:
-            raise ConfigError(f"File not found: {yaml_path}")
-    
     
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
@@ -153,7 +150,13 @@ class FileManager:
 def init_browser() -> webdriver.Chrome:
     try:
         options = chromeBrowserOptions()
-        service = ChromeService(ChromeDriverManager().install())
+        
+        chrome_driver_path = Path(r"C:\Users\sunda\chromedriver-win64\chromedriver-win64\chromedriver.exe")
+        
+        if not chrome_driver_path.exists():
+            raise FileNotFoundError(f"ChromeDriver not found at {chrome_driver_path}")
+        
+        service = Service(executable_path=str(chrome_driver_path))
         return webdriver.Chrome(service=service, options=options)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
@@ -211,9 +214,7 @@ def main(resume: Path = None):
         print("Ensure all required files are present in the data folder.")
         print("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
-
         print(f"Runtime error: {str(re)}")
-
         print("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
