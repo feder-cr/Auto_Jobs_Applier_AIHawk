@@ -13,3 +13,4 @@ chrome_profile
 answers.json
 data_folder/
 data_folder_example/
+data_folder/secrets.yaml
