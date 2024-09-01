@@ -1,0 +1,103 @@
+Metadata-Version: 2.1
+Name: faiss-cpu
+Version: 1.8.0.post1
+Summary: A library for efficient similarity search and clustering of dense vectors.
+Author-email: Kota Yamaguchi <yamaguchi_kota@cyberagent.co.jp>
+License: MIT License
+Project-URL: Repository, https://github.com/kyamagu/faiss-wheels
+Keywords: faiss,similarity search,clustering,machine learning
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy <2.0,>=1.0
+Requires-Dist: packaging
+
+# faiss-wheels
+
+[![Build](https://github.com/kyamagu/faiss-wheels/actions/workflows/build.yml/badge.svg)](https://github.com/kyamagu/faiss-wheels/actions/workflows/build.yml)
+[![PyPI](https://img.shields.io/pypi/v/faiss-cpu?label=faiss-cpu)](https://pypi.org/project/faiss-cpu/)
+
+faiss python wheel packages.
+
+- [faiss](https://github.com/facebookresearch/faiss)
+
+## Overview
+
+This repository provides scripts to build wheel packages for the
+[faiss](https://github.com/facebookresearch/faiss) library.
+
+- Builds CPU-only version with [cibuildwheel](https://github.com/pypa/cibuildwheel/).
+- Bundles OpenBLAS in Linux/Windows
+- Uses Accelerate framework in macOS
+
+There is also a source package to customize the build process.
+
+> **Note**
+> GPU package has been supported until version 1.7.2, but is not available since version 1.7.3 due to [the PyPI limitation](https://github.com/kyamagu/faiss-wheels/issues/57).
+
+### Install
+
+Install a binary package by:
+
+```bash
+pip install faiss-cpu
+```
+
+## Building source package
+
+If there is a custom built faiss library in the system, build source package for
+the best performance.
+
+### Prerequisite
+
+The source package assumes faiss is already built and installed in the system.
+Build and install the faiss library first.
+
+```bash
+cd faiss
+cmake . -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DFAISS_OPT_LEVEL=avx512
+cmake --build build --config Release -j
+cmake --install build install
+cd ..
+```
+
+See the official
+[faiss installation instruction](https://github.com/facebookresearch/faiss/blob/master/INSTALL.md)
+for more on how to build and install faiss.
+
+For building sdist, swig 3.0.12 or later needs to be available.
+
+### Building a source distribution
+
+The following builds and installs the faiss-cpu source package with AVX512.
+
+```bash
+export FAISS_OPT_LEVEL=avx512
+pip install --no-binary :all: faiss-cpu
+```
+
+The following example builds a GPU wheel.
+
+```bash
+export FAISS_ENABLE_GPU=ON
+pip install --no-binary :all: faiss-cpu
+```
+
+There are a few environment variables that specifies build-time options.
+- `FAISS_INSTALL_PREFIX`: Specifies the install location of faiss library, default to `/usr/local`.
+- `FAISS_OPT_LEVEL`: Faiss SIMD optimization, one of `generic`, `avx2`, `avx512`. Note that AVX option is only available in x86_64 arch.
+- `FAISS_ENABLE_GPU`: Setting this variable to `ON` builds GPU wrappers. Set this variable if faiss is built with GPU support.
+- `CUDA_HOME`: Specifies CUDA install location for building GPU wrappers, default to `/usr/local/cuda`.
