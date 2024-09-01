@@ -1,11 +1,18 @@
 from typing import Dict, List
 from linkedin_api import Linkedin
 from typing import Optional, Union, Literal
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
+import logging
+import json
+
+# set log to all debug
+logging.basicConfig(level=logging.INFO)
+
 
 class LinkedInEvolvedAPI(Linkedin):
     def __init__(self, username, password):
         super().__init__(username, password)
+
 
     def search_jobs(
         self,
@@ -106,7 +113,7 @@ class LinkedInEvolvedAPI(Linkedin):
         if remote:
             query["selectedFilters"]["workplaceType"] = f"List({','.join(remote)})"
         if easy_apply:
-            query["selectedFilters"]["easyApply"] = "List(true)"
+            query["selectedFilters"]["applyWithLinkedin"] = "List(true)"
 
         query["selectedFilters"]["timePostedRange"] = f"List(r{listed_at})"
         query["spellCorrectionEnabled"] = "true"
@@ -160,9 +167,72 @@ class LinkedInEvolvedAPI(Linkedin):
             self.logger.debug(f"results grew to {len(results)}")
 
         return results
-
     
+    def get_fields_for_easy_apply(self,job_id:str) -> List[Dict]:
+        """Get fields needed for easy apply jobs.
+
+        :param job_id: Job ID
+        :type job_id: str
+        :return: Fields
+        :rtype: dict
+        """
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+        headers['User-Agent'] = headers['user-agent']
+        headers['Accept-Language'] = headers['accept-language']
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        headers.pop("user-agent")
+        headers.pop("accept-language")
         
 
+        default_params = {
+            "decorationId": "com.linkedin.voyager.dash.deco.jobs.OnsiteApplyApplication-67",
+            "jobPostingUrn": f"urn:li:fsd_jobPosting:{job_id}",
+            "q": "jobPosting",
+        }
+
+        default_params = urlencode(default_params)
+        res = self._fetch(
+            f"/voyagerJobsDashOnsiteApplyApplication?{default_params}",
+            headers=headers,
+            cookies=cookies,
+        )
+
+        try:
+            data = res.json()
+        except ValueError:
+            self.logger.error("Failed to parse JSON response")
+            return []
+        
+        form_components = []
+
+        for item in data.get("included", []):
+            if 'formComponent' in item:
+                title = item['title']['text']
+                form_components.append({title: item['formComponent']})
+
+
+
+        
+    def get_cookies_hitting_url(self, url: str):
+        res = self._fetch(url,base_request=False)
+        return res.headers
+        
+## EXAMPLE USAGE
+#if __name__ == "__main__":
+#    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI("", "")        
+#    jobs = api.search_jobs(keywords="Python", location_name="Italy", limit=1, easy_apply=True)
+#    for job in jobs:
+#        job_id: str = job["job_id"]
+#        fields = api.get_fields_for_easy_apply(job_id)
+        
 
     
