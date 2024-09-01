@@ -121,19 +121,23 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 3. **Clone the repository:**
    ```bash
    git clone https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application
-   cd LinkedIn_AIHawk_automatic_job_application
    ```
-
-4. **Activate virtual environment:**
+   
+4. **Navigate to the project directory:**
    ```bash
-   python3 -m venv virtual
+   cd linkedIn_auto_jobs_applier_with_AI
+   ```
+
+5. **Create and activate a virtual environment:**
+   ```bash
+   python3 -m venv virtual 
    ```
 
    ```bash
-   source virtual/bin/activate
+   source virtual/bin/activate # On Windows: virtual\Scripts\activate
    ```
 
-5. **Install the required packages:**
+6. **Install the required dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
