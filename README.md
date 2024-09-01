@@ -501,19 +501,84 @@ Using this folder as a guide can be particularly helpful for:
   python main.py --resume /path/to/your/resume.pdf
   ```
 
-## Documentation
 
-TODO ):
+### Troubleshooting Common Issues
 
-## Troubleshooting
+#### 1. OpenAI API Rate Limit Errors
 
-- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse. 
-- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.  
-- **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
-- **Missing Files:** Verify that all necessary files are present in the data folder.
-- **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
-- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
-  
+**Error Message:**
+
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+
+**Solution:**
+- Check your OpenAI API billing settings at https://platform.openai.com/account/billing
+- Ensure you have added a valid payment method to your OpenAI account
+- Note that ChatGPT Plus subscription is different from API access
+- If you've recently added funds or upgraded, wait 12-24 hours for changes to take effect
+- Free tier has a 3 RPM limit; spend at least $5 on API usage to increase
+
+#### 2. LinkedIn Easy Apply Button Not Found
+
+**Error Message:**
+
+Exception: No clickable 'Easy Apply' button found
+
+**Solution:**
+- Ensure that you're logged into LinkedIn properly
+- Check if the job listings you're targeting actually have the "Easy Apply" option
+- Verify that your search parameters in the `config.yaml` file are correct and returning jobs with the "Easy Apply" button
+- Try increasing the wait time for page loading in the script to ensure all elements are loaded before searching for the button
+
+#### 3. Incorrect Information in Job Applications
+
+**Issue:** Bot provides inaccurate data for experience, CTC, and notice period
+
+**Solution:**
+- Update prompts for professional experience specificity
+- Add fields in `config.yaml` for current CTC, expected CTC, and notice period
+- Modify bot logic to use these new config fields
+
+#### 4. YAML Configuration Errors
+
+**Error Message:**
+
+yaml.scanner.ScannerError: while scanning a simple key
+
+**Solution:**
+- Copy example `config.yaml` and modify gradually
+- Ensure proper YAML indentation and spacing
+- Use a YAML validator tool
+- Avoid unnecessary special characters or quotes
+
+#### 5. Bot Logs In But Doesn't Apply to Jobs
+
+**Issue:** Bot searches for jobs but continues scrolling without applying
+
+**Solution:**
+- Check for security checks or CAPTCHAs
+- Verify `config.yaml` job search parameters
+- Ensure your LinkedIn profile meets job requirements
+- Review console output for error messages
+
+### General Troubleshooting Tips
+
+- Use the latest version of the script
+- Verify all dependencies are installed and updated
+- Check internet connection stability
+- Use VPNs cautiously to avoid triggering LinkedIn security
+- Clear browser cache and cookies if issues persist
+
+For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
+
+### Additional Resources
+
+- [Video Tutorial: How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM)
+- [OpenAI API Documentation](https://platform.openai.com/docs/)
+- [LinkedIn Developer Documentation](https://developer.linkedin.com/)
+- [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
+
+Remember to always use LinkedIn_AIHawk responsibly and in compliance with LinkedIn's terms of service.
+
 If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
