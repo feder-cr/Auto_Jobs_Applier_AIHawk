@@ -32,10 +32,8 @@ class ConfigValidator:
         try:
             with open(yaml_path, 'r') as stream:
                 return yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
+        except (yaml.YAMLError, FileNotFoundError) as exc:
             raise ConfigError(f"Error reading file {yaml_path}: {exc}")
-        except FileNotFoundError:
-            raise ConfigError(f"File not found: {yaml_path}")
     
     
     def validate_config(config_yaml_path: Path) -> dict:
