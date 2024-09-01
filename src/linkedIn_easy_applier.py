@@ -133,12 +133,15 @@ class LinkedInEasyApplier:
     def _next_or_submit(self):
         next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
         button_text = next_button.text.lower()
+        title = self.driver.find_element(By.ID, "jobs-apply-header")
         if 'submit application' in button_text:
             self._unfollow_company()
             time.sleep(random.uniform(1.5, 2.5))
             next_button.click()
             time.sleep(random.uniform(1.5, 2.5))
             return True
+        time.sleep(random.uniform(1.5, 2.5))
+        title.click()
         time.sleep(random.uniform(1.5, 2.5))
         next_button.click()
         time.sleep(random.uniform(3.0, 5.0))
