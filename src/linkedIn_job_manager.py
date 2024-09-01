@@ -65,6 +65,13 @@ class LinkedInJobManager:
                         self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer"""
 
 
+    def next_page_exist(self):
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'jobs-search-pagination__button--next')
+        except NoSuchElementException:
+            return False
+        return True
+
     def start_applying(self):
         self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
@@ -76,16 +83,18 @@ class LinkedInJobManager:
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
+            isNextPageExist = True
             utils.printyellow(f"Starting the search for {position} in {location}.")
 
             try:
-                while True:
+                while isNextPageExist:
                     page_sleep += 1
                     job_page_number += 1
                     utils.printyellow(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the application process for this page...")
+                    isNextPageExist = self.next_page_exist()
                     self.apply_jobs()
                     utils.printyellow("Applying to jobs on this page has been completed!")
 
