@@ -222,10 +222,6 @@ class LinkedInEvolvedAPI(Linkedin):
 
 
         
-    def get_cookies_hitting_url(self, url: str):
-        res = self._fetch(url,base_request=False)
-        return res.headers
-        
 ## EXAMPLE USAGE
 #if __name__ == "__main__":
 #    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI("", "")        
