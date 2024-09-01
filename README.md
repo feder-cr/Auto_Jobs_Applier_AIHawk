@@ -211,11 +211,12 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Marketing
     ```
 - `llm_model_type`: 
-  - Choose the model type, supported: openai / ollama
+  - Choose the model type, supported: openai / ollama / claude
 - `llm_model`: 
   - Choose the LLM model, currently supported: 
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
+    - claude: any model 
 - `llm_api_url`: 
   - Link of the API endpoint for the LLM model
 
