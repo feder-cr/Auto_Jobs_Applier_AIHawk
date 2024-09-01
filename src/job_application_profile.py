@@ -14,9 +14,13 @@ class SelfIdentification:
 class LegalAuthorization:
     eu_work_authorization: str
     us_work_authorization: str
+    canada_work_authorization: str
     requires_us_visa: str
+    requires_canada_visa: str
     legally_allowed_to_work_in_us: str
+    legally_allowed_to_work_in_canada: str
     requires_us_sponsorship: str
+    requires_canada_sponsorship: str
     requires_eu_visa: str
     legally_allowed_to_work_in_eu: str
     requires_eu_sponsorship: str
