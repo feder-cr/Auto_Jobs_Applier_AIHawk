@@ -152,6 +152,11 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
+  - According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
+    `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
+    `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
+    OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
+    You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
 
 
 
