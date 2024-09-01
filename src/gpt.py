@@ -20,7 +20,7 @@ load_dotenv()
 
 class AIModel(ABC):
     @abstractmethod
-    def generate_response(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> str:
         pass
 
 class OpenAIModel(AIModel):
@@ -29,32 +29,29 @@ class OpenAIModel(AIModel):
         self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
                                 temperature=0.4, base_url=llm_api_url)
  
-    def generate_response(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> str:
+        print("invoke in openai")
         response = self.model.invoke(prompt)
-        return response.content
+        return response
 
 class ClaudeModel(AIModel):
     def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
-        from anthropic import Anthropic
-        self.client = Anthropic(api_key=api_key)
+        from langchain_anthropic import ChatAnthropic
+        self.model = ChatAnthropic(model=llm_model, api_key=api_key,
+                                temperature=0.4, base_url=llm_api_url)
 
-    def generate_response(self, prompt: str) -> str:
-        formatted_prompt = f"\n\nHuman: {prompt}\n\nAssistant:"
-        response = self.client.completions.create(
-            model="claude-2",
-            prompt=formatted_prompt,
-            max_tokens_to_sample=300
-        )
-        return response.completion.strip()
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
 
 class OllamaModel(AIModel):
     def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
         from langchain_ollama import ChatOllama
         self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
 
-    def generate_response(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> str:
         response = self.model.invoke(prompt)
-        return response.content
+        return response
 
 class AIAdapter:
     def __init__(self, config: dict, api_key: str):
@@ -75,8 +72,8 @@ class AIAdapter:
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
-    def generate_response(self, prompt: str) -> str:
-        return self.model.generate_response(prompt)
+    def invoke(self, prompt: str) -> str:
+        return self.model.invoke(prompt)
 
 class LLMLogger:
     

@@ -42,5 +42,5 @@ titleBlacklist:
   - word2
   
 llm_model_type: [openai / ollama / claude]
-llm_model: [gpt-4o / mistral:v0.3 / anymodel]
-llm_api_url: [https://api.pawan.krd/cosmosrp/v1' /  http://127.0.0.1:11434/]
+llm_model: [gpt-4o / mistral:v0.3 / claude-3-5-sonnet-20240620]
+llm_api_url: [https://api.pawan.krd/cosmosrp/v1',  http://127.0.0.1:11434/, https://api.anthropic.com/v1/messages]
