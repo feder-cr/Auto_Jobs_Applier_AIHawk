@@ -210,7 +210,9 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Sales
       - Marketing
     ```
-- `llm_model_type`: 
+#### 2.1 config.yaml - Customize LLM model endpoint
+
+- `llm_model_type`:
   - Choose the model type, supported: openai / ollama / claude
 - `llm_model`: 
   - Choose the LLM model, currently supported: 
@@ -219,7 +221,11 @@ This file defines your job search parameters and bot behavior. Each section cont
     - claude: any model 
 - `llm_api_url`: 
   - Link of the API endpoint for the LLM model
-
+    - openai: https://api.pawan.krd/cosmosrp/v1
+    - ollama: http://127.0.0.1:11434/
+    - claude: https://api.anthropic.com/v1
+ - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
+  
 ### 3. plain_text_resume.yaml
 
 This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
