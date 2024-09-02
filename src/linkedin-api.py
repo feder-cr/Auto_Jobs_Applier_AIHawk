@@ -1,7 +1,13 @@
 from typing import Dict, List
 from linkedin_api import Linkedin
 from typing import Optional, Union, Literal
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
+import logging
+import json
+
+# set log to all debug
+logging.basicConfig(level=logging.INFO)
+
 
 class LinkedInEvolvedAPI(Linkedin):
     def __init__(self, username, password):
@@ -106,7 +112,7 @@ class LinkedInEvolvedAPI(Linkedin):
         if remote:
             query["selectedFilters"]["workplaceType"] = f"List({','.join(remote)})"
         if easy_apply:
-            query["selectedFilters"]["easyApply"] = "List(true)"
+            query["selectedFilters"]["applyWithLinkedin"] = "List(true)"
 
         query["selectedFilters"]["timePostedRange"] = f"List(r{listed_at})"
         query["spellCorrectionEnabled"] = "true"
@@ -160,9 +166,103 @@ class LinkedInEvolvedAPI(Linkedin):
             self.logger.debug(f"results grew to {len(results)}")
 
         return results
-
     
+    def get_fields_for_easy_apply(self,job_id:str) -> List[Dict]:
+        """Get fields needed for easy apply jobs.
+
+        :param job_id: Job ID
+        :type job_id: str
+        :return: Fields
+        :rtype: dict
+        """
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
         
 
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+
+        default_params = {
+            "decorationId": "com.linkedin.voyager.dash.deco.jobs.OnsiteApplyApplication-67",
+            "jobPostingUrn": f"urn:li:fsd_jobPosting:{job_id}",
+            "q": "jobPosting",
+        }
+
+        default_params = urlencode(default_params)
+        res = self._fetch(
+            f"/voyagerJobsDashOnsiteApplyApplication?{default_params}",
+            headers=headers,
+            cookies=cookies,
+        )
+
+        match res.status_code:
+            case 200:
+                pass
+            case 409:
+                self.logger.error("Failed to fetch fields for easy apply job because already applied to this job!")
+                return []
+            case _:
+                self.logger.error("Failed to fetch fields for easy apply job")
+                return []
+
+        try:
+            data = res.json()
+        except ValueError:
+            self.logger.error("Failed to parse JSON response")
+            return []
+        
+        form_components = []
+
+        for item in data.get("included", []):
+            if 'formComponent' in item:
+                urn = item['urn']
+                try:
+                    title = item['title']['text']
+                except TypeError:
+                    title = urn
+                
+                form_component_type = list(item['formComponent'].keys())[0]
+                form_component_details = item['formComponent'][form_component_type]
+                
+                component_info = {
+                    'title': title,
+                    'urn': urn,
+                    'formComponentType': form_component_type,
+                }
+                
+                if 'textSelectableOptions' in form_component_details:
+                    options = [
+                        opt['optionText']['text'] for opt in form_component_details['textSelectableOptions']
+                    ]
+                    component_info['selectableOptions'] = options
+                elif 'selectableOptions' in form_component_details:
+                    options = [
+                        opt['textSelectableOption']['optionText']['text'] 
+                        for opt in form_component_details['selectableOptions']
+                    ]
+                    component_info['selectableOptions'] = options
+                
+                form_components.append(component_info)
+
+        return form_components
+
+## EXAMPLE USAGE
+if __name__ == "__main__":
+    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")     
+    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
+    for job in jobs:
+        job_id: str = job["job_id"]
+
+        fields = api.get_fields_for_easy_apply(job_id)
+        for field in fields:
+            print(field)
+
+        
 
     

@@ -101,7 +101,7 @@ class ConfigValidator:
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:
         secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
-        mandatory_secrets = ['email', 'password', 'openai_api_key']
+        mandatory_secrets = ['email', 'password']
 
         for secret in mandatory_secrets:
             if secret not in secrets:
@@ -111,10 +111,7 @@ class ConfigValidator:
             raise ConfigError(f"Invalid email format in secrets file {secrets_yaml_path}.")
         if not secrets['password']:
             raise ConfigError(f"Password cannot be empty in secrets file {secrets_yaml_path}.")
-        if not secrets['openai_api_key']:
-            raise ConfigError(f"OpenAI API key cannot be empty in secrets file {secrets_yaml_path}.")
-
-        return secrets['email'], str(secrets['password']), secrets['openai_api_key']
+        return secrets['email'], str(secrets['password']), secrets['llm_api_key']
 
 class FileManager:
     @staticmethod
@@ -158,14 +155,14 @@ def init_browser() -> webdriver.Chrome:
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
-def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
+def create_and_run_bot(email, password, parameters, llm_api_key):
     try:
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
         with open(parameters['uploads']['plainTextResume'], "r") as file:
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
-        resume_generator_manager = FacadeManager(openai_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
+        resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
         os.system('cls' if os.name == 'nt' else 'clear')
         resume_generator_manager.choose_style()
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -175,7 +172,7 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         browser = init_browser()
         login_component = LinkedInAuthenticator(browser)
         apply_component = LinkedInJobManager(browser)
-        gpt_answerer_component = GPTAnswerer(openai_api_key)
+        gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
         bot = LinkedInBotFacade(login_component, apply_component)
         bot.set_secrets(email, password)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
@@ -197,12 +194,12 @@ def main(resume: Path = None):
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
         
         parameters = ConfigValidator.validate_config(config_file)
-        email, password, openai_api_key = ConfigValidator.validate_secrets(secrets_file)
+        email, password, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
         
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         
-        create_and_run_bot(email, password, parameters, openai_api_key)
+        create_and_run_bot(email, password, parameters, llm_api_key)
     except ConfigError as ce:
         print(f"Configuration error: {str(ce)}")
         print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
