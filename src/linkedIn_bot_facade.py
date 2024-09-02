@@ -55,13 +55,13 @@ class LinkedInBotFacade:
         self.state.parameters_set = True
 
     def start_login(self):
-        self.state.validate_state(['credentials_set'])
+        self.state.validate_state(["credentials_set"])
         self.login_component.set_secrets(self.email, self.password)
         self.login_component.start()
         self.state.logged_in = True
 
     def start_apply(self):
-        self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
+        self.state.validate_state(["logged_in", "job_application_profile_set", "gpt_answerer_set", "parameters_set"])
         self.apply_component.start_applying()
 
     def _validate_non_empty(self, value, name):

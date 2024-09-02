@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, List
 import yaml
 
 @dataclass
@@ -59,7 +58,7 @@ class JobApplicationProfile:
 
         # Process self_identification
         try:
-            self.self_identification = SelfIdentification(**data['self_identification'])
+            self.self_identification = SelfIdentification(**data["self_identification"])
         except KeyError as e:
             raise KeyError(f"Required field {e} is missing in self_identification data.") from e
         except TypeError as e:
@@ -71,7 +70,7 @@ class JobApplicationProfile:
 
         # Process legal_authorization
         try:
-            self.legal_authorization = LegalAuthorization(**data['legal_authorization'])
+            self.legal_authorization = LegalAuthorization(**data["legal_authorization"])
         except KeyError as e:
             raise KeyError(f"Required field {e} is missing in legal_authorization data.") from e
         except TypeError as e:
@@ -83,7 +82,7 @@ class JobApplicationProfile:
 
         # Process work_preferences
         try:
-            self.work_preferences = WorkPreferences(**data['work_preferences'])
+            self.work_preferences = WorkPreferences(**data["work_preferences"])
         except KeyError as e:
             raise KeyError(f"Required field {e} is missing in work_preferences data.") from e
         except TypeError as e:
@@ -95,7 +94,7 @@ class JobApplicationProfile:
 
         # Process availability
         try:
-            self.availability = Availability(**data['availability'])
+            self.availability = Availability(**data["availability"])
         except KeyError as e:
             raise KeyError(f"Required field {e} is missing in availability data.") from e
         except TypeError as e:
@@ -107,7 +106,7 @@ class JobApplicationProfile:
 
         # Process salary_expectations
         try:
-            self.salary_expectations = SalaryExpectations(**data['salary_expectations'])
+            self.salary_expectations = SalaryExpectations(**data["salary_expectations"])
         except KeyError as e:
             raise KeyError(f"Required field {e} is missing in salary_expectations data.") from e
         except TypeError as e:

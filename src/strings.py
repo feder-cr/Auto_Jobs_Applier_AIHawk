@@ -301,7 +301,7 @@ How many years of experience do you have with IoT?
 ```
 ## Curriculum
 
-I had a degree in computer science. 
+I had a degree in computer science.
 
 ## Question
 
@@ -333,7 +333,7 @@ How many years of experience do you have with AI?
 {resume_jobs}
 {resume_projects}
 ```
-        
+
 ## Question:
 {question}
 
@@ -386,30 +386,30 @@ The objective is to fix the text of a form input on a web page.
 {question}
 
 ## Input
-{input} 
+{input}
 
 ## Error
-{error}  
+{error}
 
 ## Fixed Input
 """
 
 func_summarize_prompt_template = """
         Following are two texts, one with placeholders and one without, the second text uses information from the first text to fill the placeholders.
-        
+
         ## Rules
         - A placeholder is a string like "[[placeholder]]". E.g. "[[company]]", "[[job_title]]", "[[years_of_experience]]"...
         - The task is to remove the placeholders from the text.
         - If there is no information to fill a placeholder, remove the placeholder, and adapt the text accordingly.
         - No placeholders should remain in the text.
-        
+
         ## Example
         Text with placeholders: "I'm a software engineer engineer with 10 years of experience on [placeholder] and [placeholder]."
         Text without placeholders: "I'm a software engineer with 10 years of experience."
-        
+
         -----
-        
+
         ## Text with placeholders:
         {text_with_placeholders}
-        
+
         ## Text without placeholders:"""

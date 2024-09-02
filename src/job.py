@@ -27,12 +27,12 @@ class Job:
         """
         job_information = f"""
         # Job Description
-        ## Job Information 
+        ## Job Information
         - Position: {self.title}
         - At: {self.company}
         - Location: {self.location}
         - Recruiter Profile: {self.recruiter_link or 'Not available'}
-        
+
         ## Description
         {self.description or 'No description provided.'}
         """

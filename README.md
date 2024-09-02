@@ -14,7 +14,7 @@
 <br />
 
 <!-- Message Clarity -->
-## 🚀 Join the AIHawk Community 🚀 
+## 🚀 Join the AIHawk Community 🚀
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
@@ -479,7 +479,7 @@ Using this folder as a guide can be particularly helpful for:
 ## Usage
 0. **LinkedIn language**
    To ensure the bot works, your LinkedIn language must be set to English.
-   
+
 2. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
@@ -507,15 +507,15 @@ TODO ):
 
 ## Troubleshooting
 
-- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse. 
-- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.  
+- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse.
+- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
 - **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
-- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
-  
+- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side
+
 If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
-  Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
+  Please add valuable details to the subject and to the description. If you need new feature then please reflect this.
   I'll be more than happy to assist you!
 
 ## Conclusion

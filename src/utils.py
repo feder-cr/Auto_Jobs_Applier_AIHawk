@@ -33,7 +33,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
                 return
             if (step > 0 and start >= end) or (step < 0 and start <= end):
                 print("No scrolling will occur due to incorrect start/end values.")
-                return        
+                return
             for position in range(start, end, step):
                 try:
                     driver.execute_script(script_scroll_to, scrollable_element, position)
@@ -67,7 +67,7 @@ def chromeBrowserOptions():
     options.add_argument("--disable-autofill")  # Disabilita l'autocompletamento dei moduli
     options.add_argument("--disable-plugins")  # Disabilita i plugin del browser
     options.add_argument("--disable-animations")  # Disabilita le animazioni
-    options.add_argument("--disable-cache")  # Disabilita la cache 
+    options.add_argument("--disable-cache")  # Disabilita la cache
     options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])  # Esclude switch della modalità automatica e logging
 
     # Preferenze per contenuti
@@ -80,7 +80,7 @@ def chromeBrowserOptions():
     if len(chromeProfilePath) > 0:
         initialPath = os.path.dirname(chromeProfilePath)
         profileDir = os.path.basename(chromeProfilePath)
-        options.add_argument('--user-data-dir=' + initialPath)
+        options.add_argument("--user-data-dir=" + initialPath)
         options.add_argument("--profile-directory=" + profileDir)
     else:
         options.add_argument("--incognito")

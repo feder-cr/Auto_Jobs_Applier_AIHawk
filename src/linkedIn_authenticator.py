@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 class LinkedInAuthenticator:
-    
+
     def __init__(self, driver=None):
         self.driver = driver
         self.email = ""
@@ -17,7 +17,7 @@ class LinkedInAuthenticator:
 
     def start(self):
         print("Starting Chrome browser to log in to LinkedIn.")
-        self.driver.get('https://www.linkedin.com')
+        self.driver.get("https://www.linkedin.com")
         self.wait_for_page_load()
         if not self.is_logged_in():
             self.handle_login()
@@ -54,24 +54,24 @@ class LinkedInAuthenticator:
     def handle_security_check(self):
         try:
             WebDriverWait(self.driver, 10).until(
-                EC.url_contains('https://www.linkedin.com/checkpoint/challengesV2/')
+                EC.url_contains("https://www.linkedin.com/checkpoint/challengesV2/")
             )
             print("Security checkpoint detected. Please complete the challenge.")
             WebDriverWait(self.driver, 300).until(
-                EC.url_contains('https://www.linkedin.com/feed/')
+                EC.url_contains("https://www.linkedin.com/feed/")
             )
             print("Security check completed")
         except TimeoutException:
             print("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
-        self.driver.get('https://www.linkedin.com/feed')
+        self.driver.get("https://www.linkedin.com/feed")
         try:
             WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
+                EC.presence_of_element_located((By.CLASS_NAME, "share-box-feed-entry__trigger"))
             )
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            if any(button.text.strip() == 'Start a post' for button in buttons):
+            buttons = self.driver.find_elements(By.CLASS_NAME, "share-box-feed-entry__trigger")
+            if any(button.text.strip() == "Start a post" for button in buttons):
                 print("User is already logged in.")
                 return True
         except TimeoutException:
@@ -81,7 +81,7 @@ class LinkedInAuthenticator:
     def wait_for_page_load(self, timeout=10):
         try:
             WebDriverWait(self.driver, timeout).until(
-                lambda d: d.execute_script('return document.readyState') == 'complete'
+                lambda d: d.execute_script("return document.readyState") == "complete"
             )
         except TimeoutException:
             print("Page load timed out.")

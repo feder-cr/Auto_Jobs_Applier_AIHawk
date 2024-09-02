@@ -19,7 +19,7 @@ load_dotenv()
 
 
 class LLMLogger:
-    
+
     def __init__(self, llm: ChatOpenAI):
         self.llm = llm
 
@@ -148,7 +148,7 @@ class GPTAnswerer:
 
     def set_job_application_profile(self, job_application_profile):
         self.job_application_profile = job_application_profile
-        
+
     def summarize_job_description(self, text: str) -> str:
         strings.summarize_prompt_template = self._preprocess_template_string(
             strings.summarize_prompt_template
@@ -157,11 +157,11 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"text": text})
         return output
-            
+
     def _create_chain(self, template: str):
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
-    
+
     def answer_question_textual_wide_range(self, question: str) -> str:
         # Define chains for each section of the resume
         chains = {
@@ -182,7 +182,7 @@ class GPTAnswerer:
         section_prompt = """
         You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
-        For the following question: '{question}', determine which section of the resume is most relevant. 
+        For the following question: '{question}', determine which section of the resume is most relevant.
         Respond with exactly one of the following options:
         - Personal information
         - Self Identification
@@ -308,12 +308,12 @@ class GPTAnswerer:
         output_str = chain.invoke({"resume": self.resume, "question": question, "options": options})
         best_option = self.find_best_match(output_str, options)
         return best_option
-    
+
     def resume_or_cover(self, phrase: str) -> str:
         # Define the prompt template
         prompt_template = """
         Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter. Do not provide any additional information or explanations.
-        
+
         phrase: {phrase}
         """
         prompt = ChatPromptTemplate.from_template(prompt_template)
