@@ -153,6 +153,7 @@ class FileManager:
 def init_browser() -> webdriver.Chrome:
     try:
         options = chromeBrowserOptions()
+        options.add_argument("--incognito")  # Open Chrome in incognito mode
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
     except Exception as e:
