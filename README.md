@@ -148,11 +148,10 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your LinkedIn account email address
 - `password: [Your LinkedIn password]`
   - Replace with your LinkedIn account password
-- `openai_api_key: [Your OpenAI API key]`
+- `llm_api_key: [Your OpenAI or Ollama API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-
 
 
 ### 2. config.yaml
@@ -211,7 +210,22 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Sales
       - Marketing
     ```
+#### 2.1 config.yaml - Customize LLM model endpoint
 
+- `llm_model_type`:
+  - Choose the model type, supported: openai / ollama / claude
+- `llm_model`: 
+  - Choose the LLM model, currently supported: 
+    - openai: gpt-4o
+    - ollama: llama2, mistral:v0.3
+    - claude: any model 
+- `llm_api_url`: 
+  - Link of the API endpoint for the LLM model
+    - openai: https://api.pawan.krd/cosmosrp/v1
+    - ollama: http://127.0.0.1:11434/
+    - claude: https://api.anthropic.com/v1
+ - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
+  
 ### 3. plain_text_resume.yaml
 
 This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.

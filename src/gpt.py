@@ -3,7 +3,8 @@ import os
 import re
 import textwrap
 from datetime import datetime
-from typing import Dict, List
+from abc import ABC, abstractmethod
+from typing import Dict, List, Union
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.messages.ai import AIMessage
@@ -17,10 +18,66 @@ import src.strings as strings
 
 load_dotenv()
 
+class AIModel(ABC):
+    @abstractmethod
+    def invoke(self, prompt: str) -> str:
+        pass
+
+class OpenAIModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_openai import ChatOpenAI
+        self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
+                                temperature=0.4, base_url=llm_api_url)
+ 
+    def invoke(self, prompt: str) -> str:
+        print("invoke in openai")
+        response = self.model.invoke(prompt)
+        return response
+
+class ClaudeModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_anthropic import ChatAnthropic
+        self.model = ChatAnthropic(model=llm_model, api_key=api_key,
+                                temperature=0.4, base_url=llm_api_url)
+
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
+
+class OllamaModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_ollama import ChatOllama
+        self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
+
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
+
+class AIAdapter:
+    def __init__(self, config: dict, api_key: str):
+        self.model = self._create_model(config, api_key)
+
+    def _create_model(self, config: dict, api_key: str) -> AIModel:
+        llm_model_type = config['llm_model_type']
+        llm_model = config['llm_model']
+        llm_api_url = config['llm_api_url']
+        print('Using {0} with {1} from {2}'.format(llm_model_type, llm_model, llm_api_url))
+        
+        if llm_model_type == "openai":
+            return OpenAIModel(api_key, llm_model, llm_api_url)
+        elif llm_model_type == "claude":
+            return ClaudeModel(api_key, llm_model, llm_api_url)
+        elif llm_model_type == "ollama":
+            return OllamaModel(api_key, llm_model, llm_api_url)
+        else:
+            raise ValueError(f"Unsupported model type: {model_type}")
+
+    def invoke(self, prompt: str) -> str:
+        return self.model.invoke(prompt)
 
 class LLMLogger:
     
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
         self.llm = llm
 
     @staticmethod
@@ -78,12 +135,12 @@ class LLMLogger:
 
 class LoggerChatModel:
 
-    def __init__(self, llm: ChatOpenAI):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
         self.llm = llm
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
         # Call the LLM with the provided messages and log the response.
-        reply = self.llm(messages)
+        reply = self.llm.invoke(messages)
         parsed_reply = self.parse_llmresult(reply)
         LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
         return reply
@@ -113,10 +170,9 @@ class LoggerChatModel:
 
 
 class GPTAnswerer:
-    def __init__(self, openai_api_key):
-        self.llm_cheap = LoggerChatModel(
-            ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
-        )
+    def __init__(self, config, llm_api_key):
+        self.ai_adapter = AIAdapter(config, llm_api_key)
+        self.llm_cheap = LoggerChatModel(self.ai_adapter)
     @property
     def job_description(self):
         return self.job.description
