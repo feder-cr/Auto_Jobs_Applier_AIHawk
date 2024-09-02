@@ -13,4 +13,4 @@ webdriver-manager==4.0.2
 click
 git+https://github.com/feder-cr/lib_resume_builder_AIHawk.git
 linkedin-api
-PyPDF2==3.0.1
+pdfminer.six==20221105

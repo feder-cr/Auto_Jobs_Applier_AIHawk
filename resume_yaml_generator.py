@@ -5,7 +5,7 @@ import os
 from typing import Dict, Any
 import re
 from jsonschema import validate, ValidationError
-import PyPDF2
+from pdfminer.high_level import extract_text
 
 def load_yaml(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as file:
@@ -118,12 +118,7 @@ def generate_report(validation_result: Dict[str, Any], output_file: str):
     print(report)
 
 def pdf_to_text(pdf_path: str) -> str:
-    text = ""
-    with open(pdf_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        for page in reader.pages:
-            text += page.extract_text()
-    return text
+    return extract_text(pdf_path)
 
 def main():
     parser = argparse.ArgumentParser(description="Generate a resume YAML file from a PDF or text resume using OpenAI API")
