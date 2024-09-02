@@ -13,7 +13,6 @@ class LinkedInEvolvedAPI(Linkedin):
     def __init__(self, username, password):
         super().__init__(username, password)
 
-
     def search_jobs(
         self,
         keywords: Optional[str] = None,
@@ -182,16 +181,12 @@ class LinkedInEvolvedAPI(Linkedin):
 
         headers: Dict[str, str] = self._headers()
         
-        headers['User-Agent'] = headers['user-agent']
-        headers['Accept-Language'] = headers['accept-language']
+
         headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
         headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
         headers["Cookie"] = cookie_str
         headers["Connection"] = "keep-alive"
 
-        headers.pop("user-agent")
-        headers.pop("accept-language")
-        
 
         default_params = {
             "decorationId": "com.linkedin.voyager.dash.deco.jobs.OnsiteApplyApplication-67",
@@ -206,6 +201,16 @@ class LinkedInEvolvedAPI(Linkedin):
             cookies=cookies,
         )
 
+        match res.status_code:
+            case 200:
+                pass
+            case 409:
+                self.logger.error("Failed to fetch fields for easy apply job because already applied to this job!")
+                return []
+            case _:
+                self.logger.error("Failed to fetch fields for easy apply job")
+                return []
+
         try:
             data = res.json()
         except ValueError:
@@ -216,19 +221,48 @@ class LinkedInEvolvedAPI(Linkedin):
 
         for item in data.get("included", []):
             if 'formComponent' in item:
-                title = item['title']['text']
-                form_components.append({title: item['formComponent']})
+                urn = item['urn']
+                try:
+                    title = item['title']['text']
+                except TypeError:
+                    title = urn
+                
+                form_component_type = list(item['formComponent'].keys())[0]
+                form_component_details = item['formComponent'][form_component_type]
+                
+                component_info = {
+                    'title': title,
+                    'urn': urn,
+                    'formComponentType': form_component_type,
+                }
+                
+                if 'textSelectableOptions' in form_component_details:
+                    options = [
+                        opt['optionText']['text'] for opt in form_component_details['textSelectableOptions']
+                    ]
+                    component_info['selectableOptions'] = options
+                elif 'selectableOptions' in form_component_details:
+                    options = [
+                        opt['textSelectableOption']['optionText']['text'] 
+                        for opt in form_component_details['selectableOptions']
+                    ]
+                    component_info['selectableOptions'] = options
+                
+                form_components.append(component_info)
 
+        return form_components
 
-
-        
 ## EXAMPLE USAGE
-#if __name__ == "__main__":
-#    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI("", "")        
-#    jobs = api.search_jobs(keywords="Python", location_name="Italy", limit=1, easy_apply=True)
-#    for job in jobs:
-#        job_id: str = job["job_id"]
-#        fields = api.get_fields_for_easy_apply(job_id)
+if __name__ == "__main__":
+    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")     
+    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
+    for job in jobs:
+        job_id: str = job["job_id"]
+
+        fields = api.get_fields_for_easy_apply(job_id)
+        for field in fields:
+            print(field)
+
         
 
     
