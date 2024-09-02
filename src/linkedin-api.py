@@ -8,7 +8,6 @@ import json
 # set log to all debug
 logging.basicConfig(level=logging.INFO)
 
-
 class LinkedInEvolvedAPI(Linkedin):
     def __init__(self, username, password):
         super().__init__(username, password)
@@ -167,7 +166,7 @@ class LinkedInEvolvedAPI(Linkedin):
 
         return results
     
-    def get_fields_for_easy_apply(self,job_id:str) -> List[Dict]:
+    def get_fields_for_easy_apply(self,job_id: str) -> List[Dict]:
         """Get fields needed for easy apply jobs.
 
         :param job_id: Job ID
@@ -220,7 +219,7 @@ class LinkedInEvolvedAPI(Linkedin):
         form_components = []
 
         for item in data.get("included", []):
-            if 'formComponent' in item:
+            if 'formComponent' in item:                
                 urn = item['urn']
                 try:
                     title = item['title']['text']
@@ -251,10 +250,117 @@ class LinkedInEvolvedAPI(Linkedin):
                 form_components.append(component_info)
 
         return form_components
+    
+    def apply_to_job(self,job_id: str, fields: dict, followCompany: bool = True) -> bool:
+        return False
+    
+        # ToDo: Implement apply to job parser first
+        # How need to be implemented:
+        # 1. Get fields for easy apply job from the previous method (get_fields_for_easy_apply)
+        # 2. Fill the fields with the data adding a response parameter in the specific field in the dict object, for example:
+        # {'title': 'Quanti anni di esperienza di lavoro hai con Router?', 'urn': 'urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4013860791,9478711764,numeric)', 'formComponentType': 'singleLineTextFormComponent'}
+        # Became:
+        # {'title': 'Quanti anni di esperienza di lavoro hai con Router?', 'urn': 'urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4013860791,9478711764,numeric)', 'formComponentType': 'singleLineTextFormComponent', 'response': '5'}
+        # To fill, you can temporary use input() function to get the data from the user manually for testing purposes (for the further implementation, the question will be asked to AI implementation and automatically filled)
+        # Build a working payload.
+        
+        # EXAMPLE OF WORKING PAYLOAD
+        # 4005350454 is job_id, so need to be replaced with the job_id
+
+        #{
+        #    "followCompany": true,
+        #    "responses": [
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278561,multipleChoice)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "entityInputValue": {
+        #                        "inputEntityName": "email@gmail.com"
+        #                    }
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278545,phoneNumber~country)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "entityInputValue": {
+        #                        "inputEntityName": "Italy (+39)",
+        #                        "inputEntityUrn": "urn:li:country:it"
+        #                    }
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278545,phoneNumber~nationalNumber)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "textInputValue": "3333333"
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278529,multipleChoice)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "entityInputValue": {
+        #                        "inputEntityName": "Native or bilingual"
+        #                    }
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278537,numeric)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "textInputValue": "0"
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3498546713,multipleChoice)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "entityInputValue": {
+        #                        "inputEntityName": "No"
+        #                    }
+        #                }
+        #            ]
+        #        },
+        #        {
+        #            "formElementUrn": "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278521,multipleChoice)",
+        #            "formElementInputValues": [
+        #                {
+        #                    "entityInputValue": {
+        #                        "inputEntityName": "No"
+        #                    }
+        #                }
+        #            ]
+        #        }
+        #    ],
+        #    "referenceId": "",
+        #    "trackingCode": "d_flagship3_search_srp_jobs",
+        #    "fileUploadResponses": [
+        #        {
+        #            "inputUrn": "urn:li:fsd_resume:/##todo##",
+        #            "formElementUrn": "urn:li:fsu_jobApplicationFileUploadFormElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4005350454,3497278553,document)"
+        #        }
+        #    ],
+        #    "trackingId": ""
+        #}
+
+        # Push the commit to the repository and create a pull request to the v3 branch.
+        
+
+        
+            
+
+
+
 
 ## EXAMPLE USAGE
 if __name__ == "__main__":
-    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")     
+    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")    
     jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
     for job in jobs:
         job_id: str = job["job_id"]
@@ -262,6 +368,7 @@ if __name__ == "__main__":
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
             print(field)
+        break
 
         
 
