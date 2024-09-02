@@ -3,9 +3,9 @@ import yaml
 from openai import OpenAI
 import os
 from typing import Dict, Any
-import tiktoken
 import re
 from jsonschema import validate, ValidationError
+import PyPDF2
 
 def load_yaml(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as file:
@@ -26,10 +26,6 @@ def get_api_key() -> str:
         raise ValueError("OpenAI API key not found in secrets.yaml")
     
     return api_key
-
-def num_tokens_from_string(string: str, model: str) -> int:
-    encoding = tiktoken.encoding_for_model(model)
-    return len(encoding.encode(string))
 
 def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key: str) -> str:
     client = OpenAI(api_key=api_key)
@@ -96,7 +92,8 @@ def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key:
     if match:
         return match.group(1).strip()
     else:
-        raise ValueError("YAML content not found in the expected format")                                                                                                                                                                                                                                                                                                                                                                                        
+        raise ValueError("YAML content not found in the expected format")
+
 def save_yaml(data: str, output_file: str):
     with open(output_file, 'w') as file:
         file.write(data)
@@ -120,16 +117,30 @@ def generate_report(validation_result: Dict[str, Any], output_file: str):
     
     print(report)
 
+def pdf_to_text(pdf_path: str) -> str:
+    text = ""
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text()
+    return text
+
 def main():
-    parser = argparse.ArgumentParser(description="Generate a resume YAML file from a text resume using OpenAI API")
-    parser.add_argument("--input", required=True, help="Path to the input text resume file")
+    parser = argparse.ArgumentParser(description="Generate a resume YAML file from a PDF or text resume using OpenAI API")
+    parser.add_argument("--input", required=True, help="Path to the input resume file (PDF or TXT)")
     parser.add_argument("--output", default="data_folder/plain_text_resume.yaml", help="Path to the output YAML file")
     args = parser.parse_args()
 
     try:
         api_key = get_api_key()
         schema = load_yaml("assets/resume_schema.yaml")
-        resume_text = load_resume_text(args.input)
+
+        # Check if input is PDF or TXT
+        if args.input.lower().endswith('.pdf'):
+            resume_text = pdf_to_text(args.input)
+            print(f"PDF resume converted to text successfully.")
+        else:
+            resume_text = load_resume_text(args.input)
 
         generated_yaml = generate_yaml_from_resume(resume_text, schema, api_key)
         save_yaml(generated_yaml, args.output)
