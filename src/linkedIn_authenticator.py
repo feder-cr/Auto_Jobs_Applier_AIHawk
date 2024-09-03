@@ -25,6 +25,9 @@ class LinkedInAuthenticator:
     def handle_login(self):
         print("Navigating to the LinkedIn login page...")
         self.driver.get("https://www.linkedin.com/login")
+        if 'feed' in self.driver.current_url:
+            print("User is already logged in.")
+            return
         try:
             self.enter_credentials()
             self.submit_login_form()
