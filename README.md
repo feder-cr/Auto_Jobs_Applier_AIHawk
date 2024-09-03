@@ -466,6 +466,27 @@ Each section has specific fields to fill out:
     willing_to_undergo_drug_tests: "No"
     willing_to_undergo_background_checks: "Yes"
   ```
+### 4. Generating plain_text_resume.yaml from a PDF or Text Resume
+
+To simplify the process of creating your `plain_text_resume.yaml` file, you can use the provided script to generate it from a pdf-based or text-based resume. Follow these steps:
+
+1. Prepare your resume in a pdf (.pdf file) or plain text (.txt file) format.
+
+2. Place your resume in the `data_folder` directory.
+
+3. Run the following command:
+
+   ```bash
+   python generate_resume_yaml.py --input data_folder/your_resume.[pdf|txt] --output data_folder/plain_text_resume.yaml
+   ```
+
+   Replace `your_resume.[pdf|txt]` with the actual name of your pdf or text resume file.
+
+4. The script will generate a `plain_text_resume.yaml` file in the `data_folder` directory.
+
+5. Review the generated YAML file and make any necessary adjustments to ensure all information is correct and complete.
+
+This automated process helps in creating a structured YAML file from your existing resume, saving time and reducing the chance of errors in manual data entry.
 
 ### PLUS. data_folder_example
 
