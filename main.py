@@ -162,7 +162,7 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
     try:
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
-        with open(parameters['uploads']['plainTextResume'], "r") as file:
+        with open(parameters['uploads']['plainTextResume'], "r", encoding='utf-8') as file:
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(openai_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
