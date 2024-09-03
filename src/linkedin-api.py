@@ -8,7 +8,6 @@ import json
 # set log to all debug
 logging.basicConfig(level=logging.INFO)
 
-
 class LinkedInEvolvedAPI(Linkedin):
     def __init__(self, username, password):
         super().__init__(username, password)
@@ -167,7 +166,7 @@ class LinkedInEvolvedAPI(Linkedin):
 
         return results
     
-    def get_fields_for_easy_apply(self,job_id:str) -> List[Dict]:
+    def get_fields_for_easy_apply(self,job_id: str) -> List[Dict]:
         """Get fields needed for easy apply jobs.
 
         :param job_id: Job ID
@@ -220,7 +219,7 @@ class LinkedInEvolvedAPI(Linkedin):
         form_components = []
 
         for item in data.get("included", []):
-            if 'formComponent' in item:
+            if 'formComponent' in item:                
                 urn = item['urn']
                 try:
                     title = item['title']['text']
@@ -251,18 +250,106 @@ class LinkedInEvolvedAPI(Linkedin):
                 form_components.append(component_info)
 
         return form_components
+    
+    import json
 
-## EXAMPLE USAGE
+def apply_to_job(self, job_id: str, fields: dict, followCompany: bool = True) -> bool:
+    """Apply to a job on LinkedIn using the easy apply feature.
+
+    :param job_id: Job ID
+    :type job_id: str
+    :param fields: Fields required for the application
+    :type fields: dict
+    :param followCompany: Whether to follow the company after applying
+    :type followCompany: bool, optional
+    :return: True if the application was successful, False otherwise
+    :rtype: bool
+    """
+    # Fetch the fields for easy apply job
+    form_components = self.get_fields_for_easy_apply(job_id)
+    
+    # Fill the fields with the data
+    responses = []
+    for component in form_components:
+        if component['formComponentType'] == 'singleLineTextFormComponent':
+            response = input(f"Enter response for '{component['title']}': ") # Need to replace this with AI answer
+            responses.append({
+                "formElementUrn": component['urn'],
+                "formElementInputValues": [
+                    {
+                        "textInputValue": response
+                    }
+                ]
+            })
+        elif component['formComponentType'] == 'multipleChoiceFormComponent':
+            print(f"Select an option for '{component['title']}':")
+            for i, option in enumerate(component['selectableOptions']):
+                print(f"{i+1}. {option}")
+            choice = int(input("Enter the number of your choice: ")) - 1
+            responses.append({
+                "formElementUrn": component['urn'],
+                "formElementInputValues": [
+                    {
+                        "entityInputValue": {
+                            "inputEntityName": component['selectableOptions'][choice]
+                        }
+                    }
+                ]
+            })
+        # Need to add more elif clauses for other form component types
+    
+    # Build the payload
+    payload = {
+        "followCompany": followCompany,
+        "responses": responses,
+        "referenceId": "",
+        "trackingCode": "d_flagship3_search_srp_jobs",
+        "fileUploadResponses": [],
+        "trackingId": ""
+    }
+    
+    # Send the payload to apply for the job
+    cookies = self.client.session.cookies.get_dict()
+    cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+    headers = self._headers()
+    headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+    headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+    headers["Cookie"] = cookie_str
+    headers["Connection"] = "keep-alive"
+
+    default_params = {
+        "decorationId": "com.linkedin.voyager.dash.deco.jobs.OnsiteApplyApplication-67",
+        "jobPostingUrn": f"urn:li:fsd_jobPosting:{job_id}",
+        "q": "jobPosting",
+    }
+
+    default_params = urlencode(default_params)
+    res = self._fetch(
+        f"/voyagerJobsDashOnsiteApplyApplication?{default_params}",
+        method="POST",
+        headers=headers,
+        cookies=cookies,
+        data=json.dumps(payload)
+    )
+
+    if res.status_code == 200:
+        self.logger.info(f"Successfully applied to job {job_id}")
+        return True
+    else:
+        self.logger.error(f"Failed to apply to job {job_id}. Status code: {res.status_code}")
+        return False
+
+# Example usage
 if __name__ == "__main__":
-    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")     
+    api = LinkedInEvolvedAPI(username="", password="")    
     jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
     for job in jobs:
-        job_id: str = job["job_id"]
+        job_id = job["job_id"]
 
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
             print(field)
-
         
-
-    
+        if api.apply_to_job(job_id, fields):
+            break
