@@ -4,5 +4,6 @@ contact_links:
     url: t.me/AIhawkCommunity
     about: You can join the discussions on Telegram.
   - name: New issue
-    url: https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/blob/v3/.github/CONTRIBUTING.md
-    about: Before opening a new issue, please make sure to read CONTRIBUTING.md
+    url: >-
+      https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/blob/v3/.github/CONTRIBUTING.md
+    about: "Before opening a new issue, please make sure to read CONTRIBUTING.md"
