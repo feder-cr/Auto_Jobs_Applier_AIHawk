@@ -9,6 +9,8 @@ import json
 logging.basicConfig(level=logging.INFO)
 
 class LinkedInEvolvedAPI(Linkedin):
+    already_applied_jobs: List[str] = []
+    
     def __init__(self, username, password):
         super().__init__(username, password)
 
@@ -351,6 +353,8 @@ class LinkedInEvolvedAPI(Linkedin):
 
         # Push the commit to the repository and create a pull request to the v3 branch.
         
+    def set_job_as_applied(self, job_id: str) -> None:
+        self.already_applied_jobs.append(job_id)
 
         
             
@@ -360,10 +364,13 @@ class LinkedInEvolvedAPI(Linkedin):
 
 ## EXAMPLE USAGE
 if __name__ == "__main__":
-    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")    
+    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")  
     jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
     for job in jobs:
         job_id: str = job["job_id"]
+        if job_id in api.already_applied_jobs:
+            logging.info(f"Already applied to job {job_id}, skipping it")
+            continue
 
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
