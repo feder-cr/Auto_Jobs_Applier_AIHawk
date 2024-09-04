@@ -31,6 +31,8 @@ locations:
   - Country1
   - Country2
 
+applyOnceAtCompany: [true/false]
+
 distance: 100
 
 companyBlacklist:
