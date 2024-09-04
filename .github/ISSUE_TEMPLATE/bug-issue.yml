@@ -49,12 +49,9 @@ body:
       label: Environment
       description: Specify the environment where the bug occurred.
       options:
-        - label: Production
-          value: production
-        - label: Development
-          value: development
-        - label: Staging
-          value: staging
+        - Production
+        - Development
+        - Staging
 
   - type: input
     id: version
