@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import random
 import time
@@ -134,6 +135,7 @@ class LinkedInJobManager:
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
         data = {
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "company": job.company,
             "job_title": job.title,
             "link": job.link,
