@@ -159,7 +159,7 @@ def create_and_run_bot(email, password, parameters, llm_api_key):
     try:
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
-        with open(parameters['uploads']['plainTextResume'], "r") as file:
+        with open(parameters['uploads']['plainTextResume'], "r", encoding='utf-8') as file:
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
