@@ -1,0 +1,39 @@
+name: Documentation request
+description: Suggest improvements or additions to the project's documentation.
+title: "[DOCS]: <Provide a short title>"
+labels: ["documentation"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping to improve the project's documentation! Please provide the following details to ensure your request is clear.
+
+  - type: input
+    id: doc_section
+    attributes:
+      label: Affected documentation section
+      description: Specify which part of the documentation needs improvement or addition.
+      placeholder: "e.g., Installation Guide, API Reference..."
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Documentation improvement description
+      description: Describe the specific improvements or additions you suggest.
+      placeholder: "Explain what changes you propose and why..."
+
+  - type: input
+    id: reason
+    attributes:
+      label: Why is this change necessary?
+      description: Explain why the documentation needs to be updated or expanded.
+      placeholder: "Describe the issue or gap in the documentation..."
+
+  - type: input
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context, such as related documentation, external resources, or screenshots.
+      placeholder: "Add any other supporting information..."
