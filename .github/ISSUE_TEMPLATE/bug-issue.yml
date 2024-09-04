@@ -1,0 +1,85 @@
+name: Bug report
+description: Report a bug or an issue that isn't working as expected.
+title: "[BUG]: <Provide a clear, descriptive title>"
+labels: ["bug"]
+assignees: ""
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the following information to help us resolve the issue.
+
+  - type: input
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "Describe the bug in detail..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Steps to reproduce the behavior:
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+      placeholder: "List the steps to reproduce the bug..."
+    validations:
+      required: true
+
+  - type: input
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+      placeholder: "What was the expected result?"
+    validations:
+      required: true
+
+  - type: input
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened instead.
+      placeholder: "What happened instead?"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Specify the environment where the bug occurred.
+      options:
+        - label: Production
+          value: production
+        - label: Development
+          value: development
+        - label: Staging
+          value: staging
+      validations:
+        required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Version of the application where the bug occurred.
+      placeholder: "e.g., 1.0.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+      placeholder: "Any additional information..."
+    validations:
+      required: false
