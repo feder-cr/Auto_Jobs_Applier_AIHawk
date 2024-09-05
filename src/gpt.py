@@ -2,20 +2,21 @@ import json
 import os
 import re
 import textwrap
+import time
 from datetime import datetime
-from typing import Dict, List
+from functools import wraps
 from pathlib import Path
+from typing import Dict, List
+
+import httpx
+from Levenshtein import distance
 from dotenv import load_dotenv
+from httpx import HTTPStatusError
 from langchain_core.messages.ai import AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from Levenshtein import distance
-import time
-from functools import wraps
-from openai import RateLimitError, OpenAIError, APIError
-
 
 import src.strings as strings
 from src.utils import logger
@@ -42,156 +43,209 @@ def global_rate_limiter(min_interval):
 
     return decorator
 
-def parse_wait_time_from_error_message(error_message: str) -> int:
-    logger.debug("Parsing wait time from error message: %s", error_message)
-    match = re.search(r"Please try again in (\d+)([smhd])", error_message)
-    if match:
-        value, unit = int(match.group(1)), match.group(2)
-        logger.debug("Extracted wait time: %d %s", value, unit)
-        if unit == 's':
-            return value
-        elif unit == 'm':
-            return value * 60
-        elif unit == 'h':
-            return value * 3600
-        elif unit == 'd':
-            return value * 86400
-    logger.debug("Default wait time applied: 30 seconds")
-    return 30
-
 
 class LLMLogger:
     
     def __init__(self, llm: ChatOpenAI):
+        logger.debug("Initializing LLMLogger with LLM: %s", llm)
         self.llm = llm
-        logger.debug("LLMLogger initialized with LLM: %s", llm)
+        logger.debug("LLMLogger successfully initialized with LLM: %s", llm)
 
     @staticmethod
     def log_request(prompts, parsed_reply: Dict[str, Dict]):
-        logger.debug("Logging request with prompts: %s", prompts)
-        calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
+        logger.debug("Starting log_request method")
+        logger.debug("Prompts received: %s", prompts)
+        logger.debug("Parsed reply received: %s", parsed_reply)
 
+        # Определяем путь к файлу для записи логов
+        try:
+            calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
+            logger.debug("Logging path determined: %s", calls_log)
+        except Exception as e:
+            logger.error("Error determining the log path: %s", str(e))
+            raise
+
+        # Преобразование prompts в текст или словарь
         if isinstance(prompts, StringPromptValue):
+            logger.debug("Prompts are of type StringPromptValue")
             prompts = prompts.text
+            logger.debug("Prompts converted to text: %s", prompts)
         elif isinstance(prompts, Dict):
-            # Convert prompts to a dictionary if they are not in the expected format
-            prompts = {
-                f"prompt_{i+1}": prompt.content
-                for i, prompt in enumerate(prompts.messages)
-            }
+            logger.debug("Prompts are of type Dict")
+            try:
+                prompts = {
+                    f"prompt_{i+1}": prompt.content
+                    for i, prompt in enumerate(prompts.messages)
+                }
+                logger.debug("Prompts converted to dictionary: %s", prompts)
+            except Exception as e:
+                logger.error("Error converting prompts to dictionary: %s", str(e))
+                raise
         else:
-            prompts = {
-                f"prompt_{i+1}": prompt.content
-                for i, prompt in enumerate(prompts.messages)
+            logger.debug("Prompts are of unknown type, attempting default conversion")
+            try:
+                prompts = {
+                    f"prompt_{i+1}": prompt.content
+                    for i, prompt in enumerate(prompts.messages)
+                }
+                logger.debug("Prompts converted to dictionary using default method: %s", prompts)
+            except Exception as e:
+                logger.error("Error converting prompts using default method: %s", str(e))
+                raise
+
+        # Получение текущего времени
+        try:
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.debug("Current time obtained: %s", current_time)
+        except Exception as e:
+            logger.error("Error obtaining current time: %s", str(e))
+            raise
+
+        # Извлечение информации о токенах
+        try:
+            token_usage = parsed_reply["usage_metadata"]
+            output_tokens = token_usage["output_tokens"]
+            input_tokens = token_usage["input_tokens"]
+            total_tokens = token_usage["total_tokens"]
+            logger.debug("Token usage - Input: %d, Output: %d, Total: %d", input_tokens, output_tokens, total_tokens)
+        except KeyError as e:
+            logger.error("KeyError in parsed_reply structure: %s", str(e))
+            raise
+
+        # Извлечение имени модели
+        try:
+            model_name = parsed_reply["response_metadata"]["model_name"]
+            logger.debug("Model name: %s", model_name)
+        except KeyError as e:
+            logger.error("KeyError in response_metadata: %s", str(e))
+            raise
+
+        # Вычисление стоимости использования API
+        try:
+            prompt_price_per_token = 0.00000015
+            completion_price_per_token = 0.0000006
+            total_cost = (input_tokens * prompt_price_per_token) + (output_tokens * completion_price_per_token)
+            logger.debug("Total cost calculated: %f", total_cost)
+        except Exception as e:
+            logger.error("Error calculating total cost: %s", str(e))
+            raise
+
+        # Формирование записи лога
+        try:
+            log_entry = {
+                "model": model_name,
+                "time": current_time,
+                "prompts": prompts,
+                "replies": parsed_reply["content"],  # Контент ответа
+                "total_tokens": total_tokens,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_cost": total_cost,
             }
+            logger.debug("Log entry created: %s", log_entry)
+        except KeyError as e:
+            logger.error("Error creating log entry: missing key %s in parsed_reply", str(e))
+            raise
 
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        logger.debug("Current time: %s", current_time)
-
-        # Extract token usage details from the response
-        token_usage = parsed_reply["usage_metadata"]
-        output_tokens = token_usage["output_tokens"]
-        input_tokens = token_usage["input_tokens"]
-        total_tokens = token_usage["total_tokens"]
-
-        logger.debug("Token usage - Input: %d, Output: %d, Total: %d", input_tokens, output_tokens, total_tokens)
-
-        model_name = parsed_reply["response_metadata"]["model_name"]
-        prompt_price_per_token = 0.00000015
-        completion_price_per_token = 0.0000006
-
-        # Calculate the total cost of the API call
-        total_cost = (input_tokens * prompt_price_per_token) + (
-            output_tokens * completion_price_per_token
-        )
-
-        logger.debug("Total cost calculated: %f", total_cost)
-
-        log_entry = {
-            "model": model_name,
-            "time": current_time,
-            "prompts": prompts,
-            "replies": parsed_reply["content"],  # Response content
-            "total_tokens": total_tokens,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "total_cost": total_cost,
-        }
-
-        logger.debug("Log entry created: %s", log_entry)
-
-        with open(calls_log, "a", encoding="utf-8") as f:
-            json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
-            f.write(json_string + "\n")
-            logger.debug("Log entry written to file: %s", calls_log)
+        # Запись в файл
+        try:
+            with open(calls_log, "a", encoding="utf-8") as f:
+                json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
+                f.write(json_string + "\n")
+                logger.debug("Log entry written to file: %s", calls_log)
+        except Exception as e:
+            logger.error("Error writing log entry to file: %s", str(e))
+            raise
 
 
 class LoggerChatModel:
-
     def __init__(self, llm: ChatOpenAI):
+        logger.debug("Initializing LoggerChatModel with LLM: %s", llm)
         self.llm = llm
-        logger.debug("LoggerChatModel initialized with LLM: %s", llm)
+        logger.debug("LoggerChatModel successfully initialized with LLM: %s", llm)
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
-        logger.debug("Calling LoggerChatModel with messages: %s", messages)
-        while True:
+        logger.debug("Entering __call__ method with messages: %s", messages)
+        while True:  # Бесконечный цикл до успешного выполнения
             try:
-                # Попытка вызвать модель
-                reply = self.llm(messages)
-                logger.debug("Model reply received: %s", reply)
+                logger.debug("Attempting to call the LLM with messages")
+                reply = self.llm(messages)  # Вызов LLM
+                logger.debug("LLM response received: %s", reply)
+
                 parsed_reply = self.parse_llmresult(reply)
+                logger.debug("Parsed LLM reply: %s", parsed_reply)
+
+                # Логируем запрос и ответ
                 LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
-                return reply
-            except RateLimitError as err:
-                # Handle RateLimitError
-                wait_time = self.parse_wait_time_from_error_message(str(err))
-                logger.warning("Rate limit exceeded. Waiting for %d seconds before retrying...", wait_time)
-                time.sleep(wait_time)
+                logger.debug("Request successfully logged")
+
+                return reply  # Возвращаем корректный ответ, завершаем цикл
+
+            except httpx.HTTPStatusError as e:
+                logger.error("HTTPStatusError encountered: %s", str(e))
+                if e.response.status_code == 429:
+                    retry_after = e.response.headers.get('retry-after')
+                    retry_after_ms = e.response.headers.get('retry-after-ms')
+
+                    if retry_after:
+                        wait_time = int(retry_after)
+                        logger.warning("Rate limit exceeded. Waiting for %d seconds before retrying (extracted from 'retry-after' header)...", wait_time)
+                        time.sleep(wait_time)
+                    elif retry_after_ms:
+                        wait_time = int(retry_after_ms) / 1000.0
+                        logger.warning("Rate limit exceeded. Waiting for %f seconds before retrying (extracted from 'retry-after-ms' header)...", wait_time)
+                        time.sleep(wait_time)
+                    else:
+                        wait_time = 30  # Время ожидания по умолчанию
+                        logger.warning("'retry-after' header not found. Waiting for %d seconds before retrying (default)...", wait_time)
+                        time.sleep(wait_time)
+                else:
+                    logger.error("HTTP error occurred with status code: %d, waiting 30 seconds before retrying", e.response.status_code)
+                    time.sleep(30)
+
             except Exception as e:
                 logger.error("Unexpected error occurred: %s", str(e))
-                raise
+                logger.info("Waiting for 30 seconds before retrying due to an unexpected error.")
+                time.sleep(30)
+                continue  # Продолжаем цикл
 
     def parse_llmresult(self, llmresult: AIMessage) -> Dict[str, Dict]:
         logger.debug("Parsing LLM result: %s", llmresult)
-        content = llmresult.content
-        response_metadata = llmresult.response_metadata
-        id_ = llmresult.id
-        usage_metadata = llmresult.usage_metadata
-        parsed_result = {
-            "content": content,
-            "response_metadata": {
-                "model_name": response_metadata.get("model_name", ""),
-                "system_fingerprint": response_metadata.get("system_fingerprint", ""),
-                "finish_reason": response_metadata.get("finish_reason", ""),
-                "logprobs": response_metadata.get("logprobs", None),
-            },
-            "id": id_,
-            "usage_metadata": {
-                "input_tokens": usage_metadata.get("input_tokens", 0),
-                "output_tokens": usage_metadata.get("output_tokens", 0),
-                "total_tokens": usage_metadata.get("total_tokens", 0),
-            },
-        }
-        logger.debug("Parsed LLM result: %s", parsed_result)
-        return parsed_result
 
-    def parse_wait_time_from_error_message(self, error_message: str) -> int:
-        logger.debug("Parsing wait time from error message: %s", error_message)
-        match = re.search(r"Please try again in (\d+)([smhd])", error_message)
-        if match:
-            value, unit = match.groups()
-            value = int(value)
-            logger.debug("Extracted wait time: %d %s", value, unit)
-            if unit == "s":
-                return value
-            elif unit == "m":
-                return value * 60
-            elif unit == "h":
-                return value * 3600
-            elif unit == "d":
-                return value * 86400
-        logger.debug("Default wait time applied: 30 seconds")
-        return 30
+        # Извлечение данных из ответа
+        try:
+            content = llmresult.content
+            response_metadata = llmresult.response_metadata
+            id_ = llmresult.id
+            usage_metadata = llmresult.usage_metadata
+
+            parsed_result = {
+                "content": content,
+                "response_metadata": {
+                    "model_name": response_metadata.get("model_name", ""),
+                    "system_fingerprint": response_metadata.get("system_fingerprint", ""),
+                    "finish_reason": response_metadata.get("finish_reason", ""),
+                    "logprobs": response_metadata.get("logprobs", None),
+                },
+                "id": id_,
+                "usage_metadata": {
+                    "input_tokens": usage_metadata.get("input_tokens", 0),
+                    "output_tokens": usage_metadata.get("output_tokens", 0),
+                    "total_tokens": usage_metadata.get("total_tokens", 0),
+                },
+            }
+
+            logger.debug("Parsed LLM result successfully: %s", parsed_result)
+            return parsed_result
+
+        except KeyError as e:
+            logger.error("KeyError while parsing LLM result: missing key %s", str(e))
+            raise  # Повторно выбрасываем исключение, чтобы оно обрабатывалось выше
+
+        except Exception as e:
+            logger.error("Unexpected error while parsing LLM result: %s", str(e))
+            raise
+
 
 
 class GPTAnswerer:
@@ -239,7 +293,7 @@ class GPTAnswerer:
         logger.debug("Setting job application profile: %s", job_application_profile)
         self.job_application_profile = job_application_profile
 
-    @global_rate_limiter(25)
+    #@global_rate_limiter(25)
     def summarize_job_description(self, text: str) -> str:
         logger.debug("Summarizing job description: %s", text)
         strings.summarize_prompt_template = self._preprocess_template_string(
@@ -256,7 +310,7 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
 
-    @global_rate_limiter(25)
+    #@global_rate_limiter(25)
     def answer_question_textual_wide_range(self, question: str) -> str:
         logger.debug("Answering textual question: %s", question)
         chains = {
@@ -384,7 +438,7 @@ class GPTAnswerer:
         logger.debug("Question answered: %s", output)
         return output
 
-    @global_rate_limiter(25)
+    #@global_rate_limiter(25)
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
         logger.debug("Answering numeric question: %s", question)
         func_template = self._preprocess_template_string(strings.numeric_question_template)
@@ -410,7 +464,7 @@ class GPTAnswerer:
             logger.error("No numbers found in the string")
             raise ValueError("No numbers found in the string")
 
-    @global_rate_limiter(25)
+    #@global_rate_limiter(25)
     def answer_question_from_options(self, question: str, options: list[str]) -> str:
         logger.debug("Answering question from options: %s", question)
         func_template = self._preprocess_template_string(strings.options_template)
@@ -422,11 +476,11 @@ class GPTAnswerer:
         logger.debug("Best option determined: %s", best_option)
         return best_option
 
-    @global_rate_limiter(25)
+    #@global_rate_limiter(25)
     def resume_or_cover(self, phrase: str) -> str:
         logger.debug("Determining if phrase refers to resume or cover letter: %s", phrase)
         prompt_template = """
-        Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter. Do not provide any additional information or explanations.
+        Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter. If the phrase contains only the word 'upload', consider it as 'cover'. Do not provide any additional information or explanations.
         
         phrase: {phrase}
         """

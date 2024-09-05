@@ -8,6 +8,9 @@ import time
 import traceback
 from datetime import date
 from typing import List, Optional, Any, Tuple
+
+from httpx import HTTPStatusError
+from openai import RateLimitError
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -57,54 +60,131 @@ class LinkedInEasyApplier:
 
     def job_apply(self, job: Any):
         logger.debug("Starting job application for job: %s", job)
-        self.driver.get(job.link)
-        time.sleep(random.uniform(3, 5))
+
+        # Открываем страницу с вакансией
         try:
+            self.driver.get(job.link)
+            logger.debug("Navigated to job link: %s", job.link)
+        except Exception as e:
+            logger.error("Failed to navigate to job link: %s, error: %s", job.link, str(e))
+            raise
+
+        # Добавляем небольшую паузу для загрузки страницы
+        time.sleep(random.uniform(3, 5))
+
+        try:
+            # Поиск кнопки 'Easy Apply'
+            logger.debug("Searching for 'Easy Apply' button on job page")
             easy_apply_button = self._find_easy_apply_button()
-            job.set_job_description(self._get_job_description())
-            job.set_recruiter_link(self._get_job_recruiter())
+
+            # Получаем описание вакансии
+            logger.debug("Retrieving job description")
+            job_description = self._get_job_description()
+            job.set_job_description(job_description)
+            logger.debug("Job description set: %s", job_description[:100])  # Логируем только первые 100 символов
+
+            # Получаем ссылку на рекрутера (если есть)
+            logger.debug("Retrieving recruiter link")
+            recruiter_link = self._get_job_recruiter()
+            job.set_recruiter_link(recruiter_link)
+            logger.debug("Recruiter link set: %s", recruiter_link)
+
+            # Действие: нажимаем на кнопку 'Easy Apply'
+            logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
+            logger.debug("'Easy Apply' button clicked successfully")
+
+            # Передача информации о работе для дальнейшей обработки
+            logger.debug("Passing job information to GPT Answerer")
             self.gpt_answerer.set_job(job)
+
+            # Заполнение формы подачи заявки
+            logger.debug("Filling out application form")
             self._fill_application_form(job)
-            logger.debug("Job application process completed for job: %s", job)
-        except Exception:
+            logger.debug("Job application process completed successfully for job: %s", job)
+
+        except Exception as e:
+            # Захват и логирование полного traceback в случае ошибки
             tb_str = traceback.format_exc()
-            logger.error("Failed to apply to job: %s", tb_str)
+            logger.error("Failed to apply to job: %s. Error traceback: %s", job, tb_str)
+
+            # Отмена заявки в случае ошибки
+            logger.debug("Discarding application due to failure")
             self._discard_application()
-            raise Exception(f"Failed to apply to job! Original exception: \nTraceback:\n{tb_str}")
+
+            # Поднятие исключения с оригинальной ошибкой
+            raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
     def _find_easy_apply_button(self) -> WebElement:
         logger.debug("Searching for 'Easy Apply' button")
         attempt = 0
+
+        # Список методов поиска кнопки
+        search_methods = [
+            {
+                'description': "find all 'Easy Apply' buttons using find_elements",
+                'find_elements': True,  # Используем find_elements для поиска всех кнопок
+                'xpath': '//button[contains(@class, "jobs-apply-button") and contains(., "Easy Apply")]'
+            },
+            {
+                'description': "'aria-label' containing 'Easy Apply to'",
+                'xpath': '//button[contains(@aria-label, "Easy Apply to")]'
+            },
+            {
+                'description': "button text search",
+                'xpath': '//button[contains(text(), "Easy Apply") or contains(text(), "Apply now")]'
+            }
+        ]
+
         while attempt < 2:
             self._scroll_page()
-            try:
-                buttons = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_all_elements_located(
-                        (By.XPATH, '//button[contains(@class, "jobs-apply-button") and contains(., "Easy Apply")]')
-                    )
-                )
-                for index, _ in enumerate(buttons):
-                    try:
-                        button = WebDriverWait(self.driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, f'(//button[contains(@class, "jobs-apply-button") and contains(., "Easy Apply")])[{index + 1}]')
-                            )
-                        )
-                        logger.debug("Found and clicking 'Easy Apply' button")
-                        return button
-                    except Exception as e:
-                        logger.warning("Failed to click 'Easy Apply' button on attempt %d: %s", attempt + 1, e)
-            except TimeoutException:
-                logger.warning("Timeout while searching for 'Easy Apply' button")
 
+            for method in search_methods:
+                try:
+                    logger.debug(f"Attempting search using {method['description']}")
+
+                    # Если метод использует find_elements
+                    if method.get('find_elements'):
+                        # Поиск всех кнопок "Easy Apply"
+                        buttons = self.driver.find_elements(By.XPATH, method['xpath'])
+                        if buttons:
+                            for index, button in enumerate(buttons):
+                                try:
+                                    # Проверка видимости и кликабельности каждой кнопки
+                                    WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
+                                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
+                                    logger.debug(f"Found 'Easy Apply' button {index + 1}, attempting to click")
+                                    return button
+                                except Exception as e:
+                                    logger.warning(f"Button {index + 1} found but not clickable: {e}")
+                        else:
+                            raise TimeoutException("No 'Easy Apply' buttons found")
+                    else:
+                        # Стандартный метод с WebDriverWait для одного элемента
+                        button = WebDriverWait(self.driver, 10).until(
+                            EC.presence_of_element_located((By.XPATH, method['xpath']))
+                        )
+                        WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
+                        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
+                        logger.debug("Found 'Easy Apply' button, attempting to click")
+                        return button
+
+                except TimeoutException:
+                    logger.warning(f"Timeout during search using {method['description']}")
+                except Exception as e:
+                    logger.warning(f"Failed to click 'Easy Apply' button using {method['description']} on attempt {attempt + 1}: {e}")
+
+            # Обновление страницы после первой неудачной попытки
             if attempt == 0:
                 logger.debug("Refreshing page to retry finding 'Easy Apply' button")
                 self.driver.refresh()
                 time.sleep(random.randint(3, 5))
             attempt += 1
-        logger.error("No clickable 'Easy Apply' button found after 2 attempts")
+
+        # Если не удалось найти кнопку, выводим HTML для отладки
+        page_source = self.driver.page_source
+        logger.error("No clickable 'Easy Apply' button found after 2 attempts. Page source:\n%s", page_source)
         raise Exception("No clickable 'Easy Apply' button found")
 
     def _get_job_description(self) -> str:
@@ -136,10 +216,18 @@ class LinkedInEasyApplier:
             hiring_team_section = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//h2[text()="Meet the hiring team"]'))
             )
-            recruiter_element = hiring_team_section.find_element(By.XPATH, './/following::a[contains(@href, "linkedin.com/in/")]')
-            recruiter_link = recruiter_element.get_attribute('href')
-            logger.debug("Job recruiter link retrieved successfully")
-            return recruiter_link
+            logger.debug("Hiring team section found")
+
+            recruiter_elements = hiring_team_section.find_elements(By.XPATH, './/following::a[contains(@href, "linkedin.com/in/")]')
+
+            if recruiter_elements:
+                recruiter_element = recruiter_elements[0]
+                recruiter_link = recruiter_element.get_attribute('href')
+                logger.debug("Job recruiter link retrieved successfully: %s", recruiter_link)
+                return recruiter_link
+            else:
+                logger.debug("No recruiter link found in the hiring team section")
+                return ""
         except Exception as e:
             logger.warning("Failed to retrieve recruiter information: %s", e)
             return ""
@@ -202,11 +290,19 @@ class LinkedInEasyApplier:
 
     def fill_up(self, job) -> None:
         logger.debug("Filling up form sections for job: %s", job)
-        easy_apply_content = self.driver.find_element(By.CLASS_NAME, 'jobs-easy-apply-content')
-        pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
-        for element in pb4_elements:
-            self._process_form_element(element, job)
-        
+
+        # Используем WebDriverWait для ожидания элемента с классом 'jobs-easy-apply-content'
+        try:
+            easy_apply_content = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-content'))
+            )
+
+            # После нахождения 'jobs-easy-apply-content' ищем элементы с классом 'pb4'
+            pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
+            for element in pb4_elements:
+                self._process_form_element(element, job)
+        except Exception as e:
+            logger.error(f"Failed to find form elements: {e}")
     def _process_form_element(self, element: WebElement, job) -> None:
         logger.debug("Processing form element")
         if self._is_upload_field(element):
@@ -221,40 +317,114 @@ class LinkedInEasyApplier:
 
     def _handle_upload_fields(self, element: WebElement, job) -> None:
         logger.debug("Handling upload fields")
+
+        try:
+            show_more_button = self.driver.find_element(By.XPATH, "//button[contains(@aria-label, 'Show more resumes')]")
+            show_more_button.click()
+            logger.debug("Clicked 'Show more resumes' button")
+        except NoSuchElementException:
+            logger.debug("'Show more resumes' button not found, continuing...")
+
         file_upload_elements = self.driver.find_elements(By.XPATH, "//input[@type='file']")
         for element in file_upload_elements:
             parent = element.find_element(By.XPATH, "..")
             self.driver.execute_script("arguments[0].classList.remove('hidden')", element)
+
             output = self.gpt_answerer.resume_or_cover(parent.text.lower())
             if 'resume' in output:
                 logger.debug("Uploading resume")
                 if self.resume_path is not None and self.resume_path.resolve().is_file():
                     element.send_keys(str(self.resume_path.resolve()))
+                    logger.debug(f"Resume uploaded from path: {self.resume_path.resolve()}")
                 else:
+                    logger.debug("Resume path not found or invalid, generating new resume")
                     self._create_and_upload_resume(element, job)
             elif 'cover' in output:
                 logger.debug("Uploading cover letter")
                 self._create_and_upload_cover_letter(element)
 
+        logger.debug("Finished handling upload fields")
+
     def _create_and_upload_resume(self, element, job):
-        logger.debug("Creating and uploading resume")
-        folder_path = 'generated_cv'
-        os.makedirs(folder_path, exist_ok=True)
-        try:
-            timestamp = int(time.time())
-            file_path_pdf = os.path.join(folder_path, f"CV_{timestamp}.pdf")
+            logger.debug("Starting the process of creating and uploading resume.")
+            folder_path = 'generated_cv'
 
-            with open(file_path_pdf, "xb") as f: # gjcvjn
-                f.write(base64.b64decode(self.resume_generator_manager.pdf_base64(job_description_text=job.description)))
+            try:
+                if not os.path.exists(folder_path):
+                    logger.debug(f"Creating directory at path: {folder_path}")
+                os.makedirs(folder_path, exist_ok=True)
+            except Exception as e:
+                logger.error(f"Failed to create directory: {folder_path}. Error: {e}")
+                raise
 
-            element.send_keys(os.path.abspath(file_path_pdf))
-            job.pdf_path = os.path.abspath(file_path_pdf)
-            time.sleep(2)
-            logger.debug("Resume created and uploaded successfully: %s", file_path_pdf)
-        except Exception:
-            tb_str = traceback.format_exc()
-            logger.error("Resume upload failed: %s", tb_str)
-            raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
+            while True:
+                try:
+                    timestamp = int(time.time())
+                    file_path_pdf = os.path.join(folder_path, f"CV_{timestamp}.pdf")
+                    logger.debug(f"Generated file path for resume: {file_path_pdf}")
+
+                    logger.debug(f"Generating resume for job: {job.title} at {job.company}")
+                    resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
+                    with open(file_path_pdf, "xb") as f:
+                        f.write(base64.b64decode(resume_pdf_base64))
+                    logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
+
+                    break
+                except HTTPStatusError as e:
+                    if e.response.status_code == 429:
+
+                        retry_after = e.response.headers.get('retry-after')
+                        retry_after_ms = e.response.headers.get('retry-after-ms')
+
+                        if retry_after:
+                            wait_time = int(retry_after)
+                            logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
+                        elif retry_after_ms:
+                            wait_time = int(retry_after_ms) / 1000.0
+                            logger.warning(f"Rate limit exceeded, waiting {wait_time} milliseconds before retrying...")
+                        else:
+                            wait_time = 20
+                            logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
+
+                        time.sleep(wait_time)
+                    else:
+                        logger.error(f"HTTP error: {e}")
+                        raise
+
+                except Exception as e:
+                    logger.error(f"Failed to generate resume: {e}")
+                    tb_str = traceback.format_exc()
+                    logger.error(f"Traceback: {tb_str}")
+                    if "RateLimitError" in str(e):
+                        logger.warning("Rate limit error encountered, retrying...")
+                        time.sleep(20)
+                    else:
+                        raise
+
+            file_size = os.path.getsize(file_path_pdf)
+            max_file_size = 2 * 1024 * 1024  # 2 MB
+            logger.debug(f"Resume file size: {file_size} bytes")
+            if file_size > max_file_size:
+                logger.error(f"Resume file size exceeds 2 MB: {file_size} bytes")
+                raise ValueError("Resume file size exceeds the maximum limit of 2 MB.")
+
+            allowed_extensions = {'.pdf', '.doc', '.docx'}
+            file_extension = os.path.splitext(file_path_pdf)[1].lower()
+            logger.debug(f"Resume file extension: {file_extension}")
+            if file_extension not in allowed_extensions:
+                logger.error(f"Invalid resume file format: {file_extension}")
+                raise ValueError("Resume file format is not allowed. Only PDF, DOC, and DOCX formats are supported.")
+
+            try:
+                logger.debug(f"Uploading resume from path: {file_path_pdf}")
+                element.send_keys(os.path.abspath(file_path_pdf))
+                job.pdf_path = os.path.abspath(file_path_pdf)
+                time.sleep(2)
+                logger.debug(f"Resume created and uploaded successfully: {file_path_pdf}")
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                logger.error(f"Resume upload failed: {tb_str}")
+                raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
 
     def _create_and_upload_cover_letter(self, element: WebElement) -> None:
         logger.debug("Creating and uploading cover letter")
@@ -329,30 +499,56 @@ class LinkedInEasyApplier:
         return False
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
+        logger.debug("Searching for text fields in the section.")
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
+
         if text_fields:
             text_field = text_fields[0]
             question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
+            logger.debug(f"Found text field with label: {question_text}")
+
             is_numeric = self._is_numeric_field(text_field)
+            logger.debug(f"Is the field numeric? {'Yes' if is_numeric else 'No'}")
+
             if is_numeric:
                 question_type = 'numeric'
                 answer = self.gpt_answerer.answer_question_numeric(question_text)
+                logger.debug(f"Generated numeric answer: {answer}")
             else:
                 question_type = 'textbox'
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                logger.debug(f"Generated textual answer: {answer}")
+
             existing_answer = None
             for item in self.all_data:
                 if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
                     existing_answer = item
+                    logger.debug(f"Found existing answer in the data: {existing_answer['answer']}")
                     break
+
             if existing_answer:
                 self._enter_text(text_field, existing_answer['answer'])
-                logger.debug("Entered existing textbox answer")
+                logger.debug("Entered existing textbox answer.")
+
+                # Нажать "Вниз" и "Enter" для выбора первого элемента в выпадающем списке
+                time.sleep(1)  # Ожидание появления выпадающего списка
+                text_field.send_keys(Keys.ARROW_DOWN)
+                text_field.send_keys(Keys.ENTER)
+                logger.debug("Selected first option from the dropdown.")
                 return True
+
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
-            logger.debug("Entered new textbox answer")
+            logger.debug("Entered new textbox answer and saved it to JSON.")
+
+            # Нажать "Вниз" и "Enter" для выбора первого элемента в выпадающем списке
+            time.sleep(1)  # Ожидание появления выпадающего списка
+            text_field.send_keys(Keys.ARROW_DOWN)
+            text_field.send_keys(Keys.ENTER)
+            logger.debug("Selected first option from the dropdown.")
             return True
+
+        logger.debug("No text fields found in the section.")
         return False
 
     def _find_and_handle_date_question(self, section: WebElement) -> bool:
@@ -384,16 +580,20 @@ class LinkedInEasyApplier:
         try:
             question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
             question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
-            dropdown = question.find_element(By.TAG_NAME, 'select')
-            if dropdown:
+            logger.debug(f"Processing dropdown or combobox question: {question_text}")
+
+            try:
+                dropdown = question.find_element(By.TAG_NAME, 'select')
                 select = Select(dropdown)
                 options = [option.text for option in select.options]
+                logger.debug(f"Dropdown options found: {options}")
 
                 existing_answer = None
                 for item in self.all_data:
                     if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item
                         break
+
                 if existing_answer:
                     self._select_dropdown_option(dropdown, existing_answer['answer'])
                     logger.debug("Selected existing dropdown answer")
@@ -404,14 +604,37 @@ class LinkedInEasyApplier:
                 self._select_dropdown_option(dropdown, answer)
                 logger.debug("Selected new dropdown answer")
                 return True
+
+            except NoSuchElementException:
+                combobox = question.find_element(By.TAG_NAME, 'input')
+                logger.debug(f"Found combobox with ID: {combobox.get_attribute('id')}")
+
+                existing_answer = None
+                for item in self.all_data:
+                    if self._sanitize_text(question_text) in item['question'] and item['type'] == 'combobox':
+                        existing_answer = item
+                        break
+
+                if existing_answer:
+                    self._enter_text(combobox, existing_answer['answer'])
+                    logger.debug("Entered existing combobox answer")
+                    return True
+
+                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                self._save_questions_to_json({'type': 'combobox', 'question': question_text, 'answer': answer})
+                self._enter_text(combobox, answer)
+                logger.debug("Entered new combobox answer")
+                return True
+
         except Exception as e:
-            logger.warning("Failed to handle dropdown question: %s", e)
+            logger.warning("Failed to handle dropdown or combobox question: %s", e)
             return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
         field_type = field.get_attribute('type').lower()
-        is_numeric = 'numeric' in field_type or ('id' in field.get_attribute("id") and 'numeric' in field.get_attribute("id"))
-        logger.debug("Field is numeric: %s", is_numeric)
+        field_id = field.get_attribute("id").lower()
+        is_numeric = 'numeric' in field_id or field_type == 'number' or ('text' == field_type and 'numeric' in field_id)
+        logger.debug("Field type: %s, Field ID: %s, Is numeric: %s", field_type, field_id, is_numeric)
         return is_numeric
 
     def _enter_text(self, element: WebElement, text: str) -> None:

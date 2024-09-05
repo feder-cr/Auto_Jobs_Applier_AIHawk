@@ -85,12 +85,24 @@ class LinkedInJobManager:
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the application process for this page...")
+
+                    # Проверка на наличие вакансий на странице
+                    try:
+                        jobs = self.get_jobs_from_page()
+                        if not jobs:
+                            utils.printyellow("No more jobs found on this page. Exiting loop.")
+                            break
+                    except Exception as e:
+                        logger.error(f"Failed to retrieve jobs: {e}")
+                        break  # Выходим из цикла, если не удалось получить вакансии
+
                     try:
                         self.apply_jobs()
                     except Exception as e:
                         logger.error("Error during job application: %s", e)
                         utils.printred(f"Error during job application: {e}")
                         continue
+
                     utils.printyellow("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
@@ -121,6 +133,47 @@ class LinkedInJobManager:
                 logger.debug("Sleeping for %d seconds", sleep_time)
                 time.sleep(sleep_time)
                 page_sleep += 1
+
+
+    def get_jobs_from_page(self):
+        """
+        Функция для получения списка вакансий на текущей странице.
+        Если вакансии не найдены, возвращает пустой список.
+        """
+        try:
+            # Проверка на отсутствие вакансий
+            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
+            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
+                utils.printyellow("No matching jobs found on this page.")
+                logger.debug("No matching jobs found on this page, skipping.")
+                return []  # Возвращаем пустой список, если нет вакансий
+
+        except NoSuchElementException:
+            pass  # Если элемент не найден, продолжаем поиск вакансий
+
+        # Поиск контейнера результатов с вакансиями
+        try:
+            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            utils.scroll_slow(self.driver, job_results)
+            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+
+            # Поиск элементов списка вакансий
+            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+            if not job_list_elements:
+                utils.printyellow("No job class elements found on page.")
+                logger.debug("No job class elements found on page, skipping.")
+                return []
+
+            # Возвращаем список найденных вакансий
+            return job_list_elements
+
+        except NoSuchElementException:
+            logger.debug("No job results found on the page.")
+            return []  # Если не найден контейнер с результатами, возвращаем пустой список
+
+        except Exception as e:
+            logger.error(f"Error while fetching job elements: {e}")
+            return []
 
     def apply_jobs(self):
         try:

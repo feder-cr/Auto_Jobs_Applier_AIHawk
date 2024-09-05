@@ -25,7 +25,14 @@ class LinkedInAuthenticator:
         logger.info("Starting Chrome browser to log in to LinkedIn.")
         self.driver.get('https://www.linkedin.com/feed')
         self.wait_for_page_load()
-        if not self.is_logged_in():
+
+        time.sleep(3)
+
+        if self.is_logged_in():
+            logger.info("User is already logged in. Skipping login process.")
+            return
+        else:
+            logger.info("User is not logged in. Proceeding with login.")
             self.handle_login()
 
     def handle_login(self):
@@ -82,12 +89,12 @@ class LinkedInAuthenticator:
             print("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
-        target_url = 'https://www.linkedin.com/feed'
-
-        # Navigate to the target URL if not already there
-        if self.driver.current_url != target_url:
-            logger.debug("Navigating to target URL: %s", target_url)
-            self.driver.get(target_url)
+        # target_url = 'https://www.linkedin.com/feed'
+        #
+        # # Navigate to the target URL if not already there
+        # if self.driver.current_url != target_url:
+        #     logger.debug("Navigating to target URL: %s", target_url)
+        #     self.driver.get(target_url)
 
         try:
             # Increase the wait time for the page elements to load
@@ -98,37 +105,28 @@ class LinkedInAuthenticator:
 
             # Check for the presence of the "Start a post" button
             buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            if any(button.text.strip() == 'Start a post' for button in buttons):
-                logger.info("User is already logged in.")
+            logger.debug("Found %d 'Start a post' buttons", len(buttons))
 
-                try:
-                    # Wait for the profile picture and name to load
-                    profile_img = WebDriverWait(self.driver, 10).until(
-                        EC.presence_of_element_located((By.XPATH, "//img[contains(@alt, 'Photo of')]"))
-                    )
-                    profile_name = WebDriverWait(self.driver, 10).until(
-                        EC.presence_of_element_located((By.XPATH, "//div[@class='t-16 t-black t-bold']"))
-                    )
+            # Выведем текст всех найденных кнопок в лог для диагностики
+            for i, button in enumerate(buttons):
+                logger.debug("Button %d text: %s", i + 1, button.text.strip())
 
-                    if profile_img and profile_name:
-                        logger.info("Profile picture found for user: %s", profile_name.text)
-                        return True
-                except NoSuchElementException:
-                    logger.warning("Profile picture or name not found.")
-                    print("Profile picture or name not found.")
-                    return False
-                except TimeoutException:
-                    logger.warning("Profile picture or name took too long to load.")
-                    print("Profile picture or name took too long to load.")
-                    return False
+            if any(button.text.strip().lower() == 'start a post' for button in buttons):
+                logger.info("Found 'Start a post' button indicating user is logged in.")
+                return True
+
+            # Альтернативная проверка авторизации по наличию изображения профиля
+            profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
+            if profile_img_elements:
+                logger.info("Profile image found. Assuming user is logged in.")
+                return True
+
+            logger.info("Did not find 'Start a post' button or profile image. User might not be logged in.")
+            return False
 
         except TimeoutException:
             logger.error("Page elements took too long to load or were not found.")
-            print("Page elements took too long to load or were not found.")
             return False
-
-        return False
-
 
     def wait_for_page_load(self, timeout=10):
         try:

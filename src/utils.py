@@ -10,6 +10,11 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Отключаем логирование для selenium и urllib3
+logging.getLogger("selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
@@ -31,7 +36,7 @@ def is_scrollable(element):
     logger.debug("Element scrollable check: scrollHeight=%s, clientHeight=%s, scrollable=%s", scroll_height, client_height, scrollable)
     return scrollable
 
-def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse=False):
+def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
     logger.debug("Starting slow scroll: start=%d, end=%d, step=%d, reverse=%s", start, end, step, reverse)
     if reverse:
         start, end = end, start
@@ -39,6 +44,14 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=100, reverse
     if step == 0:
         logger.error("Step value cannot be zero.")
         raise ValueError("Step cannot be zero.")
+
+    max_scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
+    logger.debug("Max scroll height of the element: %d", max_scroll_height)
+
+    if end > max_scroll_height:
+        logger.warning("End value exceeds the scroll height. Adjusting end to %d", max_scroll_height)
+        end = max_scroll_height
+
     script_scroll_to = "arguments[0].scrollTop = arguments[1];"
     try:
         if scrollable_element.is_displayed():
