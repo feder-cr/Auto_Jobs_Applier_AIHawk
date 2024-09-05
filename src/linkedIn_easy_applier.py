@@ -18,6 +18,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver import ActionChains
 import src.utils as utils
+import shutil
+
 
 class LinkedInEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]], gpt_answerer: Any, resume_generator_manager):
@@ -193,17 +195,35 @@ class LinkedInEasyApplier:
 
     def _create_and_upload_resume(self, element, job):
         folder_path = 'generated_cv'
+        old_folder_path = 'old_resume'
+        
+        # Ensure the directories exist
         os.makedirs(folder_path, exist_ok=True)
+        os.makedirs(old_folder_path, exist_ok=True)
+        
         try:
-            file_path_pdf = os.path.join(folder_path, f"CV_{random.randint(0, 9999)}.pdf")
+            file_name = "Firstname_Lastname.pdf"
+            file_path_pdf = os.path.join(folder_path, file_name)
+            
+            # If the file already exists, move it to the old_resume directory with a random number
+            if os.path.exists(file_path_pdf):
+                random_number = random.randint(1, 10000)
+                new_file_name = f"Firstname_Lastname_{random_number:04d}.pdf"
+                new_file_path = os.path.join(old_folder_path, new_file_name)
+                shutil.move(file_path_pdf, new_file_path)
+            
+            # Create the new PDF file
             with open(file_path_pdf, "xb") as f:
                 f.write(base64.b64decode(self.resume_generator_manager.pdf_base64(job_description_text=job.description)))
+            
             element.send_keys(os.path.abspath(file_path_pdf))
             job.pdf_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
+        
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
+
 
     def _create_and_upload_cover_letter(self, element: WebElement) -> None:
         cover_letter = self.gpt_answerer.answer_question_textual_wide_range("Write a cover letter")
