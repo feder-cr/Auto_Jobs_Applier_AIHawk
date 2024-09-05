@@ -47,7 +47,7 @@ class LinkedInEvolvedAPI(Linkedin):
         industries: Optional[List[str]] = None,
         location_name: Optional[str] = None,
         remote: Optional[List[Union[Literal["1"], Literal["2"], Literal["3"]]]] = None,
-        listed_at=24 * 60 * 60,
+        listed_at: None | int = None,
         distance: Optional[int] = None,
         easy_apply: Optional[bool] = True,
         limit=-1,
@@ -72,8 +72,8 @@ class LinkedInEvolvedAPI(Linkedin):
         :type location_name: str, optional
         :param remote: Filter for remote jobs, onsite or hybrid. onsite:"1", remote:"2", hybrid:"3"
         :type remote: list, optional
-        :param listed_at: maximum number of seconds passed since job posting. 86400 will filter job postings posted in last 24 hours.
-        :type listed_at: int/str, optional. Default value is equal to 24 hours.
+        :param listed_at: maximum number of seconds passed since job posting. 86400 will filter job postings posted in last 24 hours, default is None
+        :type listed_at: int or none, if none, no filter applied, otherwise, filter applied in seconds
         :param distance: maximum distance from location in miles
         :type distance: int/str, optional. If not specified, None or 0, the default value of 25 miles applied.
         :param easy_apply: filter for jobs that are easy to apply to
@@ -115,7 +115,8 @@ class LinkedInEvolvedAPI(Linkedin):
         if easy_apply:
             query["selectedFilters"]["applyWithLinkedin"] = "List(true)"
 
-        query["selectedFilters"]["timePostedRange"] = f"List(r{listed_at})"
+        if listed_at:
+            query["selectedFilters"]["timePostedRange"] = f"List(r{listed_at})"
         query["spellCorrectionEnabled"] = "true"
 
         query_string = (
@@ -144,7 +145,6 @@ class LinkedInEvolvedAPI(Linkedin):
                 headers={"accept": "application/vnd.linkedin.normalized+json+2.1"},
             )
             data = res.json()
-
             elements = data.get("included", [])
             new_data = []
             for e in elements:
@@ -365,9 +365,12 @@ class LinkedInEvolvedAPI(Linkedin):
 ## EXAMPLE USAGE
 if __name__ == "__main__":
     api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")  
-    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=5, easy_apply=True, offset=1)
+    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=100, easy_apply=True, offset=1, listed_at=None)
     for job in jobs:
         job_id: str = job["job_id"]
+        print(f"Job ID: {job_id}")
+        continue
+
         if job_id in api.already_applied_jobs:
             logging.info(f"Already applied to job {job_id}, skipping it")
             continue
