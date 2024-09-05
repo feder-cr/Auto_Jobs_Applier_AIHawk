@@ -23,27 +23,6 @@ from src.utils import logger
 
 load_dotenv()
 
-# Global timestamp for rate limiting
-last_call_time = 0
-
-
-def global_rate_limiter(min_interval):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            global last_call_time
-            elapsed = time.time() - last_call_time
-            if elapsed < min_interval:
-                logger.debug("Rate limit hit, sleeping for %s seconds", min_interval - elapsed)
-                time.sleep(min_interval - elapsed)
-            last_call_time = time.time()
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
 class LLMLogger:
     
     def __init__(self, llm: ChatOpenAI):
@@ -57,7 +36,6 @@ class LLMLogger:
         logger.debug("Prompts received: %s", prompts)
         logger.debug("Parsed reply received: %s", parsed_reply)
 
-        # Определяем путь к файлу для записи логов
         try:
             calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
             logger.debug("Logging path determined: %s", calls_log)
@@ -65,7 +43,6 @@ class LLMLogger:
             logger.error("Error determining the log path: %s", str(e))
             raise
 
-        # Преобразование prompts в текст или словарь
         if isinstance(prompts, StringPromptValue):
             logger.debug("Prompts are of type StringPromptValue")
             prompts = prompts.text
@@ -93,7 +70,6 @@ class LLMLogger:
                 logger.error("Error converting prompts using default method: %s", str(e))
                 raise
 
-        # Получение текущего времени
         try:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             logger.debug("Current time obtained: %s", current_time)
@@ -101,7 +77,6 @@ class LLMLogger:
             logger.error("Error obtaining current time: %s", str(e))
             raise
 
-        # Извлечение информации о токенах
         try:
             token_usage = parsed_reply["usage_metadata"]
             output_tokens = token_usage["output_tokens"]
@@ -112,7 +87,6 @@ class LLMLogger:
             logger.error("KeyError in parsed_reply structure: %s", str(e))
             raise
 
-        # Извлечение имени модели
         try:
             model_name = parsed_reply["response_metadata"]["model_name"]
             logger.debug("Model name: %s", model_name)
@@ -120,7 +94,6 @@ class LLMLogger:
             logger.error("KeyError in response_metadata: %s", str(e))
             raise
 
-        # Вычисление стоимости использования API
         try:
             prompt_price_per_token = 0.00000015
             completion_price_per_token = 0.0000006
@@ -130,7 +103,6 @@ class LLMLogger:
             logger.error("Error calculating total cost: %s", str(e))
             raise
 
-        # Формирование записи лога
         try:
             log_entry = {
                 "model": model_name,
@@ -147,7 +119,6 @@ class LLMLogger:
             logger.error("Error creating log entry: missing key %s in parsed_reply", str(e))
             raise
 
-        # Запись в файл
         try:
             with open(calls_log, "a", encoding="utf-8") as f:
                 json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
@@ -166,7 +137,7 @@ class LoggerChatModel:
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
         logger.debug("Entering __call__ method with messages: %s", messages)
-        while True:  # Бесконечный цикл до успешного выполнения
+        while True:
             try:
                 logger.debug("Attempting to call the LLM with messages")
                 reply = self.llm(messages)  # Вызов LLM
@@ -175,11 +146,10 @@ class LoggerChatModel:
                 parsed_reply = self.parse_llmresult(reply)
                 logger.debug("Parsed LLM reply: %s", parsed_reply)
 
-                # Логируем запрос и ответ
                 LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
                 logger.debug("Request successfully logged")
 
-                return reply  # Возвращаем корректный ответ, завершаем цикл
+                return reply
 
             except httpx.HTTPStatusError as e:
                 logger.error("HTTPStatusError encountered: %s", str(e))
@@ -207,12 +177,11 @@ class LoggerChatModel:
                 logger.error("Unexpected error occurred: %s", str(e))
                 logger.info("Waiting for 30 seconds before retrying due to an unexpected error.")
                 time.sleep(30)
-                continue  # Продолжаем цикл
+                continue
 
     def parse_llmresult(self, llmresult: AIMessage) -> Dict[str, Dict]:
         logger.debug("Parsing LLM result: %s", llmresult)
 
-        # Извлечение данных из ответа
         try:
             content = llmresult.content
             response_metadata = llmresult.response_metadata
@@ -240,7 +209,7 @@ class LoggerChatModel:
 
         except KeyError as e:
             logger.error("KeyError while parsing LLM result: missing key %s", str(e))
-            raise  # Повторно выбрасываем исключение, чтобы оно обрабатывалось выше
+            raise
 
         except Exception as e:
             logger.error("Unexpected error while parsing LLM result: %s", str(e))
@@ -293,7 +262,6 @@ class GPTAnswerer:
         logger.debug("Setting job application profile: %s", job_application_profile)
         self.job_application_profile = job_application_profile
 
-    #@global_rate_limiter(25)
     def summarize_job_description(self, text: str) -> str:
         logger.debug("Summarizing job description: %s", text)
         strings.summarize_prompt_template = self._preprocess_template_string(
@@ -310,7 +278,6 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
 
-    #@global_rate_limiter(25)
     def answer_question_textual_wide_range(self, question: str) -> str:
         logger.debug("Answering textual question: %s", question)
         chains = {
@@ -438,7 +405,6 @@ class GPTAnswerer:
         logger.debug("Question answered: %s", output)
         return output
 
-    #@global_rate_limiter(25)
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
         logger.debug("Answering numeric question: %s", question)
         func_template = self._preprocess_template_string(strings.numeric_question_template)
@@ -464,7 +430,6 @@ class GPTAnswerer:
             logger.error("No numbers found in the string")
             raise ValueError("No numbers found in the string")
 
-    #@global_rate_limiter(25)
     def answer_question_from_options(self, question: str, options: list[str]) -> str:
         logger.debug("Answering question from options: %s", question)
         func_template = self._preprocess_template_string(strings.options_template)
@@ -476,7 +441,6 @@ class GPTAnswerer:
         logger.debug("Best option determined: %s", best_option)
         return best_option
 
-    #@global_rate_limiter(25)
     def resume_or_cover(self, phrase: str) -> str:
         logger.debug("Determining if phrase refers to resume or cover letter: %s", phrase)
         prompt_template = """
