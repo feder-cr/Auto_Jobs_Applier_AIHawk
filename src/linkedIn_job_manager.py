@@ -36,6 +36,7 @@ class LinkedInJobManager:
         self.title_blacklist = parameters.get('titleBlacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
+        self.apply_once_at_company = parameters.get('applyOnceAtCompany', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
         resume_path = parameters.get('uploads', {}).get('resume', None)
@@ -119,6 +120,12 @@ class LinkedInJobManager:
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                self.write_to_file(job, "skipped")
+                continue
+            if self.is_already_applied_to_job(job.title, job.company, job.link):
+                self.write_to_file(job, "skipped")
+                continue            
+            if self.is_already_applied_to_company(job.company):
                 self.write_to_file(job, "skipped")
                 continue
             try:
@@ -206,3 +213,28 @@ class LinkedInJobManager:
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
         return title_blacklisted or company_blacklisted or link_seen
+
+    def is_already_applied_to_job(self, job_title, company, link):
+        link_seen = link in self.seen_jobs
+        if link_seen:
+            utils.printyellow(f"Already applied to job: {job_title} at {company}, skipping...")
+        return link_seen
+
+    def is_already_applied_to_company(self, company):
+        if not self.apply_once_at_company:
+            return False  
+        
+        output_files = ["success.json"]
+        for file_name in output_files:
+            file_path = self.output_file_directory / file_name
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    try:
+                        existing_data = json.load(f)
+                        for applied_job in existing_data:
+                            if applied_job['company'].strip().lower() == company.strip().lower():
+                                utils.printyellow(f"Already applied at {company} (once per company policy), skipping...")
+                                return True
+                    except json.JSONDecodeError:
+                        continue
+        return False

@@ -26,9 +26,10 @@ date:
 positions:
   - Software Tester
 
-
 locations:
   - USA
+
+applyOnceAtCompany: [true/false]
 
 distance: 100
 
