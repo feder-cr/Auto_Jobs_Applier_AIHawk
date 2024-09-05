@@ -326,7 +326,11 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
-        section_name = output.lower().replace(" ", "_")
+        match = re.search(r"(Personal information|Self Identification|Legal Authorization|Work Preferences|Education Details|Experience Details|Projects|Availability|Salary Expectations|Certifications|Languages|Interests|Cover letter)", output, re.IGNORECASE)
+        if not match:
+            raise ValueError("Could not extract section name from the response.")
+
+        section_name = match.group(1).lower().replace(" ", "_")
         if section_name == "cover_letter":
             chain = chains.get(section_name)
             output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
