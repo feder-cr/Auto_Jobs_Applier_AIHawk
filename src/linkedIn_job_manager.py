@@ -47,6 +47,7 @@ class LinkedInJobManager:
         self.title_blacklist = parameters.get('titleBlacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
+        self.apply_once_at_company = parameters.get('applyOnceAtCompany', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
         resume_path = parameters.get('uploads', {}).get('resume', None)
@@ -86,7 +87,6 @@ class LinkedInJobManager:
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the application process for this page...")
 
-                    # Проверка на наличие вакансий на странице
                     try:
                         jobs = self.get_jobs_from_page()
                         if not jobs:
@@ -94,7 +94,7 @@ class LinkedInJobManager:
                             break
                     except Exception as e:
                         logger.error(f"Failed to retrieve jobs: {e}")
-                        break  # Выходим из цикла, если не удалось получить вакансии
+                        break
 
                     try:
                         self.apply_jobs()
@@ -136,40 +136,32 @@ class LinkedInJobManager:
 
 
     def get_jobs_from_page(self):
-        """
-        Функция для получения списка вакансий на текущей странице.
-        Если вакансии не найдены, возвращает пустой список.
-        """
         try:
-            # Проверка на отсутствие вакансий
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
                 utils.printyellow("No matching jobs found on this page.")
                 logger.debug("No matching jobs found on this page, skipping.")
-                return []  # Возвращаем пустой список, если нет вакансий
+                return []
 
         except NoSuchElementException:
-            pass  # Если элемент не найден, продолжаем поиск вакансий
+            pass
 
-        # Поиск контейнера результатов с вакансиями
         try:
             job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
             utils.scroll_slow(self.driver, job_results)
             utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
-            # Поиск элементов списка вакансий
             job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
             if not job_list_elements:
                 utils.printyellow("No job class elements found on page.")
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
-            # Возвращаем список найденных вакансий
             return job_list_elements
 
         except NoSuchElementException:
             logger.debug("No job results found on the page.")
-            return []  # Если не найден контейнер с результатами, возвращаем пустой список
+            return []
 
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
@@ -181,9 +173,9 @@ class LinkedInJobManager:
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
                 utils.printyellow("No matching jobs found on this page, moving to next.")
                 logger.debug("No matching jobs found on this page, skipping")
-                return  # Выход из метода, если нет больше подходящих вакансий
+                return
         except NoSuchElementException:
-            pass  # Если элемент не найден, просто продолжаем
+            pass
 
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
         utils.scroll_slow(self.driver, job_results)
@@ -192,12 +184,18 @@ class LinkedInJobManager:
         if not job_list_elements:
             utils.printyellow("No job class elements found on page, moving to next page.")
             logger.debug("No job class elements found on page, skipping")
-            return  # Выход из метода, если нет вакансий на странице
+            return
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                 logger.debug("Job blacklisted: %s at %s", job.title, job.company)
+                self.write_to_file(job, "skipped")
+                continue
+            if self.is_already_applied_to_job(job.title, job.company, job.link):
+                self.write_to_file(job, "skipped")
+                continue
+            if self.is_already_applied_to_company(job.company):
                 self.write_to_file(job, "skipped")
                 continue
             try:
@@ -301,6 +299,33 @@ class LinkedInJobManager:
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
+
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
         logger.debug("Job blacklisted status: %s", is_blacklisted)
         return is_blacklisted
+
+
+    def is_already_applied_to_job(self, job_title, company, link):
+        link_seen = link in self.seen_jobs
+        if link_seen:
+            utils.printyellow(f"Already applied to job: {job_title} at {company}, skipping...")
+        return link_seen
+
+    def is_already_applied_to_company(self, company):
+        if not self.apply_once_at_company:
+            return False
+
+        output_files = ["success.json"]
+        for file_name in output_files:
+            file_path = self.output_file_directory / file_name
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    try:
+                        existing_data = json.load(f)
+                        for applied_job in existing_data:
+                            if applied_job['company'].strip().lower() == company.strip().lower():
+                                utils.printyellow(f"Already applied at {company} (once per company policy), skipping...")
+                                return True
+                    except json.JSONDecodeError:
+                        continue
+        return False

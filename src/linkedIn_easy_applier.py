@@ -8,7 +8,6 @@ import time
 import traceback
 from datetime import date
 from typing import List, Optional, Any, Tuple
-
 from httpx import HTTPStatusError
 from openai import RateLimitError
 from reportlab.lib.pagesizes import letter
@@ -175,7 +174,6 @@ class LinkedInEasyApplier:
                 except Exception as e:
                     logger.warning(f"Failed to click 'Easy Apply' button using {method['description']} on attempt {attempt + 1}: {e}")
 
-            # Обновление страницы после первой неудачной попытки
             if attempt == 0:
                 logger.debug("Refreshing page to retry finding 'Easy Apply' button")
                 self.driver.refresh()
@@ -530,8 +528,7 @@ class LinkedInEasyApplier:
                 self._enter_text(text_field, existing_answer['answer'])
                 logger.debug("Entered existing textbox answer.")
 
-                # Нажать "Вниз" и "Enter" для выбора первого элемента в выпадающем списке
-                time.sleep(1)  # Ожидание появления выпадающего списка
+                time.sleep(1)
                 text_field.send_keys(Keys.ARROW_DOWN)
                 text_field.send_keys(Keys.ENTER)
                 logger.debug("Selected first option from the dropdown.")
@@ -541,8 +538,7 @@ class LinkedInEasyApplier:
             self._enter_text(text_field, answer)
             logger.debug("Entered new textbox answer and saved it to JSON.")
 
-            # Нажать "Вниз" и "Enter" для выбора первого элемента в выпадающем списке
-            time.sleep(1)  # Ожидание появления выпадающего списка
+            time.sleep(1)
             text_field.send_keys(Keys.ARROW_DOWN)
             text_field.send_keys(Keys.ENTER)
             logger.debug("Selected first option from the dropdown.")
