@@ -53,18 +53,6 @@ class LinkedInJobManager:
     def set_resume_generator_manager(self, resume_generator_manager):
         self.resume_generator_manager = resume_generator_manager
 
-    """ def old_question(self):
-        self.set_old_answers = {}
-        file_path = 'data_folder/output/old_Questions.csv'
-        if os.path.exists(file_path):
-            with open(file_path, 'r', newline='', encoding='utf-8', errors='ignore') as file:
-                csv_reader = csv.reader(file, delimiter=',', quotechar='"')
-                for row in csv_reader:
-                    if len(row) == 3:
-                        answer_type, question_text, answer = row
-                        self.set_old_answers[(answer_type.lower(), question_text.lower())] = answer"""
-
-
     def start_applying(self):
         self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))

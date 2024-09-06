@@ -30,7 +30,6 @@ class LinkedInEasyApplier:
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
 
-
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
         try:
@@ -48,7 +47,6 @@ class LinkedInEasyApplier:
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
-
 
     def job_apply(self, job: Any):
         self.driver.get(job.link)
@@ -91,7 +89,6 @@ class LinkedInEasyApplier:
             attempt += 1
         raise Exception("No clickable 'Easy Apply' button found")
     
-
     def _get_job_description(self) -> str:
         try:
             see_more_button = self.driver.find_element(By.XPATH, '//button[@aria-label="Click to see more description"]')
@@ -106,7 +103,6 @@ class LinkedInEasyApplier:
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error getting Job description: \nTraceback:\n{tb_str}")
-
 
     def _get_job_recruiter(self):
         try:
@@ -253,16 +249,12 @@ class LinkedInEasyApplier:
         if radios:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
-            
             existing_answer = None
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
                     existing_answer = item
-                    break
-            if existing_answer:
-                self._select_radio(radios, existing_answer['answer'])
-                return True
-
+                    self._select_radio(radios, existing_answer['answer'])
+                    return True
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
             self._select_radio(radios, answer)
@@ -283,12 +275,10 @@ class LinkedInEasyApplier:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
             existing_answer = None
             for item in self.all_data:
-                if item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
+                if 'cover' not in item['question'] and item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
                     existing_answer = item
-                    break
-            if existing_answer:
-                self._enter_text(text_field, existing_answer['answer'])
-                return True
+                    self._enter_text(text_field, existing_answer['answer'])
+                    return True
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
             return True
@@ -302,15 +292,12 @@ class LinkedInEasyApplier:
             answer_date = self.gpt_answerer.answer_question_date()
             answer_text = answer_date.strftime("%Y-%m-%d")
 
-
             existing_answer = None
             for item in self.all_data:
                 if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
                     existing_answer = item
-                    break
-            if existing_answer:
-                self._enter_text(date_field, existing_answer['answer'])
-                return True
+                    self._enter_text(date_field, existing_answer['answer'])
+                    return True
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
@@ -325,16 +312,12 @@ class LinkedInEasyApplier:
             if dropdown:
                 select = Select(dropdown)
                 options = [option.text for option in select.options]
-
                 existing_answer = None
                 for item in self.all_data:
                     if  self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item
-                        break
-                if existing_answer:
-                    self._select_dropdown_option(dropdown, existing_answer['answer'])
-                    return True
-
+                        self._select_dropdown_option(dropdown, existing_answer['answer'])
+                        return True
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
                 self._select_dropdown_option(dropdown, answer)
@@ -384,7 +367,6 @@ class LinkedInEasyApplier:
         except Exception:
             tb_str = traceback.format_exc()
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
-
 
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower()
