@@ -21,9 +21,13 @@ def get_api_key() -> str:
         raise FileNotFoundError(f"Secrets file not found at {secrets_path}")
     
     secrets = load_yaml(secrets_path)
-    api_key = secrets.get('openai_api_key')
+
+    if not 'llm_api_key' in secrets:
+        raise KeyError("No key as llm_api_key in the secret.yaml")
+
+    api_key = secrets.get('llm_api_key')
     if not api_key:
-        raise ValueError("OpenAI API key not found in secrets.yaml")
+        raise ValueError("LLM API key not found in secrets.yaml")
     
     return api_key
 
