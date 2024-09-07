@@ -1,4 +1,4 @@
-<img src="./assets/resume-spider.webp">
+<img src="./assets/resume-spider.jpeg">
 
 <!-- At first glance, the branding and messaging clearly conveys what to expect -->
 <div align="center">
@@ -13,20 +13,7 @@
 </div>
 <br />
 
-<!-- Message Clarity -->
-## 🚀 Join the AIHawk Community 🚀 
-
-Connect with like-minded individuals and get the most out of AIHawk.
-
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
-
-🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
-
-🤝 **Network:** Connect with other professionals and explore new opportunities.
-
-🔔 **Stay updated:** Get the latest news and updates on AIHawk.
-
-<!-- Strong Call to Action -->
+<
 ### Join Now 👇
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 )](https://t.me/AIhawkCommunity)
@@ -105,7 +92,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Installation
 
-**Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
+<!-- **Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
 0. **Confirmed succesfull runs OSs & Python**: Python 3.10, 3.11.9(64b), 3.12.5(64b) . Windows 10, Ubuntu 22
 1. **Download and Install Python:**
 
@@ -116,7 +103,7 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    - [How to Download and Install Python on macOS](https://www.geeksforgeeks.org/how-to-download-and-install-python-latest-version-on-macos-mac-os-x/)
 
 2. **Download and Install Google Chrome:**
-   - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
+   - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome). -->
 
 3. **Clone the repository:**
    ```bash
@@ -157,301 +144,6 @@ This file contains sensitive information. Never share or commit this file to ver
 
 ### 2. config.yaml
 
-This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
-
-- `remote: [true/false]`
-  - Set to `true` to include remote jobs, `false` to exclude them
-
-- `experienceLevel:`
-  - Set desired experience levels to `true`, others to `false`
-
-- `jobTypes:`
-  - Set desired job types to `true`, others to `false`
-
-- `date:`
-  - Choose one time range for job postings by setting it to `true`, others to `false`
-
-
-- `positions:`
-  - List job titles you're interested in, one per line
-  - Example:
-    ```yaml
-    positions:
-      - Software Developer
-      - Data Scientist
-    ```
-
-- `locations:`
-  - List locations you want to search in, one per line
-  - Example:
-    ```yaml
-    locations:
-      - Italy
-      - London
-    ```
-
-- `distance: [number]`
-  - Set the radius for your job search in miles
-  - Example: `distance: 50`
-
-- `companyBlacklist:`
-  - List companies you want to exclude from your search, one per line
-  - Example:
-    ```yaml
-    companyBlacklist:
-      - Company X
-      - Company Y
-    ```
-
-- `titleBlacklist:`
-  - List keywords in job titles you want to avoid, one per line
-  - Example:
-    ```yaml
-    titleBlacklist:
-      - Sales
-      - Marketing
-    ```
-
-### 3. plain_text_resume.yaml
-
-This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
-
-Each section has specific fields to fill out:
-
-- `personal_information:`
-  - This section contains basic personal details to identify yourself and provide contact information.
-    - **name**: Your first name.
-    - **surname**: Your last name or family name.
-    - **date_of_birth**: Your birth date in the format DD/MM/YYYY.
-    - **country**: The country where you currently reside.
-    - **city**: The city where you currently live.
-    - **address**: Your full address, including street and number.
-    - **phone_prefix**: The international dialing code for your phone number (e.g., +1 for the USA, +44 for the UK).
-    - **phone**: Your phone number without the international prefix.
-    - **email**: Your primary email address.
-    - **github**: URL to your GitHub profile, if applicable.
-    - **linkedin**: URL to your LinkedIn profile, if applicable.
-  - Example
-  ```yaml
-  personal_information:
-    name: "Jane"
-    surname: "Doe"
-    date_of_birth: "01/01/1990"
-    country: "USA"
-    city: "New York"
-    address: "123 Main St"
-    phone_prefix: "+1"
-    phone: "5551234567"
-    email: "jane.doe@example.com"
-    github: "https://github.com/janedoe"
-    linkedin: "https://www.linkedin.com/in/janedoe/"
-  ```
-
-- `education_details:`
-  - This section outlines your academic background, including degrees earned and relevant coursework.
-    - **degree**: The type of degree obtained (e.g., Bachelor's Degree, Master's Degree).
-    - **university**: The name of the university or institution where you studied.
-    - **gpa**: Your Grade Point Average or equivalent measure of academic performance.
-    - **graduation_year**: The year you graduated.
-    - **field_of_study**: The major or focus area of your studies.
-    - **exam**: A list of courses or subjects taken along with their respective grades.
-
-  - Example:
-  ```yaml
-  education_details:
-    - degree: "Bachelor's Degree"
-      university: "University of Example"
-      gpa: "3.8/4"
-      graduation_year: "2022"
-      field_of_study: "Software Engineering"
-      exam:
-        Algorithms: "A"
-        Data Structures: "B+"
-        Database Systems: "A"
-        Operating Systems: "A-"
-        Web Development: "B"
-  ```
-
-- `experience_details:`
-  - This section details your work experience, including job roles, companies, and key responsibilities.
-    - **position**: Your job title or role.
-    - **company**: The name of the company or organization where you worked.
-    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
-    - **location**: The city and country where the company is located.
-    - **industry**: The industry or field in which the company operates.
-    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
-    - **skills_acquired**: Skills or expertise gained through this role.
-
-  - Example:
-  ```yaml
-  experience_details:
-    - position: "Software Developer"
-      company: "Tech Innovations Inc."
-      employment_period: "06/2021 - Present"
-      location: "San Francisco, CA"
-      industry: "Technology"
-      key_responsibilities:
-        - "Developed web applications using React and Node.js"
-        - "Collaborated with cross-functional teams to design and implement new features"
-        - "Troubleshot and resolved complex software issues"
-      skills_acquired:
-        - "React"
-        - "Node.js"
-        - "Software Troubleshooting"
-  ```
-
-- `projects:`
-  - Include notable projects you have worked on, including personal or professional projects.
-    - **name**: The name or title of the project.
-    - **description**: A brief summary of what the project involves or its purpose.
-    - **link**: URL to the project, if available (e.g., GitHub repository, website).
-
-   - Example:
-    ```yaml
-    projects:
-      - name: "Weather App"
-        description: "A web application that provides real-time weather information using a third-party API."
-        link: "https://github.com/janedoe/weather-app"
-      - name: "Task Manager"
-        description: "A task management tool with features for tracking and prioritizing tasks."
-        link: "https://github.com/janedoe/task-manager"
-    ```
-
-- `achievements:`
-  - Highlight notable accomplishments or awards you have received.
-    - **name**: The title or name of the achievement.
-    - **description**: A brief explanation of the achievement and its significance.
-
-  - Example:
-  ```yaml
-  achievements:
-    - name: "Employee of the Month"
-      description: "Recognized for exceptional performance and contributions to the team."
-    - name: "Hackathon Winner"
-      description: "Won first place in a national hackathon competition."
-  ```
-
-- `certifications:`
-  - Include any professional certifications you have earned.
-    - **certification_name**: The name of the certification.
-
-  - Example:
-  ```yaml
-  certifications:
-    - "Certified Scrum Master"
-    - "AWS Certified Solutions Architect"
-  ```
-
-- `languages:`
-  - Detail the languages you speak and your proficiency level in each.
-    - **language**: The name of the language.
-    - **proficiency**: Your level of proficiency (e.g., Native, Fluent, Intermediate).
-
-  - Example:
-  ```yaml
-  languages:
-    - language: "English"
-      proficiency: "Fluent"
-    - language: "Spanish"
-      proficiency: "Intermediate"
-  ```
-
-- `interests:`
-
-  - Mention your professional or personal interests that may be relevant to your career.
-    - **interest**: A list of interests or hobbies.
-
-  - Example:
-  ```yaml
-  interests:
-    - "Machine Learning"
-    - "Cybersecurity"
-    - "Open Source Projects"
-    - "Digital Marketing"
-    - "Entrepreneurship"
-  ```
-
-- `availability:`
-  - State your current availability or notice period.
-    - **notice_period**: The amount of time required before you can start a new role (e.g., "2 weeks", "1 month").
-
-  - Example:
-  ```yaml
-  availability:
-    notice_period: "2 weeks"
-  ```
-
-- `salary_expectations:`
-  - Provide your expected salary range.
-    - **salary_range_usd**: The salary range you are expecting, expressed in USD.
-
-  - Example:
-  ```yaml
-  salary_expectations:
-    salary_range_usd: "80000 - 100000"
-  ```
-
-- `self_identification:`
-  - Provide information related to personal identity, including gender and pronouns.
-    - **gender**: Your gender identity.
-    - **pronouns**: The pronouns you use (e.g., He/Him, She/Her, They/Them).
-    - **veteran**: Your status as a veteran (e.g., Yes, No).
-    - **disability**: Whether you have a disability (e.g., Yes, No).
-    - **ethnicity**: Your ethnicity.
-
-  - Example:
-  ```yaml
-  self_identification:
-    gender: "Female"
-    pronouns: "She/Her"
-    veteran: "No"
-    disability: "No"
-    ethnicity: "Asian"
-  ```
-
-- `legal_authorization:`
-  - Indicate your legal ability to work in various locations.
-    - **eu_work_authorization**: Whether you are authorized to work in the European Union (Yes/No).
-    - **us_work_authorization**: Whether you are authorized to work in the United States (Yes/No).
-    - **requires_us_visa**: Whether you require a visa to work in the US (Yes/No).
-    - **requires_us_sponsorship**: Whether you require sponsorship to work in the US (Yes/No).
-    - **requires_eu_visa**: Whether you require a visa to work in the EU (Yes/No).
-    - **legally_allowed_to_work_in_eu**: Whether you are legally allowed to work in the EU (Yes/No).
-    - **legally_allowed_to_work_in_us**: Whether you are legally allowed to work in the US (Yes/No).
-    - **requires_eu_sponsorship**: Whether you require sponsorship to work in the EU (Yes/No).
-
-  - Example:
-     ```yaml
-     legal_authorization:
-       eu_work_authorization: "Yes"
-       us_work_authorization: "No"
-       requires_us_visa: "Yes"
-       requires_us_sponsorship: "Yes"
-       requires_eu_visa: "No"
-       legally_allowed_to_work_in_eu: "Yes"
-       legally_allowed_to_work_in_us: "No"
-       requires_eu_sponsorship: "No"
-     ```
-
-- `work_preferences:`
-  - Specify your preferences for work arrangements and conditions.
-    - **remote_work**: Whether you are open to remote work (Yes/No).
-    - **in_person_work**: Whether you are open to in-person work (Yes/No).
-    - **open_to_relocation**: Whether you are willing to relocate for a job (Yes/No).
-    - **willing_to_complete_assessments**: Whether you are willing to complete job assessments (Yes/No).
-    - **willing_to_undergo_drug_tests**: Whether you are willing to undergo drug testing (Yes/No).
-    - **willing_to_undergo_background_checks**: Whether you are willing to undergo background checks (Yes/No).
-
-  - Example:
-  ```yaml
-  work_preferences:
-    remote_work: "Yes"
-    in_person_work: "No"
-    open_to_relocation: "Yes"
-    willing_to_complete_assessments: "Yes"
-    willing_to_undergo_drug_tests: "No"
-    willing_to_undergo_background_checks: "Yes"
-  ```
 
 ### PLUS. data_folder_example
 
@@ -477,18 +169,13 @@ Using this folder as a guide can be particularly helpful for:
 
 
 ## Usage
-0. **LinkedIn language**
-   To ensure the bot works, your LinkedIn language must be set to English.
-   
+
 2. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
 
-3. **Run the Bot:**
-
-   LinkedIn_AIHawk offers flexibility in how it handles your pdf resume:
 
 - **Dynamic Resume Generation:**
   If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
