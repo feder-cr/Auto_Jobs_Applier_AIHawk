@@ -181,7 +181,7 @@ Answer the following question based on the provided language skills.
 - Answer questions directly.
 - If it seems likely that you have the experience, even if not explicitly defined, answer as if you have the experience.
 - If unsure, respond with "I have no experience with that, but I learn fast" or "Not yet, but willing to learn."
-- Keep the answer under 140 characters.
+- Keep the answer under 140 characters. Do not add any additional languages what is not in my experience
 
 ## Example
 My resume: Fluent in Italian and English.
@@ -237,7 +237,6 @@ This comprehensive overview will serve as a guideline for the recruitment proces
 ---
 
 # Job Description Summary"""
-
 
 coverletter_template = """
 Compose a brief and impactful cover letter based on the provided job description and resume. The letter should be no longer than three paragraphs and should be written in a professional, yet conversational tone. Avoid using any placeholders, and ensure that the letter flows naturally and is tailored to the job.
@@ -370,7 +369,6 @@ Options: [1-2, 3-5, 6-10, 10+]
 {options}
 
 ## """
-
 
 try_to_fix_template = """\
 The objective is to fix the text of a form input on a web page.

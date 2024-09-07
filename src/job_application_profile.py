@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+
 import yaml
 
 from src.utils import logger
@@ -13,6 +13,7 @@ class SelfIdentification:
     disability: str
     ethnicity: str
 
+
 @dataclass
 class LegalAuthorization:
     eu_work_authorization: str
@@ -24,6 +25,7 @@ class LegalAuthorization:
     legally_allowed_to_work_in_eu: str
     requires_eu_sponsorship: str
 
+
 @dataclass
 class WorkPreferences:
     remote_work: str
@@ -33,13 +35,16 @@ class WorkPreferences:
     willing_to_undergo_drug_tests: str
     willing_to_undergo_background_checks: str
 
+
 @dataclass
 class Availability:
     notice_period: str
 
+
 @dataclass
 class SalaryExpectations:
     salary_range_usd: str
+
 
 @dataclass
 class JobApplicationProfile:
@@ -159,6 +164,7 @@ class JobApplicationProfile:
 
     def __str__(self):
         logger.debug("Generating string representation of JobApplicationProfile")
+
         def format_dataclass(obj):
             return "\n".join(f"{field.name}: {getattr(obj, field.name)}" for field in obj.__dataclass_fields__.values())
 

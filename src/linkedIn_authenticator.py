@@ -1,15 +1,16 @@
 import random
 import time
+
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from src.utils import logger
 
 
 class LinkedInAuthenticator:
-    
+
     def __init__(self, driver=None):
         self.driver = driver
         self.email = ""
@@ -107,7 +108,6 @@ class LinkedInAuthenticator:
             buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
             logger.debug("Found %d 'Start a post' buttons", len(buttons))
 
-            # Выведем текст всех найденных кнопок в лог для диагностики
             for i, button in enumerate(buttons):
                 logger.debug("Button %d text: %s", i + 1, button.text.strip())
 
@@ -115,7 +115,6 @@ class LinkedInAuthenticator:
                 logger.info("Found 'Start a post' button indicating user is logged in.")
                 return True
 
-            # Альтернативная проверка авторизации по наличию изображения профиля
             profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
             if profile_img_elements:
                 logger.info("Profile image found. Assuming user is logged in.")

@@ -23,6 +23,7 @@ class LinkedInBotState:
                 raise ValueError(f"{key.replace('_', ' ').capitalize()} must be set before proceeding.")
         logger.debug("State validation passed")
 
+
 class LinkedInBotFacade:
     def __init__(self, login_component, apply_component):
         logger.debug("Initializing LinkedInBotFacade")
