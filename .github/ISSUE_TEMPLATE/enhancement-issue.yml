@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a new feature or improvement for the project.
+title: "[FEATURE]: <Provide a descriptive title>"
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the form below to help us understand your idea.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Feature summary
+      description: Provide a short summary of the feature you're requesting.
+      placeholder: "Summarize the feature in a few words..."
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature description
+      description: A detailed description of the feature or improvement.
+      placeholder: "Describe the feature in detail..."
+
+  - type: input
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Explain why this feature would be beneficial and how it solves a problem.
+      placeholder: "Why do you need this feature?"
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List any alternative solutions or features you've considered.
+      placeholder: "Are there any alternative features or solutions you’ve considered?"
+
+  - type: input
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots to support your feature request.
+      placeholder: "Any additional information..."

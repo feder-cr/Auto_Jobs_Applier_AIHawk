@@ -148,11 +148,15 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your LinkedIn account email address
 - `password: [Your LinkedIn password]`
   - Replace with your LinkedIn account password
-- `openai_api_key: [Your OpenAI API key]`
+- `llm_api_key: [Your OpenAI or Ollama API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-
+  - According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
+    `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
+    `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
+    OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
+    You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
 
 
 ### 2. config.yaml
@@ -189,6 +193,8 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Italy
       - London
     ```
+- `applyOnceAtCompany: [True/False]`
+  - Set if you will apply in more than one opportunity per company
 
 - `distance: [number]`
   - Set the radius for your job search in miles
@@ -211,7 +217,22 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Sales
       - Marketing
     ```
+#### 2.1 config.yaml - Customize LLM model endpoint
 
+- `llm_model_type`:
+  - Choose the model type, supported: openai / ollama / claude
+- `llm_model`: 
+  - Choose the LLM model, currently supported: 
+    - openai: gpt-4o
+    - ollama: llama2, mistral:v0.3
+    - claude: any model 
+- `llm_api_url`: 
+  - Link of the API endpoint for the LLM model
+    - openai: https://api.pawan.krd/cosmosrp/v1
+    - ollama: http://127.0.0.1:11434/
+    - claude: https://api.anthropic.com/v1
+ - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
+  
 ### 3. plain_text_resume.yaml
 
 This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
@@ -452,6 +473,27 @@ Each section has specific fields to fill out:
     willing_to_undergo_drug_tests: "No"
     willing_to_undergo_background_checks: "Yes"
   ```
+### 4. Generating plain_text_resume.yaml from a PDF or Text Resume
+
+To simplify the process of creating your `plain_text_resume.yaml` file, you can use the provided script to generate it from a pdf-based or text-based resume. Follow these steps:
+
+1. Prepare your resume in a pdf (.pdf file) or plain text (.txt file) format.
+
+2. Place your resume in the `data_folder` directory.
+
+3. Run the following command:
+
+   ```bash
+   python generate_resume_yaml.py --input data_folder/your_resume.[pdf|txt] --output data_folder/plain_text_resume.yaml
+   ```
+
+   Replace `your_resume.[pdf|txt]` with the actual name of your pdf or text resume file.
+
+4. The script will generate a `plain_text_resume.yaml` file in the `data_folder` directory.
+
+5. Review the generated YAML file and make any necessary adjustments to ensure all information is correct and complete.
+
+This automated process helps in creating a structured YAML file from your existing resume, saving time and reducing the chance of errors in manual data entry.
 
 ### PLUS. data_folder_example
 
@@ -501,19 +543,83 @@ Using this folder as a guide can be particularly helpful for:
   python main.py --resume /path/to/your/resume.pdf
   ```
 
-## Documentation
 
-TODO ):
+### Troubleshooting Common Issues
 
-## Troubleshooting
+#### 1. OpenAI API Rate Limit Errors
 
-- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse. 
-- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.  
-- **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
-- **Missing Files:** Verify that all necessary files are present in the data folder.
-- **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
-- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
-  
+**Error Message:**
+
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+
+**Solution:**
+- Check your OpenAI API billing settings at https://platform.openai.com/account/billing
+- Ensure you have added a valid payment method to your OpenAI account
+- Note that ChatGPT Plus subscription is different from API access
+- If you've recently added funds or upgraded, wait 12-24 hours for changes to take effect
+- Free tier has a 3 RPM limit; spend at least $5 on API usage to increase
+
+#### 2. LinkedIn Easy Apply Button Not Found
+
+**Error Message:**
+
+Exception: No clickable 'Easy Apply' button found
+
+**Solution:**
+- Ensure that you're logged into LinkedIn properly
+- Check if the job listings you're targeting actually have the "Easy Apply" option
+- Verify that your search parameters in the `config.yaml` file are correct and returning jobs with the "Easy Apply" button
+- Try increasing the wait time for page loading in the script to ensure all elements are loaded before searching for the button
+
+#### 3. Incorrect Information in Job Applications
+
+**Issue:** Bot provides inaccurate data for experience, CTC, and notice period
+
+**Solution:**
+- Update prompts for professional experience specificity
+- Add fields in `config.yaml` for current CTC, expected CTC, and notice period
+- Modify bot logic to use these new config fields
+
+#### 4. YAML Configuration Errors
+
+**Error Message:**
+
+yaml.scanner.ScannerError: while scanning a simple key
+
+**Solution:**
+- Copy example `config.yaml` and modify gradually
+- Ensure proper YAML indentation and spacing
+- Use a YAML validator tool
+- Avoid unnecessary special characters or quotes
+
+#### 5. Bot Logs In But Doesn't Apply to Jobs
+
+**Issue:** Bot searches for jobs but continues scrolling without applying
+
+**Solution:**
+- Check for security checks or CAPTCHAs
+- Verify `config.yaml` job search parameters
+- Ensure your LinkedIn profile meets job requirements
+- Review console output for error messages
+
+### General Troubleshooting Tips
+
+- Use the latest version of the script
+- Verify all dependencies are installed and updated
+- Check internet connection stability
+- Use VPNs cautiously to avoid triggering LinkedIn security
+- Clear browser cache and cookies if issues persist
+
+For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
+
+### Additional Resources
+
+- [Video Tutorial: How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM)
+- [OpenAI API Documentation](https://platform.openai.com/docs/)
+- [LinkedIn Developer Documentation](https://developer.linkedin.com/)
+- [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
+
+
 If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!

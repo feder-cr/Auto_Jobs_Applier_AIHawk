@@ -4,6 +4,8 @@ import re
 import textwrap
 import time
 from datetime import datetime
+from abc import ABC, abstractmethod
+from typing import Dict, List, Union
 from pathlib import Path
 from typing import Dict, List
 
@@ -21,11 +23,68 @@ from src.utils import logger
 
 load_dotenv()
 
+class AIModel(ABC):
+    @abstractmethod
+    def invoke(self, prompt: str) -> str:
+        pass
+
+class OpenAIModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_openai import ChatOpenAI
+        self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
+                                temperature=0.4, base_url=llm_api_url)
+ 
+    def invoke(self, prompt: str) -> str:
+        print("invoke in openai")
+        response = self.model.invoke(prompt)
+        return response
+
+class ClaudeModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_anthropic import ChatAnthropic
+        self.model = ChatAnthropic(model=llm_model, api_key=api_key,
+                                temperature=0.4, base_url=llm_api_url)
+
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
+
+class OllamaModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+        from langchain_ollama import ChatOllama
+        self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
+
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
+
+class AIAdapter:
+    def __init__(self, config: dict, api_key: str):
+        self.model = self._create_model(config, api_key)
+
+    def _create_model(self, config: dict, api_key: str) -> AIModel:
+        llm_model_type = config['llm_model_type']
+        llm_model = config['llm_model']
+        llm_api_url = config['llm_api_url']
+        print('Using {0} with {1} from {2}'.format(llm_model_type, llm_model, llm_api_url))
+        
+        if llm_model_type == "openai":
+            return OpenAIModel(api_key, llm_model, llm_api_url)
+        elif llm_model_type == "claude":
+            return ClaudeModel(api_key, llm_model, llm_api_url)
+        elif llm_model_type == "ollama":
+            return OllamaModel(api_key, llm_model, llm_api_url)
+        else:
+            raise ValueError(f"Unsupported model type: {model_type}")
+
+    def invoke(self, prompt: str) -> str:
+        return self.model.invoke(prompt)
 
 class LLMLogger:
 
-    def __init__(self, llm: ChatOpenAI):
-        logger.debug("Initializing LLMLogger with LLM: %s", llm)
+    
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
+
         self.llm = llm
         logger.debug("LLMLogger successfully initialized with LLM: %s", llm)
 
@@ -129,12 +188,15 @@ class LLMLogger:
 
 
 class LoggerChatModel:
-    def __init__(self, llm: ChatOpenAI):
-        logger.debug("Initializing LoggerChatModel with LLM: %s", llm)
+
+
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
+
         self.llm = llm
         logger.debug("LoggerChatModel successfully initialized with LLM: %s", llm)
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
+
         logger.debug("Entering __call__ method with messages: %s", messages)
         while True:
             try:
@@ -185,6 +247,7 @@ class LoggerChatModel:
                 time.sleep(30)
                 continue
 
+
     def parse_llmresult(self, llmresult: AIMessage) -> Dict[str, Dict]:
         logger.debug("Parsing LLM result: %s", llmresult)
 
@@ -223,11 +286,10 @@ class LoggerChatModel:
 
 
 class GPTAnswerer:
-    def __init__(self, openai_api_key):
-        self.llm_cheap = LoggerChatModel(
-            ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
-        )
-        logger.debug("GPTAnswerer initialized with API key")
+
+    def __init__(self, config, llm_api_key):
+        self.ai_adapter = AIAdapter(config, llm_api_key)
+        self.llm_cheap = LoggerChatModel(self.ai_adapter)
 
     @property
     def job_description(self):
@@ -391,8 +453,13 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
-        logger.debug("Section determined from question: %s", output)
-        section_name = output.lower().replace(" ", "_")
+
+        match = re.search(r"(Personal information|Self Identification|Legal Authorization|Work Preferences|Education Details|Experience Details|Projects|Availability|Salary Expectations|Certifications|Languages|Interests|Cover letter)", output, re.IGNORECASE)
+        if not match:
+            raise ValueError("Could not extract section name from the response.")
+
+        section_name = match.group(1).lower().replace(" ", "_")
+        
         if section_name == "cover_letter":
             chain = chains.get(section_name)
             output = chain.invoke({"resume": self.resume, "job_description": self.job_description})

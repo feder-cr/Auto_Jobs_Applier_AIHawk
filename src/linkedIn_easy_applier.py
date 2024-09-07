@@ -34,7 +34,9 @@ class LinkedInEasyApplier:
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
+
         logger.debug("LinkedInEasyApplier initialized successfully")
+
 
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
@@ -58,6 +60,7 @@ class LinkedInEasyApplier:
             logger.error("Error loading questions data from JSON file: %s", tb_str)
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
+
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
         """Проверяет, был ли выполнен редирект на страницу LinkedIn Premium.
         В случае редиректа возвращает пользователя на исходную страницу вакансии."""
@@ -76,6 +79,7 @@ class LinkedInEasyApplier:
             logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+
 
     def job_apply(self, job: Any):
         logger.debug("Starting job application for job: %s", job)
@@ -205,6 +209,7 @@ class LinkedInEasyApplier:
         logger.error("No clickable 'Easy Apply' button found after 2 attempts. Page source:\n%s", page_source)
         raise Exception("No clickable 'Easy Apply' button found")
 
+        
     def _get_job_description(self) -> str:
         logger.debug("Getting job description")
         try:
@@ -596,6 +601,7 @@ class LinkedInEasyApplier:
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
                     existing_answer = item
+
                     break
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
@@ -626,6 +632,7 @@ class LinkedInEasyApplier:
 
             for item in self.all_data:
 
+
                 logger.debug(
                     f"Comparing sanitized stored question: '{self._sanitize_text(item['question'])}' and type: '{item.get('type')}' with current question: '{self._sanitize_text(question_text)}' and type: '{question_type}'")
 
@@ -652,6 +659,7 @@ class LinkedInEasyApplier:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                 logger.debug(f"Generated textual answer: {answer}")
 
+
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
             logger.debug("Entered new answer into the textbox and saved it to JSON.")
@@ -677,11 +685,13 @@ class LinkedInEasyApplier:
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
                     existing_answer = item
+
                     break
             if existing_answer:
                 self._enter_text(date_field, existing_answer['answer'])
                 logger.debug("Entered existing date answer")
                 return True
+
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
@@ -701,6 +711,7 @@ class LinkedInEasyApplier:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
                 options = [option.text for option in select.options]
+
                 logger.debug(f"Dropdown options found: {options}")
 
                 current_selection = select.first_selected_option.text
@@ -720,6 +731,7 @@ class LinkedInEasyApplier:
                     return True
 
                 logger.debug(f"No existing answer found, querying model for: {question_text}")
+
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
                 self._select_dropdown_option(dropdown, answer)
