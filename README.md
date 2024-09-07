@@ -1,4 +1,4 @@
-<img src="./assets/resume-spider.jpeg">
+<img src="./assets/resume-spider.jpeg">git 
 
 <!-- At first glance, the branding and messaging clearly conveys what to expect -->
 <div align="center">
@@ -8,7 +8,7 @@
 
 # LinkedIn_AIHawk
 
-#### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
+#### AI Agent UnderConstruction for Job Applicants
 
 </div>
 <br />
