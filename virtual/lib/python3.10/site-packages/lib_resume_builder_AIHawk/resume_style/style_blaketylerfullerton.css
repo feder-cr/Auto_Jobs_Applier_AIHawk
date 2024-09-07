@@ -1,0 +1,195 @@
+/*Modern$https://github.com/blaketylerfullerton*/
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --text-color: #333;
+    --background-color: #f5f5f5;
+    --section-bg-color: #fff;
+    --border-color: #e0e0e0;
+  }
+  
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-size: 14px;
+  }
+  
+  header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 30px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    font-size: 36px;
+    font-weight: 300;
+    margin: 0 0 10px 0;
+    letter-spacing: 2px;
+  }
+  
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+  }
+  
+  .contact-info p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .contact-info a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .contact-info a:hover {
+    color: var(--secondary-color);
+  }
+  
+  .fab, .fas {
+    margin-right: 8px;
+    color: var(--secondary-color);
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 5px;
+    margin: 25px 0 15px 0;
+  }
+  
+  .entry {
+    background-color: var(--section-bg-color);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .entry:hover {
+    transform: translateY(-2px);
+  }
+  
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+  }
+  
+  .entry-details {
+    display: flex;
+    justify-content: space-between;
+    font-style: italic;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  
+  .compact-list {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .compact-list li {
+    margin-bottom: 5px;
+  }
+  
+  .two-column {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .two-column ul {
+    width: 48%;
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }
+  
+  #skills-languages .compact-list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style-type: none;
+  }
+  
+  #skills-languages .compact-list li {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 5px 10px;
+    margin: 3px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+  
+  @media print {
+    body {
+      padding: 0;
+      margin: 0;
+      font-size: 12px;
+      background-color: white;
+    }
+    
+    header {
+      box-shadow: none;
+    }
+    
+    .entry {
+      box-shadow: none;
+    }
+    
+    @page {
+      margin: 1cm;
+    }
+    
+    h1 {
+      font-size: 24px;
+    }
+    
+    h2 {
+      font-size: 18px;
+    }
+    
+    .contact-info {
+      font-size: 12px;
+    }
+    
+    .entry-details {
+      font-size: 11px;
+    }
+    
+    #skills-languages .compact-list li {
+      border: 1px solid var(--secondary-color);
+      color: var(--secondary-color);
+      background-color: transparent;
+    }
+  }
