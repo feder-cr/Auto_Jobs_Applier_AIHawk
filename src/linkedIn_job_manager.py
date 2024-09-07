@@ -138,10 +138,7 @@ class LinkedInJobManager:
                 page_sleep += 1
 
     def get_jobs_from_page(self):
-        """
-        Функция для получения списка вакансий на текущей странице.
-        Если вакансии не найдены, возвращает пустой список.
-        """
+
         try:
 
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
