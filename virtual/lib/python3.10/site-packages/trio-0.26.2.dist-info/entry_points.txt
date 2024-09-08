@@ -1,2 +1,0 @@
-[hypothesis]
-trio = trio._core._run:_hypothesis_plugin_setup
