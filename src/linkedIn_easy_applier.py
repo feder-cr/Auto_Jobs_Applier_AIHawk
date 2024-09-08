@@ -166,7 +166,8 @@ class LinkedInEasyApplier:
                     logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
-                        # Поиск всех кнопок "Easy Apply"
+
+                    
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
@@ -738,10 +739,8 @@ class LinkedInEasyApplier:
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
         try:
-            # Попытка найти элемент с вопросом через класс
             question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
 
-            # Если не удалось найти элемент с классом, пробуем искать по атрибуту 'data-test-text-entity-list-form-select'
             dropdowns = question.find_elements(By.TAG_NAME, 'select')
             if not dropdowns:
                 dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
@@ -753,14 +752,13 @@ class LinkedInEasyApplier:
 
                 logger.debug(f"Dropdown options found: {options}")
 
-                # Извлечение текста вопроса
+
                 question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
                 logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
                 current_selection = select.first_selected_option.text
                 logger.debug(f"Current selection: {current_selection}")
 
-                # Найдем существующий ответ в сохраненных данных
                 existing_answer = None
                 for item in self.all_data:
                     if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
