@@ -35,13 +35,17 @@ applyOnceAtCompany: [true/false]
 
 distance: 100
 
-companyBlacklist:
+company_blacklist:
   - Company1
   - Company2
 
 titleBlacklist:
   - word1
   - word2
+
+job_applicants_threshold:
+  min_applicants: 0
+  max_applicants: 100
   
 llm_model_type: openai
 llm_model: gpt-4o 
