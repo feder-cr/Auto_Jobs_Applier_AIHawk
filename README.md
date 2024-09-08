@@ -259,11 +259,12 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   education_details:
-    - degree: "Bachelor's Degree"
-      university: "University of Example"
-      gpa: "3.8/4"
-      graduation_year: "2022"
+    - education_level: "Bachelor's Degree"
+      institution: "University of Example"
       field_of_study: "Software Engineering"
+      final_evaluation_grade: "4/4"
+      start_date: "2021"
+      year_of_completion: "2023"
       exam:
         Algorithms: "A"
         Data Structures: "B+"
@@ -274,13 +275,13 @@ Each section has specific fields to fill out:
 
 - `experience_details:`
   - This section details your work experience, including job roles, companies, and key responsibilities.
-    - **position**: Your job title or role.
-    - **company**: The name of the company or organization where you worked.
-    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
-    - **location**: The city and country where the company is located.
-    - **industry**: The industry or field in which the company operates.
-    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
-    - **skills_acquired**: Skills or expertise gained through this role.
+    - position: Your job title or role.
+    - company: The name of the company or organization where you worked.
+    - employment_period: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
+    - location: The city and country where the company is located.
+    - industry: The industry or field in which the company operates.
+    - key_responsibilities: A list of major responsibilities or duties you had in the role.
+    - skills_acquired: Skills or expertise gained through this role.
 
   - Example:
   ```yaml
@@ -333,7 +334,8 @@ Each section has specific fields to fill out:
 
 - `certifications:`
   - Include any professional certifications you have earned.
-    - **certification_name**: The name of the certification.
+      - name: "PMP"  
+      description: "Certification for project management professionals, issued by the Project Management Institute (PMI)"
 
   - Example:
   ```yaml
