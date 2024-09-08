@@ -275,13 +275,13 @@ Each section has specific fields to fill out:
 
 - `experience_details:`
   - This section details your work experience, including job roles, companies, and key responsibilities.
-    - position: Your job title or role.
-    - company: The name of the company or organization where you worked.
-    - employment_period: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
-    - location: The city and country where the company is located.
-    - industry: The industry or field in which the company operates.
-    - key_responsibilities: A list of major responsibilities or duties you had in the role.
-    - skills_acquired: Skills or expertise gained through this role.
+    - **position**: Your job title or role.
+    - **company**: The name of the company or organization where you worked.
+    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
+    - **location**: The city and country where the company is located.
+    - **industry**: The industry or field in which the company operates.
+    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
+    - **skills_acquired**: Skills or expertise gained through this role.
 
   - Example:
   ```yaml
