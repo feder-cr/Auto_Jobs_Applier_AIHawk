@@ -8,7 +8,7 @@ import traceback
 from typing import List, Optional, Any, Tuple
 
 from httpx import HTTPStatusError
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
@@ -62,8 +62,7 @@ class LinkedInEasyApplier:
 
 
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
-        """Проверяет, был ли выполнен редирект на страницу LinkedIn Premium.
-        В случае редиректа возвращает пользователя на исходную страницу вакансии."""
+
         current_url = self.driver.current_url
         attempts = 0
 
@@ -514,11 +513,48 @@ class LinkedInEasyApplier:
                 file_path_pdf = os.path.join(folder_path, f"Cover_Letter_{timestamp}.pdf")
                 logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
 
-                c = canvas.Canvas(file_path_pdf, pagesize=letter)
-                _, height = letter
-                text_object = c.beginText(100, height - 100)
+                c = canvas.Canvas(file_path_pdf, pagesize=A4)
+                page_width, page_height = A4
+                text_object = c.beginText(50, page_height - 50)
                 text_object.setFont("Helvetica", 12)
-                text_object.textLines(cover_letter_text)
+
+                max_width = page_width - 100
+                bottom_margin = 50
+                available_height = page_height - bottom_margin - 50
+
+                def split_text_by_width(text, font, font_size, max_width):
+                    wrapped_lines = []
+                    for line in text.splitlines():
+
+                        if utils.stringWidth(line, font, font_size) > max_width:
+                            words = line.split()
+                            new_line = ""
+                            for word in words:
+                                if utils.stringWidth(new_line + word + " ", font, font_size) <= max_width:
+                                    new_line += word + " "
+                                else:
+                                    wrapped_lines.append(new_line.strip())
+                                    new_line = word + " "
+                            wrapped_lines.append(new_line.strip())
+                        else:
+                            wrapped_lines.append(line)
+                    return wrapped_lines
+
+
+                lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
+
+                for line in lines:
+                    text_height = text_object.getY()
+                    if text_height > bottom_margin:
+                        text_object.textLine(line)
+                    else:
+
+                        c.drawText(text_object)
+                        c.showPage()
+                        text_object = c.beginText(50, page_height - 50)
+                        text_object.setFont("Helvetica", 12)
+                        text_object.textLine(line)
+
                 c.drawText(text_object)
                 c.save()
                 logger.debug(f"Cover letter successfully generated and saved to: {file_path_pdf}")
@@ -529,6 +565,7 @@ class LinkedInEasyApplier:
                 tb_str = traceback.format_exc()
                 logger.error(f"Traceback: {tb_str}")
                 raise
+
 
         file_size = os.path.getsize(file_path_pdf)
         max_file_size = 2 * 1024 * 1024  # 2 MB
@@ -701,12 +738,14 @@ class LinkedInEasyApplier:
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
         try:
-
+            # Попытка найти элемент с вопросом через класс
             question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
-            question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
-            logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
+            # Если не удалось найти элемент с классом, пробуем искать по атрибуту 'data-test-text-entity-list-form-select'
             dropdowns = question.find_elements(By.TAG_NAME, 'select')
+            if not dropdowns:
+                dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
+
             if dropdowns:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
@@ -714,9 +753,14 @@ class LinkedInEasyApplier:
 
                 logger.debug(f"Dropdown options found: {options}")
 
+                # Извлечение текста вопроса
+                question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
+                logger.debug(f"Processing dropdown or combobox question: {question_text}")
+
                 current_selection = select.first_selected_option.text
                 logger.debug(f"Current selection: {current_selection}")
 
+                # Найдем существующий ответ в сохраненных данных
                 existing_answer = None
                 for item in self.all_data:
                     if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
@@ -738,9 +782,15 @@ class LinkedInEasyApplier:
                 logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
 
-            return False
+            else:
+
+                logger.debug(f"No dropdown found. Logging elements for debugging.")
+                elements = section.find_elements(By.XPATH, ".//*")
+                logger.debug(f"Elements found: {[element.tag_name for element in elements]}")
+                return False
+
         except Exception as e:
-            logger.warning(f"Failed to handle dropdown or combobox question: {e}")
+            logger.warning(f"Failed to handle dropdown or combobox question: {e}", exc_info=True)
             return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
