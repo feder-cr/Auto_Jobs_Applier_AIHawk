@@ -1,6 +1,40 @@
+<img src="./assets/linkedin_aihawk.png">
+
+<!-- At first glance, the branding and messaging clearly conveys what to expect -->
+<div align="center">
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/federico-elia-5199951b6/)
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
+
 # LinkedIn_AIHawk
 
-🚀 **Join Our Telegram Community!** 🚀
+#### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
+
+</div>
+<br />
+
+<!-- Message Clarity -->
+## 🚀 Join the AIHawk Community 🚀 
+
+Connect with like-minded individuals and get the most out of AIHawk.
+
+💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+
+🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
+
+🤝 **Network:** Connect with other professionals and explore new opportunities.
+
+🔔 **Stay updated:** Get the latest news and updates on AIHawk.
+
+<!-- Strong Call to Action -->
+### Join Now 👇
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
+)](https://t.me/AIhawkCommunity)
+
+
+
+
+<!-- 🚀 **Join Our Telegram Community!** 🚀
 
 Join our **Telegram community** for:
 - **Support with AIHawk software**
@@ -8,7 +42,7 @@ Join our **Telegram community** for:
 - **Job search tips** and **resume advice**
 - **Idea exchange** and resources for your projects
 
-📲 **[Join now!](https://t.me/AIhawkCommunity)**
+📲 **[Join now!](https://t.me/AIhawkCommunity)** -->
 
 ## Table of Contents
 
@@ -21,9 +55,8 @@ Join our **Telegram community** for:
 7. [Troubleshooting](#troubleshooting)
 8. [Conclusion](#conclusion)
 9. [Contributors](#contributors)
-10. [Credits](#credits)
-11. [License](#license)
-12. [Disclaimer](#Disclaimer)
+10. [License](#license)
+11. [Disclaimer](#Disclaimer)
 
 ## Introduction
 
@@ -72,9 +105,11 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Installation
 
+**Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
+0. **Confirmed succesfull runs OSs & Python**: Python 3.10, 3.11.9(64b), 3.12.5(64b) . Windows 10, Ubuntu 22
 1. **Download and Install Python:**
 
-   Ensure you have Python installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
+   Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
 
    - [How to Install Python on Windows](https://www.geeksforgeeks.org/how-to-install-python-on-windows/)
    - [How to Install Python on Linux](https://www.geeksforgeeks.org/how-to-install-python-on-linux/)
@@ -89,7 +124,16 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    cd LinkedIn_AIHawk_automatic_job_application
    ```
 
-4. **Install the required packages:**
+4. **Activate virtual environment:**
+   ```bash
+   python3 -m venv virtual
+   ```
+
+   ```bash
+   source virtual/bin/activate
+   ```
+
+5. **Install the required packages:**
    ```bash
    pip install -r requirements.txt
    ```
@@ -175,54 +219,239 @@ This file contains your resume information in a structured format. Fill it out w
 Each section has specific fields to fill out:
 
 - `personal_information:`
-  - Contains basic personal details
-  - Example: `name: "John Doe"`
-
-- `self_identification:`
-  - Optional demographic information
-  - Example: `gender: "Male"`
-
-- `legal_authorization:`
-  - Work authorization status
-  - Use `true` or `false` for each field
-  - Example: `usWorkAuthorization: true`
-
-- `work_preferences:`
-  - Your work-related preferences
-  - Use `true` or `false` for each field
-  - Example: `remoteWork: true`
+  - This section contains basic personal details to identify yourself and provide contact information.
+    - **name**: Your first name.
+    - **surname**: Your last name or family name.
+    - **date_of_birth**: Your birth date in the format DD/MM/YYYY.
+    - **country**: The country where you currently reside.
+    - **city**: The city where you currently live.
+    - **address**: Your full address, including street and number.
+    - **phone_prefix**: The international dialing code for your phone number (e.g., +1 for the USA, +44 for the UK).
+    - **phone**: Your phone number without the international prefix.
+    - **email**: Your primary email address.
+    - **github**: URL to your GitHub profile, if applicable.
+    - **linkedin**: URL to your LinkedIn profile, if applicable.
+  - Example
+  ```yaml
+  personal_information:
+    name: "Jane"
+    surname: "Doe"
+    date_of_birth: "01/01/1990"
+    country: "USA"
+    city: "New York"
+    address: "123 Main St"
+    phone_prefix: "+1"
+    phone: "5551234567"
+    email: "jane.doe@example.com"
+    github: "https://github.com/janedoe"
+    linkedin: "https://www.linkedin.com/in/janedoe/"
+  ```
 
 - `education_details:`
-  - List your educational background
-  - Include degree, university, GPA, graduation year, field of study, and skills acquired
+  - This section outlines your academic background, including degrees earned and relevant coursework.
+    - **degree**: The type of degree obtained (e.g., Bachelor's Degree, Master's Degree).
+    - **university**: The name of the university or institution where you studied.
+    - **gpa**: Your Grade Point Average or equivalent measure of academic performance.
+    - **graduation_year**: The year you graduated.
+    - **field_of_study**: The major or focus area of your studies.
+    - **exam**: A list of courses or subjects taken along with their respective grades.
+
   - Example:
-    ```yaml
-    - degree: "Bachelor's"
+  ```yaml
+  education_details:
+    - degree: "Bachelor's Degree"
       university: "University of Example"
-      gpa: "3.8"
-      graduationYear: "2022"
-      fieldOfStudy: "Computer Science"
-      skillsAcquired:
-        problemSolving: "4"
-    ```
+      gpa: "3.8/4"
+      graduation_year: "2022"
+      field_of_study: "Software Engineering"
+      exam:
+        Algorithms: "A"
+        Data Structures: "B+"
+        Database Systems: "A"
+        Operating Systems: "A-"
+        Web Development: "B"
+  ```
 
 - `experience_details:`
-  - List your work experiences
-  - Include position, company, employment period, location, industry, key responsibilities, and skills acquired
+  - This section details your work experience, including job roles, companies, and key responsibilities.
+    - **position**: Your job title or role.
+    - **company**: The name of the company or organization where you worked.
+    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
+    - **location**: The city and country where the company is located.
+    - **industry**: The industry or field in which the company operates.
+    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
+    - **skills_acquired**: Skills or expertise gained through this role.
+
   - Example:
-    ```yaml
+  ```yaml
+  experience_details:
     - position: "Software Developer"
-      company: "Tech Corp"
-      employmentPeriod: "Jan 2020 - Present"
-      location: "San Francisco, USA"
+      company: "Tech Innovations Inc."
+      employment_period: "06/2021 - Present"
+      location: "San Francisco, CA"
       industry: "Technology"
-      keyResponsibilities:
-        responsibility1: "Developed web applications using React"
-      skillsAcquired:
-        adaptability: "3"
+      key_responsibilities:
+        - "Developed web applications using React and Node.js"
+        - "Collaborated with cross-functional teams to design and implement new features"
+        - "Troubleshot and resolved complex software issues"
+      skills_acquired:
+        - "React"
+        - "Node.js"
+        - "Software Troubleshooting"
+  ```
+
+- `projects:`
+  - Include notable projects you have worked on, including personal or professional projects.
+    - **name**: The name or title of the project.
+    - **description**: A brief summary of what the project involves or its purpose.
+    - **link**: URL to the project, if available (e.g., GitHub repository, website).
+
+   - Example:
+    ```yaml
+    projects:
+      - name: "Weather App"
+        description: "A web application that provides real-time weather information using a third-party API."
+        link: "https://github.com/janedoe/weather-app"
+      - name: "Task Manager"
+        description: "A task management tool with features for tracking and prioritizing tasks."
+        link: "https://github.com/janedoe/task-manager"
     ```
 
-- Other sections like `projects`, `availability`, `salary_expectations`, `certifications`, `skills`, `languages`, and `interests` follow a similar format, with each item on a new line.
+- `achievements:`
+  - Highlight notable accomplishments or awards you have received.
+    - **name**: The title or name of the achievement.
+    - **description**: A brief explanation of the achievement and its significance.
+
+  - Example:
+  ```yaml
+  achievements:
+    - name: "Employee of the Month"
+      description: "Recognized for exceptional performance and contributions to the team."
+    - name: "Hackathon Winner"
+      description: "Won first place in a national hackathon competition."
+  ```
+
+- `certifications:`
+  - Include any professional certifications you have earned.
+    - **certification_name**: The name of the certification.
+
+  - Example:
+  ```yaml
+  certifications:
+    - "Certified Scrum Master"
+    - "AWS Certified Solutions Architect"
+  ```
+
+- `languages:`
+  - Detail the languages you speak and your proficiency level in each.
+    - **language**: The name of the language.
+    - **proficiency**: Your level of proficiency (e.g., Native, Fluent, Intermediate).
+
+  - Example:
+  ```yaml
+  languages:
+    - language: "English"
+      proficiency: "Fluent"
+    - language: "Spanish"
+      proficiency: "Intermediate"
+  ```
+
+- `interests:`
+
+  - Mention your professional or personal interests that may be relevant to your career.
+    - **interest**: A list of interests or hobbies.
+
+  - Example:
+  ```yaml
+  interests:
+    - "Machine Learning"
+    - "Cybersecurity"
+    - "Open Source Projects"
+    - "Digital Marketing"
+    - "Entrepreneurship"
+  ```
+
+- `availability:`
+  - State your current availability or notice period.
+    - **notice_period**: The amount of time required before you can start a new role (e.g., "2 weeks", "1 month").
+
+  - Example:
+  ```yaml
+  availability:
+    notice_period: "2 weeks"
+  ```
+
+- `salary_expectations:`
+  - Provide your expected salary range.
+    - **salary_range_usd**: The salary range you are expecting, expressed in USD.
+
+  - Example:
+  ```yaml
+  salary_expectations:
+    salary_range_usd: "80000 - 100000"
+  ```
+
+- `self_identification:`
+  - Provide information related to personal identity, including gender and pronouns.
+    - **gender**: Your gender identity.
+    - **pronouns**: The pronouns you use (e.g., He/Him, She/Her, They/Them).
+    - **veteran**: Your status as a veteran (e.g., Yes, No).
+    - **disability**: Whether you have a disability (e.g., Yes, No).
+    - **ethnicity**: Your ethnicity.
+
+  - Example:
+  ```yaml
+  self_identification:
+    gender: "Female"
+    pronouns: "She/Her"
+    veteran: "No"
+    disability: "No"
+    ethnicity: "Asian"
+  ```
+
+- `legal_authorization:`
+  - Indicate your legal ability to work in various locations.
+    - **eu_work_authorization**: Whether you are authorized to work in the European Union (Yes/No).
+    - **us_work_authorization**: Whether you are authorized to work in the United States (Yes/No).
+    - **requires_us_visa**: Whether you require a visa to work in the US (Yes/No).
+    - **requires_us_sponsorship**: Whether you require sponsorship to work in the US (Yes/No).
+    - **requires_eu_visa**: Whether you require a visa to work in the EU (Yes/No).
+    - **legally_allowed_to_work_in_eu**: Whether you are legally allowed to work in the EU (Yes/No).
+    - **legally_allowed_to_work_in_us**: Whether you are legally allowed to work in the US (Yes/No).
+    - **requires_eu_sponsorship**: Whether you require sponsorship to work in the EU (Yes/No).
+
+  - Example:
+     ```yaml
+     legal_authorization:
+       eu_work_authorization: "Yes"
+       us_work_authorization: "No"
+       requires_us_visa: "Yes"
+       requires_us_sponsorship: "Yes"
+       requires_eu_visa: "No"
+       legally_allowed_to_work_in_eu: "Yes"
+       legally_allowed_to_work_in_us: "No"
+       requires_eu_sponsorship: "No"
+     ```
+
+- `work_preferences:`
+  - Specify your preferences for work arrangements and conditions.
+    - **remote_work**: Whether you are open to remote work (Yes/No).
+    - **in_person_work**: Whether you are open to in-person work (Yes/No).
+    - **open_to_relocation**: Whether you are willing to relocate for a job (Yes/No).
+    - **willing_to_complete_assessments**: Whether you are willing to complete job assessments (Yes/No).
+    - **willing_to_undergo_drug_tests**: Whether you are willing to undergo drug testing (Yes/No).
+    - **willing_to_undergo_background_checks**: Whether you are willing to undergo background checks (Yes/No).
+
+  - Example:
+  ```yaml
+  work_preferences:
+    remote_work: "Yes"
+    in_person_work: "No"
+    open_to_relocation: "Yes"
+    willing_to_complete_assessments: "Yes"
+    willing_to_undergo_drug_tests: "No"
+    willing_to_undergo_background_checks: "Yes"
+  ```
 
 ### PLUS. data_folder_example
 
@@ -246,7 +475,6 @@ Using this folder as a guide can be particularly helpful for:
 2. Seeing examples of valid data for each field
 3. Having a reference point while filling out your personal files
 
-#### Important Note
 
 ## Usage
 0. **LinkedIn language**
@@ -268,22 +496,27 @@ Using this folder as a guide can be particularly helpful for:
    python main.py
    ```
 - **Using a Specific Resume:**
-  If you want to use a specific PDF resume for all applications, run the bot with the `--resume` option:
+  If you want to use a specific PDF resume for all applications, place your resume PDF in the `data_folder` directory and run the bot with the `--resume` option:
   ```bash
   python main.py --resume /path/to/your/resume.pdf
   ```
 
 ## Documentation
 
-For detailed information on each component and their respective roles, please refer to the [Documentation](documentation.md) file.
+TODO ):
 
 ## Troubleshooting
 
+- **Carefully read logs and output :** Most of the errors are verbosely reflected just watch the output and try to find the root couse. 
+- **If nothing works by unknown reason:**  Use tested OS. Reboot and/or update OS.  Use new clean venv. Try update Python to the tested version.  
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
-- **Invalid YAML:** Check your YAML files for syntax errors.
-
-  If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues). I'll be more than happy to assist you!
+- **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
+- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
+  
+If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
+  Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
+  I'll be more than happy to assist you!
 
 ## Conclusion
 
@@ -291,16 +524,9 @@ LinkedIn_AIHawk provides a significant advantage in the modern job market by aut
 
 ## Contributors
 
-- [feder-cr](https://github.com/feder-cr/) - Creator and Maintainer
+- [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
 
 LinkedIn_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make LinkedIn_AIHawk an even more powerful tool for job seekers worldwide.
-
-## Credits
-
-### casual-markdown
-- **Description:** This project uses the casual-markdown library, a lightweight regex-based Markdown parser with Table of Contents (TOC) support.
-- **Author:** [casualwriter](https://github.com/casualwriter)
-- **Repository:** [casual-markdown](https://github.com/casualwriter/casual-markdown)
 
 
 ## License

@@ -9,9 +9,13 @@ _*
 data_folder/secrets.yaml
 venv
 env
+.venv
 generated_cv*
-resume.html
 .vscode
 Chrome Profile
 *.log
 emerge/*
+chrome_profile
+answers.json
+data*
+*virtual

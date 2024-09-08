@@ -16,7 +16,6 @@ class LinkedInAuthenticator:
         self.password = password
 
     def start(self):
-        """Start the Chrome browser and attempt to log in to LinkedIn."""
         print("Starting Chrome browser to log in to LinkedIn.")
         self.driver.get('https://www.linkedin.com')
         self.wait_for_page_load()
@@ -24,9 +23,11 @@ class LinkedInAuthenticator:
             self.handle_login()
 
     def handle_login(self):
-        """Handle the LinkedIn login process."""
         print("Navigating to the LinkedIn login page...")
         self.driver.get("https://www.linkedin.com/login")
+        if 'feed' in self.driver.current_url:
+            print("User is already logged in.")
+            return
         try:
             self.enter_credentials()
             self.submit_login_form()
@@ -36,7 +37,6 @@ class LinkedInAuthenticator:
         self.handle_security_check()
 
     def enter_credentials(self):
-        """Enter the user's email and password into the login form."""
         try:
             email_field = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.NAME, "session_key"))
@@ -48,7 +48,6 @@ class LinkedInAuthenticator:
             print("Login form not found. Aborting login.")
 
     def submit_login_form(self):
-        """Submit the LinkedIn login form."""
         try:
             login_button = self.driver.find_element(By.XPATH, '//button[@type="submit"]')
             login_button.click()
@@ -56,7 +55,6 @@ class LinkedInAuthenticator:
             print("Login button not found. Please verify the page structure.")
 
     def handle_security_check(self):
-        """Handle LinkedIn security checks if triggered."""
         try:
             WebDriverWait(self.driver, 10).until(
                 EC.url_contains('https://www.linkedin.com/checkpoint/challengesV2/')
@@ -70,7 +68,6 @@ class LinkedInAuthenticator:
             print("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
-        """Check if the user is already logged in to LinkedIn."""
         self.driver.get('https://www.linkedin.com/feed')
         # print(self.driver.title.lower())
         # try:
@@ -89,7 +86,6 @@ class LinkedInAuthenticator:
             return True
 
     def wait_for_page_load(self, timeout=10):
-        """Wait for the page to fully load."""
         try:
             WebDriverWait(self.driver, timeout).until(
                 lambda d: d.execute_script('return document.readyState') == 'complete'
