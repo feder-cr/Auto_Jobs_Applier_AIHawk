@@ -452,9 +452,9 @@ class LinkedInJobManager:
                         existing_data = json.load(f)
                         for applied_job in existing_data:
                             if applied_job['company'].strip().lower() == company.strip().lower():
-                                utils.printyellow(f"Already applied at {company} (once per company policy), skipping...")
+                                utils.printyellow(
+                                    f"Already applied at {company} (once per company policy), skipping...")
                                 return True
                     except json.JSONDecodeError:
                         continue
         return False
-

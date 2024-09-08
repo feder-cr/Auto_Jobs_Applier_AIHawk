@@ -37,7 +37,6 @@ class LinkedInEasyApplier:
 
         logger.debug("LinkedInEasyApplier initialized successfully")
 
-
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
         logger.debug("Loading questions from JSON file: %s", output_file)
@@ -60,7 +59,6 @@ class LinkedInEasyApplier:
             logger.error("Error loading questions data from JSON file: %s", tb_str)
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
-
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
 
         current_url = self.driver.current_url
@@ -78,7 +76,6 @@ class LinkedInEasyApplier:
             logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
-
 
     def job_apply(self, job: Any):
         logger.debug("Starting job application for job: %s", job)
@@ -167,7 +164,6 @@ class LinkedInEasyApplier:
 
                     if method.get('find_elements'):
 
-                    
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
@@ -209,7 +205,6 @@ class LinkedInEasyApplier:
         logger.error("No clickable 'Easy Apply' button found after 2 attempts. Page source:\n%s", page_source)
         raise Exception("No clickable 'Easy Apply' button found")
 
-        
     def _get_job_description(self) -> str:
         logger.debug("Getting job description")
         try:
@@ -541,7 +536,6 @@ class LinkedInEasyApplier:
                             wrapped_lines.append(line)
                     return wrapped_lines
 
-
                 lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
 
                 for line in lines:
@@ -566,7 +560,6 @@ class LinkedInEasyApplier:
                 tb_str = traceback.format_exc()
                 logger.error(f"Traceback: {tb_str}")
                 raise
-
 
         file_size = os.path.getsize(file_path_pdf)
         max_file_size = 2 * 1024 * 1024  # 2 MB
@@ -670,7 +663,6 @@ class LinkedInEasyApplier:
 
             for item in self.all_data:
 
-
                 logger.debug(
                     f"Comparing sanitized stored question: '{self._sanitize_text(item['question'])}' and type: '{item.get('type')}' with current question: '{self._sanitize_text(question_text)}' and type: '{question_type}'")
 
@@ -696,7 +688,6 @@ class LinkedInEasyApplier:
             else:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                 logger.debug(f"Generated textual answer: {answer}")
-
 
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
@@ -730,7 +721,6 @@ class LinkedInEasyApplier:
                 logger.debug("Entered existing date answer")
                 return True
 
-
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
@@ -751,7 +741,6 @@ class LinkedInEasyApplier:
                 options = [option.text for option in select.options]
 
                 logger.debug(f"Dropdown options found: {options}")
-
 
                 question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
                 logger.debug(f"Processing dropdown or combobox question: {question_text}")
