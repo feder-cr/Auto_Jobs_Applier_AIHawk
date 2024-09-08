@@ -1,0 +1,23 @@
+git-filter-repo itself and most the files in this repository (exceptions
+noted below) are provided under the MIT license (see COPYING.mit).
+
+The usage of the MIT license probably makes filter-repo compatible with
+everything, but just in case, these files can also be used under whatever
+open source license[1] that git.git or libgit2 use now or in the future
+(currently GPL[2] and GPL-with-linking-exception[3]).  Further, the
+examples (in contrib/filter-repo-demos/ and t/t9391/) can also be used
+under the same license that libgit2 provides their examples under (CC0,
+currently[4]).
+
+Exceptions:
+
+  - The test harness (t/test-lib.sh, t/test-lib-functions.sh) is a slightly
+    modified copy of git.git's test harness (the difference being that my
+    copy doesn't require a built version of 'git' to be present).  These
+    are thus GPL2 (see COPYING.gpl), and are individually marked as such.
+
+
+[1] ...as defined by the Open Source Initiative (https://opensource.org/)
+[2] https://git.kernel.org/pub/scm/git/git.git/tree/COPYING
+[3] https://github.com/libgit2/libgit2/blob/master/COPYING
+[4] https://github.com/libgit2/libgit2/blob/master/examples/COPYING

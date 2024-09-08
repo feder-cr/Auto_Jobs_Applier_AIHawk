@@ -1,5 +1,7 @@
+import logging
 import os
 import re
+
 import sys
 from pathlib import Path
 import yaml
@@ -15,7 +17,16 @@ from src.linkedIn_authenticator import LinkedInAuthenticator
 from src.linkedIn_bot_facade import LinkedInBotFacade
 from src.linkedIn_job_manager import LinkedInJobManager
 from src.job_application_profile import JobApplicationProfile
+from yaml.parser import ParserError
+from yaml.scanner import ScannerError
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskID
+import time
 
+#setup logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("__name__")
 # Suppress stderr
 sys.stderr = open(os.devnull, 'w')
 
@@ -158,36 +169,149 @@ def init_browser() -> webdriver.Chrome:
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
-def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_key: str):
+
+
+console = Console()
+
+import traceback
+
+def create_and_run_bot(email: str, password: str, parameters: dict, llm_api_key: str):
     try:
+        logger.info("Initializing StyleManager and ResumeGenerator")
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
+        
+        logger.info(f"Reading plain text resume from {parameters['uploads']['plainTextResume']}")
         with open(parameters['uploads']['plainTextResume'], "r", encoding='utf-8') as file:
             plain_text_resume = file.read()
+        
+        logger.info("Creating Resume object")
         resume_object = Resume(plain_text_resume)
-        resume_generator_manager = FacadeManager(openai_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
-        os.system('cls' if os.name == 'nt' else 'clear')
-        resume_generator_manager.choose_style()
+        
+        logger.info("Initializing FacadeManager")
+        resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
+        
+        logger.debug("Clearing console")
         os.system('cls' if os.name == 'nt' else 'clear')
         
+        logger.info("Choosing resume style")
+        resume_generator_manager.choose_style()
+        
+        logger.debug("Clearing console")
+        os.system('cls' if os.name == 'nt' else 'clear')
+        
+        logger.info("Creating JobApplicationProfile object")
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
+        logger.info("Initializing browser")
         browser = init_browser()
+        
+        logger.info("Creating LinkedInAuthenticator")
         login_component = LinkedInAuthenticator(browser)
+        
+        logger.info("Creating LinkedInJobManager")
         apply_component = LinkedInJobManager(browser)
-        gpt_answerer_component = GPTAnswerer(openai_api_key)
+        
+        print("Initializing GPTAnswerer...")
+        gpt_answerer_component = GPTAnswerer()
+        print("GPTAnswerer initialized successfully.")
+        
+        logger.info("Creating LinkedInBotFacade")
         bot = LinkedInBotFacade(login_component, apply_component)
         bot.set_secrets(email, password)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
         bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
+        print("GPTAnswerer and ResumeGenerator set in bot.")
         bot.set_parameters(parameters)
-        bot.start_login()
-        bot.start_apply()
-    except WebDriverException as e:
-        print(f"WebDriver error occurred: {e}")
-    except Exception as e:
-        raise RuntimeError(f"Error running the bot: {str(e)}")
 
+        console.print(Panel("LinkedIn Job Application Bot", style="bold green"))
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            console=console
+        ) as progress:
+            login_task = progress.add_task("[cyan]Logging in...", total=1)
+            bot.start_login()
+            progress.update(login_task, completed=1)
+
+            search_task = progress.add_task("[yellow]Searching for jobs...", total=100)
+            logger.info("Attempting to search for jobs")
+            jobs_found = bot.search_jobs()  # This is where the error occurs
+            for i in range(100):
+                time.sleep(0.1)
+                progress.update(search_task, advance=1)
+            
+            application_task = progress.add_task(f"[green]Applying to jobs... (0/{len(jobs_found)})", total=len(jobs_found))
+            for i, job in enumerate(jobs_found):
+                console.print(f"[bold blue]Applying to job {i+1}/{len(jobs_found)}:[/bold blue] {job.title} at {job.company}")
+                
+                # Update progress description
+                progress.update(application_task, description=f"[green]Applying to jobs... ({i+1}/{len(jobs_found)})")
+                
+                # Simulate steps in job application process
+                steps = ["Analyzing job description", "Customizing resume", "Answering questions", "Submitting application"]
+                for step in steps:
+                    console.print(f"  [italic]{step}...[/italic]")
+                    time.sleep(1)  # Simulate work being done
+                
+                # Update progress bar
+                progress.update(application_task, advance=1)
+                
+                console.print(f"[bold green]Application submitted for {job.title}[/bold green]\n")
+
+        console.print(Panel("Job application process completed!", style="bold blue"))
+
+    except AttributeError as e:
+        console.print(f"[bold red]AttributeError:[/bold red] {str(e)}")
+        console.print("[yellow]This error suggests that the 'LinkedInBotFacade' class is missing the 'search_jobs' method.[/yellow]")
+        console.print("[yellow]Please check the implementation of the LinkedInBotFacade class.[/yellow]")
+        console.print("\n[bold]Traceback:[/bold]")
+        console.print(traceback.format_exc())
+    except WebDriverException as e:
+        console.print(f"[bold red]WebDriver error occurred:[/bold red] {e}")
+        console.print("\n[bold]Traceback:[/bold]")
+        console.print(traceback.format_exc())
+    except Exception as e:
+        console.print(f"[bold red]Error running the bot:[/bold red] {str(e)}")
+        console.print("\n[bold]Traceback:[/bold]")
+        console.print(traceback.format_exc())
+    finally:
+        logger.info("Bot execution completed (with or without errors)")
+
+
+def read_plain_text_resume(file_path: str) -> str:
+    logger.debug(f"Attempting to read plain text resume from: {file_path}")
+    try:
+        with open(file_path, "r", encoding='utf-8') as file:
+            content = file.read()
+        logger.debug(f"File contents read. Length: {len(content)} characters")
+        return content
+    except FileNotFoundError:
+        logger.error(f"Plain text resume file not found: {file_path}")
+        raise
+    except IOError as e:
+        logger.error(f"IO error when reading plain text resume: {str(e)}")
+        raise
+
+def create_resume_object(plain_text_resume: str) -> Resume:
+    logger.debug("Creating Resume object...")
+    try:
+        resume_object = Resume(plain_text_resume)
+        logger.debug("Resume object created successfully")
+        return resume_object
+    except (ParserError, ScannerError) as e:
+        logger.error(f"YAML parsing error in plain text resume: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error creating Resume object: {str(e)}")
+        raise
+
+def clear_console():
+    logger.debug("Clearing console...")
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
@@ -203,17 +327,18 @@ def main(resume: Path = None):
         parameters['outputFileDirectory'] = output_folder
         
         create_and_run_bot(email, password, parameters, openai_api_key)
+
     except ConfigError as ce:
-        print(f"Configuration error: {str(ce)}")
+        logger.error(f"Congiguration error: {str(ce)}")
+        
         print("Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except FileNotFoundError as fnf:
-        print(f"File not found: {str(fnf)}")
+        logger.error(f"File not found: {str(fnf)}")
         print("Ensure all required files are present in the data folder.")
         print("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
-
-        print(f"Runtime error: {str(re)}")
-
+        logger.error(f"Runtime error: {str(re)}")
+        
         print("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")

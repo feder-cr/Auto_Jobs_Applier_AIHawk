@@ -15,6 +15,7 @@ data*
 data_folder/config.yaml
 data_folder/plain_text_resume.yaml
 data_folder/secrets.yaml
+<<<<<<< Updated upstream
 
 .DS_Store
 virtual/
@@ -22,3 +23,6 @@ virtual/
 __pycache__/
 .DS_Store
 .DS_Store
+=======
+secrets.yaml
+>>>>>>> Stashed changes

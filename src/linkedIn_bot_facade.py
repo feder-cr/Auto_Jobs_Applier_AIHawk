@@ -71,3 +71,7 @@ class LinkedInBotFacade:
     def _ensure_job_profile_and_resume_set(self):
         if not self.state.job_application_profile_set:
             raise ValueError("Job application profile and resume must be set before proceeding.")
+
+    def search_jobs(self):
+        self.state.validate_state(['logged_in', 'parameters_set'])
+        return self.apply_component.search_jobs(self.parameters)

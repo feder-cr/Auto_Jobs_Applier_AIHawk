@@ -3,7 +3,7 @@ import os
 import re
 import textwrap
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.messages.ai import AIMessage
@@ -12,11 +12,16 @@ from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from Levenshtein import distance
+import logging
+from pydantic import BaseModel, ConfigDict
+import pdb
 
 import src.strings as strings
 
 load_dotenv()
 
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class LLMLogger:
     
@@ -76,10 +81,12 @@ class LLMLogger:
             f.write(json_string + "\n")
 
 
-class LoggerChatModel:
+class LoggerChatModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    llm: ChatOpenAI
 
     def __init__(self, llm: ChatOpenAI):
-        self.llm = llm
+        super().__init__(llm = llm)
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
         # Call the LLM with the provided messages and log the response.
@@ -111,12 +118,26 @@ class LoggerChatModel:
         }
         return parsed_result
 
+class GPTAnswerer(BaseModel):
+    llm_cheap: Optional[LoggerChatModel] = None
+    resume: Optional[dict] = None
+    job: Optional[dict] = None
+    job_application_profile: Optional[dict] = None
 
-class GPTAnswerer:
-    def __init__(self, openai_api_key):
-        self.llm_cheap = LoggerChatModel(
-            ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key, temperature=0.4)
-        )
+    @classmethod
+    def create(cls, openai_api_key: str, temperature: float = 0.5):
+        logging.info("Creating GPTAnswerer instance")
+        try:
+            llm = LoggerChatModel(
+                ChatOpenAI(temperature=temperature, model_name="gpt-4-0125-preview", openai_api_key=openai_api_key)
+            )
+            instance = cls(llm_cheap=llm)
+            logging.info("GPTAnswerer instance created successfully")
+            return instance
+        except Exception as e:
+            logging.error(f"Error creating GPTAnswerer instance: {e}")
+            raise
+
     @property
     def job_description(self):
         return self.job.description
@@ -140,22 +161,31 @@ class GPTAnswerer:
         return textwrap.dedent(template)
 
     def set_resume(self, resume):
+        logging.info("Setting resume")
         self.resume = resume
+        logging.info("Resume set successfully")
 
     def set_job(self, job):
+        logging.info("Setting job")
         self.job = job
+        logging.info("Summarizing job description")
         self.job.set_summarize_job_description(self.summarize_job_description(self.job.description))
+        logging.info("Job set successfully")
 
     def set_job_application_profile(self, job_application_profile):
+        logging.info("Setting job application profile")
         self.job_application_profile = job_application_profile
+        logging.info("Job application profile set successfully")
         
     def summarize_job_description(self, text: str) -> str:
+        logging.info("Summarizing job description")
         strings.summarize_prompt_template = self._preprocess_template_string(
             strings.summarize_prompt_template
         )
         prompt = ChatPromptTemplate.from_template(strings.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"text": text})
+        logging.info("Job description summarized")
         return output
             
     def _create_chain(self, template: str):
@@ -179,6 +209,26 @@ class GPTAnswerer:
             "interests": self._create_chain(strings.interests_template),
             "cover_letter": self._create_chain(strings.coverletter_template),
         }
+        
+        # Determine the most relevant section for the question
+        section_name = self._determine_relevant_section(question)
+        
+        if section_name == "cover_letter":
+            chain = chains.get(section_name)
+            output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
+            return output
+        
+        resume_section = getattr(self.resume, section_name, None) or getattr(self.job_application_profile, section_name, None)
+        if resume_section is None:
+            raise ValueError(f"Section '{section_name}' not found in either resume or job_application_profile.")
+        
+        chain = chains.get(section_name)
+        if chain is None:
+            raise ValueError(f"Chain not defined for section '{section_name}'")
+        
+        return chain.invoke({"resume_section": resume_section, "question": question})
+
+    def _determine_relevant_section(self, question: str) -> str:
         section_prompt = """
         You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
@@ -198,90 +248,12 @@ class GPTAnswerer:
         - Interests
         - Cover letter
 
-        Here are detailed guidelines to help you choose the correct section:
-
-        1. **Personal Information**:
-        - **Purpose**: Contains your basic contact details and online profiles.
-        - **Use When**: The question is about how to contact you or requests links to your professional online presence.
-        - **Examples**: Email address, phone number, LinkedIn profile, GitHub repository, personal website.
-
-        2. **Self Identification**:
-        - **Purpose**: Covers personal identifiers and demographic information.
-        - **Use When**: The question pertains to your gender, pronouns, veteran status, disability status, or ethnicity.
-        - **Examples**: Gender, pronouns, veteran status, disability status, ethnicity.
-
-        3. **Legal Authorization**:
-        - **Purpose**: Details your work authorization status and visa requirements.
-        - **Use When**: The question asks about your ability to work in specific countries or if you need sponsorship or visas.
-        - **Examples**: Work authorization in EU and US, visa requirements, legally allowed to work.
-
-        4. **Work Preferences**:
-        - **Purpose**: Specifies your preferences regarding work conditions and job roles.
-        - **Use When**: The question is about your preferences for remote work, in-person work, relocation, and willingness to undergo assessments or background checks.
-        - **Examples**: Remote work, in-person work, open to relocation, willingness to complete assessments.
-
-        5. **Education Details**:
-        - **Purpose**: Contains information about your academic qualifications.
-        - **Use When**: The question concerns your degrees, universities attended, GPA, and relevant coursework.
-        - **Examples**: Degree, university, GPA, field of study, exams.
-
-        6. **Experience Details**:
-        - **Purpose**: Details your professional work history and key responsibilities.
-        - **Use When**: The question pertains to your job roles, responsibilities, and achievements in previous positions.
-        - **Examples**: Job positions, company names, key responsibilities, skills acquired.
-
-        7. **Projects**:
-        - **Purpose**: Highlights specific projects you have worked on.
-        - **Use When**: The question asks about particular projects, their descriptions, or links to project repositories.
-        - **Examples**: Project names, descriptions, links to project repositories.
-
-        8. **Availability**:
-        - **Purpose**: Provides information on your availability for new roles.
-        - **Use When**: The question is about how soon you can start a new job or your notice period.
-        - **Examples**: Notice period, availability to start.
-
-        9. **Salary Expectations**:
-        - **Purpose**: Covers your expected salary range.
-        - **Use When**: The question pertains to your salary expectations or compensation requirements.
-        - **Examples**: Desired salary range.
-
-        10. **Certifications**:
-            - **Purpose**: Lists your professional certifications or licenses.
-            - **Use When**: The question involves your certifications or qualifications from recognized organizations.
-            - **Examples**: Certification names, issuing bodies, dates of validity.
-
-        11. **Languages**:
-            - **Purpose**: Describes the languages you can speak and your proficiency levels.
-            - **Use When**: The question asks about your language skills or proficiency in specific languages.
-            - **Examples**: Languages spoken, proficiency levels.
-
-        12. **Interests**:
-            - **Purpose**: Details your personal or professional interests.
-            - **Use When**: The question is about your hobbies, interests, or activities outside of work.
-            - **Examples**: Personal hobbies, professional interests.
-
-        13. **Cover Letter**:
-            - **Purpose**: Contains your personalized cover letter or statement.
-            - **Use When**: The question involves your cover letter or specific written content intended for the job application.
-            - **Examples**: Cover letter content, personalized statements.
-
         Provide only the exact name of the section from the list above with no additional text.
         """
         prompt = ChatPromptTemplate.from_template(section_prompt)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"question": question})
-        section_name = output.lower().replace(" ", "_")
-        if section_name == "cover_letter":
-            chain = chains.get(section_name)
-            output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
-            return output
-        resume_section = getattr(self.resume, section_name, None) or getattr(self.job_application_profile, section_name, None)
-        if resume_section is None:
-            raise ValueError(f"Section '{section_name}' not found in either resume or job_application_profile.")
-        chain = chains.get(section_name)
-        if chain is None:
-            raise ValueError(f"Chain not defined for section '{section_name}'")
-        return chain.invoke({"resume_section": resume_section, "question": question})
+        return output.lower().replace(" ", "_")
 
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
         func_template = self._preprocess_template_string(strings.numeric_question_template)
@@ -325,3 +297,9 @@ class GPTAnswerer:
             return "cover"
         else:
             return "resume"
+
+    @staticmethod
+    def debug(message):
+        logging.info(f"DEBUG: {message}")
+        if input("Enter 'c' to continue, or 's' to step into debugger: ").lower() == 's':
+            pdb.set_trace()
