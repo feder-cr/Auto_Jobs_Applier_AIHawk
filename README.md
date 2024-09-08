@@ -133,6 +133,11 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
    source virtual/bin/activate
    ```
 
+   or for Windows-based machines -
+   ```bash
+   .\virtual\Scripts\activate
+   ```
+
 5. **Install the required packages:**
    ```bash
    pip install -r requirements.txt
