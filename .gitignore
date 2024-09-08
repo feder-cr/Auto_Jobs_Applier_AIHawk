@@ -7,10 +7,11 @@ openaiSelenium*
 open_ai_calls.json
 _*
 data_folder/secrets.yaml
-.venv
+venv
+env
 generated_cv*
 resume.html
 .vscode
-chrome_profile
+Chrome Profile
 *.log
 emerge/*

@@ -32,17 +32,17 @@ class LinkedInAuthenticator:
             self.submit_login_form()
         except NoSuchElementException:
             print("Could not log in to LinkedIn. Please check your credentials.")
-        time.sleep(35) #TODO fix better
+        time.sleep(10) #TODO fix better
         self.handle_security_check()
 
     def enter_credentials(self):
         """Enter the user's email and password into the login form."""
         try:
             email_field = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "username"))
+                EC.presence_of_element_located((By.NAME, "session_key"))
             )
             email_field.send_keys(self.email)
-            password_field = self.driver.find_element(By.ID, "password")
+            password_field = self.driver.find_element(By.NAME, "session_password")
             password_field.send_keys(self.password)
         except TimeoutException:
             print("Login form not found. Aborting login.")
@@ -83,7 +83,7 @@ class LinkedInAuthenticator:
         #         return True
         # except TimeoutException:
         #     pass
-        if "login" in self.driver.title.lower():
+        if "sign" in self.driver.title.lower() or "log" in self.driver.title.lower():
             return False
         else:
             return True

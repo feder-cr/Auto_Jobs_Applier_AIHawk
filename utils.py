@@ -10,15 +10,15 @@ import glob
 from webdriver_manager.chrome import ChromeDriverManager
 
 headless = False
-chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
+chromeUserDir = os.path.join(os.getcwd(), "Chrome Profile")
 
 def ensure_chrome_profile():
-    profile_dir = os.path.dirname(chromeProfilePath)
+    profile_dir = os.path.dirname(chromeUserDir)
     if not os.path.exists(profile_dir):
         os.makedirs(profile_dir)
-    if not os.path.exists(chromeProfilePath):
-        os.makedirs(chromeProfilePath)
-    return chromeProfilePath
+    if not os.path.exists(chromeUserDir):
+        os.makedirs(chromeUserDir)
+    return chromeUserDir
 
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
@@ -116,10 +116,10 @@ def chromeBrowserOptions():
     # Assicurati che la directory del profilo Chrome esista
     ensure_chrome_profile()
 
-    if len(chromeProfilePath) > 0:
-        initialPath = os.path.dirname(chromeProfilePath)
-        profileDir = os.path.basename(chromeProfilePath)
-        options.add_argument('--user-data-dir=' + initialPath)
+    if len(chromeUserDir) > 0:
+        # initialPath = os.path.dirname(chromeUserDir)
+        profileDir = "linkedin_profile"
+        options.add_argument('--user-data-dir=' + chromeUserDir)
         options.add_argument("--profile-directory=" + profileDir)
     else:
         options.add_argument("--incognito")
