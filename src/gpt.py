@@ -213,7 +213,7 @@ class LoggerChatModel:
         while True:
             try:
                 logger.debug("Attempting to call the LLM with messages")
-                # Ensure you're using invoke to call the model
+
                 reply = self.llm.invoke(messages)
                 logger.debug("LLM response received: %s", reply)
 
