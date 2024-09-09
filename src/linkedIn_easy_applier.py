@@ -5,7 +5,8 @@ import random
 import re
 import time
 import traceback
-from typing import List, Optional, Any, Tuple
+from pathlib import Path
+from typing import List, Optional, Any, Tuple, Set
 
 from httpx import HTTPStatusError
 from reportlab.lib.pagesizes import A4
@@ -23,11 +24,13 @@ from src.utils import logger
 
 
 class LinkedInEasyApplier:
-    def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
+    def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: Set[Tuple[str, str, str]],
                  gpt_answerer: Any, resume_generator_manager):
         logger.debug("Initializing LinkedInEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
+        else:
+            resume_dir = Path(resume_dir)
         self.driver = driver
         self.resume_path = resume_dir
         self.set_old_answers = set_old_answers
@@ -538,17 +541,19 @@ class LinkedInEasyApplier:
 
                 lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
 
+                line_height = 14
+                max_lines_per_page = int(available_height // line_height)
+
                 for line in lines:
                     text_height = text_object.getY()
-                    if text_height > bottom_margin:
-                        text_object.textLine(line)
-                    else:
 
+                    if text_height - line_height < bottom_margin:
                         c.drawText(text_object)
                         c.showPage()
                         text_object = c.beginText(50, page_height - 50)
                         text_object.setFont("Helvetica", 12)
-                        text_object.textLine(line)
+
+                    text_object.textLine(line)
 
                 c.drawText(text_object)
                 c.save()
