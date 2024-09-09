@@ -70,7 +70,8 @@ class AIAdapter:
         llm_model_type = config['llm_model_type']
         llm_model = config['llm_model']
         llm_api_url = config['llm_api_url']
-        print('Using {0} with {1} from {2}'.format(llm_model_type, llm_model, llm_api_url))
+        print('Using {0} with {1} from {2}'.format(
+            llm_model_type, llm_model, llm_api_url))
 
         if llm_model_type == "openai":
             return OpenAIModel(api_key, llm_model, llm_api_url)
@@ -79,7 +80,7 @@ class AIAdapter:
         elif llm_model_type == "ollama":
             return OllamaModel(api_key, llm_model, llm_api_url)
         else:
-            raise ValueError(f"Unsupported model type: {model_type}")
+            raise ValueError(f"Unsupported model type: {llm_model_type}")
 
     def invoke(self, prompt: str) -> str:
         return self.model.invoke(prompt)
@@ -99,7 +100,8 @@ class LLMLogger:
         logger.debug("Parsed reply received: %s", parsed_reply)
 
         try:
-            calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
+            calls_log = os.path.join(
+                Path("data_folder/output"), "open_ai_calls.json")
             logger.debug("Logging path determined: %s", calls_log)
         except Exception as e:
             logger.error("Error determining the log path: %s", str(e))
@@ -118,18 +120,22 @@ class LLMLogger:
                 }
                 logger.debug("Prompts converted to dictionary: %s", prompts)
             except Exception as e:
-                logger.error("Error converting prompts to dictionary: %s", str(e))
+                logger.error(
+                    "Error converting prompts to dictionary: %s", str(e))
                 raise
         else:
-            logger.debug("Prompts are of unknown type, attempting default conversion")
+            logger.debug(
+                "Prompts are of unknown type, attempting default conversion")
             try:
                 prompts = {
                     f"prompt_{i + 1}": prompt.content
                     for i, prompt in enumerate(prompts.messages)
                 }
-                logger.debug("Prompts converted to dictionary using default method: %s", prompts)
+                logger.debug(
+                    "Prompts converted to dictionary using default method: %s", prompts)
             except Exception as e:
-                logger.error("Error converting prompts using default method: %s", str(e))
+                logger.error(
+                    "Error converting prompts using default method: %s", str(e))
                 raise
 
         try:
@@ -144,7 +150,8 @@ class LLMLogger:
             output_tokens = token_usage["output_tokens"]
             input_tokens = token_usage["input_tokens"]
             total_tokens = token_usage["total_tokens"]
-            logger.debug("Token usage - Input: %d, Output: %d, Total: %d", input_tokens, output_tokens, total_tokens)
+            logger.debug("Token usage - Input: %d, Output: %d, Total: %d",
+                         input_tokens, output_tokens, total_tokens)
         except KeyError as e:
             logger.error("KeyError in parsed_reply structure: %s", str(e))
             raise
@@ -159,7 +166,8 @@ class LLMLogger:
         try:
             prompt_price_per_token = 0.00000015
             completion_price_per_token = 0.0000006
-            total_cost = (input_tokens * prompt_price_per_token) + (output_tokens * completion_price_per_token)
+            total_cost = (input_tokens * prompt_price_per_token) + \
+                (output_tokens * completion_price_per_token)
             logger.debug("Total cost calculated: %f", total_cost)
         except Exception as e:
             logger.error("Error calculating total cost: %s", str(e))
@@ -178,12 +186,14 @@ class LLMLogger:
             }
             logger.debug("Log entry created: %s", log_entry)
         except KeyError as e:
-            logger.error("Error creating log entry: missing key %s in parsed_reply", str(e))
+            logger.error(
+                "Error creating log entry: missing key %s in parsed_reply", str(e))
             raise
 
         try:
             with open(calls_log, "a", encoding="utf-8") as f:
-                json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
+                json_string = json.dumps(
+                    log_entry, ensure_ascii=False, indent=4)
                 f.write(json_string + "\n")
                 logger.debug("Log entry written to file: %s", calls_log)
         except Exception as e:
@@ -194,23 +204,24 @@ class LLMLogger:
 class LoggerChatModel:
 
     def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
-
         self.llm = llm
-        logger.debug("LoggerChatModel successfully initialized with LLM: %s", llm)
+        logger.debug(
+            "LoggerChatModel successfully initialized with LLM: %s", llm)
 
     def __call__(self, messages: List[Dict[str, str]]) -> str:
-
         logger.debug("Entering __call__ method with messages: %s", messages)
         while True:
             try:
                 logger.debug("Attempting to call the LLM with messages")
-                reply = self.llm(messages)
+                # Ensure you're using invoke to call the model
+                reply = self.llm.invoke(messages)
                 logger.debug("LLM response received: %s", reply)
 
                 parsed_reply = self.parse_llmresult(reply)
                 logger.debug("Parsed LLM reply: %s", parsed_reply)
 
-                LLMLogger.log_request(prompts=messages, parsed_reply=parsed_reply)
+                LLMLogger.log_request(
+                    prompts=messages, parsed_reply=parsed_reply)
                 logger.debug("Request successfully logged")
 
                 return reply
@@ -246,7 +257,8 @@ class LoggerChatModel:
 
             except Exception as e:
                 logger.error("Unexpected error occurred: %s", str(e))
-                logger.info("Waiting for 30 seconds before retrying due to an unexpected error.")
+                logger.info(
+                    "Waiting for 30 seconds before retrying due to an unexpected error.")
                 time.sleep(30)
                 continue
 
@@ -279,11 +291,13 @@ class LoggerChatModel:
             return parsed_result
 
         except KeyError as e:
-            logger.error("KeyError while parsing LLM result: missing key %s", str(e))
+            logger.error(
+                "KeyError while parsing LLM result: missing key %s", str(e))
             raise
 
         except Exception as e:
-            logger.error("Unexpected error while parsing LLM result: %s", str(e))
+            logger.error(
+                "Unexpected error while parsing LLM result: %s", str(e))
             raise
 
 
@@ -299,7 +313,8 @@ class GPTAnswerer:
 
     @staticmethod
     def find_best_match(text: str, options: list[str]) -> str:
-        logger.debug("Finding best match for text: '%s' in options: %s", text, options)
+        logger.debug(
+            "Finding best match for text: '%s' in options: %s", text, options)
         distances = [
             (option, distance(text.lower(), option.lower())) for option in options
         ]
@@ -325,10 +340,12 @@ class GPTAnswerer:
     def set_job(self, job):
         logger.debug("Setting job: %s", job)
         self.job = job
-        self.job.set_summarize_job_description(self.summarize_job_description(self.job.description))
+        self.job.set_summarize_job_description(
+            self.summarize_job_description(self.job.description))
 
     def set_job_application_profile(self, job_application_profile):
-        logger.debug("Setting job application profile: %s", job_application_profile)
+        logger.debug("Setting job application profile: %s",
+                     job_application_profile)
         self.job_application_profile = job_application_profile
 
     def summarize_job_description(self, text: str) -> str:
@@ -336,7 +353,8 @@ class GPTAnswerer:
         strings.summarize_prompt_template = self._preprocess_template_string(
             strings.summarize_prompt_template
         )
-        prompt = ChatPromptTemplate.from_template(strings.summarize_prompt_template)
+        prompt = ChatPromptTemplate.from_template(
+            strings.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"text": text})
         logger.debug("Summary generated: %s", output)
@@ -460,31 +478,37 @@ class GPTAnswerer:
             r"(Personal information|Self Identification|Legal Authorization|Work Preferences|Education Details|Experience Details|Projects|Availability|Salary Expectations|Certifications|Languages|Interests|Cover letter)",
             output, re.IGNORECASE)
         if not match:
-            raise ValueError("Could not extract section name from the response.")
+            raise ValueError(
+                "Could not extract section name from the response.")
 
         section_name = match.group(1).lower().replace(" ", "_")
 
         if section_name == "cover_letter":
             chain = chains.get(section_name)
-            output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
+            output = chain.invoke(
+                {"resume": self.resume, "job_description": self.job_description})
             logger.debug("Cover letter generated: %s", output)
             return output
         resume_section = getattr(self.resume, section_name, None) or getattr(self.job_application_profile, section_name,
                                                                              None)
         if resume_section is None:
-            logger.error("Section '%s' not found in either resume or job_application_profile.", section_name)
-            raise ValueError(f"Section '{section_name}' not found in either resume or job_application_profile.")
+            logger.error(
+                "Section '%s' not found in either resume or job_application_profile.", section_name)
+            raise ValueError(f"Section '{
+                             section_name}' not found in either resume or job_application_profile.")
         chain = chains.get(section_name)
         if chain is None:
             logger.error("Chain not defined for section '%s'", section_name)
             raise ValueError(f"Chain not defined for section '{section_name}'")
-        output = chain.invoke({"resume_section": resume_section, "question": question})
+        output = chain.invoke(
+            {"resume_section": resume_section, "question": question})
         logger.debug("Question answered: %s", output)
         return output
 
     def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
         logger.debug("Answering numeric question: %s", question)
-        func_template = self._preprocess_template_string(strings.numeric_question_template)
+        func_template = self._preprocess_template_string(
+            strings.numeric_question_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
@@ -495,7 +519,8 @@ class GPTAnswerer:
             output = self.extract_number_from_string(output_str)
             logger.debug("Extracted number: %d", output)
         except ValueError:
-            logger.warning("Failed to extract number, using default experience: %d", default_experience)
+            logger.warning(
+                "Failed to extract number, using default experience: %d", default_experience)
             output = default_experience
         return output
 
@@ -511,17 +536,20 @@ class GPTAnswerer:
 
     def answer_question_from_options(self, question: str, options: list[str]) -> str:
         logger.debug("Answering question from options: %s", question)
-        func_template = self._preprocess_template_string(strings.options_template)
+        func_template = self._preprocess_template_string(
+            strings.options_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output_str = chain.invoke({"resume": self.resume, "question": question, "options": options})
+        output_str = chain.invoke(
+            {"resume": self.resume, "question": question, "options": options})
         logger.debug("Raw output for options question: %s", output_str)
         best_option = self.find_best_match(output_str, options)
         logger.debug("Best option determined: %s", best_option)
         return best_option
 
     def resume_or_cover(self, phrase: str) -> str:
-        logger.debug("Determining if phrase refers to resume or cover letter: %s", phrase)
+        logger.debug(
+            "Determining if phrase refers to resume or cover letter: %s", phrase)
         prompt_template = """
         Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter.
         If the phrase contains only one word 'upload', consider it as 'cover'.

@@ -13,3 +13,6 @@ chrome_profile
 answers.json
 data*
 *virtual
+data_folder/*.yaml
+app_log.log
+venv
