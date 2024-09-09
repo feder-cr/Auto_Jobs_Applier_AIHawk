@@ -14,3 +14,4 @@ click
 git+https://github.com/feder-cr/lib_resume_builder_AIHawk.git
 linkedin-api
 pdfminer.six==20221105
+inputimeout
