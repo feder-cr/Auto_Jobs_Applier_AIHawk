@@ -169,6 +169,7 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         os.system('cls' if os.name == 'nt' else 'clear')
         resume_generator_manager.choose_style()
         os.system('cls' if os.name == 'nt' else 'clear')
+        print("Here")
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
