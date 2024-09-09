@@ -251,7 +251,8 @@ Each section has specific fields to fill out:
   - This section outlines your academic background, including degrees earned and relevant coursework.
     - **degree**: The type of degree obtained (e.g., Bachelor's Degree, Master's Degree).
     - **university**: The name of the university or institution where you studied.
-    - **gpa**: Your Grade Point Average or equivalent measure of academic performance.
+    - **final_evaluation_grade**: Your Grade Point Average or equivalent measure of academic performance.
+    - **start_date**: The start year of your studies.
     - **graduation_year**: The year you graduated.
     - **field_of_study**: The major or focus area of your studies.
     - **exam**: A list of courses or subjects taken along with their respective grades.
