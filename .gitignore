@@ -22,7 +22,10 @@ virtual/
 *.pyc
 __pycache__/
 .DS_Store
+<<<<<<< HEAD
 .DS_Store
 =======
 secrets.yaml
 >>>>>>> Stashed changes
+=======
+>>>>>>> parent of 4cc8b50 (Add .DS_Store to .gitignore)
