@@ -1,6 +1,6 @@
 remote: [true/false]
 
-experience_level:
+experienceLevel:
  internship: [true/false]
  entry: [true/false]
  associate: [true/false]
@@ -31,7 +31,7 @@ locations:
   - Country1
   - Country2
 
-apply_once_at_company: [ true/false]
+applyOnceAtCompany: [true/false]
 
 distance: 100
 
@@ -39,8 +39,7 @@ company_blacklist:
   - Company1
   - Company2
 
-
-title_blacklist:
+titleBlacklist:
   - word1
   - word2
 

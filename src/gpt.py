@@ -6,7 +6,8 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List
+from typing import Union
 
 import httpx
 from Levenshtein import distance
@@ -37,7 +38,7 @@ class OpenAIModel(AIModel):
     def invoke(self, prompt: str) -> str:
         print("invoke in openai")
         response = self.model.invoke(prompt)
-        return response.content
+        return response
 
 
 class ClaudeModel(AIModel):
@@ -48,7 +49,7 @@ class ClaudeModel(AIModel):
 
     def invoke(self, prompt: str) -> str:
         response = self.model.invoke(prompt)
-        return response.content
+        return response
 
 
 class OllamaModel(AIModel):
@@ -58,14 +59,14 @@ class OllamaModel(AIModel):
 
     def invoke(self, prompt: str) -> str:
         response = self.model.invoke(prompt)
-        return response.content
+        return response
 
 
 class AIAdapter:
     def __init__(self, config: dict, api_key: str):
         self.model = self._create_model(config, api_key)
 
-    def _create_model(self, config: dict, api_key: str) -> Union[OpenAIModel, OllamaModel, ClaudeModel]:
+    def _create_model(self, config: dict, api_key: str) -> AIModel:
         llm_model_type = config['llm_model_type']
         llm_model = config['llm_model']
         llm_api_url = config['llm_api_url']
@@ -78,7 +79,7 @@ class AIAdapter:
         elif llm_model_type == "ollama":
             return OllamaModel(api_key, llm_model, llm_api_url)
         else:
-            raise ValueError(f"Unsupported model type: {llm_model_type}")
+            raise ValueError(f"Unsupported model type: {model_type}")
 
     def invoke(self, prompt: str) -> str:
         return self.model.invoke(prompt)
@@ -108,34 +109,25 @@ class LLMLogger:
             logger.debug("Prompts are of type StringPromptValue")
             prompts = prompts.text
             logger.debug("Prompts converted to text: %s", prompts)
-        elif isinstance(prompts, dict):
-            logger.debug("Prompts are of type dict")
+        elif isinstance(prompts, Dict):
+            logger.debug("Prompts are of type Dict")
             try:
-                if "messages" in prompts:
-                    logger.debug("Prompts contain 'messages' key")
-                    prompts = {
-                        f"prompt_{i + 1}": prompt["content"]
-                        for i, prompt in enumerate(prompts["messages"])
-                    }
-                    logger.debug("Prompts converted to dictionary: %s", prompts)
-                else:
-                    logger.debug("Prompts dictionary does not contain 'messages' key")
+                prompts = {
+                    f"prompt_{i + 1}": prompt.content
+                    for i, prompt in enumerate(prompts.messages)
+                }
+                logger.debug("Prompts converted to dictionary: %s", prompts)
             except Exception as e:
                 logger.error("Error converting prompts to dictionary: %s", str(e))
                 raise
         else:
             logger.debug("Prompts are of unknown type, attempting default conversion")
             try:
-                if hasattr(prompts, "messages"):
-                    logger.debug("Prompts have 'messages' attribute")
-                    prompts = {
-                        f"prompt_{i + 1}": prompt.content
-                        for i, prompt in enumerate(prompts.messages)
-                    }
-                    logger.debug("Prompts converted to dictionary using default method: %s", prompts)
-                else:
-                    logger.error("Prompts do not have 'messages' attribute, and default conversion failed")
-                    raise ValueError("Prompts structure is not supported.")
+                prompts = {
+                    f"prompt_{i + 1}": prompt.content
+                    for i, prompt in enumerate(prompts.messages)
+                }
+                logger.debug("Prompts converted to dictionary using default method: %s", prompts)
             except Exception as e:
                 logger.error("Error converting prompts using default method: %s", str(e))
                 raise
@@ -299,7 +291,7 @@ class GPTAnswerer:
 
     def __init__(self, config, llm_api_key):
         self.ai_adapter = AIAdapter(config, llm_api_key)
-        self.llm_cheap = LoggerChatModel(self.ai_adapter.model)
+        self.llm_cheap = LoggerChatModel(self.ai_adapter)
 
     @property
     def job_description(self):

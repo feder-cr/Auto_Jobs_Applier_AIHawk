@@ -1,6 +1,6 @@
 remote: true
 
-experience_level:
+experienceLevel:
   internship: true
   entry: true
   associate: true
@@ -29,15 +29,15 @@ positions:
 locations:
   - USA
 
-apply_once_at_company: [true/false]
+applyOnceAtCompany: [true/false]
 
 distance: 100
 
-company_blacklist:
+companyBlacklist:
   - Noir
   - Crossover
 
-title_blacklist:
+titleBlacklist:
 
 llm_model_type: openai
 llm_model: 'gpt-4o'

@@ -47,10 +47,10 @@ class LinkedInJobManager:
     def set_parameters(self, parameters):
         logger.debug("Setting parameters for LinkedInJobManager")
         self.company_blacklist = parameters.get('company_blacklist', []) or []
-        self.title_blacklist = parameters.get('title_blacklist', []) or []
+        self.title_blacklist = parameters.get('titleBlacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
-        self.apply_once_at_company = parameters.get('apply_once_at_company', False)
+        self.apply_once_at_company = parameters.get('applyOnceAtCompany', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
 
@@ -272,7 +272,7 @@ class LinkedInJobManager:
                         logger.debug(f"Applicants text found: {applicants_text}")
 
                         # Extract numeric digits from the text (e.g., "70 applicants" -> "70")
-                        applicants_count = ''.join([char for char in str(applicants_text) if char.isdigit()])
+                        applicants_count = ''.join(filter(str.isdigit, applicants_text))
                         logger.debug(f"Extracted applicants count: {applicants_count}")
 
                         if applicants_count:
@@ -370,7 +370,7 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if
                              v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
@@ -429,6 +429,7 @@ class LinkedInJobManager:
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
         logger.debug("Job blacklisted status: %s", is_blacklisted)
+        return is_blacklisted
 
         return title_blacklisted or company_blacklisted or link_seen
 

@@ -7,22 +7,19 @@ import re
 from jsonschema import validate, ValidationError
 from pdfminer.high_level import extract_text
 
-
 def load_yaml(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as file:
         return yaml.safe_load(file)
-
 
 def load_resume_text(file_path: str) -> str:
     with open(file_path, 'r') as file:
         return file.read()
 
-
 def get_api_key() -> str:
     secrets_path = os.path.join('data_folder', 'secrets.yaml')
     if not os.path.exists(secrets_path):
         raise FileNotFoundError(f"Secrets file not found at {secrets_path}")
-
+    
     secrets = load_yaml(secrets_path)
 
     if not 'llm_api_key' in secrets:
@@ -31,9 +28,8 @@ def get_api_key() -> str:
     api_key = secrets.get('llm_api_key')
     if not api_key:
         raise ValueError("LLM API key not found in secrets.yaml")
-
+    
     return api_key
-
 
 def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key: str) -> str:
     client = OpenAI(api_key=api_key)
@@ -87,15 +83,14 @@ def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system",
-             "content": "You are a helpful assistant that generates structured YAML content from resume files, paying close attention to format requirements and schema structure."},
+            {"role": "system", "content": "You are a helpful assistant that generates structured YAML content from resume files, paying close attention to format requirements and schema structure."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.5,
     )
 
     yaml_content = response.choices[0].message.content.strip()
-
+    
     # Extract YAML content from between the tags
     match = re.search(r'<resume_yaml>(.*?)</resume_yaml>', yaml_content, re.DOTALL)
     if match:
@@ -103,11 +98,9 @@ def generate_yaml_from_resume(resume_text: str, schema: Dict[str, Any], api_key:
     else:
         raise ValueError("YAML content not found in the expected format")
 
-
 def save_yaml(data: str, output_file: str):
     with open(output_file, 'w') as file:
         file.write(data)
-
 
 def validate_yaml(yaml_content: str, schema: Dict[str, Any]) -> Dict[str, Any]:
     try:
@@ -117,7 +110,6 @@ def validate_yaml(yaml_content: str, schema: Dict[str, Any]) -> Dict[str, Any]:
     except ValidationError as e:
         return {"valid": False, "errors": str(e)}
 
-
 def generate_report(validation_result: Dict[str, Any], output_file: str):
     report = f"Validation Report for {output_file}\n"
     report += "=" * 40 + "\n"
@@ -126,17 +118,14 @@ def generate_report(validation_result: Dict[str, Any], output_file: str):
     else:
         report += "YAML is not valid. Errors:\n"
         report += validation_result["errors"] + "\n"
-
+    
     print(report)
-
 
 def pdf_to_text(pdf_path: str) -> str:
     return extract_text(pdf_path)
 
-
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate a resume YAML file from a PDF or text resume using OpenAI API")
+    parser = argparse.ArgumentParser(description="Generate a resume YAML file from a PDF or text resume using OpenAI API")
     parser.add_argument("--input", required=True, help="Path to the input resume file (PDF or TXT)")
     parser.add_argument("--output", default="data_folder/plain_text_resume.yaml", help="Path to the output YAML file")
     args = parser.parse_args()
@@ -166,7 +155,6 @@ def main():
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
 
 if __name__ == "__main__":
     main()
