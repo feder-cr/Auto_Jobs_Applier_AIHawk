@@ -1,60 +1,63 @@
-# LinkedIn Job Application Bot - Code Structure and Flow
+# Trusted Jobs Applier with AI - Spid3r
 
-## File Structure
+## 1. System Overview
+This application automates the process of searching and applying for jobs on LinkedIn, utilizing AI for generating responses and tailoring resumes.
 
-1. `main.py`: Entry point of the application
-2. `linkedIn_bot_facade.py`: High-level interface for bot operations
-3. `gpt.py`: Handles GPT-based response generation
-4. `linkedIn_job_manager.py`: Manages job searching and application processes
-5. `linkedIn_authenticator.py`: Handles LinkedIn login process
+## 2. Core Components
 
-## Detailed Component Breakdown
+### 2.1 Main Entry Point (main.py)
+- Serves as the entry point for the application
+- Validates data folder structure
+- Reads configuration files
+- Sets up logging
+- Initializes necessary components
 
-### 1. main.py
-- Entry point of the application
-- Sets up configuration and validates input files
-- Initializes the bot
-- Contains `create_and_run_bot` function where main logic starts
+### 2.2 Bot Runner (bot_runner.py)
+- Contains `create_and_run_bot` function
+- Orchestrates the entire job application process
 
-### 2. linkedIn_bot_facade.py
-- Contains `LinkedInBotFacade` class
+### 2.3 LinkedIn Bot Facade (LinkedInBotFacade)
 - Acts as a high-level interface for bot operations
-- Coordinates between different components (login, job search, application)
 
-### 3. gpt.py
-- Contains `GPTAnswerer` class
+### 2.4 Authentication (LinkedInAuthenticator)
+- Handles the login process
+
+### 2.5 Job Search and Application (LinkedInJobManager)
+- Manages job searching and application processes
+
+### 2.6 Easy Apply Process (LinkedInEasyApplier)
+- Handles the actual application submission
+
+### 2.7 AI-Powered Responses (GPTAnswerer)
 - Generates responses to application questions using GPT
 
-### 4. linkedIn_job_manager.py
-- Contains `LinkedInJobManager` class
-- Handles job searching and application processes
+### 2.8 Resume Generation
+- Dynamically generates resumes based on job descriptions
 
-### 5. linkedIn_authenticator.py
-- Contains `LinkedInAuthenticator` class
-- Manages the login process to LinkedIn
+## 3. Data Management
 
-## Execution Flow
+### 3.1 Job Class
+- Stores job information
 
-1. `main.py` initializes the bot and its components
-2. Configuration of the bot via `LinkedInBotFacade` methods:
-   - `bot.set_secrets(email, password)`
-   - `bot.set_job_application_profile_and_resume(...)`
-   - `bot.set_gpt_answerer_and_resume_generator(...)`
-   - `bot.set_parameters(parameters)`
-3. Login process starts with `bot.start_login()` (uses `LinkedInAuthenticator`)
-4. Job search begins with `bot.search_jobs()` (uses `LinkedInJobManager`)
-5. For each job found, the application process starts (potentially using `GPTAnswerer` for generating responses)
+### 3.2 JobApplicationProfile Class
+- Manages user profile information
 
-## Implementation Notes
+## 4. Application Flow
+1. User initiates the script through main.py
+2. Configuration is loaded and validated
+3. Bot runner initializes all necessary components
+4. LinkedIn authentication is performed
+5. Job search begins based on user-defined criteria
+6. For each suitable job found:
+   a. Job details are extracted and stored
+   b. Easy Apply process is initiated
+   c. AI-powered responses are generated for application questions
+   d. If required, a tailored resume is generated
+   e. Application is submitted
+7. Results are logged and stored for user review
 
-### LinkedInJobManager
-## Troubleshooting
-
-- If encountering `AttributeError`, ensure all methods referenced in the flow are implemented in their respective classes.
-- Double-check that all necessary parameters are set before calling methods that depend on them.
-
-## Future Improvements
-
-- Implement more robust error handling and logging throughout the application
-- Add unit tests for each component to ensure reliability
-- Consider implementing a configuration file for easier customization of bot behavior
+## 5. Design Principles
+- Modular and extensible system
+- Each component handles a specific part of the job application process
+- Facade pattern (LinkedInBotFacade) provides a simplified interface for main application logic
+- Individual components (authenticator, job manager, easy applier) handle specific tasks

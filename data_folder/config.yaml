@@ -26,49 +26,49 @@ date:
   24 hours: true
 
 positions:
-  - New Grad Software Engineer
-  - New Grad Data Engineer
-  - New Grad Machine Learning Engineer
-  - New Grad AI Engineer
-  - New Grad Full Stack Developer
-  - New Grad Cloud Solutions Architect
-  - New Grad DevOps Engineer
-  - New Grad Research Scientist
-  - New Grad Data Scientist
-  - New Grad Product Manager (Technical)
-  - New Grad Data Analyst
+  # - New Grad Software Engineer
+  # - New Grad Data Engineer
+  # - New Grad Machine Learning Engineer
+  # - New Grad AI Engineer
+  # - New Grad Full Stack Developer
+  # - New Grad Cloud Solutions Architect
+  # - New Grad DevOps Engineer
+  # - New Grad Research Scientist
+  # - New Grad Data Scientist
+  # - New Grad Product Manager (Technical)
+  # - New Grad Data Analyst
 
 
   - Software Engineer
   - Data Engineer
-  - Data Scientist
-  - Machine Learning Engineer
-  - AI Research Scientist
-  - Full Stack Developer
-  - Cloud Solutions Architect
-  - DevOps Engineer
-  - Product Manager (Technical)
-  - Data Analyst
-  - Business Intelligence Analyst
-  - Backend Developer
-  - AI Engineer
-  - NLP Engineer
-  - Computer Vision Engineer
-  - Big Data Engineer
-  - Data Pipeline Engineer
-  - ETL Developer
-  - Data Architect
-  - Research Scientist
-  - Quantitative Analyst
-  - Data Visualization Specialist
-  - ML Ops Engineer
-  - Deep Learning Engineer
-  - Data Platform Engineer
-  - AI Product Manager
-  - Data Strategy Consultant
-  - Applied Scientist
-  - MLOps Engineer
-  - Cloud Data Engineer
+  # - Data Scientist
+  # - Machine Learning Engineer
+  # - AI Research Scientist
+  # - Full Stack Developer
+  # - Cloud Solutions Architect
+  # - DevOps Engineer
+  # - Product Manager (Technical)
+  # - Data Analyst
+  # - Business Intelligence Analyst
+  # - Backend Developer
+  # - AI Engineer
+  # - NLP Engineer
+  # - Computer Vision Engineer
+  # - Big Data Engineer
+  # - Data Pipeline Engineer
+  # - ETL Developer
+  # - Data Architect
+  # - Research Scientist
+  # - Quantitative Analyst
+  # - Data Visualization Specialist
+  # - ML Ops Engineer
+  # - Deep Learning Engineer
+  # - Data Platform Engineer
+  # - AI Product Manager
+  # - Data Strategy Consultant
+  # - Applied Scientist
+  # - MLOps Engineer
+  # - Cloud Data Engineer
 
 locations:
   - USA

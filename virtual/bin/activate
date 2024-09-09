@@ -1,5 +1,5 @@
 # This file must be used with "source bin/activate" *from bash*
-# You cannot run it directly
+# you cannot run it directly
 
 deactivate () {
     # reset old environment variables
@@ -14,9 +14,12 @@ deactivate () {
         unset _OLD_VIRTUAL_PYTHONHOME
     fi
 
-    # Call hash to forget past commands. Without forgetting
+    # This should detect bash and zsh, which have a hash command that must
+    # be called to get it to forget past commands.  Without forgetting
     # past commands the $PATH changes we made may not be respected
-    hash -r 2> /dev/null
+    if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
+        hash -r 2> /dev/null
+    fi
 
     if [ -n "${_OLD_VIRTUAL_PS1:-}" ] ; then
         PS1="${_OLD_VIRTUAL_PS1:-}"
@@ -35,15 +38,8 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-# on Windows, a path can contain colons and backslashes and has to be converted:
-if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
-    # transform D:\path\to\venv to /d/path/to/venv on MSYS
-    # and to /cygdrive/d/path/to/venv on Cygwin
-    export VIRTUAL_ENV=$(cygpath "/Users/rishabsingh/Documents/ai-resume-agent/linkedIn_auto_jobs_applier_with_AI/virtual")
-else
-    # use the path as-is
-    export VIRTUAL_ENV="/Users/rishabsingh/Documents/ai-resume-agent/linkedIn_auto_jobs_applier_with_AI/virtual"
-fi
+VIRTUAL_ENV="/Users/rishabsingh/Documents/ai-resume-agent/linkedIn_auto_jobs_applier_with_AI/virtual"
+export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
 PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -65,6 +61,9 @@ if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
     export VIRTUAL_ENV_PROMPT
 fi
 
-# Call hash to forget past commands. Without forgetting
+# This should detect bash and zsh, which have a hash command that must
+# be called to get it to forget past commands.  Without forgetting
 # past commands the $PATH changes we made may not be respected
-hash -r 2> /dev/null
+if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
+    hash -r 2> /dev/null
+fi

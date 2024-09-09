@@ -6,9 +6,9 @@ from itertools import product
 from pathlib import Path
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-import src.utils as utils
+import linkedIn_auto_jobs_applier_with_AI.srcfile.utils as utils
 from src.job import Job
-from src.linkedIn_easy_applier import LinkedInEasyApplier
+from linkedIn_auto_jobs_applier_with_AI.src.linkedin.linkedIn_easy_applier import LinkedInEasyApplier
 import json
 
 
@@ -206,3 +206,37 @@ class LinkedInJobManager:
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
         return title_blacklisted or company_blacklisted or link_seen
+
+    def search_jobs(self):
+        print("Searching for jobs...")
+        searches = list(product(self.positions, self.locations))
+        random.shuffle(searches)
+        jobs_found = []
+
+        for position, location in searches:
+            location_url = "&location=" + location
+            job_page_number = 1
+            utils.printyellow(f"Searching for {position} in {location}.")
+
+            while True:
+                utils.printyellow(f"Searching job page {job_page_number}")
+                self.next_job_page(position, location_url, job_page_number)
+                time.sleep(random.uniform(1.5, 3.5))
+                
+                try:
+                    job_list = self.get_job_list_from_page()
+                    if not job_list:
+                        break
+                    jobs_found.extend(job_list)
+                    job_page_number += 1
+                except Exception as e:
+                    utils.printred(f"Error while searching jobs: {str(e)}")
+                    break
+
+        return jobs_found
+
+    def get_job_list_from_page(self):
+        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        if not job_list_elements:
+            return []
+        return [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]

@@ -77,3 +77,12 @@ webdriver-manager==4.0.2
 wsproto==1.2.0
 xmod==1.8.1
 yarl==1.9.11
+annotated-types==0.7.0
+markdown-it-py==3.0.0
+mdurl==0.1.2
+pydantic==2.9.0
+pydantic_core==2.23.2
+Pygments==2.18.0
+rich==13.8.0
+typing_extensions==4.12.2
+tzdata==2024.1

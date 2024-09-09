@@ -74,4 +74,4 @@ class LinkedInBotFacade:
 
     def search_jobs(self):
         self.state.validate_state(['logged_in', 'parameters_set'])
-        return self.apply_component.search_jobs(self.parameters)
+        return self.apply_component.search_jobs()
