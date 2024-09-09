@@ -79,7 +79,7 @@ class AIAdapter:
         elif llm_model_type == "ollama":
             return OllamaModel(api_key, llm_model, llm_api_url)
         else:
-            raise ValueError(f"Unsupported model type: {model_type}")
+            raise ValueError(f"Unsupported model type: {llm_model_type}")
 
     def invoke(self, prompt: str) -> str:
         return self.model.invoke(prompt)
@@ -204,7 +204,7 @@ class LoggerChatModel:
         while True:
             try:
                 logger.debug("Attempting to call the LLM with messages")
-                reply = self.llm(messages)
+                reply = self.llm.invoke(messages)
                 logger.debug("LLM response received: %s", reply)
 
                 parsed_reply = self.parse_llmresult(reply)

@@ -47,10 +47,10 @@ class LinkedInJobManager:
     def set_parameters(self, parameters):
         logger.debug("Setting parameters for LinkedInJobManager")
         self.company_blacklist = parameters.get('company_blacklist', []) or []
-        self.title_blacklist = parameters.get('titleBlacklist', []) or []
+        self.title_blacklist = parameters.get('title_blacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
-        self.apply_once_at_company = parameters.get('applyOnceAtCompany', False)
+        self.apply_once_at_company = parameters.get('apply_once_at_company', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
 
@@ -120,8 +120,8 @@ class LinkedInJobManager:
                     if time_left > 0:
                         try:
                             user_input = inputimeout(
-                                prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 10 seconds : ",
-                                timeout=10).strip().lower()
+                                prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                                timeout=60).strip().lower()
                         except TimeoutOccurred:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
@@ -138,8 +138,8 @@ class LinkedInJobManager:
                         sleep_time = random.randint(5, 34)
                         try:
                             user_input = inputimeout(
-                                prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 10 seconds : ",
-                                timeout=10).strip().lower()
+                                prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                                timeout=60).strip().lower()
                         except TimeoutOccurred:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
@@ -160,8 +160,8 @@ class LinkedInJobManager:
             if time_left > 0:
                 try:
                     user_input = inputimeout(
-                        prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 10 seconds : ",
-                        timeout=10).strip().lower()
+                        prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                        timeout=60).strip().lower()
                 except TimeoutOccurred:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
@@ -179,7 +179,7 @@ class LinkedInJobManager:
                 try:
                     user_input = inputimeout(
                         prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ",
-                        timeout=10).strip().lower()
+                        timeout=60).strip().lower()
                 except TimeoutOccurred:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
@@ -370,7 +370,7 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
                              v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
@@ -429,7 +429,6 @@ class LinkedInJobManager:
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
         logger.debug("Job blacklisted status: %s", is_blacklisted)
-        return is_blacklisted
 
         return title_blacklisted or company_blacklisted or link_seen
 
