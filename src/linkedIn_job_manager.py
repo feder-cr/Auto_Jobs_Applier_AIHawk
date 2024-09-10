@@ -53,7 +53,7 @@ class LinkedInJobManager:
     def set_resume_generator_manager(self, resume_generator_manager):
         self.resume_generator_manager = resume_generator_manager
 
-    def start_applying(self):
+    def start_applying(self, applied_jobs):
         self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
@@ -74,7 +74,7 @@ class LinkedInJobManager:
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the application process for this page...")
-                    self.apply_jobs()
+                    self.apply_jobs(applied_jobs)
                     utils.printyellow("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
@@ -101,7 +101,7 @@ class LinkedInJobManager:
                 time.sleep(sleep_time)
                 page_sleep += 1
 
-    def apply_jobs(self):
+    def apply_jobs(self, applied_jobs):
         try:
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
@@ -117,6 +117,10 @@ class LinkedInJobManager:
             raise Exception("No job class elements found on page")
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:
+            if job.link in applied_jobs:
+                utils.printyellow(f"Already applied to {job.title} at {job.company}, skipping...")
+                self.write_to_file(job, "skipped")
+                continue
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                 self.write_to_file(job, "skipped")
@@ -124,6 +128,7 @@ class LinkedInJobManager:
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
                     self.easy_applier_component.job_apply(job)
+                    applied_jobs.add(job.link)
                     self.write_to_file(job, "success")
             except Exception as e:
                 utils.printred(traceback.format_exc())

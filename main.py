@@ -182,12 +182,11 @@ def create_and_run_bot(email: str, password: str, parameters: dict, openai_api_k
         bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
         bot.set_parameters(parameters)
         bot.start_login()
-        bot.start_apply()
+        bot.start_apply()  #No need to change this call now as the applied_jobs is managed internally
     except WebDriverException as e:
         print(f"WebDriver error occurred: {e}")
     except Exception as e:
         raise RuntimeError(f"Error running the bot: {str(e)}")
-
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")

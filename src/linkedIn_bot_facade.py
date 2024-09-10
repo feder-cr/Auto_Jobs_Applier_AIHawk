@@ -9,6 +9,7 @@ class LinkedInBotState:
         self.gpt_answerer_set = False
         self.parameters_set = False
         self.logged_in = False
+        self.applied_jobs = set()  #Track applied jobs to avoid duplicates
 
     def validate_state(self, required_keys):
         for key in required_keys:
@@ -62,7 +63,7 @@ class LinkedInBotFacade:
 
     def start_apply(self):
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
-        self.apply_component.start_applying()
+        self.apply_component.start_applying(self.state.applied_jobs)  #Pass the applied jobs set
 
     def _validate_non_empty(self, value, name):
         if not value:
