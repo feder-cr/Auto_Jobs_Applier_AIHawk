@@ -153,7 +153,7 @@ This file contains sensitive information. Never share or commit this file to ver
   - Replace with your LinkedIn account email address
 - `password: [Your LinkedIn password]`
   - Replace with your LinkedIn account password
-- `llm_api_key: [Your OpenAI or Ollama API key]`
+- `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
@@ -162,6 +162,7 @@ This file contains sensitive information. Never share or commit this file to ver
     `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
     OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
+  - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
 
 ### 2. config.yaml
@@ -225,17 +226,19 @@ This file defines your job search parameters and bot behavior. Each section cont
 #### 2.1 config.yaml - Customize LLM model endpoint
 
 - `llm_model_type`:
-  - Choose the model type, supported: openai / ollama / claude
+  - Choose the model type, supported: openai / ollama / claude / gemini
 - `llm_model`: 
   - Choose the LLM model, currently supported: 
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
     - claude: any model 
+    - gemini: any model
 - `llm_api_url`: 
   - Link of the API endpoint for the LLM model
     - openai: https://api.pawan.krd/cosmosrp/v1
     - ollama: http://127.0.0.1:11434/
     - claude: https://api.anthropic.com/v1
+    - gemini: no api_url
  - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
