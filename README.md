@@ -234,17 +234,17 @@ Each section has specific fields to fill out:
   - Example
   ```yaml
   personal_information:
-    name: "Jane"
-    surname: "Doe"
-    date_of_birth: "01/01/1990"
-    country: "USA"
-    city: "New York"
-    address: "123 Main St"
-    phone_prefix: "+1"
-    phone: "5551234567"
-    email: "jane.doe@example.com"
-    github: "https://github.com/janedoe"
-    linkedin: "https://www.linkedin.com/in/janedoe/"
+    name: "[Your Name]"
+    surname: "[Your Surname]"
+    date_of_birth: "[Your Date of Birth]"
+    country: "[Your Country]"
+    city: "[Your City]"
+    address: "[Your Address]"
+    phone_prefix: "[Your Phone Prefix]"
+    phone: "[Your Phone Number]"
+    email: "[Your Email Address]"
+    github: "[Your GitHub Profile URL]"
+    linkedin: "[Your LinkedIn Profile URL]"
   ```
 
 - `education_details:`
@@ -260,18 +260,19 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   education_details:
-    - education_level: "Bachelor's Degree"
-      institution: "University of Example"
-      field_of_study: "Software Engineering"
-      final_evaluation_grade: "4/4"
-      start_date: "2021"
-      year_of_completion: "2023"
+    - education_level: "[Your Education Level]"
+      institution: "[Your Institution]"
+      field_of_study: "[Your Field of Study]"
+      final_evaluation_grade: "[Your Final Evaluation Grade]"
+      start_date: "[Start Date]"
+      year_of_completion: "[Year of Completion]"
       exam:
-        Algorithms: "A"
-        Data Structures: "B+"
-        Database Systems: "A"
-        Operating Systems: "A-"
-        Web Development: "B"
+        exam_name_1: "[Grade]"
+        exam_name_2: "[Grade]"
+        exam_name_3: "[Grade]"
+        exam_name_4: "[Grade]"
+        exam_name_5: "[Grade]"
+        exam_name_6: "[Grade]"
   ```
 
 - `experience_details:`
@@ -287,19 +288,32 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   experience_details:
-    - position: "Software Developer"
-      company: "Tech Innovations Inc."
-      employment_period: "06/2021 - Present"
-      location: "San Francisco, CA"
-      industry: "Technology"
+    - position: "[Your Position]"
+      company: "[Company Name]"
+      employment_period: "[Employment Period]"
+      location: "[Location]"
+      industry: "[Industry]"
       key_responsibilities:
-        - "Developed web applications using React and Node.js"
-        - "Collaborated with cross-functional teams to design and implement new features"
-        - "Troubleshot and resolved complex software issues"
+        - responsibility_1: "[Responsibility Description]"
+        - responsibility_2: "[Responsibility Description]"
+        - responsibility_3: "[Responsibility Description]"
       skills_acquired:
-        - "React"
-        - "Node.js"
-        - "Software Troubleshooting"
+        - "[Skill]"
+        - "[Skill]"
+        - "[Skill]"
+    - position: "[Your Position]"
+      company: "[Company Name]"
+      employment_period: "[Employment Period]"
+      location: "[Location]"
+      industry: "[Industry]"
+      key_responsibilities:
+        - responsibility_1: "[Responsibility Description]"
+        - responsibility_2: "[Responsibility Description]"
+        - responsibility_3: "[Responsibility Description]"
+      skills_acquired:
+        - "[Skill]"
+        - "[Skill]"
+        - "[Skill]"
   ```
 
 - `projects:`
@@ -311,12 +325,13 @@ Each section has specific fields to fill out:
    - Example:
     ```yaml
     projects:
-      - name: "Weather App"
-        description: "A web application that provides real-time weather information using a third-party API."
-        link: "https://github.com/janedoe/weather-app"
-      - name: "Task Manager"
-        description: "A task management tool with features for tracking and prioritizing tasks."
-        link: "https://github.com/janedoe/task-manager"
+    - name: "[Project Name]"
+      description: "[Project Description]"
+      link: "[Project Link]"
+
+    - name: "[Project Name]"
+      description: "[Project Description]"
+      link: "[Project Link]"
     ```
 
 - `achievements:`
@@ -327,10 +342,10 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   achievements:
-    - name: "Employee of the Month"
-      description: "Recognized for exceptional performance and contributions to the team."
-    - name: "Hackathon Winner"
-      description: "Won first place in a national hackathon competition."
+    - name: "[Achievement Name]"
+      description: "[Achievement Description]"
+    - name: "[Achievement Name]"
+      description: "[Achievement Description]"
   ```
 
 - `certifications:`
@@ -341,8 +356,10 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   certifications:
-    - "Certified Scrum Master"
-    - "AWS Certified Solutions Architect"
+    - name: "[Certification Name]"
+      description: "[Certification Description]"
+    - name: "[Certification Name]"
+      description: "[Certification Description]"
   ```
 
 - `languages:`
@@ -353,10 +370,10 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   languages:
-    - language: "English"
-      proficiency: "Fluent"
-    - language: "Spanish"
-      proficiency: "Intermediate"
+    - language: "[Language]"
+      proficiency: "[Proficiency Level]"
+    - language: "[Language]"
+      proficiency: "[Proficiency Level]"
   ```
 
 - `interests:`
@@ -367,11 +384,9 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   interests:
-    - "Machine Learning"
-    - "Cybersecurity"
-    - "Open Source Projects"
-    - "Digital Marketing"
-    - "Entrepreneurship"
+    - "[Interest]"
+    - "[Interest]"
+    - "[Interest]"
   ```
 
 - `availability:`
@@ -381,7 +396,7 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   availability:
-    notice_period: "2 weeks"
+    notice_period: "[Notice Period]"
   ```
 
 - `salary_expectations:`
@@ -391,7 +406,7 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   salary_expectations:
-    salary_range_usd: "80000 - 100000"
+    salary_range_usd: "[Salary Range]"
   ```
 
 - `self_identification:`
@@ -405,11 +420,11 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   self_identification:
-    gender: "Female"
-    pronouns: "She/Her"
-    veteran: "No"
-    disability: "No"
-    ethnicity: "Asian"
+    gender: "[Gender]"
+    pronouns: "[Pronouns]"
+    veteran: "[Yes/No]"
+    disability: "[Yes/No]"
+    ethnicity: "[Ethnicity]"
   ```
 
 - `legal_authorization:`
@@ -426,14 +441,14 @@ Each section has specific fields to fill out:
   - Example:
      ```yaml
      legal_authorization:
-       eu_work_authorization: "Yes"
-       us_work_authorization: "No"
-       requires_us_visa: "Yes"
-       requires_us_sponsorship: "Yes"
-       requires_eu_visa: "No"
-       legally_allowed_to_work_in_eu: "Yes"
-       legally_allowed_to_work_in_us: "No"
-       requires_eu_sponsorship: "No"
+       eu_work_authorization: "[Yes/No]"
+       us_work_authorization: "[Yes/No]"
+       requires_us_visa: "[Yes/No]"
+       requires_us_sponsorship: "[Yes/No]"
+       requires_eu_visa: "[Yes/No]"
+       legally_allowed_to_work_in_eu: "[Yes/No]"
+       legally_allowed_to_work_in_us: "[Yes/No]"
+       requires_eu_sponsorship: "[Yes/No]"
      ```
 
 - `work_preferences:`
@@ -448,12 +463,12 @@ Each section has specific fields to fill out:
   - Example:
   ```yaml
   work_preferences:
-    remote_work: "Yes"
-    in_person_work: "No"
-    open_to_relocation: "Yes"
-    willing_to_complete_assessments: "Yes"
-    willing_to_undergo_drug_tests: "No"
-    willing_to_undergo_background_checks: "Yes"
+    remote_work: "[Yes/No]"
+    in_person_work: "[Yes/No]"
+    open_to_relocation: "[Yes/No]"
+    willing_to_complete_assessments: "[Yes/No]"
+    willing_to_undergo_drug_tests: "[Yes/No]"
+    willing_to_undergo_background_checks: "[Yes/No]"
   ```
 
 ### PLUS. data_folder_example
