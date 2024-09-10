@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
-from src.utils import chromeBrowserOptions
+from src.utils import chrome_browser_options
 from src.gpt import GPTAnswerer
 from src.linkedIn_authenticator import LinkedInAuthenticator
 from src.linkedIn_bot_facade import LinkedInBotFacade
@@ -149,7 +149,7 @@ class FileManager:
 
 def init_browser() -> webdriver.Chrome:
     try:
-        options = chromeBrowserOptions()
+        options = chrome_browser_options()
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
     except Exception as e:

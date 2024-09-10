@@ -8,7 +8,7 @@ import traceback
 from typing import List, Optional, Any, Tuple
 
 from httpx import HTTPStatusError
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
@@ -37,7 +37,6 @@ class LinkedInEasyApplier:
 
         logger.debug("LinkedInEasyApplier initialized successfully")
 
-
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
         logger.debug("Loading questions from JSON file: %s", output_file)
@@ -60,10 +59,8 @@ class LinkedInEasyApplier:
             logger.error("Error loading questions data from JSON file: %s", tb_str)
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
-
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
-        """Проверяет, был ли выполнен редирект на страницу LinkedIn Premium.
-        В случае редиректа возвращает пользователя на исходную страницу вакансии."""
+
         current_url = self.driver.current_url
         attempts = 0
 
@@ -79,7 +76,6 @@ class LinkedInEasyApplier:
             logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
-
 
     def job_apply(self, job: Any):
         logger.debug("Starting job application for job: %s", job)
@@ -167,7 +163,7 @@ class LinkedInEasyApplier:
                     logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
-                        # Поиск всех кнопок "Easy Apply"
+
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
@@ -209,7 +205,6 @@ class LinkedInEasyApplier:
         logger.error("No clickable 'Easy Apply' button found after 2 attempts. Page source:\n%s", page_source)
         raise Exception("No clickable 'Easy Apply' button found")
 
-        
     def _get_job_description(self) -> str:
         logger.debug("Getting job description")
         try:
@@ -514,11 +509,47 @@ class LinkedInEasyApplier:
                 file_path_pdf = os.path.join(folder_path, f"Cover_Letter_{timestamp}.pdf")
                 logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
 
-                c = canvas.Canvas(file_path_pdf, pagesize=letter)
-                _, height = letter
-                text_object = c.beginText(100, height - 100)
+                c = canvas.Canvas(file_path_pdf, pagesize=A4)
+                page_width, page_height = A4
+                text_object = c.beginText(50, page_height - 50)
                 text_object.setFont("Helvetica", 12)
-                text_object.textLines(cover_letter_text)
+
+                max_width = page_width - 100
+                bottom_margin = 50
+                available_height = page_height - bottom_margin - 50
+
+                def split_text_by_width(text, font, font_size, max_width):
+                    wrapped_lines = []
+                    for line in text.splitlines():
+
+                        if utils.stringWidth(line, font, font_size) > max_width:
+                            words = line.split()
+                            new_line = ""
+                            for word in words:
+                                if utils.stringWidth(new_line + word + " ", font, font_size) <= max_width:
+                                    new_line += word + " "
+                                else:
+                                    wrapped_lines.append(new_line.strip())
+                                    new_line = word + " "
+                            wrapped_lines.append(new_line.strip())
+                        else:
+                            wrapped_lines.append(line)
+                    return wrapped_lines
+
+                lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
+
+                for line in lines:
+                    text_height = text_object.getY()
+                    if text_height > bottom_margin:
+                        text_object.textLine(line)
+                    else:
+
+                        c.drawText(text_object)
+                        c.showPage()
+                        text_object = c.beginText(50, page_height - 50)
+                        text_object.setFont("Helvetica", 12)
+                        text_object.textLine(line)
+
                 c.drawText(text_object)
                 c.save()
                 logger.debug(f"Cover letter successfully generated and saved to: {file_path_pdf}")
@@ -632,7 +663,6 @@ class LinkedInEasyApplier:
 
             for item in self.all_data:
 
-
                 logger.debug(
                     f"Comparing sanitized stored question: '{self._sanitize_text(item['question'])}' and type: '{item.get('type')}' with current question: '{self._sanitize_text(question_text)}' and type: '{question_type}'")
 
@@ -658,7 +688,6 @@ class LinkedInEasyApplier:
             else:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                 logger.debug(f"Generated textual answer: {answer}")
-
 
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
@@ -692,7 +721,6 @@ class LinkedInEasyApplier:
                 logger.debug("Entered existing date answer")
                 return True
 
-
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
@@ -701,18 +729,21 @@ class LinkedInEasyApplier:
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
         try:
-
             question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
-            question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
-            logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
             dropdowns = question.find_elements(By.TAG_NAME, 'select')
+            if not dropdowns:
+                dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
+
             if dropdowns:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
                 options = [option.text for option in select.options]
 
                 logger.debug(f"Dropdown options found: {options}")
+
+                question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
+                logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
                 current_selection = select.first_selected_option.text
                 logger.debug(f"Current selection: {current_selection}")
@@ -738,9 +769,15 @@ class LinkedInEasyApplier:
                 logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
 
-            return False
+            else:
+
+                logger.debug(f"No dropdown found. Logging elements for debugging.")
+                elements = section.find_elements(By.XPATH, ".//*")
+                logger.debug(f"Elements found: {[element.tag_name for element in elements]}")
+                return False
+
         except Exception as e:
-            logger.warning(f"Failed to handle dropdown or combobox question: {e}")
+            logger.warning(f"Failed to handle dropdown or combobox question: {e}", exc_info=True)
             return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:

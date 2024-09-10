@@ -8,7 +8,7 @@ from selenium import webdriver
 log_file = "app_log.log"
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_file, mode='a', encoding='utf-8'),
@@ -22,7 +22,7 @@ file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
@@ -90,7 +90,13 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
                 return
 
             position = start
+            previous_position = None  # Tracking the previous position to avoid duplicate scrolls
             while (step > 0 and position < end) or (step < 0 and position > end):
+                if position == previous_position:
+                    # Avoid re-scrolling to the same position
+                    logger.debug("Stopping scroll as position hasn't changed: %d", position)
+                    break
+
                 try:
                     driver.execute_script(script_scroll_to, scrollable_element, position)
                     logger.debug("Scrolled to position: %d", position)
@@ -98,11 +104,15 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
                     logger.error("Error during scrolling: %s", e)
                     print(f"Error during scrolling: {e}")
 
+                previous_position = position
                 position += step
+
+                # Decrease the step but ensure it doesn't reverse direction
                 step = max(10, abs(step) - 10) * (-1 if reverse else 1)
 
                 time.sleep(random.uniform(0.6, 1.5))
 
+            # Ensure the final scroll position is correct
             driver.execute_script(script_scroll_to, scrollable_element, end)
             logger.debug("Scrolled to final position: %d", end)
             time.sleep(0.5)

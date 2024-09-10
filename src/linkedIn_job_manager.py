@@ -5,6 +5,7 @@ import time
 from itertools import product
 from pathlib import Path
 
+from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -45,13 +46,18 @@ class LinkedInJobManager:
 
     def set_parameters(self, parameters):
         logger.debug("Setting parameters for LinkedInJobManager")
-        self.company_blacklist = parameters.get('companyBlacklist', []) or []
-        self.title_blacklist = parameters.get('titleBlacklist', []) or []
+        self.company_blacklist = parameters.get('company_blacklist', []) or []
+        self.title_blacklist = parameters.get('title_blacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
-        self.apply_once_at_company = parameters.get('applyOnceAtCompany', False)
+        self.apply_once_at_company = parameters.get('apply_once_at_company', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
+
+        job_applicants_threshold = parameters.get('job_applicants_threshold', {})
+        self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
+        self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
+
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
         self.output_file_directory = Path(parameters['outputFileDirectory'])
@@ -109,32 +115,80 @@ class LinkedInJobManager:
                     utils.printyellow("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
+
+                    # Ask user if they want to skip waiting, with timeout
                     if time_left > 0:
-                        utils.printyellow(f"Sleeping for {time_left} seconds.")
-                        logger.debug("Sleeping for %d seconds", time_left)
-                        time.sleep(time_left)
-                        minimum_page_time = time.time() + minimum_time
+                        try:
+                            user_input = inputimeout(
+                                prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                                timeout=60).strip().lower()
+                        except TimeoutOccurred:
+                            user_input = ''  # No input after timeout
+                        if user_input == 'y':
+                            logger.debug("User chose to skip waiting.")
+                            utils.printyellow("User skipped waiting.")
+                        else:
+                            logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
+                            utils.printyellow(f"Sleeping for {time_left} seconds.")
+                            time.sleep(time_left)
+
+                    minimum_page_time = time.time() + minimum_time
+
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
-                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                        logger.debug("Sleeping for %d seconds", sleep_time)
-                        time.sleep(sleep_time)
+                        try:
+                            user_input = inputimeout(
+                                prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                                timeout=60).strip().lower()
+                        except TimeoutOccurred:
+                            user_input = ''  # No input after timeout
+                        if user_input == 'y':
+                            logger.debug("User chose to skip waiting.")
+                            utils.printyellow("User skipped waiting.")
+                        else:
+                            logger.debug(f"Sleeping for {sleep_time} seconds.")
+                            utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                            time.sleep(sleep_time)
                         page_sleep += 1
             except Exception as e:
                 logger.error("Unexpected error during job search: %s", e)
                 utils.printred(f"Unexpected error: {e}")
                 continue
+
             time_left = minimum_page_time - time.time()
+
             if time_left > 0:
-                utils.printyellow(f"Sleeping for {time_left} seconds.")
-                logger.debug("Sleeping for %d seconds", time_left)
-                time.sleep(time_left)
-                minimum_page_time = time.time() + minimum_time
+                try:
+                    user_input = inputimeout(
+                        prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                        timeout=60).strip().lower()
+                except TimeoutOccurred:
+                    user_input = ''  # No input after timeout
+                if user_input == 'y':
+                    logger.debug("User chose to skip waiting.")
+                    utils.printyellow("User skipped waiting.")
+                else:
+                    logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
+                    utils.printyellow(f"Sleeping for {time_left} seconds.")
+                    time.sleep(time_left)
+
+            minimum_page_time = time.time() + minimum_time
+
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                logger.debug("Sleeping for %d seconds", sleep_time)
-                time.sleep(sleep_time)
+                try:
+                    user_input = inputimeout(
+                        prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ",
+                        timeout=60).strip().lower()
+                except TimeoutOccurred:
+                    user_input = ''  # No input after timeout
+                if user_input == 'y':
+                    logger.debug("User chose to skip waiting.")
+                    utils.printyellow("User skipped waiting.")
+                else:
+                    logger.debug(f"Sleeping for {sleep_time} seconds.")
+                    utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                    time.sleep(sleep_time)
                 page_sleep += 1
 
     def get_jobs_from_page(self):
@@ -183,16 +237,82 @@ class LinkedInJobManager:
             pass
 
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        utils.scroll_slow(self.driver, job_results)
-        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        # utils.scroll_slow(self.driver, job_results)
+        # utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
             0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+
         if not job_list_elements:
             utils.printyellow("No job class elements found on page, moving to next page.")
             logger.debug("No job class elements found on page, skipping")
             return
+
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
+
         for job in job_list:
+
+            try:
+                logger.debug(f"Starting applicant count search for job: {job.title} at {job.company}")
+
+                # Find all job insight elements
+                job_insight_elements = self.driver.find_elements(By.CLASS_NAME,
+                                                                 "job-details-jobs-unified-top-card__job-insight")
+                logger.debug(f"Found {len(job_insight_elements)} job insight elements")
+
+                # Initialize applicants_count as None
+                applicants_count = None
+
+                # Iterate over each job insight element to find the one containing the word "applicant"
+                for element in job_insight_elements:
+                    logger.debug(f"Checking element text: {element.text}")
+                    if "applicant" in element.text.lower():
+                        # Found an element containing "applicant"
+                        applicants_text = element.text.strip()
+                        logger.debug(f"Applicants text found: {applicants_text}")
+
+                        # Extract numeric digits from the text (e.g., "70 applicants" -> "70")
+                        applicants_count = ''.join(filter(str.isdigit, applicants_text))
+                        logger.debug(f"Extracted applicants count: {applicants_count}")
+
+                        if applicants_count:
+                            if "over" in applicants_text.lower():
+                                applicants_count = int(applicants_count) + 1  # Handle "over X applicants"
+                                logger.debug(f"Applicants count adjusted for 'over': {applicants_count}")
+                            else:
+                                applicants_count = int(applicants_count)  # Convert the extracted number to an integer
+                        break
+
+                # Check if applicants_count is valid (not None) before performing comparisons
+                if applicants_count is not None:
+                    # Perform the threshold check for applicants count
+                    if applicants_count < self.min_applicants or applicants_count > self.max_applicants:
+                        utils.printyellow(
+                            f"Skipping {job.title} at {job.company} due to applicants count: {applicants_count}")
+                        logger.debug(f"Skipping {job.title} at {job.company}, applicants count: {applicants_count}")
+                        self.write_to_file(job, "skipped_due_to_applicants")
+                        continue  # Skip this job if applicants count is outside the threshold
+                    else:
+                        logger.debug(f"Applicants count {applicants_count} is within the threshold")
+                else:
+                    # If no applicants count was found, log a warning but continue the process
+                    logger.warning(
+                        f"Applicants count not found for {job.title} at {job.company}, continuing with application.")
+            except NoSuchElementException:
+                # Log a warning if the job insight elements are not found, but do not stop the job application process
+                logger.warning(
+                    f"Applicants count elements not found for {job.title} at {job.company}, continuing with application.")
+            except ValueError as e:
+                # Handle errors when parsing the applicants count
+                logger.error(f"Error parsing applicants count for {job.title} at {job.company}: {e}")
+            except Exception as e:
+                # Catch any other exceptions to ensure the process continues
+                logger.error(
+                    f"Unexpected error during applicants count processing for {job.title} at {job.company}: {e}")
+
+            # Continue with the job application process regardless of the applicants count check
+            logger.debug(f"Continuing with job application for {job.title} at {job.company}")
+
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
                 logger.debug("Job blacklisted: %s at %s", job.title, job.company)
@@ -200,7 +320,7 @@ class LinkedInJobManager:
                 continue
             if self.is_already_applied_to_job(job.title, job.company, job.link):
                 self.write_to_file(job, "skipped")
-                continue            
+                continue
             if self.is_already_applied_to_company(job.company):
                 self.write_to_file(job, "skipped")
                 continue
@@ -250,7 +370,7 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experienceLevel', {}).items()) if
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
                              v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
@@ -307,10 +427,8 @@ class LinkedInJobManager:
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
-
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
         logger.debug("Job blacklisted status: %s", is_blacklisted)
-        return is_blacklisted
 
         return title_blacklisted or company_blacklisted or link_seen
 
@@ -322,8 +440,8 @@ class LinkedInJobManager:
 
     def is_already_applied_to_company(self, company):
         if not self.apply_once_at_company:
-            return False  
-        
+            return False
+
         output_files = ["success.json"]
         for file_name in output_files:
             file_path = self.output_file_directory / file_name
@@ -333,9 +451,9 @@ class LinkedInJobManager:
                         existing_data = json.load(f)
                         for applied_job in existing_data:
                             if applied_job['company'].strip().lower() == company.strip().lower():
-                                utils.printyellow(f"Already applied at {company} (once per company policy), skipping...")
+                                utils.printyellow(
+                                    f"Already applied at {company} (once per company policy), skipping...")
                                 return True
                     except json.JSONDecodeError:
                         continue
         return False
-
