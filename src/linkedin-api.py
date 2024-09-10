@@ -1,7 +1,7 @@
 from typing import Dict, List
 from linkedin_api import Linkedin
 from typing import Optional, Union, Literal
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, parse_qs, urlparse
 import logging
 import json
 
@@ -353,10 +353,134 @@ class LinkedInEvolvedAPI(Linkedin):
 
         # Push the commit to the repository and create a pull request to the v3 branch.
         
+    def create_request_pdf(self, filename: str) -> str | None:
+        """
+        Create a PDF file with the request data.
+        :param filename: Name of the file
+        :type filename: str | None
+        :return: URL of the file uploaded to the LinkedIn.
+        """
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        default_params = {
+            'action': 'requestUrl'
+        }
+
+        res = self._post(
+            f"/voyagerJobsDashAmbryUploadUrls",
+            headers=headers,
+            cookies=cookies,
+            json={"contentType":"PDF","filename":"200.pdf","maxSizeBytes":18810},
+            params=default_params
+        )
+
+
+        match res.status_code:
+            case 200:
+                parse_res = res.json()
+                url = parse_res['data']['value']
+                logging.info(url)
+                return url
+            case _:
+                self.logger.error("Failed to create a request PDF")
+                return None
+            
+    def upload_resume_via_ambry(self, url: str, cv_path: str) -> bool | str:
+        """
+        Upload resume via Ambry.
+        :param url: URL of the file uploaded to the LinkedIn.
+        :type url: str
+        :param raw_cv: Raw CV data
+        :type raw_cv: bytes
+        :return: PDF hash.pdf or false
+        """
+        binary_cv: bytes = self.file_to_binary(cv_path)
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        ambry_url = url.replace("https://www.linkedin.com", "")
+        
+        res = self._post(
+            ambry_url,
+            base_request=True,
+            headers=headers,
+            cookies=cookies,
+            data=binary_cv,
+        )
+
+        match res.status_code:
+            case 201:
+                return res.headers['Location']
+            case _:
+                self.logger.error("Failed to upload resume via Ambry")
+                return False
+            
+    def confirm_upload_resume(self, cv_hash: str) -> bool:
+        """
+        Upload resume.
+        :param cv_hash: PDF hash
+        :type cv_hash: str
+        :return: True if success, False if failed
+        """
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        json_data = {'entityUrn': f'urn:li:fsd_resume:{cv_hash}'}
+        res = self._post(
+            "/voyagerJobsDashResumes",
+            headers=headers,
+            cookies=cookies,
+            json=json_data,
+        )
+
+        match res.status_code:
+            case 201:
+                return True
+            case _:
+                self.logger.error("Failed to upload resume")
+                return False
+            
+    def file_to_binary(self, file_path):
+        with open(file_path, 'rb') as file:
+            binary_data = file.read()
+        return binary_data
+
     def set_job_as_applied(self, job_id: str) -> None:
         self.already_applied_jobs.append(job_id)
 
-        
+    def upload_linkedin_resume(self, cv_path: str) -> str | bool:
+        url = self.create_request_pdf("resume.pdf")
+        if url:
+            cv_hash = self.upload_resume_via_ambry(url, cv_path)
+            if cv_hash:
+                self.confirm_upload_resume(cv_hash)
+                return cv_hash
+        return False
             
 
 
@@ -364,12 +488,22 @@ class LinkedInEvolvedAPI(Linkedin):
 
 ## EXAMPLE USAGE
 if __name__ == "__main__":
-    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")  
+    
+    api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")
     jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=100, easy_apply=True, offset=1, listed_at=None)
     for job in jobs:
         job_id: str = job["job_id"]
-        print(f"Job ID: {job_id}")
-        continue
+
+        resume: str = api.upload_linkedin_resume("resume.pdf")
+        if isinstance(resume, bool):
+            logging.error("Failed to upload resume")
+            continue
+        elif isinstance(resume, str):
+            logging.info(f"Resume uploaded with hash {resume}")
+        else:
+            logging.error("Unknown error")
+            continue
+
 
         if job_id in api.already_applied_jobs:
             logging.info(f"Already applied to job {job_id}, skipping it")
@@ -378,6 +512,7 @@ if __name__ == "__main__":
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
             print(field)
+
         break
 
         
