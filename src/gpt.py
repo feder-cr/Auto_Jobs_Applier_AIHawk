@@ -62,6 +62,16 @@ class OllamaModel(AIModel):
         return response
 
 
+class GeminiModel(AIModel):
+    def __init__(self, api_key:str, llm_model: str, llm_api_url: str):
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        self.model = ChatGoogleGenerativeAI(model=llm_model, google_api_key=api_key)
+
+    def invoke(self, prompt: str) -> str:
+        response = self.model.invoke(prompt)
+        return response
+
+
 class AIAdapter:
     def __init__(self, config: dict, api_key: str):
         self.model = self._create_model(config, api_key)
@@ -79,6 +89,8 @@ class AIAdapter:
             return ClaudeModel(api_key, llm_model, llm_api_url)
         elif llm_model_type == "ollama":
             return OllamaModel(api_key, llm_model, llm_api_url)
+        elif llm_model_type == "gemini":
+            return GeminiModel(api_key, llm_model, llm_api_url)
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
 
@@ -88,7 +100,7 @@ class AIAdapter:
 
 class LLMLogger:
 
-    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel, GeminiModel]):
 
         self.llm = llm
         logger.debug("LLMLogger successfully initialized with LLM: %s", llm)
@@ -203,7 +215,7 @@ class LLMLogger:
 
 class LoggerChatModel:
 
-    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel]):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel, GeminiModel]):
         self.llm = llm
         logger.debug(
             "LoggerChatModel successfully initialized with LLM: %s", llm)
@@ -494,8 +506,7 @@ class GPTAnswerer:
         if resume_section is None:
             logger.error(
                 "Section '%s' not found in either resume or job_application_profile.", section_name)
-            raise ValueError(f"Section '{
-                             section_name}' not found in either resume or job_application_profile.")
+            raise ValueError(f"Section '{section_name}' not found in either resume or job_application_profile.")
         chain = chains.get(section_name)
         if chain is None:
             logger.error("Chain not defined for section '%s'", section_name)
