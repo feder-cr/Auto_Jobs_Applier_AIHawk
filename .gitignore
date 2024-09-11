@@ -153,3 +153,5 @@ data_folder/output/*
 generated_cv/*
 chrome_profile/*
 answers.json
+
+virtual/*
