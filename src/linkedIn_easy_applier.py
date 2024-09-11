@@ -76,6 +76,20 @@ class LinkedInEasyApplier:
             logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+            
+    def apply_to_job(self, job: Any) -> None:
+        """
+        Starts the process of applying to a job.
+        :param job: A job object with the job details.
+        :return: None
+        """
+        logger.debug(f"Applying to job: {job}")
+        try:
+            self.job_apply(job)
+            logger.info(f"Successfully applied to job: {job.title}")
+        except Exception as e:
+            logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
+            raise e
 
     def job_apply(self, job: Any):
         logger.debug("Starting job application for job: %s", job)
