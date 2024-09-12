@@ -72,10 +72,28 @@ class LinkedInJobManager:
         logger.debug("Setting resume generator manager")
         self.resume_generator_manager = resume_generator_manager
 
+    def wait_or_skip(self, time_left):
+        """Method for waiting or skipping the sleep time based on user input"""
+        if time_left > 0:
+            try:
+                user_input = inputimeout(
+                    prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
+                    timeout=60).strip().lower()
+            except TimeoutOccurred:
+                user_input = ''  # No input after timeout
+            if user_input == 'y':
+                logger.debug("User chose to skip waiting.")
+                utils.printyellow("User skipped waiting.")
+            else:
+                logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
+                utils.printyellow(f"Sleeping for {time_left} seconds.")
+                time.sleep(time_left)
+
     def start_applying(self):
         logger.debug("Starting job application process")
         self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers,
-                                                          self.gpt_answerer, self.resume_generator_manager)
+                                                          self.gpt_answerer, self.resume_generator_manager,
+                                                          self.parameters)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
@@ -116,39 +134,15 @@ class LinkedInJobManager:
 
                     time_left = minimum_page_time - time.time()
 
-                    # Ask user if they want to skip waiting, with timeout
-                    if time_left > 0:
-                        try:
-                            user_input = inputimeout(
-                                prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                                timeout=60).strip().lower()
-                        except TimeoutOccurred:
-                            user_input = ''  # No input after timeout
-                        if user_input == 'y':
-                            logger.debug("User chose to skip waiting.")
-                            utils.printyellow("User skipped waiting.")
-                        else:
-                            logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
-                            utils.printyellow(f"Sleeping for {time_left} seconds.")
-                            time.sleep(time_left)
+                    # Use the wait_or_skip function for sleeping
+                    self.wait_or_skip(time_left)
 
                     minimum_page_time = time.time() + minimum_time
 
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
-                        try:
-                            user_input = inputimeout(
-                                prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                                timeout=60).strip().lower()
-                        except TimeoutOccurred:
-                            user_input = ''  # No input after timeout
-                        if user_input == 'y':
-                            logger.debug("User chose to skip waiting.")
-                            utils.printyellow("User skipped waiting.")
-                        else:
-                            logger.debug(f"Sleeping for {sleep_time} seconds.")
-                            utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                            time.sleep(sleep_time)
+                        # Use the wait_or_skip function for extended sleep
+                        self.wait_or_skip(sleep_time)
                         page_sleep += 1
             except Exception as e:
                 logger.error("Unexpected error during job search: %s", e)
@@ -157,38 +151,15 @@ class LinkedInJobManager:
 
             time_left = minimum_page_time - time.time()
 
-            if time_left > 0:
-                try:
-                    user_input = inputimeout(
-                        prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                        timeout=60).strip().lower()
-                except TimeoutOccurred:
-                    user_input = ''  # No input after timeout
-                if user_input == 'y':
-                    logger.debug("User chose to skip waiting.")
-                    utils.printyellow("User skipped waiting.")
-                else:
-                    logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
-                    utils.printyellow(f"Sleeping for {time_left} seconds.")
-                    time.sleep(time_left)
+            # Use the wait_or_skip function again before moving to the next search
+            self.wait_or_skip(time_left)
 
             minimum_page_time = time.time() + minimum_time
 
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                try:
-                    user_input = inputimeout(
-                        prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ",
-                        timeout=60).strip().lower()
-                except TimeoutOccurred:
-                    user_input = ''  # No input after timeout
-                if user_input == 'y':
-                    logger.debug("User chose to skip waiting.")
-                    utils.printyellow("User skipped waiting.")
-                else:
-                    logger.debug(f"Sleeping for {sleep_time} seconds.")
-                    utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                    time.sleep(sleep_time)
+                # Use the wait_or_skip function for a longer sleep period
+                self.wait_or_skip(sleep_time)
                 page_sleep += 1
 
     def get_jobs_from_page(self):
@@ -207,7 +178,7 @@ class LinkedInJobManager:
         try:
             job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
             utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+            # utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
             job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
                 0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
@@ -265,23 +236,32 @@ class LinkedInJobManager:
 
                 # Iterate over each job insight element to find the one containing the word "applicant"
                 for element in job_insight_elements:
-                    logger.debug(f"Checking element text: {element.text}")
-                    if "applicant" in element.text.lower():
-                        # Found an element containing "applicant"
-                        applicants_text = element.text.strip()
-                        logger.debug(f"Applicants text found: {applicants_text}")
+                    applicants_text = element.text.strip().lower()
+                    logger.debug(f"Checking element text: {applicants_text}")
 
-                        # Extract numeric digits from the text (e.g., "70 applicants" -> "70")
+                    # Look for keywords indicating the presence of applicants count
+                    if "applicant" in applicants_text:
+                        logger.info(f"Applicants text found: {applicants_text}")
+
+                        # Try to find numeric value in the text, such as "27 applicants" or "over 100 applicants"
                         applicants_count = ''.join(filter(str.isdigit, applicants_text))
-                        logger.debug(f"Extracted applicants count: {applicants_count}")
 
                         if applicants_count:
-                            if "over" in applicants_text.lower():
-                                applicants_count = int(applicants_count) + 1  # Handle "over X applicants"
-                                logger.debug(f"Applicants count adjusted for 'over': {applicants_count}")
-                            else:
-                                applicants_count = int(applicants_count)  # Convert the extracted number to an integer
-                        break
+                            applicants_count = int(applicants_count)  # Convert the extracted number to an integer
+                            logger.info(f"Extracted numeric applicants count: {applicants_count}")
+
+                            # Handle case with "over X applicants"
+                            if "over" in applicants_text:
+                                applicants_count += 1
+                                logger.info(f"Adjusted applicants count for 'over': {applicants_count}")
+
+                            logger.info(f"Final applicants count: {applicants_count}")
+                        else:
+                            logger.warning(f"Applicants count could not be extracted from text: {applicants_text}")
+
+                        break  # Stop after finding the first valid applicants count element
+                    else:
+                        logger.info(f"Skipping element as it does not contain 'applicant': {applicants_text}")
 
                 # Check if applicants_count is valid (not None) before performing comparisons
                 if applicants_count is not None:
@@ -291,13 +271,13 @@ class LinkedInJobManager:
                             f"Skipping {job.title} at {job.company} due to applicants count: {applicants_count}")
                         logger.debug(f"Skipping {job.title} at {job.company}, applicants count: {applicants_count}")
                         self.write_to_file(job, "skipped_due_to_applicants")
-                        continue  # Skip this job if applicants count is outside the threshold
                     else:
                         logger.debug(f"Applicants count {applicants_count} is within the threshold")
                 else:
                     # If no applicants count was found, log a warning but continue the process
                     logger.warning(
-                        f"Applicants count not found for {job.title} at {job.company}, continuing with application.")
+                        f"Applicants count not found for {job.title} at {job.company}, but continuing with application.")
+
             except NoSuchElementException:
                 # Log a warning if the job insight elements are not found, but do not stop the job application process
                 logger.warning(
@@ -370,7 +350,8 @@ class LinkedInJobManager:
         url_parts = []
         if parameters['remote']:
             url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items())
+                             if
                              v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
