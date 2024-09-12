@@ -1,6 +1,6 @@
 remote: [true/false]
 
-experienceLevel:
+experience_level:
  internship: [true/false]
  entry: [true/false]
  associate: [true/false]
@@ -31,12 +31,22 @@ locations:
   - Country1
   - Country2
 
+apply_once_at_company: [true/false]
+
 distance: 100
 
-companyBlacklist:
+company_blacklist:
   - Company1
   - Company2
 
-titleBlacklist:
+title_blacklist:
   - word1
   - word2
+
+job_applicants_threshold:
+  min_applicants: 0
+  max_applicants: 100
+  
+llm_model_type: openai
+llm_model: gpt-4o 
+llm_api_url: https://api.pawan.krd/cosmosrp/v1
