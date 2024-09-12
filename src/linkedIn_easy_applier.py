@@ -24,7 +24,7 @@ from src.utils import logger
 
 class LinkedInEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
-                 gpt_answerer: Any, resume_generator_manager, parameters: dict):
+                 gpt_answerer: Any, resume_generator_manager):
         logger.debug("Initializing LinkedInEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
