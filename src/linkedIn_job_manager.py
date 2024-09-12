@@ -201,8 +201,14 @@ class LinkedInJobManager:
         return job_title, company, job_location, link, apply_method
     
     def is_blacklisted(self, job_title, company, link):
-        job_title_words = job_title.lower().split(' ')
-        title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
-        company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
+        title_blacklisted = any(self._strings_intersection(word, job_title, 0.8) for word in
+                                self.title_blacklist)
+        company_blacklisted = any( self._strings_intersection(word, company, 0.8) for word in
+                                   self.company_blacklist)
         link_seen = link in self.seen_jobs
         return title_blacklisted or company_blacklisted or link_seen
+
+    def _strings_intersection(self, string1, string2, rate):
+        s1 = set(string1.lower().split(" "))
+        s2 = set(string2.lower().split(" "))
+        return len(s1.intersection(s2))/len(s1) >= rate
