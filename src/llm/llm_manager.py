@@ -84,7 +84,7 @@ class GeminiModel(AIModel):
         HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
         HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE
-        },max_output_tokens=3000)
+        })
 
     def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
