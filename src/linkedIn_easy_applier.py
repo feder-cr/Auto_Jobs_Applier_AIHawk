@@ -19,7 +19,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from src.utils import logger
+from loguru import logger
 
 
 class LinkedInEasyApplier:
@@ -39,7 +39,7 @@ class LinkedInEasyApplier:
 
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
-        logger.debug("Loading questions from JSON file: %s", output_file)
+        logger.debug(f"Loading questions from JSON file: {output_file}")
         try:
             with open(output_file, 'r') as f:
                 try:
@@ -56,7 +56,7 @@ class LinkedInEasyApplier:
             return []
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error loading questions data from JSON file: %s", tb_str)
+            logger.error(f"Error loading questions data from JSON file: {tb_str}")
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
@@ -73,7 +73,7 @@ class LinkedInEasyApplier:
             current_url = self.driver.current_url
 
         if "linkedin.com/premium" in current_url:
-            logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
+            logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
             
@@ -92,13 +92,13 @@ class LinkedInEasyApplier:
             raise e
 
     def job_apply(self, job: Any):
-        logger.debug("Starting job application for job: %s", job)
+        logger.debug(f"Starting job application for job: {job}")
 
         try:
             self.driver.get(job.link)
-            logger.debug("Navigated to job link: %s", job.link)
+            logger.debug(f"Navigated to job link: {job.link}")
         except Exception as e:
-            logger.error("Failed to navigate to job link: %s, error: %s", job.link, str(e))
+            logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
         time.sleep(random.uniform(3, 5))
@@ -118,39 +118,29 @@ class LinkedInEasyApplier:
             logger.debug("Retrieving job description")
             job_description = self._get_job_description()
             job.set_job_description(job_description)
-            logger.debug("Job description set: %s", job_description[:100])
+            logger.debug(f"Job description set: {job_description[:100]}")
 
             logger.debug("Retrieving recruiter link")
             recruiter_link = self._get_job_recruiter()
             job.set_recruiter_link(recruiter_link)
-            logger.debug("Recruiter link set: %s", recruiter_link)
+            logger.debug(f"Recruiter link set: {recruiter_link}")
 
-            # Try clicking the "Easy Apply" button
-            try:
-                logger.debug("Attempting to click 'Easy Apply' button using ActionChains")
-                actions = ActionChains(self.driver)
-                actions.move_to_element(easy_apply_button).click().perform()
-                logger.debug("'Easy Apply' button clicked successfully")
-            except Exception as e:
-                logger.warning(f"Failed to click 'Easy Apply' button using ActionChains: {e}, trying JavaScript click")
-                try:
-                    self.driver.execute_script("arguments[0].click();", easy_apply_button)
-                    logger.debug("'Easy Apply' button clicked successfully via JavaScript")
-                except Exception as js_error:
-                    logger.error(f"Failed to click 'Easy Apply' button via JavaScript: {js_error}")
-                    raise
+            logger.debug("Attempting to click 'Easy Apply' button")
+            actions = ActionChains(self.driver)
+            actions.move_to_element(easy_apply_button).click().perform()
+            logger.debug("'Easy Apply' button clicked successfully")
 
             logger.debug("Passing job information to GPT Answerer")
             self.gpt_answerer.set_job(job)
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
-            logger.debug("Job application process completed successfully for job: %s", job)
+            logger.debug(f"Job application process completed successfully for job: {job}")
 
         except Exception as e:
 
             tb_str = traceback.format_exc()
-            logger.error("Failed to apply to job: %s. Error traceback: %s", job, tb_str)
+            logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
             logger.debug("Discarding application due to failure")
             self._discard_application()
@@ -160,112 +150,73 @@ class LinkedInEasyApplier:
     def _find_easy_apply_button(self, job: Any) -> WebElement:
         logger.debug("Searching for 'Easy Apply' button")
         attempt = 0
-        timeout = 8
 
         search_methods = [
             {
-                'description': "'aria-label' containing 'Easy Apply to' and with data-job-id attribute",
-                'xpath': '//button[contains(@aria-label, "Easy Apply to") and contains(@data-job-id, "")]'
-            },
-            {
                 'description': "find all 'Easy Apply' buttons using find_elements",
                 'find_elements': True,
-                'xpath': '//button[contains(@class, "jobs-apply-button") and contains(., "Easy Apply") and contains(@data-job-id, "")]'
+                'xpath': '//button[contains(@class, "jobs-apply-button") and contains(., "Easy Apply")]'
             },
             {
-                'description': "button text search with data-job-id attribute",
-                'xpath': '//button[contains(text(), "Easy Apply") or contains(text(), "Apply now") and contains(@data-job-id, "")]'
+                'description': "'aria-label' containing 'Easy Apply to'",
+                'xpath': '//button[contains(@aria-label, "Easy Apply to")]'
+            },
+            {
+                'description': "button text search",
+                'xpath': '//button[contains(text(), "Easy Apply") or contains(text(), "Apply now")]'
             }
         ]
 
-        while attempt < 3:
+        while attempt < 2:
 
             self.check_for_premium_redirect(job)
             self._scroll_page()
 
-            try:
-                logger.info("Removing focus from the active element")
-                self.driver.execute_script("document.activeElement.blur();")
-                time.sleep(1)
-
-                logger.info("Clicking on body to reset focus via JavaScript")
-                try:
-                    self.driver.execute_script("document.querySelector('body').focus();")
-                except Exception as e:
-                    logger.warning(f"Failed to reset focus via body: {e}")
-
-                time.sleep(1)
-
-                logger.info("Clicking on html to reset focus via JavaScript")
-                try:
-                    self.driver.execute_script("document.querySelector('html').focus();")
-                except Exception as e:
-                    logger.warning(f"Failed to reset focus via html: {e}")
-
-            except Exception as e:
-                logger.warning(f"Failed to remove focus from the active element: {e}")
-
             for method in search_methods:
                 try:
-                    logger.info(f"Attempt {attempt + 1}: Searching for 'Easy Apply' button using {method['description']}")
+                    logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
+
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
                                 try:
-                                    WebDriverWait(self.driver, timeout).until(EC.visibility_of(button))
-                                    WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(button))
-                                    logger.info(f"Found 'Easy Apply' button {index + 1}, attempting to click")
 
-                                    self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
-                                    time.sleep(1)
-                                    if button.is_enabled() and button.is_displayed():
-                                        return button
-                                    else:
-                                        raise Exception(f"Button {index + 1} is not enabled or not displayed")
-
+                                    WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
+                                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
+                                    logger.debug(f"Found 'Easy Apply' button {index + 1}, attempting to click")
+                                    return button
                                 except Exception as e:
                                     logger.warning(f"Button {index + 1} found but not clickable: {e}")
                         else:
                             raise TimeoutException("No 'Easy Apply' buttons found")
                     else:
-                        button = WebDriverWait(self.driver, timeout).until(
+
+                        button = WebDriverWait(self.driver, 10).until(
                             EC.presence_of_element_located((By.XPATH, method['xpath']))
                         )
-                        WebDriverWait(self.driver, timeout).until(EC.visibility_of(button))
-                        WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(button))
-                        logger.info("Found 'Easy Apply' button, attempting to click")
-
-                        self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
-                        time.sleep(1)
-                        if button.is_enabled() and button.is_displayed():
-                            return button
-                        else:
-                            raise Exception("Button is not enabled or not displayed")
+                        WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
+                        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
+                        logger.debug("Found 'Easy Apply' button, attempting to click")
+                        return button
 
                 except TimeoutException:
                     logger.warning(f"Timeout during search using {method['description']}")
                 except Exception as e:
-                    logger.warning(f"Failed to click 'Easy Apply' button using {method['description']} on attempt {attempt + 1}: {e}")
+                    logger.warning(
+                        f"Failed to click 'Easy Apply' button using {method['description']} on attempt {attempt + 1}: {e}")
 
             self.check_for_premium_redirect(job)
 
             if attempt == 0:
-                logger.info("Refreshing page and clicking on body to retry finding 'Easy Apply' button")
+                logger.debug("Refreshing page to retry finding 'Easy Apply' button")
                 self.driver.refresh()
                 time.sleep(random.randint(3, 5))
-
-                try:
-                    body_element = self.driver.find_element(By.TAG_NAME, 'body')
-                    body_element.click()
-                    logger.info("Clicked on body element to reset the page state")
-                except Exception as e:
-                    logger.warning(f"Failed to click on body element: {e}")
-
             attempt += 1
 
-        logger.error("No clickable 'Easy Apply' button found after 2 attempts.")
+        page_source = self.driver.page_source
+        logger.error(f"No clickable 'Easy Apply' button found after 2 attempts. Page source:\n{page_source}")
         raise Exception("No clickable 'Easy Apply' button found")
 
     def _get_job_description(self) -> str:
@@ -285,11 +236,11 @@ class LinkedInEasyApplier:
             return description
         except NoSuchElementException:
             tb_str = traceback.format_exc()
-            logger.error("Job description not found: %s", tb_str)
+            logger.error(f"Job description not found: {tb_str}")
             raise Exception(f"Job description not found: \nTraceback:\n{tb_str}")
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error getting Job description: %s", tb_str)
+            logger.error(f"Error getting Job description: {tb_str}")
             raise Exception(f"Error getting Job description: \nTraceback:\n{tb_str}")
 
     def _get_job_recruiter(self):
@@ -306,13 +257,13 @@ class LinkedInEasyApplier:
             if recruiter_elements:
                 recruiter_element = recruiter_elements[0]
                 recruiter_link = recruiter_element.get_attribute('href')
-                logger.debug("Job recruiter link retrieved successfully: %s", recruiter_link)
+                logger.debug(f"Job recruiter link retrieved successfully: {recruiter_link}")
                 return recruiter_link
             else:
                 logger.debug("No recruiter link found in the hiring team section")
                 return ""
         except Exception as e:
-            logger.warning("Failed to retrieve recruiter information: %s", e)
+            logger.warning(f"Failed to retrieve recruiter information: {e}")
             return ""
 
     def _scroll_page(self) -> None:
@@ -322,7 +273,7 @@ class LinkedInEasyApplier:
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
-        logger.debug("Filling out application form for job: %s", job)
+        logger.debug(f"Filling out application form for job: {job}")
         while True:
             self.fill_up(job)
             if self._next_or_submit():
@@ -352,13 +303,13 @@ class LinkedInEasyApplier:
                 By.XPATH, "//label[contains(.,'to stay up to date with their page.')]")
             follow_checkbox.click()
         except Exception as e:
-            logger.warning("Failed to unfollow company: %s", e)
+            logger.debug(f"Failed to unfollow company: {e}")
 
     def _check_for_errors(self) -> None:
         logger.debug("Checking for form errors")
         error_elements = self.driver.find_elements(By.CLASS_NAME, 'artdeco-inline-feedback--error')
         if error_elements:
-            logger.error("Form submission failed with errors: %s", [e.text for e in error_elements])
+            logger.error(f"Form submission failed with errors: {error_elements}")
             raise Exception(f"Failed answering or file upload. {str([e.text for e in error_elements])}")
 
     def _discard_application(self) -> None:
@@ -369,10 +320,10 @@ class LinkedInEasyApplier:
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
             time.sleep(random.uniform(3, 5))
         except Exception as e:
-            logger.warning("Failed to discard application: %s", e)
+            logger.warning(f"Failed to discard application: {e}")
 
     def fill_up(self, job) -> None:
-        logger.debug("Filling up form sections for job: %s", job)
+        logger.debug(f"Filling up form sections for job: {job}")
 
         try:
             easy_apply_content = WebDriverWait(self.driver, 10).until(
@@ -435,7 +386,7 @@ class LinkedInEasyApplier:
 
     def _is_upload_field(self, element: WebElement) -> bool:
         is_upload = bool(element.find_elements(By.XPATH, ".//input[@type='file']"))
-        logger.debug("Element is upload field: %s", is_upload)
+        logger.debug(f"Element is upload field: {is_upload}")
         return is_upload
 
     def _handle_upload_fields(self, element: WebElement, job) -> None:
@@ -801,24 +752,12 @@ class LinkedInEasyApplier:
             if dropdowns:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
-                options = [option.text for option in select.options if option.text != "Select an option"]
+                options = [option.text for option in select.options]
 
                 logger.debug(f"Dropdown options found: {options}")
 
-                try:
-                    question_text = question.find_element(By.TAG_NAME, 'label').text.lower().strip()
-                except NoSuchElementException:
-                    logger.warning("Label not found, trying to extract question text from <span> or other elements")
-
-                    try:
-                        question_text = question.find_element(By.CSS_SELECTOR,
-                                                              'span[aria-hidden="true"]').text.lower().strip()
-                    except NoSuchElementException:
-
-                        question_text = section.get_attribute('data-test-text-entity-list-form-title') or "unknown question"
-                        question_text = question_text.lower().strip()
-
-                logger.debug(f"Processing dropdown question: {question_text}")
+                question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
+                logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
                 current_selection = select.first_selected_option.text
                 logger.debug(f"Current selection: {current_selection}")
@@ -833,14 +772,14 @@ class LinkedInEasyApplier:
                     logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
                     if current_selection != existing_answer:
                         logger.debug(f"Updating selection to: {existing_answer}")
-                        self._select_dropdown_option(select, existing_answer)
+                        self._select_dropdown_option(dropdown, existing_answer)
                     return True
 
                 logger.debug(f"No existing answer found, querying model for: {question_text}")
 
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
-                self._select_dropdown_option(select, answer)
+                self._select_dropdown_option(dropdown, answer)
                 logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
 
@@ -855,55 +794,35 @@ class LinkedInEasyApplier:
             logger.warning(f"Failed to handle dropdown or combobox question: {e}", exc_info=True)
             return False
 
-
-    def _select_dropdown_option(self, select: Select, text: str) -> None:
-
-        try:
-            select.select_by_visible_text(text)
-            logger.debug(f"Selected option: {text}")
-        except Exception as e:
-            logger.error(f"Failed to select option '{text}': {e}")
-
     def _is_numeric_field(self, field: WebElement) -> bool:
         field_type = field.get_attribute('type').lower()
         field_id = field.get_attribute("id").lower()
         is_numeric = 'numeric' in field_id or field_type == 'number' or ('text' == field_type and 'numeric' in field_id)
-        logger.debug("Field type: %s, Field ID: %s, Is numeric: %s", field_type, field_id, is_numeric)
+        logger.debug(f"Field type: {field_type}, Field ID: {field_id}, Is numeric: {is_numeric}")
         return is_numeric
 
     def _enter_text(self, element: WebElement, text: str) -> None:
-        logger.debug("Entering text: %s", text)
+        logger.debug(f"Entering text: {text}")
         element.clear()
         element.send_keys(text)
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
-        logger.debug("Selecting radio option: %s", answer)
+        logger.debug(f"Selecting radio option: {answer}")
         for radio in radios:
             if answer in radio.text.lower():
                 radio.find_element(By.TAG_NAME, 'label').click()
                 return
         radios[-1].find_element(By.TAG_NAME, 'label').click()
 
+    def _select_dropdown_option(self, element: WebElement, text: str) -> None:
+        logger.debug(f"Selecting dropdown option: {text}")
+        select = Select(element)
+        select.select_by_visible_text(text)
 
     def _save_questions_to_json(self, question_data: dict) -> None:
-        """
-        Save question data to a JSON file, with filtering to exclude company-specific or unsuitable questions.
-
-        Args:
-            question_data (dict): The question and answer data to be saved.
-        """
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
-        logger.debug("Saving question data to JSON: %s", question_data)
-
-        # List of keywords to exclude certain questions from being saved
-        exclusion_keywords = ["why us", "summary"]
-
-        # Check if the question contains any exclusion keywords
-        if any(keyword in question_data['question'].lower() for keyword in exclusion_keywords):
-            logger.info(f"Skipping saving question due to company-specific keywords: {question_data['question']}")
-            return  # Skip saving this question if it's company-specific
-
+        logger.debug(f"Saving question data to JSON: {question_data}")
         try:
             try:
                 with open(output_file, 'r') as f:
@@ -917,19 +836,17 @@ class LinkedInEasyApplier:
             except FileNotFoundError:
                 logger.warning("JSON file not found, creating new file")
                 data = []
-
             data.append(question_data)
-
             with open(output_file, 'w') as f:
                 json.dump(data, f, indent=4)
             logger.debug("Question data saved successfully to JSON")
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error saving questions data to JSON file: %s", tb_str)
+            logger.error(f"Error saving questions data to JSON file: {tb_str}")
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
-        logger.debug("Sanitized text: %s", sanitized_text)
+        logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
