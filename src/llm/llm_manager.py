@@ -68,11 +68,23 @@ class OllamaModel(AIModel):
         response = self.model.invoke(prompt)
         return response
 
-
+#gemini doesn't seem to work because API doesn't rstitute answers for questions that involve answers that are too short
 class GeminiModel(AIModel):
     def __init__(self, api_key:str, llm_model: str):
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        self.model = ChatGoogleGenerativeAI(model=llm_model, google_api_key=api_key)
+        from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
+        self.model = ChatGoogleGenerativeAI(model=llm_model, google_api_key=api_key,safety_settings={
+        HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DEROGATORY: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_TOXICITY: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_VIOLENCE: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUAL: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_MEDICAL: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DANGEROUS: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE
+        },max_output_tokens=3000)
 
     def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
@@ -388,8 +400,7 @@ class GPTAnswerer:
             "interests": self._create_chain(strings.interests_template),
             "cover_letter": self._create_chain(strings.coverletter_template),
         }
-        section_prompt = """
-        You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
+        section_prompt = """You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
         For the following question: '{question}', determine which section of the resume is most relevant. 
         Respond with exactly one of the following options:
