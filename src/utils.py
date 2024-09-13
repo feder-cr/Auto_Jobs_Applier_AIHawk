@@ -66,7 +66,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
         raise ValueError("Step cannot be zero.")
 
     max_scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
-    current_scroll_position = int(scrollable_element.get_attribute("scrollTop"))
+    current_scroll_position = int(float(scrollable_element.get_attribute("scrollTop")))
     logger.debug(f"Max scroll height of the element: {max_scroll_height}")
     logger.debug(f"Current scroll position: {current_scroll_position}")
 
