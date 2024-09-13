@@ -1,7 +1,7 @@
 remote: true
 
-experience_level:
-  internship: true
+experienceLevel:
+  internship: false
   entry: true
   associate: true
   mid-senior level: true
@@ -19,22 +19,23 @@ jobTypes:
 
 date:
   all time: false
-  month: true
+  month: false
   week: false
   24 hours: true
 
 positions:
-  - Software Tester
+  - Software engineer or "python"
 
 locations:
-  - USA
+  - london
+  - copenhagen
 
-apply_once_at_company: [true/false]
+apply_once_at_company: true
 
 distance: 100
 
 company_blacklist:
-  - Noir
+  - wayfair
   - Crossover
 
 title_blacklist:
@@ -43,7 +44,7 @@ title_blacklist:
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 100
+  max_applicants: 30
 
 llm_model_type: openai
 llm_model: 'gpt-4o'
