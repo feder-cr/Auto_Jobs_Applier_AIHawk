@@ -12,6 +12,7 @@ from typing import Union
 import httpx
 from Levenshtein import distance
 from dotenv import load_dotenv
+from langchain_core.messages import BaseMessage
 from langchain_core.messages.ai import AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
@@ -30,44 +31,50 @@ class AIModel(ABC):
 
 
 class OpenAIModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+    def __init__(self, api_key: str, llm_model: str):
         from langchain_openai import ChatOpenAI
         self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
-                                temperature=0.4, base_url=llm_api_url)
+                                temperature=0.4)
 
-    def invoke(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> BaseMessage:
         logger.debug("Invoking OpenAI API")
         response = self.model.invoke(prompt)
         return response
 
 
 class ClaudeModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+    def __init__(self, api_key: str, llm_model: str):
         from langchain_anthropic import ChatAnthropic
         self.model = ChatAnthropic(model=llm_model, api_key=api_key,
-                                   temperature=0.4, base_url=llm_api_url)
+                                   temperature=0.4)
 
-    def invoke(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
+        logger.debug("Invoking Claude API")
         return response
 
 
 class OllamaModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str, llm_api_url: str):
+    def __init__(self, llm_model: str, llm_api_url: str):
         from langchain_ollama import ChatOllama
-        self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
 
-    def invoke(self, prompt: str) -> str:
+        if len(llm_api_url) > 0:
+            logger.debug(f"Using Ollama with API URL: {llm_api_url}")
+            self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
+        else:
+            self.model = ChatOllama(model=llm_model)
+
+    def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
         return response
 
 
 class GeminiModel(AIModel):
-    def __init__(self, api_key:str, llm_model: str, llm_api_url: str):
+    def __init__(self, api_key:str, llm_model: str):
         from langchain_google_genai import ChatGoogleGenerativeAI
         self.model = ChatGoogleGenerativeAI(model=llm_model, google_api_key=api_key)
 
-    def invoke(self, prompt: str) -> str:
+    def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
         return response
 
@@ -79,18 +86,19 @@ class AIAdapter:
     def _create_model(self, config: dict, api_key: str) -> AIModel:
         llm_model_type = config['llm_model_type']
         llm_model = config['llm_model']
-        llm_api_url = config['llm_api_url']
-        logger.debug('Using {0} with {1} from {2}'.format(
-            llm_model_type, llm_model, llm_api_url))
+
+        llm_api_url = config.get('llm_api_url', "")
+
+        logger.debug(f"Using {llm_model_type} with {llm_model}")
 
         if llm_model_type == "openai":
-            return OpenAIModel(api_key, llm_model, llm_api_url)
+            return OpenAIModel(api_key, llm_model)
         elif llm_model_type == "claude":
-            return ClaudeModel(api_key, llm_model, llm_api_url)
+            return ClaudeModel(api_key, llm_model)
         elif llm_model_type == "ollama":
-            return OllamaModel(api_key, llm_model, llm_api_url)
+            return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == "gemini":
-            return GeminiModel(api_key, llm_model, llm_api_url)
+            return GeminiModel(api_key, llm_model)
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
 

@@ -10,6 +10,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 import src.utils as utils
+from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
 from src.linkedIn_easy_applier import LinkedInEasyApplier
 from loguru import logger
@@ -78,7 +79,7 @@ class LinkedInJobManager:
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
-        minimum_time = 60 * 15
+        minimum_time = MINIMUM_WAIT_TIME
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:
