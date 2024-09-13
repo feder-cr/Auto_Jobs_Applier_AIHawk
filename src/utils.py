@@ -1,41 +1,48 @@
 import logging
 import os
 import random
+import sys
 import time
 
 from selenium import webdriver
+from loguru import logger
+
+from app_config import MINIMUM_LOG_LEVEL
 
 log_file = "app_log.log"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(log_file, mode='a', encoding='utf-8'),
-        logging.StreamHandler()
-    ],
-    force=True  # This will reset the root logger's handlers and apply the new configuration
-)
+# TODO: REMOVE THE FOLLOWING BLOCK: No need as Loguru handles everything by default
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     handlers=[
+#         logging.FileHandler(log_file, mode='a', encoding='utf-8'),
+#         logging.StreamHandler()
+#     ],
+#     force=True  # This will reset the root logger's handlers and apply the new configuration
+# )
 
-logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
+
+
+if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+    logger.remove()
+    logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL)
+else:
+    logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
+    logger.remove()
+    logger.add(sys.stderr, level="DEBUG")
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
-
 def ensure_chrome_profile():
-    logger.debug("Ensuring Chrome profile exists at path: %s", chromeProfilePath)
+    logger.debug(f"Ensuring Chrome profile exists at path: {chromeProfilePath}")
     profile_dir = os.path.dirname(chromeProfilePath)
     if not os.path.exists(profile_dir):
         os.makedirs(profile_dir)
-        logger.debug("Created directory for Chrome profile: %s", profile_dir)
+        logger.debug(f"Created directory for Chrome profile: {profile_dir}")
     if not os.path.exists(chromeProfilePath):
         os.makedirs(chromeProfilePath)
-        logger.debug("Created Chrome profile directory: %s", chromeProfilePath)
+        logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
 
 
@@ -43,13 +50,12 @@ def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")
     scrollable = int(scroll_height) > int(client_height)
-    logger.debug("Element scrollable check: scrollHeight=%s, clientHeight=%s, scrollable=%s", scroll_height,
-                 client_height, scrollable)
+    logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
     return scrollable
 
 
 def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
-    logger.debug("Starting slow scroll: start=%d, end=%d, step=%d, reverse=%s", start, end, step, reverse)
+    logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
 
     if reverse:
         start, end = end, start
@@ -61,18 +67,16 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
 
     max_scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
     current_scroll_position = int(scrollable_element.get_attribute("scrollTop"))
-    logger.debug("Max scroll height of the element: %d", max_scroll_height)
-    logger.debug("Current scroll position: %d", current_scroll_position)
+    logger.debug(f"Max scroll height of the element: {max_scroll_height}")
+    logger.debug(f"Current scroll position: {current_scroll_position}")
 
     if reverse:
-
         if current_scroll_position < start:
             start = current_scroll_position
-        logger.debug("Adjusted start position for upward scroll: %d", start)
+        logger.debug(f"Adjusted start position for upward scroll: {start}")
     else:
-
         if end > max_scroll_height:
-            logger.warning("End value exceeds the scroll height. Adjusting end to %d", max_scroll_height)
+            logger.warning(f"End value exceeds the scroll height. Adjusting end to {max_scroll_height}")
             end = max_scroll_height
 
     script_scroll_to = "arguments[0].scrollTop = arguments[1];"
@@ -81,12 +85,10 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
         if scrollable_element.is_displayed():
             if not is_scrollable(scrollable_element):
                 logger.warning("The element is not scrollable.")
-                print("The element is not scrollable.")
                 return
 
             if (step > 0 and start >= end) or (step < 0 and start <= end):
                 logger.warning("No scrolling will occur due to incorrect start/end values.")
-                print("No scrolling will occur due to incorrect start/end values.")
                 return
 
             position = start
@@ -94,15 +96,14 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
             while (step > 0 and position < end) or (step < 0 and position > end):
                 if position == previous_position:
                     # Avoid re-scrolling to the same position
-                    logger.debug("Stopping scroll as position hasn't changed: %d", position)
+                    logger.debug(f"Stopping scroll as position hasn't changed: {position}")
                     break
 
                 try:
                     driver.execute_script(script_scroll_to, scrollable_element, position)
-                    logger.debug("Scrolled to position: %d", position)
+                    logger.debug(f"Scrolled to position: {position}")
                 except Exception as e:
-                    logger.error("Error during scrolling: %s", e)
-                    print(f"Error during scrolling: {e}")
+                    logger.error(f"Error during scrolling: {e}")
 
                 previous_position = position
                 position += step
@@ -114,14 +115,12 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
 
             # Ensure the final scroll position is correct
             driver.execute_script(script_scroll_to, scrollable_element, end)
-            logger.debug("Scrolled to final position: %d", end)
+            logger.debug(f"Scrolled to final position: {end}")
             time.sleep(0.5)
         else:
             logger.warning("The element is not visible.")
-            print("The element is not visible.")
     except Exception as e:
-        logger.error("Exception occurred during scrolling: %s", e)
-        print(f"Exception occurred: {e}")
+        logger.error(f"Exception occurred during scrolling: {e}")
 
 
 def chrome_browser_options():
@@ -159,7 +158,7 @@ def chrome_browser_options():
         profile_dir = os.path.basename(chromeProfilePath)
         options.add_argument('--user-data-dir=' + initial_path)
         options.add_argument("--profile-directory=" + profile_dir)
-        logger.debug("Using Chrome profile directory: %s", chromeProfilePath)
+        logger.debug(f"Using Chrome profile directory: {chromeProfilePath}")
     else:
         options.add_argument("--incognito")
         logger.debug("Using Chrome in incognito mode")
@@ -179,8 +178,3 @@ def printyellow(text):
     reset = "\033[0m"
     logger.debug("Printing text in yellow: %s", text)
     print(f"{yellow}{text}{reset}")
-
-
-def stringWidth(text, font, font_size):
-    bbox = font.getbbox(text)
-    return bbox[2] - bbox[0]

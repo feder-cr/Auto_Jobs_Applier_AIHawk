@@ -5,6 +5,7 @@ import os
 import pytest
 from src.linkedIn_job_manager import LinkedInJobManager
 from selenium.common.exceptions import NoSuchElementException
+from loguru import logger
 
 
 @pytest.fixture
@@ -52,8 +53,7 @@ def test_set_parameters(mocker, job_manager):
 
 
 def next_job_page(self, position, location, job_page):
-    logger.debug("Navigating to next job page: %s in %s, page %d",
-                 position, location, job_page)
+    logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
     self.driver.get(
         f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}&location={location}&start={job_page * 25}")
 

@@ -2,11 +2,12 @@ from typing import Dict, List
 from linkedin_api import Linkedin
 from typing import Optional, Union, Literal
 from urllib.parse import quote, urlencode, parse_qs, urlparse
-import logging
+# import logging
 import json
+from loguru import logger
 
 # set log to all debug
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 class LinkedInEvolvedAPI(Linkedin):
     already_applied_jobs: List[str] = []
@@ -388,7 +389,7 @@ class LinkedInEvolvedAPI(Linkedin):
             case 200:
                 parse_res = res.json()
                 url = parse_res['data']['value']
-                logging.info(url)
+                logger.info(url)
                 return url
             case _:
                 self.logger.error("Failed to create a request PDF")
@@ -496,22 +497,22 @@ if __name__ == "__main__":
 
         resume: str = api.upload_linkedin_resume("resume.pdf")
         if isinstance(resume, bool):
-            logging.error("Failed to upload resume")
+            logger.error("Failed to upload resume")
             continue
         elif isinstance(resume, str):
-            logging.info(f"Resume uploaded with hash {resume}")
+            logger.info(f"Resume uploaded with hash {resume}")
         else:
-            logging.error("Unknown error")
+            logger.error("Unknown error")
             continue
 
 
         if job_id in api.already_applied_jobs:
-            logging.info(f"Already applied to job {job_id}, skipping it")
+            logger.info(f"Already applied to job {job_id}, skipping it")
             continue
 
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
-            print(field)
+            logger.info(field)
 
         break
 
