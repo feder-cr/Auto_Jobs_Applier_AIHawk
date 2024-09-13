@@ -152,4 +152,8 @@ mono_crash.*
 data_folder/output/* 
 generated_cv/*
 chrome_profile/*
+virtual/*
 answers.json
+
+# MacOS
+.DS_Store
