@@ -1,59 +1,59 @@
-import logging
 from typing import Dict, List
-from typing import Optional, Union, Literal
-from urllib.parse import urlencode
-
 from linkedin_api import Linkedin
+from typing import Optional, Union, Literal
+from urllib.parse import quote, urlencode, parse_qs, urlparse
+# import logging
+import json
+from loguru import logger
 
 # set log to all debug
-logging.basicConfig(level=logging.INFO)
-
+# logging.basicConfig(level=logging.INFO)
 
 class LinkedInEvolvedAPI(Linkedin):
     already_applied_jobs: List[str] = []
-
+    
     def __init__(self, username, password):
         super().__init__(username, password)
 
     def search_jobs(
-            self,
-            keywords: Optional[str] = None,
-            companies: Optional[List[str]] = None,
-            experience: Optional[
-                List[
-                    Union[
-                        Literal["1"],
-                        Literal["2"],
-                        Literal["3"],
-                        Literal["4"],
-                        Literal["5"],
-                        Literal["6"],
-                    ]
+        self,
+        keywords: Optional[str] = None,
+        companies: Optional[List[str]] = None,
+        experience: Optional[
+            List[
+                Union[
+                    Literal["1"],
+                    Literal["2"],
+                    Literal["3"],
+                    Literal["4"],
+                    Literal["5"],
+                    Literal["6"],
                 ]
-            ] = None,
-            job_type: Optional[
-                List[
-                    Union[
-                        Literal["F"],
-                        Literal["C"],
-                        Literal["P"],
-                        Literal["T"],
-                        Literal["I"],
-                        Literal["V"],
-                        Literal["O"],
-                    ]
+            ]
+        ] = None,
+        job_type: Optional[
+            List[
+                Union[
+                    Literal["F"],
+                    Literal["C"],
+                    Literal["P"],
+                    Literal["T"],
+                    Literal["I"],
+                    Literal["V"],
+                    Literal["O"],
                 ]
-            ] = None,
-            job_title: Optional[List[str]] = None,
-            industries: Optional[List[str]] = None,
-            location_name: Optional[str] = None,
-            remote: Optional[List[Union[Literal["1"], Literal["2"], Literal["3"]]]] = None,
-            listed_at: None | int = None,
-            distance: Optional[int] = None,
-            easy_apply: Optional[bool] = True,
-            limit=-1,
-            offset=0,
-            **kwargs,
+            ]
+        ] = None,
+        job_title: Optional[List[str]] = None,
+        industries: Optional[List[str]] = None,
+        location_name: Optional[str] = None,
+        remote: Optional[List[Union[Literal["1"], Literal["2"], Literal["3"]]]] = None,
+        listed_at: None | int = None,
+        distance: Optional[int] = None,
+        easy_apply: Optional[bool] = True,
+        limit=-1,
+        offset=0,
+        **kwargs,
     ) -> List[Dict]:
         """Perform a LinkedIn search for jobs.
 
@@ -155,21 +155,21 @@ class LinkedInEvolvedAPI(Linkedin):
                     e["job_id"] = trackingUrn
                 if e.get("$type") == "com.linkedin.voyager.dash.jobs.JobPosting":
                     new_data.append(e)
-
+                
             if not new_data:
                 break
             results.extend(new_data)
             if (
-                    (-1 < limit <= len(results))
-                    or len(results) / count >= Linkedin._MAX_REPEATED_REQUESTS
+                (-1 < limit <= len(results))
+                or len(results) / count >= Linkedin._MAX_REPEATED_REQUESTS
             ) or len(elements) == 0:
                 break
 
             self.logger.debug(f"results grew to {len(results)}")
 
         return results
-
-    def get_fields_for_easy_apply(self, job_id: str) -> List[Dict]:
+    
+    def get_fields_for_easy_apply(self,job_id: str) -> List[Dict]:
         """Get fields needed for easy apply jobs.
 
         :param job_id: Job ID
@@ -182,11 +182,13 @@ class LinkedInEvolvedAPI(Linkedin):
         cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
 
         headers: Dict[str, str] = self._headers()
+        
 
         headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
         headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
         headers["Cookie"] = cookie_str
         headers["Connection"] = "keep-alive"
+
 
         default_params = {
             "decorationId": "com.linkedin.voyager.dash.deco.jobs.OnsiteApplyApplication-67",
@@ -216,26 +218,26 @@ class LinkedInEvolvedAPI(Linkedin):
         except ValueError:
             self.logger.error("Failed to parse JSON response")
             return []
-
+        
         form_components = []
 
         for item in data.get("included", []):
-            if 'formComponent' in item:
+            if 'formComponent' in item:                
                 urn = item['urn']
                 try:
                     title = item['title']['text']
                 except TypeError:
                     title = urn
-
+                
                 form_component_type = list(item['formComponent'].keys())[0]
                 form_component_details = item['formComponent'][form_component_type]
-
+                
                 component_info = {
                     'title': title,
                     'urn': urn,
                     'formComponentType': form_component_type,
                 }
-
+                
                 if 'textSelectableOptions' in form_component_details:
                     options = [
                         opt['optionText']['text'] for opt in form_component_details['textSelectableOptions']
@@ -243,18 +245,18 @@ class LinkedInEvolvedAPI(Linkedin):
                     component_info['selectableOptions'] = options
                 elif 'selectableOptions' in form_component_details:
                     options = [
-                        opt['textSelectableOption']['optionText']['text']
+                        opt['textSelectableOption']['optionText']['text'] 
                         for opt in form_component_details['selectableOptions']
                     ]
                     component_info['selectableOptions'] = options
-
+                
                 form_components.append(component_info)
 
         return form_components
-
-    def apply_to_job(self, job_id: str, fields: dict, followCompany: bool = True) -> bool:
+    
+    def apply_to_job(self,job_id: str, fields: dict, followCompany: bool = True) -> bool:
         return False
-
+    
         # ToDo: Implement apply to job parser first
         # How need to be implemented:
         # 1. Get fields for easy apply job from the previous method (get_fields_for_easy_apply)
@@ -264,11 +266,11 @@ class LinkedInEvolvedAPI(Linkedin):
         # {'title': 'Quanti anni di esperienza di lavoro hai con Router?', 'urn': 'urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4013860791,9478711764,numeric)', 'formComponentType': 'singleLineTextFormComponent', 'response': '5'}
         # To fill, you can temporary use input() function to get the data from the user manually for testing purposes (for the further implementation, the question will be asked to AI implementation and automatically filled)
         # Build a working payload.
-
+        
         # EXAMPLE OF WORKING PAYLOAD
         # 4005350454 is job_id, so need to be replaced with the job_id
 
-        # {
+        #{
         #    "followCompany": true,
         #    "responses": [
         #        {
@@ -348,29 +350,172 @@ class LinkedInEvolvedAPI(Linkedin):
         #        }
         #    ],
         #    "trackingId": ""
-        # }
+        #}
 
         # Push the commit to the repository and create a pull request to the v3 branch.
+        
+    def create_request_pdf(self, filename: str) -> str | None:
+        """
+        Create a PDF file with the request data.
+        :param filename: Name of the file
+        :type filename: str | None
+        :return: URL of the file uploaded to the LinkedIn.
+        """
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        default_params = {
+            'action': 'requestUrl'
+        }
+
+        res = self._post(
+            f"/voyagerJobsDashAmbryUploadUrls",
+            headers=headers,
+            cookies=cookies,
+            json={"contentType":"PDF","filename":"200.pdf","maxSizeBytes":18810},
+            params=default_params
+        )
+
+
+        match res.status_code:
+            case 200:
+                parse_res = res.json()
+                url = parse_res['data']['value']
+                logger.info(url)
+                return url
+            case _:
+                self.logger.error("Failed to create a request PDF")
+                return None
+            
+    def upload_resume_via_ambry(self, url: str, cv_path: str) -> bool | str:
+        """
+        Upload resume via Ambry.
+        :param url: URL of the file uploaded to the LinkedIn.
+        :type url: str
+        :param raw_cv: Raw CV data
+        :type raw_cv: bytes
+        :return: PDF hash.pdf or false
+        """
+        binary_cv: bytes = self.file_to_binary(cv_path)
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        ambry_url = url.replace("https://www.linkedin.com", "")
+        
+        res = self._post(
+            ambry_url,
+            base_request=True,
+            headers=headers,
+            cookies=cookies,
+            data=binary_cv,
+        )
+
+        match res.status_code:
+            case 201:
+                return res.headers['Location']
+            case _:
+                self.logger.error("Failed to upload resume via Ambry")
+                return False
+            
+    def confirm_upload_resume(self, cv_hash: str) -> bool:
+        """
+        Upload resume.
+        :param cv_hash: PDF hash
+        :type cv_hash: str
+        :return: True if success, False if failed
+        """
+
+        cookies = self.client.session.cookies.get_dict()
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+
+        headers: Dict[str, str] = self._headers()
+        
+        headers["Accept"] = "application/vnd.linkedin.normalized+json+2.1"
+        headers["csrf-token"] = cookies["JSESSIONID"].replace('"', "")
+        headers["Cookie"] = cookie_str
+        headers["Connection"] = "keep-alive"
+
+        json_data = {'entityUrn': f'urn:li:fsd_resume:{cv_hash}'}
+        res = self._post(
+            "/voyagerJobsDashResumes",
+            headers=headers,
+            cookies=cookies,
+            json=json_data,
+        )
+
+        match res.status_code:
+            case 201:
+                return True
+            case _:
+                self.logger.error("Failed to upload resume")
+                return False
+            
+    def file_to_binary(self, file_path):
+        with open(file_path, 'rb') as file:
+            binary_data = file.read()
+        return binary_data
 
     def set_job_as_applied(self, job_id: str) -> None:
         self.already_applied_jobs.append(job_id)
 
+    def upload_linkedin_resume(self, cv_path: str) -> str | bool:
+        url = self.create_request_pdf("resume.pdf")
+        if url:
+            cv_hash = self.upload_resume_via_ambry(url, cv_path)
+            if cv_hash:
+                self.confirm_upload_resume(cv_hash)
+                return cv_hash
+        return False
+            
+
+
+
 
 ## EXAMPLE USAGE
 if __name__ == "__main__":
+    
     api: LinkedInEvolvedAPI = LinkedInEvolvedAPI(username="", password="")
-    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=100, easy_apply=True, offset=1,
-                           listed_at=None)
+    jobs = api.search_jobs(keywords="Frontend Developer", location_name="Italia", limit=100, easy_apply=True, offset=1, listed_at=None)
     for job in jobs:
         job_id: str = job["job_id"]
-        print(f"Job ID: {job_id}")
-        continue
+
+        resume: str = api.upload_linkedin_resume("resume.pdf")
+        if isinstance(resume, bool):
+            logger.error("Failed to upload resume")
+            continue
+        elif isinstance(resume, str):
+            logger.info(f"Resume uploaded with hash {resume}")
+        else:
+            logger.error("Unknown error")
+            continue
+
 
         if job_id in api.already_applied_jobs:
-            logging.info(f"Already applied to job {job_id}, skipping it")
+            logger.info(f"Already applied to job {job_id}, skipping it")
             continue
 
         fields = api.get_fields_for_easy_apply(job_id)
         for field in fields:
-            print(field)
+            logger.info(field)
+
         break
+
+        
+
+    

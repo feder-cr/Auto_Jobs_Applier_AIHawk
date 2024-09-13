@@ -19,7 +19,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from src.utils import logger
+from loguru import logger
 
 
 class LinkedInEasyApplier:
@@ -39,7 +39,7 @@ class LinkedInEasyApplier:
 
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
-        logger.debug("Loading questions from JSON file: %s", output_file)
+        logger.debug(f"Loading questions from JSON file: {output_file}")
         try:
             with open(output_file, 'r') as f:
                 try:
@@ -56,7 +56,7 @@ class LinkedInEasyApplier:
             return []
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error loading questions data from JSON file: %s", tb_str)
+            logger.error(f"Error loading questions data from JSON file: {tb_str}")
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
     def check_for_premium_redirect(self, job: Any, max_attempts=3):
@@ -73,18 +73,32 @@ class LinkedInEasyApplier:
             current_url = self.driver.current_url
 
         if "linkedin.com/premium" in current_url:
-            logger.error("Failed to return to job page after %d attempts. Cannot apply for the job.", max_attempts)
+            logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
                 f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+            
+    def apply_to_job(self, job: Any) -> None:
+        """
+        Starts the process of applying to a job.
+        :param job: A job object with the job details.
+        :return: None
+        """
+        logger.debug(f"Applying to job: {job}")
+        try:
+            self.job_apply(job)
+            logger.info(f"Successfully applied to job: {job.title}")
+        except Exception as e:
+            logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
+            raise e
 
     def job_apply(self, job: Any):
-        logger.debug("Starting job application for job: %s", job)
+        logger.debug(f"Starting job application for job: {job}")
 
         try:
             self.driver.get(job.link)
-            logger.debug("Navigated to job link: %s", job.link)
+            logger.debug(f"Navigated to job link: {job.link}")
         except Exception as e:
-            logger.error("Failed to navigate to job link: %s, error: %s", job.link, str(e))
+            logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
         time.sleep(random.uniform(3, 5))
@@ -104,12 +118,12 @@ class LinkedInEasyApplier:
             logger.debug("Retrieving job description")
             job_description = self._get_job_description()
             job.set_job_description(job_description)
-            logger.debug("Job description set: %s", job_description[:100])
+            logger.debug(f"Job description set: {job_description[:100]}")
 
             logger.debug("Retrieving recruiter link")
             recruiter_link = self._get_job_recruiter()
             job.set_recruiter_link(recruiter_link)
-            logger.debug("Recruiter link set: %s", recruiter_link)
+            logger.debug(f"Recruiter link set: {recruiter_link}")
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
@@ -121,12 +135,12 @@ class LinkedInEasyApplier:
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
-            logger.debug("Job application process completed successfully for job: %s", job)
+            logger.debug(f"Job application process completed successfully for job: {job}")
 
         except Exception as e:
 
             tb_str = traceback.format_exc()
-            logger.error("Failed to apply to job: %s. Error traceback: %s", job, tb_str)
+            logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
             logger.debug("Discarding application due to failure")
             self._discard_application()
@@ -202,7 +216,7 @@ class LinkedInEasyApplier:
             attempt += 1
 
         page_source = self.driver.page_source
-        logger.error("No clickable 'Easy Apply' button found after 2 attempts. Page source:\n%s", page_source)
+        logger.error(f"No clickable 'Easy Apply' button found after 2 attempts. Page source:\n{page_source}")
         raise Exception("No clickable 'Easy Apply' button found")
 
     def _get_job_description(self) -> str:
@@ -222,11 +236,11 @@ class LinkedInEasyApplier:
             return description
         except NoSuchElementException:
             tb_str = traceback.format_exc()
-            logger.error("Job description not found: %s", tb_str)
+            logger.error(f"Job description not found: {tb_str}")
             raise Exception(f"Job description not found: \nTraceback:\n{tb_str}")
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error getting Job description: %s", tb_str)
+            logger.error(f"Error getting Job description: {tb_str}")
             raise Exception(f"Error getting Job description: \nTraceback:\n{tb_str}")
 
     def _get_job_recruiter(self):
@@ -243,13 +257,13 @@ class LinkedInEasyApplier:
             if recruiter_elements:
                 recruiter_element = recruiter_elements[0]
                 recruiter_link = recruiter_element.get_attribute('href')
-                logger.debug("Job recruiter link retrieved successfully: %s", recruiter_link)
+                logger.debug(f"Job recruiter link retrieved successfully: {recruiter_link}")
                 return recruiter_link
             else:
                 logger.debug("No recruiter link found in the hiring team section")
                 return ""
         except Exception as e:
-            logger.warning("Failed to retrieve recruiter information: %s", e)
+            logger.warning(f"Failed to retrieve recruiter information: {e}")
             return ""
 
     def _scroll_page(self) -> None:
@@ -259,7 +273,7 @@ class LinkedInEasyApplier:
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
-        logger.debug("Filling out application form for job: %s", job)
+        logger.debug(f"Filling out application form for job: {job}")
         while True:
             self.fill_up(job)
             if self._next_or_submit():
@@ -289,13 +303,13 @@ class LinkedInEasyApplier:
                 By.XPATH, "//label[contains(.,'to stay up to date with their page.')]")
             follow_checkbox.click()
         except Exception as e:
-            logger.warning("Failed to unfollow company: %s", e)
+            logger.debug(f"Failed to unfollow company: {e}")
 
     def _check_for_errors(self) -> None:
         logger.debug("Checking for form errors")
         error_elements = self.driver.find_elements(By.CLASS_NAME, 'artdeco-inline-feedback--error')
         if error_elements:
-            logger.error("Form submission failed with errors: %s", [e.text for e in error_elements])
+            logger.error(f"Form submission failed with errors: {error_elements}")
             raise Exception(f"Failed answering or file upload. {str([e.text for e in error_elements])}")
 
     def _discard_application(self) -> None:
@@ -306,10 +320,10 @@ class LinkedInEasyApplier:
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
             time.sleep(random.uniform(3, 5))
         except Exception as e:
-            logger.warning("Failed to discard application: %s", e)
+            logger.warning(f"Failed to discard application: {e}")
 
     def fill_up(self, job) -> None:
-        logger.debug("Filling up form sections for job: %s", job)
+        logger.debug(f"Filling up form sections for job: {job}")
 
         try:
             easy_apply_content = WebDriverWait(self.driver, 10).until(
@@ -372,7 +386,7 @@ class LinkedInEasyApplier:
 
     def _is_upload_field(self, element: WebElement) -> bool:
         is_upload = bool(element.find_elements(By.XPATH, ".//input[@type='file']"))
-        logger.debug("Element is upload field: %s", is_upload)
+        logger.debug(f"Element is upload field: {is_upload}")
         return is_upload
 
     def _handle_upload_fields(self, element: WebElement, job) -> None:
@@ -784,16 +798,16 @@ class LinkedInEasyApplier:
         field_type = field.get_attribute('type').lower()
         field_id = field.get_attribute("id").lower()
         is_numeric = 'numeric' in field_id or field_type == 'number' or ('text' == field_type and 'numeric' in field_id)
-        logger.debug("Field type: %s, Field ID: %s, Is numeric: %s", field_type, field_id, is_numeric)
+        logger.debug(f"Field type: {field_type}, Field ID: {field_id}, Is numeric: {is_numeric}")
         return is_numeric
 
     def _enter_text(self, element: WebElement, text: str) -> None:
-        logger.debug("Entering text: %s", text)
+        logger.debug(f"Entering text: {text}")
         element.clear()
         element.send_keys(text)
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
-        logger.debug("Selecting radio option: %s", answer)
+        logger.debug(f"Selecting radio option: {answer}")
         for radio in radios:
             if answer in radio.text.lower():
                 radio.find_element(By.TAG_NAME, 'label').click()
@@ -801,14 +815,14 @@ class LinkedInEasyApplier:
         radios[-1].find_element(By.TAG_NAME, 'label').click()
 
     def _select_dropdown_option(self, element: WebElement, text: str) -> None:
-        logger.debug("Selecting dropdown option: %s", text)
+        logger.debug(f"Selecting dropdown option: {text}")
         select = Select(element)
         select.select_by_visible_text(text)
 
     def _save_questions_to_json(self, question_data: dict) -> None:
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
-        logger.debug("Saving question data to JSON: %s", question_data)
+        logger.debug(f"Saving question data to JSON: {question_data}")
         try:
             try:
                 with open(output_file, 'r') as f:
@@ -828,11 +842,11 @@ class LinkedInEasyApplier:
             logger.debug("Question data saved successfully to JSON")
         except Exception:
             tb_str = traceback.format_exc()
-            logger.error("Error saving questions data to JSON file: %s", tb_str)
+            logger.error(f"Error saving questions data to JSON file: {tb_str}")
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
-        logger.debug("Sanitized text: %s", sanitized_text)
+        logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text

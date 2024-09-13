@@ -1,4 +1,4 @@
-from src.utils import logger
+from loguru import logger
 
 
 class LinkedInBotState:
@@ -16,10 +16,10 @@ class LinkedInBotState:
         self.logged_in = False
 
     def validate_state(self, required_keys):
-        logger.debug("Validating LinkedInBotState with required keys: %s", required_keys)
+        logger.debug(f"Validating LinkedInBotState with required keys: {required_keys}")
         for key in required_keys:
             if not getattr(self, key):
-                logger.error("State validation failed: %s is not set", key)
+                logger.error(f"State validation failed: {key} is not set")
                 raise ValueError(f"{key.replace('_', ' ').capitalize()} must be set before proceeding.")
         logger.debug("State validation passed")
 
@@ -87,11 +87,11 @@ class LinkedInBotFacade:
         logger.debug("Apply process started successfully")
 
     def _validate_non_empty(self, value, name):
-        logger.debug("Validating that %s is not empty", name)
+        logger.debug(f"Validating that {name} is not empty")
         if not value:
-            logger.error("Validation failed: %s is empty", name)
+            logger.error(f"Validation failed: {name} is empty")
             raise ValueError(f"{name} cannot be empty.")
-        logger.debug("Validation passed for %s", name)
+        logger.debug(f"Validation passed for {name}")
 
     def _ensure_job_profile_and_resume_set(self):
         logger.debug("Ensuring job profile and resume are set")

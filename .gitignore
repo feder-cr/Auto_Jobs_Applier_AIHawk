@@ -26,7 +26,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
+chrome_profile/*
+data_folder/*
+answers.json
 # PyInstaller
 # Usually these files are written by a python script from a template
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -148,12 +150,3 @@ venv.bak/
 # Mono Auto Generated Files
 mono_crash.*
 
-# Project Specific
-data_folder/output/
-generated_cv/
-chrome_profile/
-virtual/
-answers.json
-
-# MacOS
-.DS_Store
