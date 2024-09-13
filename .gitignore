@@ -148,12 +148,3 @@ venv.bak/
 # Mono Auto Generated Files
 mono_crash.*
 
-# Project Specific
-data_folder/output/
-generated_cv/
-chrome_profile/
-virtual/
-answers.json
-
-# MacOS
-.DS_Store

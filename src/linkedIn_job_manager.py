@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 import src.utils as utils
 from src.job import Job
 from src.linkedIn_easy_applier import LinkedInEasyApplier
-from src.utils import logger
+from loguru import logger
 
 
 class EnvironmentKeys:
@@ -20,19 +20,18 @@ class EnvironmentKeys:
         logger.debug("Initializing EnvironmentKeys")
         self.skip_apply = self._read_env_key_bool("SKIP_APPLY")
         self.disable_description_filter = self._read_env_key_bool("DISABLE_DESCRIPTION_FILTER")
-        logger.debug("EnvironmentKeys initialized: skip_apply=%s, disable_description_filter=%s",
-                     self.skip_apply, self.disable_description_filter)
+        logger.debug(f"EnvironmentKeys initialized: skip_apply={self.skip_apply}, disable_description_filter={self.disable_description_filter}")
 
     @staticmethod
     def _read_env_key(key: str) -> str:
         value = os.getenv(key, "")
-        logger.debug("Read environment key %s: %s", key, value)
+        logger.debug(f"Read environment key {key}: {value}")
         return value
 
     @staticmethod
     def _read_env_key_bool(key: str) -> bool:
         value = os.getenv(key) == "True"
-        logger.debug("Read environment key %s as bool: %s", key, value)
+        logger.debug(f"Read environment key {key} as bool: {value}")
         return value
 
 
@@ -85,21 +84,21 @@ class LinkedInJobManager:
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
-            utils.printyellow(f"Starting the search for {position} in {location}.")
+            logger.debug(f"Starting the search for {position} in {location}.")
 
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    utils.printyellow(f"Going to job page {job_page_number}")
+                    logger.debug(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
-                    utils.printyellow("Starting the application process for this page...")
+                    logger.debug("Starting the application process for this page...")
 
                     try:
                         jobs = self.get_jobs_from_page()
                         if not jobs:
-                            utils.printyellow("No more jobs found on this page. Exiting loop.")
+                            logger.debug("No more jobs found on this page. Exiting loop.")
                             break
                     except Exception as e:
                         logger.error(f"Failed to retrieve jobs: {e}")
@@ -108,11 +107,10 @@ class LinkedInJobManager:
                     try:
                         self.apply_jobs()
                     except Exception as e:
-                        logger.error("Error during job application: %s", e)
-                        utils.printred(f"Error during job application: {e}")
+                        logger.error(f"Error during job application: {e}")
                         continue
 
-                    utils.printyellow("Applying to jobs on this page has been completed!")
+                    logger.debug("Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
 
@@ -126,10 +124,8 @@ class LinkedInJobManager:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
                             logger.debug("User chose to skip waiting.")
-                            utils.printyellow("User skipped waiting.")
                         else:
                             logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
-                            utils.printyellow(f"Sleeping for {time_left} seconds.")
                             time.sleep(time_left)
 
                     minimum_page_time = time.time() + minimum_time
@@ -144,15 +140,12 @@ class LinkedInJobManager:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
                             logger.debug("User chose to skip waiting.")
-                            utils.printyellow("User skipped waiting.")
                         else:
                             logger.debug(f"Sleeping for {sleep_time} seconds.")
-                            utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                             time.sleep(sleep_time)
                         page_sleep += 1
             except Exception as e:
-                logger.error("Unexpected error during job search: %s", e)
-                utils.printred(f"Unexpected error: {e}")
+                logger.error(f"Unexpected error during job search: {e}")
                 continue
 
             time_left = minimum_page_time - time.time()
@@ -166,10 +159,8 @@ class LinkedInJobManager:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
                     logger.debug("User chose to skip waiting.")
-                    utils.printyellow("User skipped waiting.")
                 else:
                     logger.debug(f"Sleeping for {time_left} seconds as user chose not to skip.")
-                    utils.printyellow(f"Sleeping for {time_left} seconds.")
                     time.sleep(time_left)
 
             minimum_page_time = time.time() + minimum_time
@@ -184,10 +175,8 @@ class LinkedInJobManager:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
                     logger.debug("User chose to skip waiting.")
-                    utils.printyellow("User skipped waiting.")
                 else:
                     logger.debug(f"Sleeping for {sleep_time} seconds.")
-                    utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                     time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -197,7 +186,6 @@ class LinkedInJobManager:
 
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                utils.printyellow("No matching jobs found on this page.")
                 logger.debug("No matching jobs found on this page, skipping.")
                 return []
 
@@ -212,7 +200,6 @@ class LinkedInJobManager:
             job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
                 0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
             if not job_list_elements:
-                utils.printyellow("No job class elements found on page.")
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
@@ -230,7 +217,6 @@ class LinkedInJobManager:
         try:
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                utils.printyellow("No matching jobs found on this page, moving to next.")
                 logger.debug("No matching jobs found on this page, skipping")
                 return
         except NoSuchElementException:
@@ -244,7 +230,6 @@ class LinkedInJobManager:
             0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
 
         if not job_list_elements:
-            utils.printyellow("No job class elements found on page, moving to next page.")
             logger.debug("No job class elements found on page, skipping")
             return
 
@@ -287,8 +272,6 @@ class LinkedInJobManager:
                 if applicants_count is not None:
                     # Perform the threshold check for applicants count
                     if applicants_count < self.min_applicants or applicants_count > self.max_applicants:
-                        utils.printyellow(
-                            f"Skipping {job.title} at {job.company} due to applicants count: {applicants_count}")
                         logger.debug(f"Skipping {job.title} at {job.company}, applicants count: {applicants_count}")
                         self.write_to_file(job, "skipped_due_to_applicants")
                         continue  # Skip this job if applicants count is outside the threshold
@@ -314,8 +297,7 @@ class LinkedInJobManager:
             logger.debug(f"Continuing with job application for {job.title} at {job.company}")
 
             if self.is_blacklisted(job.title, job.company, job.link):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
-                logger.debug("Job blacklisted: %s at %s", job.title, job.company)
+                logger.debug(f"Job blacklisted: {job.title} at {job.company}")
                 self.write_to_file(job, "skipped")
                 continue
             if self.is_already_applied_to_job(job.title, job.company, job.link):
@@ -328,15 +310,14 @@ class LinkedInJobManager:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
                     self.easy_applier_component.job_apply(job)
                     self.write_to_file(job, "success")
-                    logger.debug("Applied to job: %s at %s", job.title, job.company)
+                    logger.debug(f"Applied to job: {job.title} at {job.company}")
             except Exception as e:
-                logger.error("Failed to apply for %s at %s: %s", job.title, job.company, e)
-                utils.printred(f"Failed to apply for {job.title} at {job.company}: {e}")
+                logger.error(f"Failed to apply for {job.title} at {job.company}: {e}")
                 self.write_to_file(job, "failed")
                 continue
 
     def write_to_file(self, job, file_name):
-        logger.debug("Writing job application result to file: %s", file_name)
+        logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
         data = {
@@ -351,19 +332,19 @@ class LinkedInJobManager:
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
-                logger.debug("Job data written to new file: %s", file_path)
+                logger.debug(f"Job data written to new file: {file_name}")
         else:
             with open(file_path, 'r+', encoding='utf-8') as f:
                 try:
                     existing_data = json.load(f)
                 except json.JSONDecodeError:
-                    logger.error("JSON decode error in file: %s", file_path)
+                    logger.error(f"JSON decode error in file: {file_path}")
                     existing_data = []
                 existing_data.append(data)
                 f.seek(0)
                 json.dump(existing_data, f, indent=4)
                 f.truncate()
-                logger.debug("Job data appended to existing file: %s", file_path)
+                logger.debug(f"Job data appended to existing file: {file_name}")
 
     def get_base_search_url(self, parameters):
         logger.debug("Constructing base search URL")
@@ -388,11 +369,11 @@ class LinkedInJobManager:
         url_parts.append("f_LF=f_AL")  # Easy Apply
         base_url = "&".join(url_parts)
         full_url = f"?{base_url}{date_param}"
-        logger.debug("Base search URL constructed: %s", full_url)
+        logger.debug(f"Base search URL constructed: {full_url}")
         return full_url
 
     def next_job_page(self, position, location, job_page):
-        logger.debug("Navigating to next job page: %s in %s, page %d", position, location, job_page)
+        logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
         self.driver.get(
             f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
 
@@ -403,39 +384,36 @@ class LinkedInJobManager:
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').text
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
             company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-            logger.debug("Job information extracted: %s at %s", job_title, company)
+            logger.debug(f"Job information extracted: {job_title} at {company}")
         except NoSuchElementException:
-            utils.printyellow("Some job information (title, link, or company) is missing.")
             logger.warning("Some job information (title, link, or company) is missing.")
         try:
             job_location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
         except NoSuchElementException:
-            utils.printyellow("Job location is missing.")
             logger.warning("Job location is missing.")
         try:
             apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
         except NoSuchElementException:
             apply_method = "Applied"
-            utils.printyellow("Apply method not found, assuming 'Applied'.")
             logger.warning("Apply method not found, assuming 'Applied'.")
 
         return job_title, company, job_location, link, apply_method
 
     def is_blacklisted(self, job_title, company, link):
-        logger.debug("Checking if job is blacklisted: %s at %s", job_title, company)
+        logger.debug(f"Checking if job is blacklisted: {job_title} at {company}")
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
-        logger.debug("Job blacklisted status: %s", is_blacklisted)
+        logger.debug(f"Job blacklisted status: {is_blacklisted}")
 
         return title_blacklisted or company_blacklisted or link_seen
 
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs
         if link_seen:
-            utils.printyellow(f"Already applied to job: {job_title} at {company}, skipping...")
+            logger.debug(f"Already applied to job: {job_title} at {company}, skipping...")
         return link_seen
 
     def is_already_applied_to_company(self, company):
@@ -451,7 +429,7 @@ class LinkedInJobManager:
                         existing_data = json.load(f)
                         for applied_job in existing_data:
                             if applied_job['company'].strip().lower() == company.strip().lower():
-                                utils.printyellow(
+                                logger.debug(
                                     f"Already applied at {company} (once per company policy), skipping...")
                                 return True
                     except json.JSONDecodeError:

@@ -6,6 +6,7 @@ from typing import Dict, Any
 import re
 from jsonschema import validate, ValidationError
 from pdfminer.high_level import extract_text
+from loguru import logger
 
 def load_yaml(file_path: str) -> Dict[str, Any]:
     with open(file_path, 'r') as file:
@@ -119,7 +120,7 @@ def generate_report(validation_result: Dict[str, Any], output_file: str):
         report += "YAML is not valid. Errors:\n"
         report += validation_result["errors"] + "\n"
     
-    print(report)
+    logger.debug(report)
 
 def pdf_to_text(pdf_path: str) -> str:
     return extract_text(pdf_path)
@@ -137,24 +138,24 @@ def main():
         # Check if input is PDF or TXT
         if args.input.lower().endswith('.pdf'):
             resume_text = pdf_to_text(args.input)
-            print(f"PDF resume converted to text successfully.")
+            logger.debug(f"PDF resume converted to text successfully.")
         else:
             resume_text = load_resume_text(args.input)
 
         generated_yaml = generate_yaml_from_resume(resume_text, schema, api_key)
         save_yaml(generated_yaml, args.output)
 
-        print(f"Resume YAML generated and saved to {args.output}")
+        logger.debug(f"Resume YAML generated and saved to {args.output}")
 
         validation_result = validate_yaml(generated_yaml, schema)
         if validation_result["valid"]:
-            print("YAML is valid and conforms to the schema.")
+            logger.debug("YAML is valid and conforms to the schema.")
         else:
-            print("YAML is not valid. Errors:")
-            print(validation_result["errors"])
+            logger.error("YAML is not valid. Errors:")
+            logger.error(validation_result["errors"])
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
