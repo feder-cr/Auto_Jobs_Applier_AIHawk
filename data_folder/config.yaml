@@ -8,7 +8,7 @@ experience_level:
  director: [true/false]
  executive: [true/false]
 
-jobTypes:
+job_types:
  full-time: [true/false]
  contract: [true/false]
  part-time: [true/false]
@@ -45,7 +45,7 @@ title_blacklist:
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 100
+  max_applicants: 281
   
 llm_model_type: openai
 llm_model: gpt-4o 
