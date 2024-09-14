@@ -55,6 +55,13 @@ body:
         - other
 
   - type: input
+    id: otherBranch
+    attributes:
+      label: Branch name
+      description: If you selected ```other``` branch for the previous question, what is the branch name?
+      placeholder: "what-is-the-name-of-the-branch-you-were-using"
+
+  - type: input
     id: llm
     attributes:
       label: LLM Used
