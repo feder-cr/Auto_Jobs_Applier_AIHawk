@@ -23,10 +23,12 @@ body:
       label: Steps to reproduce
       description: |
         Steps to reproduce the behavior:
-        1. Go to '...'
-        2. Click on '...'
-        3. Scroll down to '...'
-        4. See error
+        1. Use branch named '...'
+        2. Go to file '...'
+        3. Find property named '...'
+        4. Change '...'
+        5. Run program using command '...'
+        6. See error
       placeholder: "List the steps to reproduce the bug..."
 
   - type: input
@@ -44,21 +46,27 @@ body:
       placeholder: "What happened instead?"
 
   - type: dropdown
-    id: environment
+    id: branch
     attributes:
-      label: Environment
-      description: Specify the environment where the bug occurred.
+      label: Branch
+      description: Specify the branch you were using when the bug occurred.
       options:
-        - Production
-        - Development
-        - Staging
+        - main
+        - other
 
   - type: input
-    id: version
+    id: llm
     attributes:
-      label: Version
-      description: Version of the application where the bug occurred.
-      placeholder: "e.g., 1.0.0"
+      label: LLM Used
+      description: LLM you were using when the bug occurred.
+      placeholder: "e.g., ChatGPT"
+
+  - type: input
+    id: model
+    attributes:
+      label: Model used
+      description: LLM you were using when the bug occurred.
+      placeholder: "e.g., GPT-4o-mini"
 
   - type: textarea
     id: additional
