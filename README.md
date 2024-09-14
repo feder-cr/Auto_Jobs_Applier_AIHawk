@@ -32,9 +32,6 @@ Connect with like-minded individuals and get the most out of AIHawk.
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 )](https://t.me/AIhawkCommunity)
 
-[![How to set up LinkedIn_AIHawk](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=gdW9wogHEUM)
-
-
 <!-- 🚀 **Join Our Telegram Community!** 🚀
 
 Join our **Telegram community** for:
@@ -107,6 +104,8 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 ## Installation
 
 **Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk- https://youtu.be/gdW9wogHEUM](https://youtu.be/gdW9wogHEUM)**
+
+[![How to set up LinkedIn_AIHawk](https://img.youtube.com/vi/gdW9wogHEUM/0.jpg)](https://www.youtube.com/watch?v=gdW9wogHEUM)
 
 **Confirmed succesfull runs on the following:**
 - Operating Systems:
