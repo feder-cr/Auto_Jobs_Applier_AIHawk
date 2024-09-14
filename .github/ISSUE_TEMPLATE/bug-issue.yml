@@ -62,17 +62,24 @@ body:
       placeholder: "what-is-the-name-of-the-branch-you-were-using"
 
   - type: input
+    id: pythonVersion
+    attributes:
+      label: Python version
+      description: Specify the version of Python you were using when the bug occurred.
+      placeholder: "e.g., 3.12.5(64b)"
+
+  - type: input
     id: llm
     attributes:
       label: LLM Used
-      description: LLM you were using when the bug occurred.
+      description: Specify the LLM provider you were using when the bug occurred.
       placeholder: "e.g., ChatGPT"
 
   - type: input
     id: model
     attributes:
       label: Model used
-      description: LLM you were using when the bug occurred.
+      description: Specify the LLM model you were using when the bug occurred.
       placeholder: "e.g., GPT-4o-mini"
 
   - type: textarea
