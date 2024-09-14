@@ -3,12 +3,13 @@
 <!-- At first glance, the branding and messaging clearly conveys what to expect -->
 <div align="center">
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/federico-elia-5199951b6/)
-[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
+  <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/federico-elia-5199951b6/)
+  [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
 
-# LinkedIn_AIHawk
+  # LinkedIn_AIHawk
 
-#### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
+  #### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
 
 </div>
 <br />
@@ -31,7 +32,7 @@ Connect with like-minded individuals and get the most out of AIHawk.
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 )](https://t.me/AIhawkCommunity)
 
-
+[![How to set up LinkedIn_AIHawk](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=gdW9wogHEUM)
 
 
 <!-- 🚀 **Join Our Telegram Community!** 🚀
@@ -42,7 +43,7 @@ Join our **Telegram community** for:
 - **Job search tips** and **resume advice**
 - **Idea exchange** and resources for your projects
 
-📲 **[Join now!](https://t.me/AIhawkCommunity)** -->
+<-- **[Join now!](https://t.me/AIhawkCommunity)** -->
 
 ## Table of Contents
 
@@ -51,12 +52,12 @@ Join our **Telegram community** for:
 3. [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Usage](#usage)
-6. [Documentation](#Documentation)
+6. [Documentation](#documentation)
 7. [Troubleshooting](#troubleshooting)
 8. [Conclusion](#conclusion)
 9. [Contributors](#contributors)
 10. [License](#license)
-11. [Disclaimer](#Disclaimer)
+11. [Disclaimer](#disclaimer)
 
 ## Introduction
 
@@ -105,8 +106,17 @@ LinkedIn_AIHawk steps in as a game-changing solution to these challenges. It's n
 
 ## Installation
 
-**Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk](https://youtu.be/gdW9wogHEUM) - https://youtu.be/gdW9wogHEUM**
-0. **Confirmed succesfull runs OSs & Python**: Python 3.10, 3.11.9(64b), 3.12.5(64b) . Windows 10, Ubuntu 22
+**Please watch this video to set up your LinkedIn_AIHawk: [How to set up LinkedIn_AIHawk- https://youtu.be/gdW9wogHEUM](https://youtu.be/gdW9wogHEUM)**
+
+**Confirmed succesfull runs on the following:**
+- Operating Systems:
+  - Windows 10
+  - Ubuntu 22
+- Python versions:
+  - 3.10
+  - 3.11.9(64b)
+  - 3.12.5(64b)
+
 1. **Download and Install Python:**
 
    Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
