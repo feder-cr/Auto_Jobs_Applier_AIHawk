@@ -8,8 +8,8 @@ personal_information:
   phone_prefix: '+20'
   phone: '1551663871'
   email: 'yousefnasar912333@gmail.com'
-  github: 'github.com/YusefNsar'
-  linkedin: 'linkedin.com/in/yusef-nsar'
+  github: 'https://github.com/YusefNsar'
+  linkedin: 'https://linkedin.com/in/yusef-nsar'
 
 education_details:
   - degree: "Bachelor's Degree"
@@ -29,6 +29,11 @@ education_details:
     gpa: '2nd rank in cohort'
     graduation_year: '2021'
     field_of_study: 'Web Development'
+    exam:
+      React & Node.js Project: '4'
+      Responsive Web Design: '4'
+      Software Architecture: '4'
+      Database Design: '4'
 
 experience_details:
   - position: 'Full Stack Developer Web & Mobile'
@@ -67,15 +72,15 @@ experience_details:
     location: 'Dubai, UAE'
     industry: 'Software Development'
     key_responsibilities:
-      - responsibility_1: "Designed and optimized Angular-based projects, reducing code redundancy."
-      - responsibility_2: "Developed custom integrations using Node.js and AWS for Mottasl, a messaging platform."
-      - responsibility_3: "Expanded Mottasl’s features, including 10+ new services, and integrated with platforms like Odoo, OTO, OpenCart and others."
+      - responsibility_1: 'Designed and optimized Angular-based projects, reducing code redundancy.'
+      - responsibility_2: 'Developed custom integrations using Node.js and AWS for Mottasl, a messaging platform.'
+      - responsibility_3: 'Expanded Mottasl’s features, including 10+ new services, and integrated with platforms like Odoo, OTO, OpenCart and others.'
     skills_acquired:
       - 'Angular'
       - 'Node.js'
-      - "AWS Services"
-      - "Complex Workflows Integrations"
-      - "Go Lang"
+      - 'AWS Services'
+      - 'Complex Workflows Integrations'
+      - 'Go Lang'
 
   - position: 'Junior Full Stack Web & Mobile Developer'
     company: 'EPICORE'
@@ -83,14 +88,14 @@ experience_details:
     location: 'Graz, Austria'
     industry: 'Software Solutions'
     key_responsibilities:
-      - responsibility_1: "Developed high-scale web and mobile projects in an Agile Scrum environment."
-      - responsibility_2: "Resolved performance issues, boosting app performance by 74%."
-      - responsibility_3: "Accelerated CI/CD pipeline speed by 250%, designed payment systems, and deployed apps to stores."
+      - responsibility_1: 'Developed high-scale web and mobile projects in an Agile Scrum environment.'
+      - responsibility_2: 'Resolved performance issues, boosting app performance by 74%.'
+      - responsibility_3: 'Accelerated CI/CD pipeline speed by 250%, designed payment systems, and deployed apps to stores.'
     skills_acquired:
       - 'Agile Scrum'
-      - "CI/CD Automation"
-      - "Payment Systems"
-      - "Cross-Platform Mobile Development"
+      - 'CI/CD Automation'
+      - 'Payment Systems'
+      - 'Cross-Platform Mobile Development'
 
   - position: 'Web Design & Development Instructor'
     company: 'Microsoft Student Partners'
@@ -98,23 +103,25 @@ experience_details:
     location: 'Cairo, Egypt'
     industry: 'Education'
     key_responsibilities:
-      - responsibility_1: "Taught web design principles and user experience optimization to students."
+      - responsibility_1: 'Taught web design principles and user experience optimization to students.'
     skills_acquired:
       - 'Web Development'
       - 'Web Design'
       - 'UX Design'
 
 projects:
-  - name: "Next-Gen Online Banking System"
-    description: "Developed a scalable web and mobile banking solution for CIB, improving user experience and system reliability."
-  - name: "Citizen Complaint & Services App"
-    description: "Developed a mobile app for UAE RAK Municipality to streamline government services and citizen complaints."
-  - name: "Mottasl Messaging Platform"
-    description: "Enhanced Mottasl’s messaging platform with 10+ new features, including integration with Odoo and OTO."
-  - name: "Parallelab Website"
-    description: "A 3D influnced, modern & slick landing page for a new startup, having beautiful 3D design elements and animations."
+  - name: 'Next-Gen Online Banking System'
+    description: 'Developed a scalable web and mobile banking solution for CIB, improving user experience and system reliability.'
+    link: 'https://www.cibeg.com'
+  - name: 'Citizen Complaint & Services App'
+    description: 'Developed a mobile app for UAE RAK Municipality to streamline government services and citizen complaints.'
+    link: 'https://www.rak.ae'
+  - name: 'Mottasl Messaging Platform'
+    description: 'Enhanced Mottasl’s messaging platform with 10+ new features, including integration with Odoo and OTO.'
+    link: 'https://mottasl.com/'
+  - name: 'Parallelab Website'
+    description: 'A 3D influnced, modern & slick landing page for a new startup, having beautiful 3D design elements and animations.'
     link: 'https://parallelab.vercel.app'
-
 
 achievements:
   - name: '2nd Rank in Web Development Nanodegree'
@@ -151,15 +158,15 @@ self_identification:
   disability: 'No'
   ethnicity: 'Middle Eastern'
 
-# legal_authorization:
-#   eu_work_authorization: 'No'
-#   us_work_authorization: 'No'
-#   requires_us_visa: 'No'
-#   requires_us_sponsorship: 'No'
-#   requires_eu_visa: 'Yes'
-#   legally_allowed_to_work_in_eu: 'No'
-#   legally_allowed_to_work_in_us: 'No'
-#   requires_eu_sponsorship: 'Yes'
+legal_authorization:
+  eu_work_authorization: 'Yes'
+  us_work_authorization: 'Yes'
+  requires_us_visa: 'No'
+  requires_us_sponsorship: 'No'
+  requires_eu_visa: 'No'
+  legally_allowed_to_work_in_eu: 'Yes'
+  legally_allowed_to_work_in_us: 'Yes'
+  requires_eu_sponsorship: 'No'
 
 work_preferences:
   remote_work: 'Yes'
