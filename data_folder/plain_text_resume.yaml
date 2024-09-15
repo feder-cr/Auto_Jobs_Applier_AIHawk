@@ -142,7 +142,7 @@ availability:
   notice_period: 'immediately'
 
 salary_expectations:
-  salary_range_usd: '15000-20000 USD'
+  salary_range_usd: '15000 - 20000'
 
 self_identification:
   gender: 'Male'
