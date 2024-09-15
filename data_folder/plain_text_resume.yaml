@@ -1,101 +1,170 @@
 personal_information:
-  name: "[Your Name]"
-  surname: "[Your Surname]"
-  date_of_birth: "[DD/MM/YYYY]"
-  country: "[Your Country]"
-  city: "[Your City]"
-  address: "[Your Address]"
-  phone_prefix: "[Your Phone Prefix]"
-  phone: "[Your Phone Number]"
-  email: "[Your Email Address]"
-  github: "[Your GitHub Profile URL]"
-  linkedin: "[Your LinkedIn Profile URL]"
+  name: 'Yusef'
+  surname: 'Nsar'
+  date_of_birth: '19/12/2001]'
+  country: 'Egypt'
+  city: 'Cairo'
+  address: 'Giza, El-Dokki'
+  phone_prefix: '+20'
+  phone: '1551663871'
+  email: 'yousefnasar912333@gmail.com'
+  github: 'github.com/YusefNsar'
+  linkedin: 'linkedin.com/in/yusef-nsar'
 
 education_details:
-  - degree: "[Your Degree]"
-    university: "[Your University]"
-    gpa: "[Your GPA]"
-    graduation_year: "[Year of Graduation]"
-    field_of_study: "[Your Field of Study]"
+  - degree: "Bachelor's Degree"
+    university: 'Cairo University, Egypt'
+    gpa: '3.4'
+    graduation_year: '2023'
+    field_of_study: 'Computer Science'
     exam:
-      [Course Name 1]: "[Grade]"
-      [Course Name 2]: "[Grade]"
-      [Course Name 3]: "[Grade]"
-      [Course Name 4]: "[Grade]"
-      [Course Name 5]: "[Grade]"
+      Information Theory and Inference: '4'
+      Data Structures: '4'
+      Algorithm Analysis and Design: '4'
+      Object-Oriented Languages and Programming: '4'
+      Linear Algebra and Numerical Analysis: '4'
+      Database: '4'
+  - degree: 'Web Development Professionals & Advanced Nanodegree'
+    university: 'UDACITY & EGYPT FWD'
+    gpa: '2nd rank in cohort'
+    graduation_year: '2021'
+    field_of_study: 'Web Development'
 
 experience_details:
-  - position: "[Your Job Title]"
-    company: "[Company Name]"
-    employment_period: "[Start Date] - [End Date]"
-    location: "[Location]"
-    industry: "[Industry]"
+  - position: 'Full Stack Developer Web & Mobile'
+    company: 'Commercial International Bank of Egypt (CIB)'
+    employment_period: 'February 2024 - Present'
+    location: 'Cairo, Egypt'
+    industry: 'Banking & Finance'
     key_responsibilities:
-      - responsibility_1: "[Key Responsibility 1]"
-      - responsibility_2: "[Key Responsibility 2]"
-      - responsibility_3: "[Key Responsibility 3]"
+      - responsibility_1: 'Developing next-gen CIB mobile & web online banking services using latest trends in web & software architecture.'
+      - responsibility_2: 'Bridging the gap between DevOps and Development Teams, collaborating on infrastructure and code deployment.'
+      - responsibility_3: 'Refactoring legacy systems to enhance scalability for future projects.'
     skills_acquired:
-      - "[Skill 1]"
-      - "[Skill 2]"
-      - "[Skill 3]"
+      - 'Nest JS'
+      - 'DevOps collaboration'
+      - 'Web & Mobile Architecture'
+      - 'Code Refactoring'
+
+  - position: 'Software Developer'
+    company: 'UAE RAK Municipality'
+    employment_period: 'November 2023 - Present'
+    location: 'RAK, UAE'
+    industry: 'Government'
+    key_responsibilities:
+      - responsibility_1: 'Developed a citizen complaints and government services ticketing app.'
+      - responsibility_2: 'Planned project stories, selected technology stack, and designed cloud architecture.'
+      - responsibility_3: 'Developed UI for the mobile app and admin dashboard using React Native and React.'
+    skills_acquired:
+      - 'React Native'
+      - 'React.js'
+      - 'Cloud Architecture'
+      - 'Agile Methodologies'
+
+  - position: 'Full Stack Developer'
+    company: 'TWERLO'
+    employment_period: 'October 2022 - November 2023'
+    location: 'Dubai, UAE'
+    industry: 'Software Development'
+    key_responsibilities:
+      - responsibility_1: "Designed and optimized Angular-based projects, reducing code redundancy."
+      - responsibility_2: "Developed custom integrations using Node.js and AWS for Mottasl, a messaging platform."
+      - responsibility_3: "Expanded Mottasl’s features, including 10+ new services, and integrated with platforms like Odoo, OTO, OpenCart and others."
+    skills_acquired:
+      - 'Angular'
+      - 'Node.js'
+      - "AWS Services"
+      - "Complex Workflows Integrations"
+      - "Go Lang"
+
+  - position: 'Junior Full Stack Web & Mobile Developer'
+    company: 'EPICORE'
+    employment_period: 'August 2021 - October 2022'
+    location: 'Graz, Austria'
+    industry: 'Software Solutions'
+    key_responsibilities:
+      - responsibility_1: "Developed high-scale web and mobile projects in an Agile Scrum environment."
+      - responsibility_2: "Resolved performance issues, boosting app performance by 74%."
+      - responsibility_3: "Accelerated CI/CD pipeline speed by 250%, designed payment systems, and deployed apps to stores."
+    skills_acquired:
+      - 'Agile Scrum'
+      - "CI/CD Automation"
+      - "Payment Systems"
+      - "Cross-Platform Mobile Development"
+
+  - position: 'Web Design & Development Instructor'
+    company: 'Microsoft Student Partners'
+    employment_period: 'September 2020 - April 2021'
+    location: 'Cairo, Egypt'
+    industry: 'Education'
+    key_responsibilities:
+      - responsibility_1: "Taught web design principles and user experience optimization to students."
+    skills_acquired:
+      - 'Web Development'
+      - 'Web Design'
+      - 'UX Design'
 
 projects:
-  - name: "[Project Name]"
-    description: "[Brief Description of the Project]"
-    link: "[Project URL]"
-  - name: "[Project Name]"
-    description: "[Brief Description of the Project]"
-    link: "[Project URL]"
+  - name: "Next-Gen Online Banking System"
+    description: "Developed a scalable web and mobile banking solution for CIB, improving user experience and system reliability."
+  - name: "Citizen Complaint & Services App"
+    description: "Developed a mobile app for UAE RAK Municipality to streamline government services and citizen complaints."
+  - name: "Mottasl Messaging Platform"
+    description: "Enhanced Mottasl’s messaging platform with 10+ new features, including integration with Odoo and OTO."
+  - name: "Parallelab Website"
+    description: "A 3D influnced, modern & slick landing page for a new startup, having beautiful 3D design elements and animations."
+    link: 'https://parallelab.vercel.app'
+
 
 achievements:
-  - name: "[Achievement Title]"
-    description: "[Brief Description of the Achievement]"
-  - name: "[Achievement Title]"
-    description: "[Brief Description of the Achievement]"
+  - name: '2nd Rank in Web Development Nanodegree'
+    description: 'Achieved 2nd rank in a cohort of 30+ peers in the Web Development Nanodegree.'
 
 certifications:
-  - "[Certification Name]"
+  - 'Web Development Nanodegree, Udacity'
 
 languages:
-  - language: "[Language Name]"
-    proficiency: "[Proficiency Level]"
-  - language: "[Language Name]"
-    proficiency: "[Proficiency Level]"
+  - language: 'English'
+    proficiency: 'Fluent'
+  - language: 'Arabic'
+    proficiency: 'Native'
 
 interests:
-  - "[Interest 1]"
-  - "[Interest 2]"
-  - "[Interest 3]"
-  - "[Interest 4]"
-  - "[Interest 5]"
+  - 'Software Engineering'
+  - 'Web Development'
+  - 'Problem Solving'
+  - 'Cloud Computing'
+  - 'Agile Development'
+  - 'UX Design'
+  - '3D Web Design'
 
 availability:
-  notice_period: "[Notice Period]"
+  notice_period: 'immediately'
 
 salary_expectations:
-  salary_range_usd: "[Expected Salary Range in USD]"
+  salary_range_usd: '15000-20000 USD'
 
 self_identification:
-  gender: "[Gender]"
-  pronouns: "[Pronouns]"
-  veteran: "[Veteran Status]"
-  disability: "[Disability Status]"
-  ethnicity: "[Ethnicity]"
+  gender: 'Male'
+  pronouns: 'He/Him'
+  veteran: 'No'
+  disability: 'No'
+  ethnicity: 'Middle Eastern'
 
-legal_authorization:
-  eu_work_authorization: "[Yes/No]"
-  us_work_authorization: "[Yes/No]"
-  requires_us_visa: "[Yes/No]"
-  requires_us_sponsorship: "[Yes/No]"
-  requires_eu_visa: "[Yes/No]"
-  legally_allowed_to_work_in_eu: "[Yes/No]"
-  legally_allowed_to_work_in_us: "[Yes/No]"
-  requires_eu_sponsorship: "[Yes/No]"
+# legal_authorization:
+#   eu_work_authorization: 'No'
+#   us_work_authorization: 'No'
+#   requires_us_visa: 'No'
+#   requires_us_sponsorship: 'No'
+#   requires_eu_visa: 'Yes'
+#   legally_allowed_to_work_in_eu: 'No'
+#   legally_allowed_to_work_in_us: 'No'
+#   requires_eu_sponsorship: 'Yes'
 
 work_preferences:
-  remote_work: "[Yes/No]"
-  in_person_work: "[Yes/No]"
-  open_to_relocation: "[Yes/No]"
-  willing_to_complete_assessments: "[Yes/No]"
-  willing_to_undergo_drug_tests: "[Yes/No]"
-  willing_to_undergo_background_checks: "[Yes/No]"
+  remote_work: 'Yes'
+  in_person_work: 'No'
+  open_to_relocation: 'Yes'
+  willing_to_complete_assessments: 'Yes'
+  willing_to_undergo_drug_tests: 'Yes'
+  willing_to_undergo_background_checks: 'Yes'

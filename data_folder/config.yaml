@@ -1,42 +1,98 @@
-remote: [true/false]
+remote: true
 
 experienceLevel:
- internship: [true/false]
- entry: [true/false]
- associate: [true/false]
- mid-senior level: [true/false]
- director: [true/false]
- executive: [true/false]
+ internship: false
+ entry: true
+ associate: true
+ mid-senior level: true
+ director: false
+ executive: false
 
 jobTypes:
- full-time: [true/false]
- contract: [true/false]
- part-time: [true/false]
- temporary: [true/false]
- internship: [true/false]
- other: [true/false]
- volunteer: [true/false]
+ full-time: true
+ contract: true
+ part-time: true
+ temporary: true
+ internship: false
+ other: true
+ volunteer: false
 
 date:
- all time: [true/false]
- month: [true/false]
- week: [true/false]
- 24 hours: [true/false]
+ all time: true
+ month: true
+ week: true
+ 24 hours: true
 
 positions:
-  - position1
-  - position2
+  - Full Stack Developer
+  - Javascript Developer
+  - Python Developer
+  - Web Developer
+  - Software Developer
+  - Software Engineer
+  - Backend Developer
+  - Frontend Developer
+  - React Native Developer
+  - Node.js Developer
+  - C++ Developer
+  - Go Developer
 
 locations:
-  - Country1
-  - Country2
+  - USA
+  - United States
+  - Switzerland
+  - Australia
+  - Germany
+  - Canada
+  - United Kingdom
+  - Netherlands
+  - Sweden
+  - Ireland
+  - France
+  - United Arab Emirates
+  - Saudi Arabia
+  - Qatar
+  - Kuwait
+  - Oman
+  - Bahrain
+  - Poland
+  - India
+  - Brazil
+  - South Africa
+  - Philippines
+  - Egypt
+  - Jordan
+  - Lebanon
+  - Morocco
+  - Tunisia
+  - Spain
+  - Italy
+  - Denmark
+  - Finland
+  - Norway
+  - Belgium
+  - Austria
+  - New Zealand
+  - Singapore
+  - Japan
+  - South Korea
+  - Mexico
+  - Argentina
+  - Chile
+  - Turkey
+  - Malaysia
+  - Indonesia
+  - Vietnam
+  - Pakistan
+  - Nigeria
+  - Kenya
+  - Ukraine
+  - Thailand
+  - Costa Rica
 
-distance: 100
 
-companyBlacklist:
-  - Company1
-  - Company2
+distance: 0
 
-titleBlacklist:
-  - word1
-  - word2
+companyBlacklist: []
+
+titleBlacklist: []
