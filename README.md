@@ -44,7 +44,7 @@ Join our **Telegram community** for:
 
 📲 **[Join now!](https://t.me/AIhawkCommunity)** -->
 
-![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/actions/workflows/ci.yml/badge.svg)
 
 ## Table of Contents
 

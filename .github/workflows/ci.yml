@@ -18,7 +18,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+            pip install -r requirements.txt
+            pip install pytest pytest-cov
 
       - name: Run tests
         run: pytest --cov=src --cov-report=term-missing
