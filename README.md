@@ -44,6 +44,8 @@ Join our **Telegram community** for:
 
 📲 **[Join now!](https://t.me/AIhawkCommunity)** -->
 
+![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)
+
 ## Table of Contents
 
 1. [Introduction](#introduction)
