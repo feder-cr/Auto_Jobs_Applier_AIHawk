@@ -10,12 +10,12 @@ experienceLevel:
 
 jobTypes:
   full-time: true
-  contract: false
-  part-time: false
+  contract: true
+  part-time: true
   temporary: true
   internship: false
   other: false
-  volunteer: true
+  volunteer: false
 
 date:
   all time: false
@@ -26,14 +26,15 @@ date:
 positions:
   - Software Tester
 
-
 locations:
   - USA
 
 distance: 100
 
 companyBlacklist:
-  - Noir
-  - Crossover
+  - Company1
+  - Company2
 
 titleBlacklist:
+  - word1
+  - word2
