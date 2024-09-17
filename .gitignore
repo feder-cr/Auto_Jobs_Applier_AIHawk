@@ -115,6 +115,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# GitHub
+.github/
+
+# MacOS
+.DS_Store
+
 # Spyder project settings
 .spyderproject
 .spyproject
