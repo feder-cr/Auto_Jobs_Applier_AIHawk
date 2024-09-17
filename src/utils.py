@@ -11,18 +11,6 @@ from app_config import MINIMUM_LOG_LEVEL
 
 log_file = "app_log.log"
 
-# TODO: REMOVE THE FOLLOWING BLOCK: No need as Loguru handles everything by default
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     handlers=[
-#         logging.FileHandler(log_file, mode='a', encoding='utf-8'),
-#         logging.StreamHandler()
-#     ],
-#     force=True  # This will reset the root logger's handlers and apply the new configuration
-# )
-
-
 
 if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
     logger.remove()
