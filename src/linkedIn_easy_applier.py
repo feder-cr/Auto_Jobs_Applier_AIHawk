@@ -263,6 +263,7 @@ class LinkedInEasyApplier:
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
+        is_type_ahead  = True if section.find_elements(By.CLASS_NAME, 'search-basic-typeahead') else False
         if text_fields:
             text_field = text_fields[0]
             question_text = section.find_element(By.TAG_NAME, 'label').text.lower()
@@ -277,10 +278,10 @@ class LinkedInEasyApplier:
             for item in self.all_data:
                 if 'cover' not in item['question'] and item['question'] == self._sanitize_text(question_text) and item['type'] == question_type:
                     existing_answer = item
-                    self._enter_text(text_field, existing_answer['answer'])
+                    self._enter_text(text_field, existing_answer['answer'], is_type_ahead)
                     return True
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
-            self._enter_text(text_field, answer)
+            self._enter_text(text_field, answer, is_type_ahead)
             return True
         return False
 
@@ -332,9 +333,15 @@ class LinkedInEasyApplier:
         class_attribute = field.get_attribute("id")
         return class_attribute and 'numeric' in class_attribute
 
-    def _enter_text(self, element: WebElement, text: str) -> None:
+    def _enter_text(self, element: WebElement, text: str, is_type_ahead:bool=False) -> None:
         element.clear()
         element.send_keys(text)
+        if is_type_ahead:
+            time.sleep(1) 
+            element.send_keys(Keys.ARROW_DOWN)
+            time.sleep(1)  
+            element.send_keys(Keys.ENTER)
+            time.sleep(1) 
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
         for radio in radios:
