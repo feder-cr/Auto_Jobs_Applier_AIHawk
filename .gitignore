@@ -150,4 +150,5 @@ venv.bak/
 # Mono Auto Generated Files
 mono_crash.*
 
-generated_cv
+/generated_cv
+data_folder/secrets.yaml

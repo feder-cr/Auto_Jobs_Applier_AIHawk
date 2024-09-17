@@ -160,7 +160,7 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     job_manager.apply_jobs()
 
     # Assertions
-    assert job_manager.driver.find_elements.call_count == 1
+    assert job_manager.driver.find_elements.call_count == 3
     # Called for each job element
     assert job_manager.extract_job_information_from_tile.call_count == 2
     # Called for each job element

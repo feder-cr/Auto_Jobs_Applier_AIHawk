@@ -50,7 +50,9 @@ class ConfigValidator:
             'locations': list,
             'distance': int,
             'companyBlacklist': list,
-            'titleBlacklist': list
+            'titleBlacklist': list,
+            'llm_model_type': str,
+            'llm_model': str
         }
 
         for key, expected_type in required_keys.items():
