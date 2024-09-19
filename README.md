@@ -515,7 +515,7 @@ TODO ):
 - **ChromeDriver Issues:** Ensure ChromeDriver is compatible with your installed Chrome version.
 - **Missing Files:** Verify that all necessary files are present in the data folder.
 - **Invalid YAML:** Check your YAML files for syntax errors . Try to use external YAML validators e.g. https://www.yamllint.com/
-- **OpenAI endpoint isues**: Try to check possible limits\blocking at their side 
+- **OpenAI endpoint issues**: Try to check possible limits\blocking at their side 
   
 If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
