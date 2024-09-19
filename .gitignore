@@ -11,8 +11,8 @@ generated_cv*
 .vscode
 chrome_profile
 answers.json
-# data
-# virtual env
 auto-jobs
-
 **/secrets.yaml
+
+# data*
+*virtual
