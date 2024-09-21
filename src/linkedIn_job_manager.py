@@ -184,7 +184,7 @@ class LinkedInJobManager:
     def extract_job_information_from_tile(self, job_tile):
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
-            job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').text
+            job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
             company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
         except:
