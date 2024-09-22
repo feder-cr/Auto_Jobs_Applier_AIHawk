@@ -90,6 +90,18 @@ class GeminiModel(AIModel):
         response = self.model.invoke(prompt)
         return response
 
+class HuggingFaceModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str):
+        from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+        self.model = HuggingFaceEndpoint(repo_id=llm_model, huggingfacehub_api_token=api_key,
+                                   temperature=0.4)
+        self.chatmodel=ChatHuggingFace(llm=self.model)
+
+    def invoke(self, prompt: str) -> BaseMessage:
+        response = self.chatmodel.invoke(prompt)
+        logger.debug("Invoking Model from Hugging Face API")
+        print(response,type(response))
+        return response
 
 class AIAdapter:
     def __init__(self, config: dict, api_key: str):
@@ -111,6 +123,8 @@ class AIAdapter:
             return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == "gemini":
             return GeminiModel(api_key, llm_model)
+        elif llm_model_type == "huggingface":
+            return HuggingFaceModel(api_key, llm_model)        
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
 
@@ -286,27 +300,46 @@ class LoggerChatModel:
         logger.debug(f"Parsing LLM result: {llmresult}")
 
         try:
-            content = llmresult.content
-            response_metadata = llmresult.response_metadata
-            id_ = llmresult.id
-            usage_metadata = llmresult.usage_metadata
+            if hasattr(llmresult, 'usage_metadata '):
+                content = llmresult.content
+                response_metadata = llmresult.response_metadata
+                id_ = llmresult.id
+                usage_metadata = llmresult.usage_metadata
 
-            parsed_result = {
-                "content": content,
-                "response_metadata": {
-                    "model_name": response_metadata.get("model_name", ""),
-                    "system_fingerprint": response_metadata.get("system_fingerprint", ""),
-                    "finish_reason": response_metadata.get("finish_reason", ""),
-                    "logprobs": response_metadata.get("logprobs", None),
-                },
-                "id": id_,
-                "usage_metadata": {
-                    "input_tokens": usage_metadata.get("input_tokens", 0),
-                    "output_tokens": usage_metadata.get("output_tokens", 0),
-                    "total_tokens": usage_metadata.get("total_tokens", 0),
-                },
-            }
+                parsed_result = {
+                    "content": content,
+                    "response_metadata": {
+                        "model_name": response_metadata.get("model_name", ""),
+                        "system_fingerprint": response_metadata.get("system_fingerprint", ""),
+                        "finish_reason": response_metadata.get("finish_reason", ""),
+                        "logprobs": response_metadata.get("logprobs", None),
+                    },
+                    "id": id_,
+                    "usage_metadata": {
+                        "input_tokens": usage_metadata.get("input_tokens", 0),
+                        "output_tokens": usage_metadata.get("output_tokens", 0),
+                        "total_tokens": usage_metadata.get("total_tokens", 0),
+                    },
+                }
+            else :  
+                content = llmresult.content
+                response_metadata = llmresult.response_metadata
+                id_ = llmresult.id
+                token_usage = response_metadata['token_usage']
 
+                parsed_result = {
+                    "content": content,
+                    "response_metadata": {
+                        "model_name": response_metadata.get("model", ""),
+                        "finish_reason": response_metadata.get("finish_reason", ""),
+                    },
+                    "id": id_,
+                    "usage_metadata": {
+                        "input_tokens": token_usage.prompt_tokens,
+                        "output_tokens": token_usage.completion_tokens,
+                        "total_tokens": token_usage.total_tokens,
+                    },
+                }                  
             logger.debug(f"Parsed LLM result successfully: {parsed_result}")
             return parsed_result
 
