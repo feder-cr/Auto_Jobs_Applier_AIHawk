@@ -110,7 +110,7 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 **Please watch this video to set up your Auto_Jobs_Applier_AIHawk: [How to set up Auto_Jobs_Applier_AIHawk- https://youtu.be/gdW9wogHEUM](https://youtu.be/gdW9wogHEUM)**
 
 <!-- It would be helpful to have a YouTube Media Player template that could be combined with this thumbnail... i.e. the 'play button', 'time stamp' and 'progress bar' so that there is a visual que telling users that this is a link to a playable video. -->
-[![How to set up Auto_jobs_applier_with_AI](https://img.youtube.com/vi/gdW9wogHEUM/0.jpg)](https://www.youtube.com/watch?v=gdW9wogHEUM)
+[![How to set up Auto_jobs_applier_with_AI](https://img.youtube.com/vi/gdW9wogHEUM/0.jpg)]
 
 **Confirmed succesfull runs on the following:**
 - Operating Systems:
