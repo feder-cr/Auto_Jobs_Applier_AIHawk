@@ -12,7 +12,7 @@
 
   #### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
 
-</div>
+
 <br />
 
 <!-- Message Clarity -->
@@ -42,7 +42,7 @@ Join our **Telegram community** for:
 - **Idea exchange** and resources for your projects
 
 <-- **[Join now!](https://t.me/AIhawkCommunity)** -->
-
+</div>
 ![CI](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/actions/workflows/ci.yml/badge.svg)
 
 ## Table of Contents
