@@ -9,7 +9,7 @@
   [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
 
   # Auto_Jobs_Applier_AIHawk
-  ![CI](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/actions/workflows/ci.yml/badge.svg)
+  ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
   #### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
 
@@ -599,7 +599,7 @@ yaml.scanner.ScannerError: while scanning a simple key
 **Solution:**
 - Check for security checks or CAPTCHAs
 - Verify `config.yaml` job search parameters
-- Ensure your LinkedIn profile meets job requirements
+- Ensure your account profile meets job requirements
 - Review console output for error messages
 
 ### General Troubleshooting Tips
@@ -609,7 +609,7 @@ yaml.scanner.ScannerError: while scanning a simple key
 - Check internet connection stability
 - Clear browser cache and cookies if issues persist
 
-For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
+For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
 
 ### Additional Resources
 
@@ -618,7 +618,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
 
-If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/linkedIn_auto_jobs_applier_with_AI/issues).
+If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
 
