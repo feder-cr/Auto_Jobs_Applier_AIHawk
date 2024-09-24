@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
-from src.linkedIn_easy_applier import LinkedInEasyApplier
+from src.aihawk_easy_applier import AIHawkEasyApplier
 from loguru import logger
 
 
@@ -36,16 +36,16 @@ class EnvironmentKeys:
         return value
 
 
-class LinkedInJobManager:
+class AIHawkJobManager:
     def __init__(self, driver):
-        logger.debug("Initializing LinkedInJobManager")
+        logger.debug("Initializing AIHawkJobManager")
         self.driver = driver
         self.set_old_answers = set()
         self.easy_applier_component = None
-        logger.debug("LinkedInJobManager initialized successfully")
+        logger.debug("AIHawkJobManager initialized successfully")
 
     def set_parameters(self, parameters):
-        logger.debug("Setting parameters for LinkedInJobManager")
+        logger.debug("Setting parameters for AIHawkJobManager")
         self.company_blacklist = parameters.get('company_blacklist', []) or []
         self.title_blacklist = parameters.get('title_blacklist', []) or []
         self.positions = parameters.get('positions', [])
@@ -74,7 +74,7 @@ class LinkedInJobManager:
 
     def start_applying(self):
         logger.debug("Starting job application process")
-        self.easy_applier_component = LinkedInEasyApplier(self.driver, self.resume_path, self.set_old_answers,
+        self.easy_applier_component = AIHawkEasyApplier(self.driver, self.resume_path, self.set_old_answers,
                                                           self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)

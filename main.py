@@ -11,9 +11,9 @@ from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
 from src.utils import chrome_browser_options
 from src.llm.llm_manager import GPTAnswerer
-from src.linkedIn_authenticator import LinkedInAuthenticator
-from src.linkedIn_bot_facade import LinkedInBotFacade
-from src.linkedIn_job_manager import LinkedInJobManager
+from src.aihawk_authenticator import AIHawkAuthenticator
+from src.aihawk_bot_facade import AIHawkBotFacade
+from src.aihawk_job_manager import AIHawkJobManager
 from src.job_application_profile import JobApplicationProfile
 from loguru import logger
 
@@ -172,10 +172,10 @@ def create_and_run_bot(parameters, llm_api_key):
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
         browser = init_browser()
-        login_component = LinkedInAuthenticator(browser)
-        apply_component = LinkedInJobManager(browser)
+        login_component = AIHawkAuthenticator(browser)
+        apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
-        bot = LinkedInBotFacade(login_component, apply_component)
+        bot = AIHawkBotFacade(login_component, apply_component)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
         bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
         bot.set_parameters(parameters)
@@ -203,19 +203,19 @@ def main(resume: Path = None):
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
-        logger.error(f"Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration {str(ce)}")
+        logger.error(f"Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration {str(ce)}")
     except FileNotFoundError as fnf:
         logger.error(f"File not found: {str(fnf)}")
         logger.error("Ensure all required files are present in the data folder.")
-        logger.error("Refer to the file setup guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error("Refer to the file setup guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except RuntimeError as re:
 
         logger.error(f"Runtime error: {str(re)}")
 
-        logger.error("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
-        logger.error("Refer to the general troubleshooting guide: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error("Refer to the general troubleshooting guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
 
 if __name__ == "__main__":
     main()

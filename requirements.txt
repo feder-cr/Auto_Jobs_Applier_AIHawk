@@ -16,7 +16,6 @@ langchain-text-splitters==0.2.2
 langsmith==0.1.93
 Levenshtein==0.25.1
 loguru==0.7.2
-linkedin-api
 openai==1.37.1
 pdfminer.six==20221105
 pytest>=8.3.3

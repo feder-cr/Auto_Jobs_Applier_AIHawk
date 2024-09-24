@@ -7,7 +7,7 @@ def job_manager():
     return None  # Replace with valid instance or mock later
 
 def test_bot_functionality(job_manager):
-    """Test LinkedIn bot facade."""
+    """Test AIHawk bot facade."""
     # Example: test job manager interacts with the bot facade correctly
     job = {"title": "Software Engineer"}
     # job_manager.some_method_to_apply(job)

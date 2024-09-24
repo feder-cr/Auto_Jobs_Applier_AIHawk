@@ -9,14 +9,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from loguru import logger
 
 
-class LinkedInAuthenticator:
+class AIHawkAuthenticator:
 
     def __init__(self, driver=None):
         self.driver = driver
-        logger.debug(f"LinkedInAuthenticator initialized with driver: {driver}")
+        logger.debug(f"AIHawkAuthenticator initialized with driver: {driver}")
 
     def start(self):
-        logger.info("Starting Chrome browser to log in to LinkedIn.")
+        logger.info("Starting Chrome browser to log in to AIHawk.")
         if self.is_logged_in():
             logger.info("User is already logged in. Skipping login process.")
             return
@@ -25,7 +25,7 @@ class LinkedInAuthenticator:
             self.handle_login()
 
     def handle_login(self):
-        logger.info("Navigating to the LinkedIn login page...")
+        logger.info("Navigating to the AIHawk login page...")
         self.driver.get("https://www.linkedin.com/login")
         if 'feed' in self.driver.current_url:
             logger.debug("User is already logged in.")
@@ -33,7 +33,7 @@ class LinkedInAuthenticator:
         try:
             self.enter_credentials()
         except NoSuchElementException as e:
-            logger.error(f"Could not log in to LinkedIn. Element not found: {e}")
+            logger.error(f"Could not log in to AIHawk. Element not found: {e}")
         self.handle_security_check()
 
 

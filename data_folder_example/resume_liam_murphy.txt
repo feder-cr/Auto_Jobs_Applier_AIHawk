@@ -1,6 +1,6 @@
 Liam Murphy
 Galway, Ireland
-Email: liam.murphy@gmail.com | LinkedIn: liam-murphy
+Email: liam.murphy@gmail.com | AIHawk: liam-murphy
 GitHub: liam-murphy | Phone: +353 871234567
 
 Education
@@ -33,7 +33,7 @@ Developed and maintained a critical software tool for password validation used b
 Played an integral role in the hospital's cybersecurity team
 Projects
 JobBot
-AI-driven tool to automate and personalize job applications on LinkedIn, gained over 3000 stars on GitHub, improving efficiency and reducing application time
+AI-driven tool to automate and personalize job applications on AIHawk, gained over 3000 stars on GitHub, improving efficiency and reducing application time
 Link: JobBot
 
 mqtt-packet-parser

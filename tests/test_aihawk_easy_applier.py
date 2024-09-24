@@ -1,6 +1,6 @@
 import pytest
 from unittest import mock
-from src.linkedIn_easy_applier import LinkedInEasyApplier
+from aihawk_easy_applier import AIHawkEasyApplier
 
 
 @pytest.fixture
@@ -23,8 +23,8 @@ def mock_resume_generator_manager():
 
 @pytest.fixture
 def easy_applier(mock_driver, mock_gpt_answerer, mock_resume_generator_manager):
-    """Fixture to initialize LinkedInEasyApplier with mocks."""
-    return LinkedInEasyApplier(
+    """Fixture to initialize AIHawkEasyApplier with mocks."""
+    return AIHawkEasyApplier(
         driver=mock_driver,
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],
@@ -34,11 +34,11 @@ def easy_applier(mock_driver, mock_gpt_answerer, mock_resume_generator_manager):
 
 
 def test_initialization(mocker, easy_applier):
-    """Test that LinkedInEasyApplier is initialized correctly."""
+    """Test that AIHawkEasyApplier is initialized correctly."""
     # Mock os.path.exists to return True
     mocker.patch('os.path.exists', return_value=True)
 
-    easy_applier = LinkedInEasyApplier(
+    easy_applier = AIHawkEasyApplier(
         driver=mocker.Mock(),
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],
@@ -85,12 +85,12 @@ def test_check_for_premium_redirect_no_redirect(mocker, easy_applier):
 
 
 def test_check_for_premium_redirect_with_redirect(mocker, easy_applier):
-    """Test that check_for_premium_redirect handles LinkedIn Premium redirects."""
+    """Test that check_for_premium_redirect handles AIHawk Premium redirects."""
     mock_job = mock.Mock()
     easy_applier.driver.current_url = "https://www.linkedin.com/premium"
     mock_job.link = "https://www.linkedin.com/jobs/view/1234"
 
-    with pytest.raises(Exception, match="Redirected to LinkedIn Premium page and failed to return"):
+    with pytest.raises(Exception, match="Redirected to AIHawk Premium page and failed to return"):
         easy_applier.check_for_premium_redirect(mock_job)
 
     # Verify that it attempted to return to the job page 3 times

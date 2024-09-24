@@ -3,27 +3,27 @@ from unittest import mock
 from pathlib import Path
 import os
 import pytest
-from src.linkedIn_job_manager import LinkedInJobManager
+from aihawk_job_manager import AIHawkJobManager
 from selenium.common.exceptions import NoSuchElementException
 from loguru import logger
 
 
 @pytest.fixture
 def job_manager(mocker):
-    """Fixture to create a LinkedInJobManager instance with mocked driver."""
+    """Fixture to create a AIHawkJobManager instance with mocked driver."""
     mock_driver = mocker.Mock()
-    return LinkedInJobManager(mock_driver)
+    return AIHawkJobManager(mock_driver)
 
 
 def test_initialization(job_manager):
-    """Test LinkedInJobManager initialization."""
+    """Test AIHawkJobManager initialization."""
     assert job_manager.driver is not None
     assert job_manager.set_old_answers == set()
     assert job_manager.easy_applier_component is None
 
 
 def test_set_parameters(mocker, job_manager):
-    """Test setting parameters for the LinkedInJobManager."""
+    """Test setting parameters for the AIHawkJobManager."""
     # Mocking os.path.exists to return True for the resume path
     mocker.patch('pathlib.Path.exists', return_value=True)
 
@@ -143,7 +143,7 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     mocker.patch.object(
         job_manager, 'is_already_applied_to_company', return_value=False)
 
-    # Mock the LinkedInEasyApplier component
+    # Mock the AIHawkEasyApplier component
     job_manager.easy_applier_component = mocker.Mock()
 
     # Mock the output_file_directory as a valid Path object

@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from src.linkedIn_authenticator import LinkedInAuthenticator
+from aihawk_authenticator import AIHawkAuthenticator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 
@@ -14,8 +14,8 @@ def mock_driver(mocker):
 
 @pytest.fixture
 def authenticator(mock_driver):
-    """Fixture to initialize LinkedInAuthenticator with a mocked driver."""
-    return LinkedInAuthenticator(mock_driver)
+    """Fixture to initialize AIHawkAuthenticator with a mocked driver."""
+    return AIHawkAuthenticator(mock_driver)
 
 
 def test_set_secrets(authenticator):
@@ -26,7 +26,7 @@ def test_set_secrets(authenticator):
 
 
 def test_start_logged_in(mocker, authenticator):
-    """Test starting LinkedIn when already logged in."""
+    """Test starting AIHawk when already logged in."""
     mocker.patch.object(authenticator, 'is_logged_in', return_value=True)
     mocker.patch.object(authenticator.driver, 'get')
     mocker.patch("time.sleep")  # Avoid waiting during the test
@@ -40,7 +40,7 @@ def test_start_logged_in(mocker, authenticator):
 
 
 def test_start_not_logged_in(mocker, authenticator):
-    """Test starting LinkedIn when not logged in."""
+    """Test starting AIHawk when not logged in."""
     mocker.patch.object(authenticator, 'is_logged_in', return_value=False)
     mocker.patch.object(authenticator, 'handle_login')
     mocker.patch.object(authenticator.driver, 'get')
@@ -54,7 +54,7 @@ def test_start_not_logged_in(mocker, authenticator):
 
 
 def test_handle_login(mocker, authenticator):
-    """Test handling the LinkedIn login process."""
+    """Test handling the AIHawk login process."""
     mocker.patch.object(authenticator.driver, 'get')
     mocker.patch.object(authenticator, 'enter_credentials')
     mocker.patch.object(authenticator, 'submit_login_form')

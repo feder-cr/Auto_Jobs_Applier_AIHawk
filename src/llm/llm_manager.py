@@ -433,7 +433,7 @@ class GPTAnswerer:
             "interests": self._create_chain(strings.interests_template),
             "cover_letter": self._create_chain(strings.coverletter_template),
         }
-        section_prompt = """You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
+        section_prompt = """You are assisting a bot designed to automatically apply for jobs on AIHawk. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
         For the following question: '{question}', determine which section of the resume is most relevant. 
         Respond with exactly one of the following options:
@@ -456,7 +456,7 @@ class GPTAnswerer:
         1. **Personal Information**:
         - **Purpose**: Contains your basic contact details and online profiles.
         - **Use When**: The question is about how to contact you or requests links to your professional online presence.
-        - **Examples**: Email address, phone number, LinkedIn profile, GitHub repository, personal website.
+        - **Examples**: Email address, phone number, AIHawk profile, GitHub repository, personal website.
 
         2. **Self Identification**:
         - **Purpose**: Covers personal identifiers and demographic information.

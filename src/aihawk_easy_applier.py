@@ -22,10 +22,10 @@ import src.utils as utils
 from loguru import logger
 
 
-class LinkedInEasyApplier:
+class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
                  gpt_answerer: Any, resume_generator_manager):
-        logger.debug("Initializing LinkedInEasyApplier")
+        logger.debug("Initializing AIHawkEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
         self.driver = driver
@@ -35,7 +35,7 @@ class LinkedInEasyApplier:
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
 
-        logger.debug("LinkedInEasyApplier initialized successfully")
+        logger.debug("AIHawkEasyApplier initialized successfully")
 
     def _load_questions_from_json(self) -> List[dict]:
         output_file = 'answers.json'
@@ -65,7 +65,7 @@ class LinkedInEasyApplier:
         attempts = 0
 
         while "linkedin.com/premium" in current_url and attempts < max_attempts:
-            logger.warning("Redirected to LinkedIn Premium page. Attempting to return to job page.")
+            logger.warning("Redirected to AIHawk Premium page. Attempting to return to job page.")
             attempts += 1
 
             self.driver.get(job.link)
@@ -75,7 +75,7 @@ class LinkedInEasyApplier:
         if "linkedin.com/premium" in current_url:
             logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
-                f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+                f"Redirected to AIHawk Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
             
     def apply_to_job(self, job: Any) -> None:
         """

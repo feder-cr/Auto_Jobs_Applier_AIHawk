@@ -1,13 +1,13 @@
 from loguru import logger
 
 
-class LinkedInBotState:
+class AIHawkBotState:
     def __init__(self):
-        logger.debug("Initializing LinkedInBotState")
+        logger.debug("Initializing AIHawkBotState")
         self.reset()
 
     def reset(self):
-        logger.debug("Resetting LinkedInBotState")
+        logger.debug("Resetting AIHawkBotState")
         self.credentials_set = False
         self.api_key_set = False
         self.job_application_profile_set = False
@@ -16,7 +16,7 @@ class LinkedInBotState:
         self.logged_in = False
 
     def validate_state(self, required_keys):
-        logger.debug(f"Validating LinkedInBotState with required keys: {required_keys}")
+        logger.debug(f"Validating AIHawkBotState with required keys: {required_keys}")
         for key in required_keys:
             if not getattr(self, key):
                 logger.error(f"State validation failed: {key} is not set")
@@ -24,12 +24,12 @@ class LinkedInBotState:
         logger.debug("State validation passed")
 
 
-class LinkedInBotFacade:
+class AIHawkBotFacade:
     def __init__(self, login_component, apply_component):
-        logger.debug("Initializing LinkedInBotFacade")
+        logger.debug("Initializing AIHawkBotFacade")
         self.login_component = login_component
         self.apply_component = apply_component
-        self.state = LinkedInBotState()
+        self.state = AIHawkBotState()
         self.job_application_profile = None
         self.resume = None
         self.email = None
