@@ -1,43 +1,41 @@
-remote: [true/false]
+remote: true
 
-experience_level:
- internship: [true/false]
- entry: [true/false]
- associate: [true/false]
- mid-senior level: [true/false]
- director: [true/false]
- executive: [true/false]
+experienceLevel:
+  internship: false
+  entry: true
+  associate: true
+  mid-senior level: true
+  director: false
+  executive: false
 
 jobTypes:
- full-time: [true/false]
- contract: [true/false]
- part-time: [true/false]
- temporary: [true/false]
- internship: [true/false]
- other: [true/false]
- volunteer: [true/false]
+  full-time: true
+  contract: false
+  part-time: false
+  temporary: true
+  internship: false
+  other: false
+  volunteer: true
 
 date:
- all time: [true/false]
- month: [true/false]
- week: [true/false]
- 24 hours: [true/false]
+  all time: false
+  month: false
+  week: false
+  24 hours: true
 
 positions:
-  - position1
-  - position2
+  - Software engineer
 
 locations:
-  - Country1
-  - Country2
+  - london
 
-apply_once_at_company: [true/false]
+apply_once_at_company: true
 
 distance: 100
 
 company_blacklist:
-  - Company1
-  - Company2
+  - wayfair
+  - Crossover
 
 title_blacklist:
   - word1
@@ -45,11 +43,8 @@ title_blacklist:
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 100
-  
-llm_model_type: openai
-llm_model: gpt-4o-mini 
+  max_applicants: 30
 
-#llm_model_type: huggingface
-#llm_model: 'tiiuae/falcon-7b-instruct'
-# llm_api_url: https://api.pawan.krd/cosmosrp/v1 this field is optional
+llm_model_type: openai
+llm_model: 'gpt-4o'
+llm_api_url: https://api.pawan.krd/cosmosrp/v1'

@@ -300,7 +300,7 @@ class LoggerChatModel:
         logger.debug(f"Parsing LLM result: {llmresult}")
 
         try:
-            if hasattr(llmresult, 'usage_metadata '):
+            if hasattr(llmresult, 'usage_metadata'):
                 content = llmresult.content
                 response_metadata = llmresult.response_metadata
                 id_ = llmresult.id

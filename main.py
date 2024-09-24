@@ -104,17 +104,15 @@ class ConfigValidator:
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:
         secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
-        mandatory_secrets = ['email', 'password']
+        mandatory_secrets = ['llm_api_key']
 
         for secret in mandatory_secrets:
             if secret not in secrets:
                 raise ConfigError(f"Missing secret '{secret}' in file {secrets_yaml_path}")
 
-        if not ConfigValidator.validate_email(secrets['email']):
-            raise ConfigError(f"Invalid email format in secrets file {secrets_yaml_path}.")
-        if not secrets['password']:
-            raise ConfigError(f"Password cannot be empty in secrets file {secrets_yaml_path}.")
-        return secrets['email'], str(secrets['password']), secrets['llm_api_key']
+        if not secrets['llm_api_key']:
+            raise ConfigError(f"llm_api_key cannot be empty in secrets file {secrets_yaml_path}.")
+        return secrets['llm_api_key']
 
 class FileManager:
     @staticmethod
@@ -152,13 +150,14 @@ class FileManager:
 
 def init_browser() -> webdriver.Chrome:
     try:
+        
         options = chrome_browser_options()
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
-def create_and_run_bot(email, password, parameters, llm_api_key):
+def create_and_run_bot(parameters, llm_api_key):
     try:
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
@@ -177,7 +176,6 @@ def create_and_run_bot(email, password, parameters, llm_api_key):
         apply_component = LinkedInJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
         bot = LinkedInBotFacade(login_component, apply_component)
-        bot.set_secrets(email, password)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
         bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
         bot.set_parameters(parameters)
@@ -197,12 +195,12 @@ def main(resume: Path = None):
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
         
         parameters = ConfigValidator.validate_config(config_file)
-        email, password, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
+        llm_api_key = ConfigValidator.validate_secrets(secrets_file)
         
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         
-        create_and_run_bot(email, password, parameters, llm_api_key)
+        create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
         logger.error(f"Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/LinkedIn_AIHawk_automatic_job_application/blob/main/readme.md#configuration {str(ce)}")

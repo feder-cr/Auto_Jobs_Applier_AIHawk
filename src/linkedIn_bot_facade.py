@@ -45,14 +45,6 @@ class LinkedInBotFacade:
         self.state.job_application_profile_set = True
         logger.debug("Job application profile and resume set successfully")
 
-    def set_secrets(self, email, password):
-        logger.debug("Setting secrets: email and password")
-        self._validate_non_empty(email, "Email")
-        self._validate_non_empty(password, "Password")
-        self.email = email
-        self.password = password
-        self.state.credentials_set = True
-        logger.debug("Secrets set successfully")
 
     def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
@@ -69,13 +61,13 @@ class LinkedInBotFacade:
         self._validate_non_empty(parameters, "Parameters")
         self.parameters = parameters
         self.apply_component.set_parameters(parameters)
+        self.state.credentials_set = True
         self.state.parameters_set = True
         logger.debug("Parameters set successfully")
 
     def start_login(self):
         logger.debug("Starting login process")
         self.state.validate_state(['credentials_set'])
-        self.login_component.set_secrets(self.email, self.password)
         self.login_component.start()
         self.state.logged_in = True
         logger.debug("Login process completed successfully")
