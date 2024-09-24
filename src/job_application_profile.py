@@ -24,6 +24,15 @@ class LegalAuthorization:
     requires_eu_visa: str
     legally_allowed_to_work_in_eu: str
     requires_eu_sponsorship: str
+    canada_work_authorization: str
+    requires_canada_visa: str
+    legally_allowed_to_work_in_canada: str
+    requires_canada_sponsorship: str
+    uk_work_authorization: str
+    requires_uk_visa: str 
+    legally_allowed_to_work_in_uk: str
+    requires_uk_sponsorship: str
+
 
 
 @dataclass
