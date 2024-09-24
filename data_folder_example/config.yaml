@@ -28,7 +28,6 @@ positions:
 
 locations:
   - london
-  - copenhagen
 
 apply_once_at_company: true
 
