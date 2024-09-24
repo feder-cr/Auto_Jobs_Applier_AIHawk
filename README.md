@@ -455,24 +455,41 @@ Each section has specific fields to fill out:
   - Indicate your legal ability to work in various locations.
     - **eu_work_authorization**: Whether you are authorized to work in the European Union (Yes/No).
     - **us_work_authorization**: Whether you are authorized to work in the United States (Yes/No).
-    - **requires_us_visa**: Whether you require a visa to work in the US (Yes/No).
-    - **requires_us_sponsorship**: Whether you require sponsorship to work in the US (Yes/No).
-    - **requires_eu_visa**: Whether you require a visa to work in the EU (Yes/No).
-    - **legally_allowed_to_work_in_eu**: Whether you are legally allowed to work in the EU (Yes/No).
-    - **legally_allowed_to_work_in_us**: Whether you are legally allowed to work in the US (Yes/No).
-    - **requires_eu_sponsorship**: Whether you require sponsorship to work in the EU (Yes/No).
+    - **requires_us_visa**: Whether you require a visa to work in the United States (Yes/No).
+    - **requires_us_sponsorship**: Whether you require sponsorship to work in the United States (Yes/No).
+    - **requires_eu_visa**: Whether you require a visa to work in the European Union (Yes/No).
+    - **legally_allowed_to_work_in_eu**: Whether you are legally allowed to work in the European Union (Yes/No).
+    - **legally_allowed_to_work_in_us**: Whether you are legally allowed to work in the United States (Yes/No).
+    - **requires_eu_sponsorship**: Whether you require sponsorship to work in the European Union (Yes/No).
+    - **canada_work_authorization**: Whether you are authorized to work in Canada (Yes/No).
+    - **requires_canada_visa**: Whether you require a visa to work in Canada (Yes/No).
+    - **legally_allowed_to_work_in_canada**: Whether you are legally allowed to work in Canada (Yes/No).
+    - **requires_canada_sponsorship**: Whether you require sponsorship to work in Canada (Yes/No).
+    - **uk_work_authorization**: Whether you are authorized to work in the United Kingdom (Yes/No).
+    - **requires_uk_visa**: Whether you require a visa to work in the United Kingdom (Yes/No).
+    - **legally_allowed_to_work_in_uk**: Whether you are legally allowed to work in the United Kingdom (Yes/No).
+    - **requires_uk_sponsorship**: Whether you require sponsorship to work in the United Kingdom (Yes/No).
+
 
   - Example:
      ```yaml
-     legal_authorization:
-       eu_work_authorization: "Yes"
-       us_work_authorization: "No"
-       requires_us_visa: "Yes"
-       requires_us_sponsorship: "Yes"
-       requires_eu_visa: "No"
-       legally_allowed_to_work_in_eu: "Yes"
-       legally_allowed_to_work_in_us: "No"
-       requires_eu_sponsorship: "No"
+    legal_authorization:
+    eu_work_authorization: "Yes"
+    us_work_authorization: "Yes"
+    requires_us_visa: "No"
+    requires_us_sponsorship: "Yes"
+    requires_eu_visa: "No"
+    legally_allowed_to_work_in_eu: "Yes"
+    legally_allowed_to_work_in_us: "Yes"
+    requires_eu_sponsorship: "No"
+    canada_work_authorization: "Yes"
+    requires_canada_visa: "No"
+    legally_allowed_to_work_in_canada: "Yes"
+    requires_canada_sponsorship: "No"
+    uk_work_authorization: "Yes"
+    requires_uk_visa: "No"
+    legally_allowed_to_work_in_uk: "Yes"
+    requires_uk_sponsorship: "No"
      ```
 
 - `work_preferences:`
