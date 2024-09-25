@@ -674,8 +674,8 @@ class AIHawkEasyApplier:
 
             question_type = 'numeric' if is_numeric else 'textbox'
 
-            # Check if it's a cover letter field
-            is_cover_letter = 'cover letter' in question_text
+            # Check if it's a cover letter field (case-insensitive)
+            is_cover_letter = 'cover letter' in question_text.lower()
 
             # Look for existing answer if it's not a cover letter field
             existing_answer = None
