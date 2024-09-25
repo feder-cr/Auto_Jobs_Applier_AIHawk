@@ -1,0 +1,90 @@
+name: Bug report
+description: Report a bug or an issue that isn't working as expected.
+title: "[BUG]: <Provide a clear, descriptive title>"
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the following information to help us resolve the issue.
+
+  - type: input
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "Describe the bug in detail..."
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Steps to reproduce the behavior:
+        1. Use branch named '...'
+        2. Go to file '...'
+        3. Find property named '...'
+        4. Change '...'
+        5. Run program using command '...'
+        6. See error
+      placeholder: "List the steps to reproduce the bug..."
+
+  - type: input
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+      placeholder: "What was the expected result?"
+
+  - type: input
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened instead.
+      placeholder: "What happened instead?"
+
+  - type: dropdown
+    id: branch
+    attributes:
+      label: Branch
+      description: Specify the branch you were using when the bug occurred.
+      options:
+        - main
+        - other
+
+  - type: input
+    id: otherBranch
+    attributes:
+      label: Branch name
+      description: If you selected ```other``` branch for the previous question, what is the branch name?
+      placeholder: "what-is-the-name-of-the-branch-you-were-using"
+
+  - type: input
+    id: pythonVersion
+    attributes:
+      label: Python version
+      description: Specify the version of Python you were using when the bug occurred.
+      placeholder: "e.g., 3.12.5(64b)"
+
+  - type: input
+    id: llm
+    attributes:
+      label: LLM Used
+      description: Specify the LLM provider you were using when the bug occurred.
+      placeholder: "e.g., ChatGPT"
+
+  - type: input
+    id: model
+    attributes:
+      label: Model used
+      description: Specify the LLM model you were using when the bug occurred.
+      placeholder: "e.g., GPT-4o-mini"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+      placeholder: "Any additional information..."
