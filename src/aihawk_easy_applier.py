@@ -672,30 +672,9 @@ class AIHawkEasyApplier:
             is_numeric = self._is_numeric_field(text_field)
             logger.debug(f"Is the field numeric? {'Yes' if is_numeric else 'No'}")
 
-            existing_answer = None
             question_type = 'numeric' if is_numeric else 'textbox'
 
-            for item in self.all_data:
-
-                logger.debug(
-                    f"Comparing sanitized stored question: '{self._sanitize_text(item['question'])}' and type: '{item.get('type')}' with current question: '{self._sanitize_text(question_text)}' and type: '{question_type}'")
-
-                if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get(
-                        'type') == question_type:
-                    existing_answer = item
-                    logger.debug(f"Found existing answer in the data: {existing_answer['answer']}")
-                    break
-
-            if existing_answer:
-                self._enter_text(text_field, existing_answer['answer'])
-                logger.debug("Entered existing answer into the textbox.")
-
-                time.sleep(1)
-                text_field.send_keys(Keys.ARROW_DOWN)
-                text_field.send_keys(Keys.ENTER)
-                logger.debug("Selected first option from the dropdown.")
-                return True
-
+            # Always generate a new answer for textbox fields
             if is_numeric:
                 answer = self.gpt_answerer.answer_question_numeric(question_text)
                 logger.debug(f"Generated numeric answer: {answer}")
@@ -703,9 +682,13 @@ class AIHawkEasyApplier:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                 logger.debug(f"Generated textual answer: {answer}")
 
-            self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
-            logger.debug("Entered new answer into the textbox and saved it to JSON.")
+            logger.debug("Entered new answer into the textbox.")
+
+            # Only save non-cover letter answers
+            if 'cover letter' not in question_text:
+                self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+                logger.debug("Saved non-cover letter answer to JSON.")
 
             time.sleep(1)
             text_field.send_keys(Keys.ARROW_DOWN)
