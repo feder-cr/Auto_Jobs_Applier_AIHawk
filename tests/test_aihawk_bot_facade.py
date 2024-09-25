@@ -1,5 +1,5 @@
 import pytest
-# from src.linkedIn_job_manager import JobManager
+# from src.aihawk_job_manager import JobManager
 
 @pytest.fixture
 def job_manager():

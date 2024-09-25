@@ -1,6 +1,6 @@
 # Issues Reporting Guidelines
 
-Welcome to the LinkedIn AI Hawk Contributing Guide and Issues Tracker! To keep things organized and ensure issues are resolved quickly, please follow the guidelines below when submitting a bug report, feature request, or any other issue.
+Welcome to the AI Hawk Contributing Guide and Issues Tracker! To keep things organized and ensure issues are resolved quickly, please follow the guidelines below when submitting a bug report, feature request, or any other issue.
 
 If you have a general question, are curious about how something in Python works, please remember that [Google](https://google.com) is your friend and it can answer many questions.
 
