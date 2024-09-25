@@ -674,19 +674,34 @@ class AIHawkEasyApplier:
 
             question_type = 'numeric' if is_numeric else 'textbox'
 
-            # Always generate a new answer for textbox fields
-            if is_numeric:
-                answer = self.gpt_answerer.answer_question_numeric(question_text)
-                logger.debug(f"Generated numeric answer: {answer}")
+            # Check if it's a cover letter field
+            is_cover_letter = 'cover letter' in question_text
+
+            # Look for existing answer if it's not a cover letter field
+            existing_answer = None
+            if not is_cover_letter:
+                for item in self.all_data:
+                    if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
+                        existing_answer = item['answer']
+                        logger.debug(f"Found existing answer: {existing_answer}")
+                        break
+
+            if existing_answer and not is_cover_letter:
+                answer = existing_answer
+                logger.debug(f"Using existing answer: {answer}")
             else:
-                answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
-                logger.debug(f"Generated textual answer: {answer}")
+                if is_numeric:
+                    answer = self.gpt_answerer.answer_question_numeric(question_text)
+                    logger.debug(f"Generated numeric answer: {answer}")
+                else:
+                    answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+                    logger.debug(f"Generated textual answer: {answer}")
 
             self._enter_text(text_field, answer)
-            logger.debug("Entered new answer into the textbox.")
+            logger.debug("Entered answer into the textbox.")
 
-            # Only save non-cover letter answers
-            if 'cover letter' not in question_text:
+            # Save non-cover letter answers
+            if not is_cover_letter:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
                 logger.debug("Saved non-cover letter answer to JSON.")
 
