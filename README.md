@@ -209,8 +209,8 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Italy
       - London
     ```
-- `applyOnceAtCompany: [True/False]`
-  - Set if you will apply in more than one opportunity per company
+- `apply_once_at_company: [True/False]`
+  - Set to `True` to apply only once per company, `False` to allow multiple applications per company
 
 - `distance: [number]`
   - Set the radius for your job search in miles
