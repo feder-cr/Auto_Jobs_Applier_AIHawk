@@ -129,7 +129,8 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 
 3. **Clone the repository:**
    ```bash
-   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk_automatic_job_application
+   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+   
    cd Auto_Jobs_Applier_AIHawk
    ```
 
