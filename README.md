@@ -624,6 +624,31 @@ yaml.scanner.ScannerError: while scanning a simple key
 
 For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
 
+## Setup Documents
+
+### Ollama & Gemini Setup
+
+To install and configure **Ollama** and **Gemini**, please refer to the following documents:
+
+- [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/RushiChaganti/Auto_Jobs_Applier_AIHawk/blob/alphonse/docs/guide_to_setup_ollama_and_gemini.pdf)
+
+Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+
+
+### Editing YAML Files
+For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
+
+[Download YAML Editing Guide (PDF)](https://github.com/RushiChaganti/Auto_Jobs_Applier_AIHawk/blob/alphonse/docs/guide_yaml_sections.pdf)
+
+### Auto-start AIHawk
+To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
+
+[Download Auto-start AIHawk Guide (PDF)](https://github.com/RushiChaganti/Auto_Jobs_Applier_AIHawk/blob/alphonse/docs/guide_to_autostart_aihawk.pdf)
+
+Navigate to the docs/ directory and download the PDF guides you need.
+
+Support me with a follow (https://www.linkedin.com/in/rushichaganti/)
+
 ### Additional Resources
 
 - [Video Tutorial: How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
