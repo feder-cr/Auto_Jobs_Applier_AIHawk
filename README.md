@@ -647,7 +647,7 @@ To make **AIHawk** automatically start when your system boots, follow the steps 
 
 Navigate to the docs/ directory and download the PDF guides you need.
 
-Support me with a follow (https://www.linkedin.com/in/rushichaganti/)
+Written by Rushi, (https://www.linkedin.com/in/rushichaganti/), support him by following.
 
 ### Additional Resources
 
