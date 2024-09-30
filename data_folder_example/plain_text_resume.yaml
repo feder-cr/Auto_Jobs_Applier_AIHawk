@@ -4,6 +4,7 @@ personal_information:
   date_of_birth: "12/01/1861"
   country: "Ireland"
   city: "Dublin"
+  zip_code: "520123"
   address: "12 Fox road"
   phone_prefix: "+1"
   phone: "7819117091"

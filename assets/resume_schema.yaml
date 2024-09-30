@@ -7,6 +7,7 @@ personal_information:
     surname: {type: string}
     date_of_birth: {type: string, format: date}
     country: {type: string}
+    zip_code: {type: string, pattern: "^[0-9]{5,10}$"}
     city: {type: string}
     address: {type: string}
     phone_prefix: {type: string, format: phone_prefix}
@@ -14,7 +15,7 @@ personal_information:
     email: {type: string, format: email}
     github: {type: string, format: uri}
     linkedin: {type: string, format: uri}
-  required: [name, surname, date_of_birth, country, city, address, phone_prefix, phone, email]
+  required: [name, surname, date_of_birth, country, city, address,zip_code, phone_prefix, phone, email]
 
 education_details:
   type: array
