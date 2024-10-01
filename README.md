@@ -153,8 +153,25 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
+6. **Copy example files in data_folder for configuration:**
+   ```bash
+   cp data_folder_example/*.yaml data_folder/
+   ```
+
 ## Configuration
 
+
+### 0. Data Folder
+
+The `data_folder` directory contains all the files necessary for the bot to operate. This folder should be structured as follows:
+  
+  ```bash
+  data_folder/
+  ├── config.yaml
+  ├── plain_text_resume.yaml
+  └── secrets.yaml
+  ```
+  Examples of each file are provided in the `data_folder_example` directory.
 ### 1. secrets.yaml
 
 This file contains sensitive information. Never share or commit this file to version control.
