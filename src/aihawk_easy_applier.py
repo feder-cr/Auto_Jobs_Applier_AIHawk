@@ -24,17 +24,14 @@ import src.utils as utils
 
 
 class AIHawkEasyApplier:
-    def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
-                 gpt_answerer: Any, resume_generator_manager, parameters: dict):
+    def __init__(self, driver, resume_dir, set_old_answers, gpt_answerer, resume_generator_manager, job_application_profile):
         logger.debug("Initializing AIHawkEasyApplier")
-        if resume_dir is None or not os.path.exists(resume_dir):
-            resume_dir = None
         self.driver = driver
         self.resume_path = resume_dir
         self.set_old_answers = set_old_answers
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
-        self.parameters = parameters
+        self.job_application_profile = job_application_profile  # Store the job_application_profile
         self.all_data = self._load_questions_from_json()
         logger.debug("AIHawkEasyApplier initialized successfully")
 
@@ -589,8 +586,8 @@ class AIHawkEasyApplier:
 
         while True:
             try:
-                candidate_first_name = self.parameters['personal_information_test']['name']
-                candidate_last_name = self.parameters['personal_information_test']['surname']
+                candidate_first_name = self.job_application_profile.personal_information.name
+                candidate_last_name = self.job_application_profile.personal_information.surname
                 timestamp = int(time.time())
                 file_name = f"CV_{candidate_first_name}_{candidate_last_name}_{timestamp}.pdf"
                 file_path_pdf = os.path.join(folder_path, file_name)
