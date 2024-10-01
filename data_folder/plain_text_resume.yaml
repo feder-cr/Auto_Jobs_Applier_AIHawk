@@ -5,6 +5,7 @@ personal_information:
   country: "[Your Country]"
   city: "[Your City]"
   address: "[Your Address]"
+  zip_code: "[Your zip code]"
   phone_prefix: "[Your Phone Prefix]"
   phone: "[Your Phone Number]"
   email: "[Your Email Address]"
