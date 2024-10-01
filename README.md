@@ -261,6 +261,7 @@ Each section has specific fields to fill out:
     - **country**: The country where you currently reside.
     - **city**: The city where you currently live.
     - **address**: Your full address, including street and number.
+    - **zip_code**: Your postal/ZIP code.
     - **phone_prefix**: The international dialing code for your phone number (e.g., +1 for the USA, +44 for the UK).
     - **phone**: Your phone number without the international prefix.
     - **email**: Your primary email address.
@@ -275,6 +276,7 @@ Each section has specific fields to fill out:
     country: "USA"
     city: "New York"
     address: "123 Main St"
+    zip_code: "520123"
     phone_prefix: "+1"
     phone: "5551234567"
     email: "jane.doe@example.com"
