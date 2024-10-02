@@ -308,7 +308,6 @@ class AIHawkEasyApplier:
         except Exception as e:
             logger.debug(f"Failed to unfollow company: {e}")
 
-## Error in this function because of find_elements is accessing a CLASS_NAME ## 
     def _check_for_errors(self) -> None:
         logger.debug("Checking for form errors")
         error_elements = self.driver.find_elements(By.CLASS_NAME, 'artdeco-inline-feedback--error')
