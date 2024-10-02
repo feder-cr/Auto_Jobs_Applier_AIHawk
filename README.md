@@ -153,8 +153,25 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
+6. **Copy example files in data_folder for configuration:**
+   ```bash
+   cp data_folder_example/*.yaml data_folder/
+   ```
+
 ## Configuration
 
+
+### 0. Data Folder
+
+The `data_folder` directory contains all the files necessary for the bot to operate. This folder should be structured as follows:
+  
+  ```bash
+  data_folder/
+  ├── config.yaml
+  ├── plain_text_resume.yaml
+  └── secrets.yaml
+  ```
+  Examples of each file are provided in the `data_folder_example` directory.
 ### 1. secrets.yaml
 
 This file contains sensitive information. Never share or commit this file to version control.
@@ -624,6 +641,10 @@ yaml.scanner.ScannerError: while scanning a simple key
 
 For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
 
+**Answer Editor and Cleaner**
+
+See ANSWERS_UTILS.md for more information on the Answer Editor and Cleaner.
+
 ## Setup Documents
 
 ### Ollama & Gemini Setup
@@ -677,3 +698,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Disclaimer
 This tool, Auto_Jobs_Applier_AIHawk, is intended for educational purposes only. The creator assumes no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
+

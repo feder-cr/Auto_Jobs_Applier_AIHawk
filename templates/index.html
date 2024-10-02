@@ -1,0 +1,56 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Answers Editor{% endblock %}
+
+{% block styles %}
+{{super()}}
+<style>
+    .container { margin-top: 30px; }
+    .form-group { margin-bottom: 20px; }
+    hr {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+        margin: 30px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Edit Answers JSON Below</h1>
+    <form method="POST" action="{{ url_for('index') }}">
+        {% for item in data %}
+        <div class="form-group">
+            <label>{{ item.question }}</label>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="delete_{{ loop.index0 }}"> Mark for deletion
+                </label>
+            </div>
+            {% if item.type == 'textbox' or item.type == 'dropdown' %}
+                <input type="text" class="form-control" name="answer_{{ loop.index0 }}" value="{{ item.answer }}">
+            {% elif item.type == 'numeric' %}
+                <input type="number" class="form-control" name="answer_{{ loop.index0 }}" value="{{ item.answer }}">
+            {% elif item.type == 'radio' %}
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="answer_{{ loop.index0 }}_radio" value="yes" {% if item.answer|string|lower == 'yes' %}checked{% endif %}> Yes
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="answer_{{ loop.index0 }}_radio" value="no" {% if item.answer|string|lower == 'no' %}checked{% endif %}> No
+                    </label>
+                </div>
+            {% else %}
+                <input type="text" class="form-control" name="answer_{{ loop.index0 }}" value="{{ item.answer }}">
+            {% endif %}
+        </div>
+        {% if not loop.last %}
+            <hr>
+        {% endif %}
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>
+{% endblock %}
