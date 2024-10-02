@@ -27,7 +27,7 @@ class ConfigValidator:
     @staticmethod
     def validate_email(email: str) -> bool:
         return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is not None
-    
+
     @staticmethod
     def validate_yaml_file(yaml_path: Path) -> dict:
         try:
@@ -37,8 +37,8 @@ class ConfigValidator:
             raise ConfigError(f"Error reading file {yaml_path}: {exc}")
         except FileNotFoundError:
             raise ConfigError(f"File not found: {yaml_path}")
-    
-    
+
+
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
         required_keys = {
@@ -126,7 +126,7 @@ class FileManager:
 
         required_files = ['secrets.yaml', 'config.yaml', 'plain_text_resume.yaml']
         missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
-        
+
         if missing_files:
             raise FileNotFoundError(f"Missing files in the data folder: {', '.join(missing_files)}")
 
@@ -150,7 +150,7 @@ class FileManager:
 
 def init_browser() -> webdriver.Chrome:
     try:
-        
+
         options = chrome_browser_options()
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
@@ -165,12 +165,15 @@ def create_and_run_bot(parameters, llm_api_key):
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
-        os.system('cls' if os.name == 'nt' else 'clear')
-        resume_generator_manager.choose_style()
-        os.system('cls' if os.name == 'nt' else 'clear')
-        
+
+        # generate resume only if no resume flag was provided
+        if "resume" not in parameters["uploads"]:
+            os.system("cls" if os.name == "nt" else "clear")
+            resume_generator_manager.choose_style()
+            os.system("cls" if os.name == "nt" else "clear")
+
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
-        
+
         browser = init_browser()
         login_component = AIHawkAuthenticator(browser)
         apply_component = AIHawkJobManager(browser)
@@ -193,13 +196,13 @@ def main(resume: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
-        
+
         parameters = ConfigValidator.validate_config(config_file)
         llm_api_key = ConfigValidator.validate_secrets(secrets_file)
-        
+
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
-        
+
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
