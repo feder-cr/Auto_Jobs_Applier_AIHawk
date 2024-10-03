@@ -153,23 +153,68 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
+---
+
 ## Configuration
 
-### 1. secrets.yaml
+### 1. `.env`
 
-This file contains sensitive information. Never share or commit this file to version control.
+This file contains sensitive information. **Never share or commit this file to version control.**
 
-- `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key]`
-  - Replace with your OpenAI API key for GPT integration
-  - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
-  - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-  - According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
+- `LLM_API_KEY=your_actual_api_key_here`
+  - Replace with your OpenAI API key for GPT integration.
+  - To obtain an API key, follow the tutorial at: [How to Get Your Own OpenAI API Key](https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327).
+  - **Note:** You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI Billing Dashboard](https://platform.openai.com/account/billing).
+  - According to the [OpenAI Community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
     `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
     `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
     OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
-  - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
+  - For obtaining a Gemini API key, visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key).
 
+---
+
+#### Setting Up the `.env` File
+
+1. **Create the `.env` File:**
+
+   In the root directory of your project, create a `.env` file by copying the `.env.example` template.
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Populate the `.env` File:**
+
+   Open the `.env` file in your preferred text editor and replace the placeholder with your actual API key.
+
+   ```env
+   LLM_API_KEY=your_actual_api_key_here
+   ```
+
+3. **Secure the `.env` File:**
+
+   - **Never** commit the `.env` file to your Git repository.
+   - Ensure that `.env` is listed in your `.gitignore` to prevent accidental commits.
+
+---
+
+#### Best Practices
+
+- **Secure Your `.env` File:**
+  - Always keep your `.env` file secure and never expose it publicly.
+  - Use environment-specific `.env` files for different stages (development, testing, production).
+
+- **Use Secret Management Services for Production:**
+  - For production environments, consider using secret management services like **AWS Secrets Manager**, **HashiCorp Vault**, or platform-specific solutions instead of `.env` files.
+
+- **Regularly Update Dependencies:**
+  - Keep your dependencies up to date to benefit from security patches and new features.
+
+- **Backup Important Configuration:**
+  - Maintain backups of your `.env` and other critical configuration files to facilitate easy setup for new environments or team members.
+
+---
 
 ### 2. config.yaml
 
@@ -516,7 +561,6 @@ The `data_folder_example` folder contains a working example of how the files nec
 
 Inside this folder, you'll find example versions of the key files:
 
-- `secrets.yaml`
 - `config.yaml`
 - `plain_text_resume.yaml`
 
@@ -537,7 +581,6 @@ Using this folder as a guide can be particularly helpful for:
    
 2. **Data Folder:**
    Ensure that your data_folder contains the following files:
-   - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
 

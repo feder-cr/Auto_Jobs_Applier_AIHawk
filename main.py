@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
-from lib_resume_builder_AIHawk import Resume,StyleManager,FacadeManager,ResumeGenerator
+from lib_resume_builder_AIHawk import Resume, StyleManager, FacadeManager, ResumeGenerator
 from src.utils import chrome_browser_options
 from src.llm.llm_manager import GPTAnswerer
 from src.aihawk_authenticator import AIHawkAuthenticator
@@ -16,6 +16,7 @@ from src.aihawk_bot_facade import AIHawkBotFacade
 from src.aihawk_job_manager import AIHawkJobManager
 from src.job_application_profile import JobApplicationProfile
 from loguru import logger
+from dotenv import load_dotenv
 
 # Suppress stderr
 sys.stderr = open(os.devnull, 'w')
@@ -39,6 +40,7 @@ class ConfigValidator:
             raise ConfigError(f"File not found: {yaml_path}")
     
     
+    @staticmethod
     def validate_config(config_yaml_path: Path) -> dict:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
         required_keys = {
@@ -66,7 +68,7 @@ class ConfigValidator:
                     parameters[key] = []
                 else:
                     raise ConfigError(f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}.")
-
+        
         experience_levels = ['internship', 'entry', 'associate', 'mid-senior level', 'director', 'executive']
         for level in experience_levels:
             if not isinstance(parameters['experienceLevel'].get(level), bool):
@@ -100,31 +102,67 @@ class ConfigValidator:
         return parameters
 
 
-
     @staticmethod
-    def validate_secrets(secrets_yaml_path: Path) -> tuple:
-        secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
-        mandatory_secrets = ['llm_api_key']
+    def validate_secrets(env_path: Path = Path('.env')) -> str:
+        """
+        Validates the necessary environment variables from a .env file.
 
+        Args:
+            env_path (Path, optional): Path to the .env file. Defaults to './.env'.
+
+        Returns:
+            str: The value of the 'LLM_API_KEY'.
+
+        Raises:
+            ConfigError: If 'LLM_API_KEY' is missing or empty.
+        """
+        # Load environment variables from the .env file
+        load_dotenv(dotenv_path=env_path)
+
+        # Define mandatory environment variables
+        mandatory_secrets = ['LLM_API_KEY']
+
+        # Validate each mandatory variable
         for secret in mandatory_secrets:
-            if secret not in secrets:
-                raise ConfigError(f"Missing secret '{secret}' in file {secrets_yaml_path}")
+            value = os.getenv(secret)
+            if value is None:
+                raise ConfigError(f"Missing environment variable '{secret}' in {env_path}.")
+            if not value.strip():
+                raise ConfigError(f"Environment variable '{secret}' cannot be empty in {env_path}.")
 
-        if not secrets['llm_api_key']:
-            raise ConfigError(f"llm_api_key cannot be empty in secrets file {secrets_yaml_path}.")
-        return secrets['llm_api_key']
+        # Return the value of 'LLM_API_KEY'
+        return os.getenv('LLM_API_KEY')
 
 class FileManager:
     @staticmethod
     def find_file(name_containing: str, with_extension: str, at_path: Path) -> Path:
-        return next((file for file in at_path.iterdir() if name_containing.lower() in file.name.lower() and file.suffix.lower() == with_extension.lower()), None)
+        return next(
+            (
+                file 
+                for file in at_path.iterdir() 
+                if name_containing.lower() in file.name.lower() and file.suffix.lower() == with_extension.lower()
+            ), 
+            None
+        )
 
     @staticmethod
     def validate_data_folder(app_data_folder: Path) -> tuple:
+        """
+        Validates and returns the necessary file paths within the data folder.
+
+        Args:
+            app_data_folder (Path): Path to the data folder.
+
+        Returns:
+            tuple: (config_file, plain_text_resume_file, output_folder)
+
+        Raises:
+            FileNotFoundError: If required files are missing.
+        """
         if not app_data_folder.exists() or not app_data_folder.is_dir():
             raise FileNotFoundError(f"Data folder not found: {app_data_folder}")
 
-        required_files = ['secrets.yaml', 'config.yaml', 'plain_text_resume.yaml']
+        required_files = ['config.yaml', 'plain_text_resume.yaml']
         missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
         
         if missing_files:
@@ -132,10 +170,23 @@ class FileManager:
 
         output_folder = app_data_folder / 'output'
         output_folder.mkdir(exist_ok=True)
-        return (app_data_folder / 'secrets.yaml', app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
+        return (app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
 
     @staticmethod
     def file_paths_to_dict(resume_file: Path | None, plain_text_resume_file: Path) -> dict:
+        """
+        Converts file paths to a dictionary.
+
+        Args:
+            resume_file (Path | None): Path to the resume PDF file.
+            plain_text_resume_file (Path): Path to the plain text resume file.
+
+        Returns:
+            dict: Dictionary with file paths.
+
+        Raises:
+            FileNotFoundError: If specified files are not found.
+        """
         if not plain_text_resume_file.exists():
             raise FileNotFoundError(f"Plain text resume file not found: {plain_text_resume_file}")
 
@@ -150,7 +201,6 @@ class FileManager:
 
 def init_browser() -> webdriver.Chrome:
     try:
-        
         options = chrome_browser_options()
         service = ChromeService(ChromeDriverManager().install())
         return webdriver.Chrome(service=service, options=options)
@@ -164,7 +214,13 @@ def create_and_run_bot(parameters, llm_api_key):
         with open(parameters['uploads']['plainTextResume'], "r", encoding='utf-8') as file:
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
-        resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
+        resume_generator_manager = FacadeManager(
+            llm_api_key, 
+            style_manager, 
+            resume_generator, 
+            resume_object, 
+            Path("data_folder/output")
+        )
         os.system('cls' if os.name == 'nt' else 'clear')
         resume_generator_manager.choose_style()
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -186,36 +242,61 @@ def create_and_run_bot(parameters, llm_api_key):
     except Exception as e:
         raise RuntimeError(f"Error running the bot: {str(e)}")
 
-
 @click.command()
-@click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
+@click.option(
+    '--resume', 
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), 
+    help="Path to the resume PDF file"
+)
 def main(resume: Path = None):
+    """
+    Main function that processes the resume and interacts with the LLM API.
+
+    Args:
+        resume (Path, optional): Path to the resume PDF file.
+    """
     try:
         data_folder = Path("data_folder")
-        secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
+        config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
         
+        # Validate the configuration file
         parameters = ConfigValidator.validate_config(config_file)
-        llm_api_key = ConfigValidator.validate_secrets(secrets_file)
         
+        # Validate and obtain the API key from the .env file
+        llm_api_key = ConfigValidator.validate_secrets(Path('.env'))
+        
+        # Add additional parameters
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         
+        # Run the bot with the parameters and API key
         create_and_run_bot(parameters, llm_api_key)
+    
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
-        logger.error(f"Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration {str(ce)}")
+        logger.error(
+            "Refer to the configuration guide for troubleshooting: "
+            "https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration"
+        )
     except FileNotFoundError as fnf:
         logger.error(f"File not found: {str(fnf)}")
         logger.error("Ensure all required files are present in the data folder.")
-        logger.error("Refer to the file setup guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error(
+            "Refer to the file setup guide: "
+            "https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration"
+        )
     except RuntimeError as re:
-
         logger.error(f"Runtime error: {str(re)}")
-
-        logger.error("Refer to the configuration and troubleshooting guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error(
+            "Refer to the configuration and troubleshooting guide: "
+            "https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration"
+        )
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
-        logger.error("Refer to the general troubleshooting guide: https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration")
+        logger.error(
+            "Refer to the general troubleshooting guide: "
+            "https://github.com/feder-cr/AIHawk_AIHawk_automatic_job_application/blob/main/readme.md#configuration"
+        )
 
 if __name__ == "__main__":
     main()

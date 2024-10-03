@@ -114,6 +114,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+virtual/
 
 # GitHub
 .github/
@@ -155,6 +156,4 @@ venv.bak/
 
 # Mono Auto Generated Files
 mono_crash.*
-
 /generated_cv
-data_folder/secrets.yaml
