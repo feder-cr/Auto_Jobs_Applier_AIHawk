@@ -417,7 +417,8 @@ class GPTAnswerer:
         return prompt | self.llm_cheap | StrOutputParser()
 
     def answer_question_textual_wide_range(self, question: str) -> str:
-        logger.debug(f"Answering textual question: {question}")
+        # logger.debug(f"Answering textual question: {question}")
+        logger.debug(f"Answering textual question:")
         chains = {
             "personal_information": self._create_chain(strings.personal_information_template),
             "self_identification": self._create_chain(strings.self_identification_template),

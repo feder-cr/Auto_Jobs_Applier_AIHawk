@@ -14,13 +14,15 @@ class Job:
     summarize_job_description: str = ""
     pdf_path: str = ""
     recruiter_link: str = ""
+    position: str = ""
 
     def set_summarize_job_description(self, summarize_job_description):
         logger.debug(f"Setting summarized job description: {summarize_job_description}")
         self.summarize_job_description = summarize_job_description
 
     def set_job_description(self, description):
-        logger.debug(f"Setting job description: {description}")
+        # logger.debug(f"Setting job description: {description}")
+        logger.debug(f"Setting job description")
         self.description = description
 
     def set_recruiter_link(self, recruiter_link):

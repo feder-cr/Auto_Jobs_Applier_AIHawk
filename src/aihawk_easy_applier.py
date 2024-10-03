@@ -6,19 +6,22 @@ import re
 import time
 import traceback
 from typing import List, Optional, Any, Tuple
+from datetime import datetime
 
 from httpx import HTTPStatusError
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementNotInteractableException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from pathlib import Path
 
 import src.utils as utils
+from src.strings import resume_prompt
 from loguru import logger
 
 
@@ -91,21 +94,92 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
             raise e
 
+
+    def save_job_score(self, job: Any, score: float):
+        """
+        Salva os empregos que não foram aplicados para evitar a consulta futura ao GPT, incluindo o score e a data/hora.
+        """
+        logger.debug(f"Saving skipped job: {job.title} at {job.company} with score {score}")
+        file_path = Path('job_score.json')
+
+        # Obter a data e hora atual
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Formato dos dados a serem salvos
+        job_data = {
+            "search_term": job.position, 
+            "company": job.company,
+            "job_title": job.title,
+            "link": job.link,
+            "score": score,  # Adiciona o score ao registro
+            "timestamp": current_time  # Adiciona a data e hora do registro
+        }
+
+        # Verifica se o arquivo já existe, se não, cria um novo
+        if not file_path.exists():
+            with open(file_path, 'w') as f:
+                json.dump([job_data], f, indent=4)
+        else:
+            # Se já existir, carrega os dados existentes e adiciona o novo emprego
+            with open(file_path, 'r+') as f:
+                try:
+                    existing_data = json.load(f)
+                except json.JSONDecodeError:
+                    existing_data = []
+                
+                existing_data.append(job_data)
+                f.seek(0)
+                json.dump(existing_data, f, indent=4)
+                f.truncate()
+        logger.debug(f"Job saved successfully: {job.title} with score {score}")
+
+    def is_job_skipped(self, job: Any) -> bool:
+        """
+        Verifica se o emprego foi avaiado anteriormente e está no arquivo job_score.json
+        """
+        file_path = Path('job_score.json')
+        
+        # Se o arquivo não existir, considera que o emprego não foi ignorado
+        if not file_path.exists():
+            return False
+
+        # Carrega os empregos ignorados
+        with open(file_path, 'r') as f:
+            try:
+                skipped_jobs = json.load(f)
+            except json.JSONDecodeError:
+                return False
+
+        # Verifica se o emprego atual já foi ignorado
+        for skipped_job in skipped_jobs:
+            if skipped_job['link'] == job.link:
+                logger.debug(f"Job already skipped: {job.title} at {job.company}")
+                return True
+        
+        return False
+
+
     def job_apply(self, job: Any):
         logger.debug(f"Starting job application for job: {job}")
 
         try:
+            logger.debug(f"Checking if job {job.title} at {job.company} is skipped before navigating.")
+            # Verifica se o emprego foi ignorado antes de navegar para a página
+            if self.is_job_skipped(job):
+                logger.info(f"Skipping job {job.title} at {job.company} as it is in skipped_jobs.json.")
+                return
+
+            # Agora navega para o link do emprego
             self.driver.get(job.link)
             logger.debug(f"Navigated to job link: {job.link}")
         except Exception as e:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        time.sleep(random.uniform(3, 5))
+        time.sleep(random.uniform(0.5, 1.5))
         self.check_for_premium_redirect(job)
 
         try:
-
             self.driver.execute_script("document.activeElement.blur();")
             logger.debug("Focus removed from the active element")
 
@@ -118,27 +192,28 @@ class AIHawkEasyApplier:
             logger.debug("Retrieving job description")
             job_description = self._get_job_description()
             job.set_job_description(job_description)
-            logger.debug(f"Job description set: {job_description[:100]}")
+            # logger.debug(f"Job description set: {job_description[:100]}")
 
-            logger.debug("Retrieving recruiter link")
-            recruiter_link = self._get_job_recruiter()
-            job.set_recruiter_link(recruiter_link)
-            logger.debug(f"Recruiter link set: {recruiter_link}")
+            # Lógica de avaliação de score
+            score = evaluate_job(job_description, resume_prompt, self.gpt_answerer)
+            self.save_job_score(job, score)
 
-            logger.debug("Attempting to click 'Easy Apply' button")
-            actions = ActionChains(self.driver)
-            actions.move_to_element(easy_apply_button).click().perform()
-            logger.debug("'Easy Apply' button clicked successfully")
+            if score >= 6:
+                logger.info(f"Score is {score}. Proceeding with the application.")
+                
+                time.sleep(random.uniform(0.5, 1.5))
 
-            logger.debug("Passing job information to GPT Answerer")
-            self.gpt_answerer.set_job(job)
-
-            logger.debug("Filling out application form")
-            self._fill_application_form(job)
-            logger.debug(f"Job application process completed successfully for job: {job}")
+                # Realiza a aplicação
+                actions = ActionChains(self.driver)
+                actions.move_to_element(easy_apply_button).click().perform()
+                logger.debug("'Easy Apply' button clicked successfully")
+                self._fill_application_form(job)
+                logger.debug(f"Job application process completed successfully for job: {job}")
+            else:
+                logger.info(f"Score is {score}. Skipping this job.")
+                return
 
         except Exception as e:
-
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
@@ -282,19 +357,37 @@ class AIHawkEasyApplier:
 
     def _next_or_submit(self):
         logger.debug("Clicking 'Next' or 'Submit' button")
-        next_button = self.driver.find_element(By.CLASS_NAME, "artdeco-button--primary")
-        button_text = next_button.text.lower()
-        if 'submit application' in button_text:
-            logger.debug("Submit button found, submitting application")
-            self._unfollow_company()
-            time.sleep(random.uniform(1.5, 2.5))
+        
+        try:
+            # Espera explícita até o botão estar clicável
+            next_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, "artdeco-button--primary"))
+            )
+            
+            button_text = next_button.text.lower()
+            if 'submit application' in button_text:
+                logger.debug("Submit button found, submitting application")
+                self._unfollow_company()
+                time.sleep(random.uniform(0.5, 1.5))
+                
+                # Tenta clicar no botão de submit
+                next_button.click()
+                time.sleep(random.uniform(0.5, 1.5))
+                return True
+            
+            # Para o botão "Next"
+            time.sleep(random.uniform(0.5, 1.5))
             next_button.click()
-            time.sleep(random.uniform(1.5, 2.5))
-            return True
-        time.sleep(random.uniform(1.5, 2.5))
-        next_button.click()
-        time.sleep(random.uniform(3.0, 5.0))
-        self._check_for_errors()
+            time.sleep(random.uniform(0.5, 1.5))
+            self._check_for_errors()
+            
+        except ElementNotInteractableException as e:
+            logger.error("Element not interactable: %s", str(e))
+            return False  # Retorna False caso o botão não seja clicável
+            
+        except TimeoutException as e:
+            logger.error("Timed out waiting for the 'Next' or 'Submit' button to become clickable: %s", str(e))
+            return False
 
     def _unfollow_company(self) -> None:
         try:
@@ -316,9 +409,9 @@ class AIHawkEasyApplier:
         logger.debug("Discarding application")
         try:
             self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
-            time.sleep(random.uniform(3, 5))
+            time.sleep(random.uniform(0.5, 1.5))
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
-            time.sleep(random.uniform(3, 5))
+            time.sleep(random.uniform(0.5, 1.5))
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 
@@ -848,3 +941,34 @@ class AIHawkEasyApplier:
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+
+def evaluate_job(job_description: str, resume_prompt: str, gpt_answerer: Any) -> float:
+    """
+    Envia a descrição do emprego e o currículo para um sistema de IA (usando gpt_answerer) e retorna um score de 0 a 10
+    """
+    # Cria o prompt para avaliar o job description e o resume
+    prompt = f"""
+    You are a Human Resources expert specializing in evaluating job applications for the American job market. Your task is to assess the compatibility between the following job description and a provided resume. 
+    Return only a score from 0 to 10 representing the candidate's likelihood of securing the position, with 0 being the lowest probability and 10 being the highest. 
+    The assessment should consider HR-specific criteria for the American job market, including skills, experience, education, and any other relevant criteria mentioned in the job description.
+
+    Job Description:
+    {job_description}
+
+    Resume:
+    {resume_prompt}
+
+    Score (0 to 10):
+    """
+    
+    # Usa o gpt_answerer para fazer a avaliação
+    response = gpt_answerer.answer_question_textual_wide_range(prompt)
+    
+    # Processa a resposta para extrair o score
+    try:
+        # Extrai o número (score) da resposta do GPT
+        score = float(re.search(r"\d+(\.\d+)?", response).group(0))
+        return score
+    except (AttributeError, ValueError):
+        logger.error(f"Erro ao processar o score da resposta: {response}")
+        return 0.1  # Retorna 0 se não conseguir extrair um score válido

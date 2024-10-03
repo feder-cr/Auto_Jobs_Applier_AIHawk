@@ -4,6 +4,7 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+from datetime import datetime
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -46,8 +47,8 @@ class AIHawkJobManager:
 
     def set_parameters(self, parameters):
         logger.debug("Setting parameters for AIHawkJobManager")
-        self.company_blacklist = parameters.get('company_blacklist', []) or []
-        self.title_blacklist = parameters.get('title_blacklist', []) or []
+        self.company_blacklist = [company.lower() for company in parameters.get('company_blacklist', [])] or []
+        self.title_blacklist = [word.lower() for word in parameters.get('title_blacklist', [])] or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
@@ -106,7 +107,7 @@ class AIHawkJobManager:
                         break
 
                     try:
-                        self.apply_jobs()
+                        self.apply_jobs(position)
                     except Exception as e:
                         logger.error(f"Error during job application: {e}")
                         continue
@@ -120,7 +121,7 @@ class AIHawkJobManager:
                         try:
                             user_input = inputimeout(
                                 prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                                timeout=60).strip().lower()
+                                timeout=0).strip().lower()
                         except TimeoutOccurred:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
@@ -132,11 +133,12 @@ class AIHawkJobManager:
                     minimum_page_time = time.time() + minimum_time
 
                     if page_sleep % 5 == 0:
-                        sleep_time = random.randint(5, 34)
+                        sleep_time = 0
+                        # sleep_time = random.randint(5, 34)
                         try:
                             user_input = inputimeout(
                                 prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                                timeout=60).strip().lower()
+                                timeout=0).strip().lower()
                         except TimeoutOccurred:
                             user_input = ''  # No input after timeout
                         if user_input == 'y':
@@ -155,7 +157,7 @@ class AIHawkJobManager:
                 try:
                     user_input = inputimeout(
                         prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ",
-                        timeout=60).strip().lower()
+                        timeout=0).strip().lower()
                 except TimeoutOccurred:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
@@ -167,11 +169,12 @@ class AIHawkJobManager:
             minimum_page_time = time.time() + minimum_time
 
             if page_sleep % 5 == 0:
-                sleep_time = random.randint(50, 90)
+                sleep_time = 0
+                # sleep_time = random.randint(50, 90)
                 try:
                     user_input = inputimeout(
                         prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ",
-                        timeout=60).strip().lower()
+                        timeout=0).strip().lower()
                 except TimeoutOccurred:
                     user_input = ''  # No input after timeout
                 if user_input == 'y':
@@ -214,7 +217,7 @@ class AIHawkJobManager:
             logger.error(f"Error while fetching job elements: {e}")
             return []
 
-    def apply_jobs(self):
+    def apply_jobs(self,position):
         try:
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
@@ -230,7 +233,11 @@ class AIHawkJobManager:
             logger.debug("No job class elements found on page, skipping")
             return
 
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
+        job_list = [
+            Job(*self.extract_job_information_from_tile(job_element), position=position)
+            for job_element in job_list_elements
+        ]
+
 
         for job in job_list:
 
@@ -313,15 +320,22 @@ class AIHawkJobManager:
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
+        
+        # Obter a data e hora atual
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         data = {
             "company": job.company,
             "job_title": job.title,
             "link": job.link,
             "job_recruiter": job.recruiter_link,
             "job_location": job.location,
-            "pdf_path": pdf_path
+            "pdf_path": pdf_path,
+            # "timestamp": current_time  # Adiciona a data e hora da entrada
         }
+        
         file_path = self.output_file_directory / f"{file_name}.json"
+        
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump([data], f, indent=4)
@@ -333,6 +347,7 @@ class AIHawkJobManager:
                 except json.JSONDecodeError:
                     logger.error(f"JSON decode error in file: {file_path}")
                     existing_data = []
+                
                 existing_data.append(data)
                 f.seek(0)
                 json.dump(existing_data, f, indent=4)
@@ -374,7 +389,7 @@ class AIHawkJobManager:
         logger.debug("Extracting job information from tile")
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
-            print(job_tile.get_attribute('outerHTML'))
+            # print(job_tile.get_attribute('outerHTML'))
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
             
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]

@@ -2,20 +2,20 @@ remote: true
 
 experienceLevel:
   internship: false
-  entry: true
-  associate: true
+  entry: false
+  associate: false
   mid-senior level: true
-  director: false
-  executive: false
+  director: true
+  executive: true
 
 jobTypes:
   full-time: true
-  contract: false
-  part-time: false
+  contract: true
+  part-time: true
   temporary: true
   internship: false
-  other: false
-  volunteer: true
+  other: true
+  volunteer: false
 
 date:
   all time: false
@@ -24,22 +24,169 @@ date:
   24 hours: true
 
 positions:
-  - Software engineer
-
+  - Health AI
+  - Health Artificial Intelligence
+  - Health Advisor
+  - Health Bioethics
+  - Health Compliance
+  - Health Consultant
+  - Health Expertise
+  - Health Ethical 
+  - Health Innovation
+  - Health Informatics
+  - Health Law
+  - Health Legal
+  - Health Malpractice
+  # - Health Practices
+  - Health Regulatory
+  - Health Strategy
+  - Health Policy
+  - Health Witness
+  - Health Technology
+  - Health Tech
+  - Health Digital
+  - Health Startup
+  - Health Software
+  - Medical AI
+  - Medical Artificial Intelligence
+  - Medical Advisor
+  - Medical Bioethics
+  - Medical Compliance
+  - Medical Consultant
+  - Medical Expertise
+  - Medical Ethical 
+  - Medical Innovation
+  - Medical Informatics
+  - Medical Law
+  - Medical Legal
+  - Medical Malpractice
+  # - Medical Practices
+  - Medical Policy
+  - Medical Regulatory
+  - Medical Strategy
+  - Medical Technology
+  - Medical Witness
+  - Medical Tech
+  - Medical Digital
+  - Medical Startup
+  - Medical Software
+  - Healthcare AI
+  - Healthcare Artificial Intelligence
+  - Healthcare Advisor
+  - Healthcare Bioethics
+  - Healthcare Compliance
+  - Healthcare Consultant
+  - Healthcare Expertise
+  - Healthcare Ethical 
+  - Healthcare Innovation
+  - Healthcare Informatics
+  - Healthcare Law
+  - Healthcare Legal
+  - Healthcare Malpractice
+  # - Healthcare Practices
+  - Healthcare Policy
+  - Healthcare Regulatory
+  - Healthcare Strategy
+  - Healthcare Technology
+  - Healthcare Witness
+  - Healthcare Tech
+  - Healthcare Digital
+  - Healthcare Startup
+  - Healthcare Software
+  - Physicians AI
+  - Physicians Artificial Intelligence
+  - Physicians Advisor
+  - Physicians Bioethics
+  - Physicians Compliance
+  - Physicians Consultant
+  - Physicians Expertise
+  - Physicians Ethical 
+  - Physicians Innovation
+  - Physicians Informatics
+  - Physicians Law
+  - Physicians Legal
+  - Physicians Malpractice
+  # - Physicians Practices
+  - Physicians Policy
+  - Physicians Regulatory
+  - Physicians Strategy
+  - Physicians Technology
+  - Physicians Witness
+  - Physicians Tech
+  - Physicians Digital
+  - Physicians Startup
+  - Physicians Software
+  # Medicine
+  - Medicine AI
+  - Medicine Artificial Intelligence
+  - Medicine Advisor
+  - Medicine Bioethics
+  - Medicine Compliance
+  - Medicine Consultant
+  - Medicine Expertise
+  - Medicine Ethical 
+  - Medicine Innovation
+  - Medicine Informatics
+  - Medicine Law
+  - Medicine Legal
+  - Medicine Malpractice
+  # - Physicians Practices
+  - Medicine Policy
+  - Medicine Regulatory
+  - Medicine Strategy
+  - Medicine Technology
+  - Medicine Witness
+  - Medicine Tech
+  - Medicine Digital
+  - Medicine Startup
+  - Medicine Software
+  - Personal Injury
+  
 locations:
-  - Germany
+  - United States
 
-apply_once_at_company: true
+apply_once_at_company: false 
 
 distance: 100
 
 company_blacklist:
   - wayfair
   - Crossover
+  - Jobot
+  - Jobot Consulting
+  - Jobot Health
 
 title_blacklist:
-  - word1
-  - word2
+  - Attorney
+  - Attorneys
+  - Board-Certified
+  - Certified
+  - Dental
+  - Dentist
+  - Dentists
+  - Dentistry
+  - Insurance
+  - Lawyers
+  - Lawyer
+  - Licensed
+  - Maxillofacial
+  - Nurse
+  - Nurses
+  - Oral
+  - Orthodontic
+  - Orthodontics
+  - Orthodontist
+  - Orthodontists
+  - Psychotherapist
+  - Psychotherapists
+  - Radiologic
+  - Radiologist
+  - Radiologists
+  - Radiology
+  - Registered
+  - Therapist
+  - Therapists
+
 
 job_applicants_threshold:
   min_applicants: 0
@@ -48,3 +195,10 @@ job_applicants_threshold:
 llm_model_type: openai
 llm_model: 'gpt-4o-mini'
 # llm_api_url: https://api.pawan.krd/cosmosrp/v1'
+
+# llm_model_type: "ollama"
+# llm_model: "mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF"
+# llm_api_url: "http://10.0.0.233:1234/v1/embeddings"
+
+# Adicione o estilo do currículo aqui
+resume_style: "Modern Grey"

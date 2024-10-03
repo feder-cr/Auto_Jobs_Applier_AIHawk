@@ -1,129 +1,382 @@
+# personal_information:
+#   name: "[Your Name]"
+#   surname: "[Your Surname]"
+#   date_of_birth: "[Your Date of Birth]"
+#   country: "[Your Country]"
+#   city: "[Your City]"
+#   address: "[Your Address]"
+#   phone_prefix: "[Your Phone Prefix]"
+#   phone: "[Your Phone Number]"
+#   email: "[Your Email Address]"
+#   github: "[Your GitHub Profile URL]"
+#   linkedin: "[Your LinkedIn Profile URL]"
+
 personal_information:
-  name: "[Your Name]"
-  surname: "[Your Surname]"
-  date_of_birth: "[Your Date of Birth]"
-  country: "[Your Country]"
-  city: "[Your City]"
-  address: "[Your Address]"
-  phone_prefix: "[Your Phone Prefix]"
-  phone: "[Your Phone Number]"
-  email: "[Your Email Address]"
-  github: "[Your GitHub Profile URL]"
-  linkedin: "[Your LinkedIn Profile URL]"
+  name: "Mario Eunides"
+  surname: "Junqueira Guimaraes Junior"
+  date_of_birth: "1983-09-21"  # Ajuste conforme necessário
+  country: "United States"
+  city: "Philadelphia"
+  address: "19129 Philadelphia - Pennsylvania US"
+  phone_prefix: "+1"
+  phone: "2673977661"  # Ajuste com o seu número de telefone
+  email: "contact@drmariojunqueira.com"
+  github: "https://github.com/proteusbr1"  # Ajuste com seu link do GitHub se aplicável
+  linkedin: "https://www.linkedin.com/in/mario-junqueira/"  # Ajuste com o link correto do LinkedIn
+
+
+# education_details:
+#   - education_level: "[Your Education Level]"
+#     institution: "[Your Institution]"
+#     field_of_study: "[Your Field of Study]"
+#     final_evaluation_grade: "[Your Final Evaluation Grade]"
+#     start_date: "[Start Date]"
+#     year_of_completion: "[Year of Completion]"
+#     exam:
+#       exam_name_1: "[Grade]"
+#       exam_name_2: "[Grade]"
+#       exam_name_3: "[Grade]"
+#       exam_name_4: "[Grade]"
+#       exam_name_5: "[Grade]"
+#       exam_name_6: "[Grade]"
+
 
 education_details:
-  - education_level: "[Your Education Level]"
-    institution: "[Your Institution]"
-    field_of_study: "[Your Field of Study]"
-    final_evaluation_grade: "[Your Final Evaluation Grade]"
-    start_date: "[Start Date]"
-    year_of_completion: "[Year of Completion]"
+  - education_level: "Master in Law (ML)"
+    institution: "University of Pennsylvania"
+    field_of_study: "Health Law and Policy"
+    final_evaluation_grade: "Dean's Scholarship Recipient"
+    start_date: "2023"
+    year_of_completion: "2025"
     exam:
-      exam_name_1: "[Grade]"
-      exam_name_2: "[Grade]"
-      exam_name_3: "[Grade]"
-      exam_name_4: "[Grade]"
-      exam_name_5: "[Grade]"
-      exam_name_6: "[Grade]"
+      - Medical Law: "A"
+      - AI and Law: "A"
+      - Health Policy: "A"
+      - Compliance in Health: "A"
+
+  - education_level: "Medical Doctor (MD)"
+    institution: "University Gama Filho"
+    field_of_study: "Medicine"
+    final_evaluation_grade: "Graduated with Honors"
+    start_date: "2005"
+    year_of_completion: "2010"
+    exam:
+      - Internal Medicine: "A"
+      - Surgery: "A"
+      - Pediatrics: "A"
+
+
+# experience_details:
+#   - position: "[Your Position]"
+#     company: "[Company Name]"
+#     employment_period: "[Employment Period]"
+#     location: "[Location]"
+#     industry: "[Industry]"
+#     key_responsibilities:
+#       - responsibility_1: "[Responsibility Description]"
+#       - responsibility_2: "[Responsibility Description]"
+#       - responsibility_3: "[Responsibility Description]"
+#     skills_acquired:
+#       - "[Skill]"
+#       - "[Skill]"
+#       - "[Skill]"
+
+#   - position: "[Your Position]"
+#     company: "[Company Name]"
+#     employment_period: "[Employment Period]"
+#     location: "[Location]"
+#     industry: "[Industry]"
+#     key_responsibilities:
+#       - responsibility_1: "[Responsibility Description]"
+#       - responsibility_2: "[Responsibility Description]"
+#       - responsibility_3: "[Responsibility Description]"
+#     skills_acquired:
+#       - "[Skill]"
+#       - "[Skill]"
+#       - "[Skill]"
 
 experience_details:
-  - position: "[Your Position]"
-    company: "[Company Name]"
-    employment_period: "[Employment Period]"
-    location: "[Location]"
-    industry: "[Industry]"
+  - position: "Founder & CEO"
+    company: "PericialMed"
+    employment_period: "2017 - Present"
+    location: "Brasília, DF, Brazil"
+    industry: "Medical Legal Consultancy"
     key_responsibilities:
-      - responsibility_1: "[Responsibility Description]"
-      - responsibility_2: "[Responsibility Description]"
-      - responsibility_3: "[Responsibility Description]"
+      - responsibility: "Led over 800 clients in complex medical-legal cases."
+      - responsibility: "Reformed national healthcare practices and policies."
+      - responsibility: "Secured millions in compensation for clients."
     skills_acquired:
-      - "[Skill]"
-      - "[Skill]"
-      - "[Skill]"
+      - "Legal Medicine"
+      - "Medical Jurisprudence"
+      - "Healthcare Policy Reform"
 
-  - position: "[Your Position]"
-    company: "[Company Name]"
-    employment_period: "[Employment Period]"
-    location: "[Location]"
-    industry: "[Industry]"
+  - position: "President"
+    company: "Board of Medical Expertise and Legal Medicine of Federal District"
+    employment_period: "2022 - Present"
+    location: "Brasília, DF, Brazil"
+    industry: "Legal Medicine"
     key_responsibilities:
-      - responsibility_1: "[Responsibility Description]"
-      - responsibility_2: "[Responsibility Description]"
-      - responsibility_3: "[Responsibility Description]"
+      - responsibility: "Directed the association’s mission and strategic vision."
+      - responsibility: "Influenced policy-making discussions at national forums."
+      - responsibility: "Collaborated with board members to align priorities with the needs of the forensic medical community."
     skills_acquired:
-      - "[Skill]"
-      - "[Skill]"
-      - "[Skill]"
+      - "Leadership"
+      - "Policy Advocacy"
+      - "Medical Jurisprudence"
+
+  - position: "Chief Legal Officer"
+    company: "State Board of Medicine of the Federal District"
+    employment_period: "2022 - 2023"
+    location: "Brasília, DF, Brazil"
+    industry: "Legal Medicine"
+    key_responsibilities:
+      - responsibility: "Oversaw management of ethical and administrative processes."
+      - responsibility: "Ensured adherence to legal procedures and due process."
+      - responsibility: "Guided a 40-member board to resolve challenging cases."
+    skills_acquired:
+      - "Ethics Management"
+      - "Legal Procedures"
+      - "Team Leadership"
+
+  - position: "Board Member"
+    company: "State Board of Medicine of the Federal District"
+    employment_period: "2018 - 2023"
+    location: "Brasília, DF, Brazil"
+    industry: "Medical Regulatory Body"
+    key_responsibilities:
+      - responsibility: "Conducted investigations into allegations against medical professionals."
+      - responsibility: "Prepared detailed reports leading to decisive actions, including potential revocation of medical licenses."
+    skills_acquired:
+      - "Investigation"
+      - "Medical Regulation"
+      - "Legal Documentation"
+
+  - position: "Medical Advisor to Judges"
+    company: "Federal and State Courts in the Federal District"
+    employment_period: "2015 - 2017"
+    location: "Brasília, DF, Brazil"
+    industry: "Judiciary"
+    key_responsibilities:
+      - responsibility: "Provided expert analysis in retirement, occupational medicine, and medical malpractice lawsuits."
+      - responsibility: "Clarified complex medical records and practices to inform judicial decisions."
+    skills_acquired:
+      - "Expert Testimony"
+      - "Occupational Medicine"
+      - "Medical Malpractice Analysis"
+
+  - position: "Occupational Medicine Practitioner / Administrative Medical Examiner"
+    company: "Federal District"
+    employment_period: "2013 - 2014"
+    location: "Brasília, DF, Brazil"
+    industry: "Occupational Health"
+    key_responsibilities:
+      - responsibility: "Conducted pre-employment screenings and routine examinations."
+      - responsibility: "Assessed court employees for disability retirement eligibility and income tax exemption benefits."
+    skills_acquired:
+      - "Occupational Health"
+      - "Disability Evaluation"
+      - "Workplace Safety"
+
+  - position: "Emergency Room Physician"
+    company: "Various Hospitals"
+    employment_period: "2010 - 2013"
+    location: "Brasília, DF, Brazil"
+    industry: "Healthcare"
+    key_responsibilities:
+      - responsibility: "Delivered immediate medical care to patients with acute illnesses in high-pressure emergency settings."
+    skills_acquired:
+      - "Emergency Medicine"
+      - "Critical Care"
+      - "Acute Illness Management"
+
+
+# projects:
+#   - name: "[Project Name]"
+#     description: "[Project Description]"
+#     link: "[Project Link]"
+
+#   - name: "[Project Name]"
+#     description: "[Project Description]"
+#     link: "[Project Link]"
+
 
 projects:
-  - name: "[Project Name]"
-    description: "[Project Description]"
-    link: "[Project Link]"
+  - name: "PennAiPath"
+    description: "AI program to recommend optimal university classes based on individual résumés."
+    link: "https://console.pennaipath.com"  # Link corrigido
 
-  - name: "[Project Name]"
-    description: "[Project Description]"
-    link: "[Project Link]"
+  - name: "Chat-Summary"
+    description: "AI tool to transcribe, summarize, and translate large volumes of data."
+    link: "https://chat-summary.com/en/"
+  
+  - name: "WelcomeToPenn"
+    description: "Wiki platform launched to assist students in navigating university information, providing easy access to resources and support networks at Penn."
+    link: "https://welcometopenn.com"
+
+
+# achievements:
+#   - name: "[Achievement Name]"
+#     description: "[Achievement Description]"
+#   - name: "[Achievement Name]"
+#     description: "[Achievement Description]"
+
 
 achievements:
-  - name: "[Achievement Name]"
-    description: "[Achievement Description]"
-  - name: "[Achievement Name]"
-    description: "[Achievement Description]"
+  - name: "Legal Expertise Contribution in New York Harbor Healthcare System"
+    description: "Provided a technical report proving nursing malpractice during chemotherapy transfusion, leading to a significant settlement for the client (2017)."
+
+  - name: "Academic Excellence at the University of Pennsylvania Carey Law School"
+    description: "Accepted into the Master of Law program with a Dean's Scholarship, reflecting dedication to advancing expertise at the intersection of law and medicine (2023)."
+
+  - name: "Healthcare Policy Reform in Brazil"
+    description: "Led the development of a technical report that mandated dentists to adhere to Federal Board of Medicine guidelines for administering anesthesia, significantly enhancing patient safety (Brazil, National Impact)."
+
+  - name: "Legislative Advocacy for Monocular Vision Rights"
+    description: "First medical expert invited to testify before the Brazilian Senate, contributing to the recognition of monocular vision as a sensory disability, granting affected individuals equal rights and benefits (Brazil, National Impact)."
+
+  - name: "Leadership Initiative at University of Pennsylvania"
+    description: "Successfully invited Jeh Johnson, former U.S. Secretary of Homeland Security, to speak at Penn Carey Law, fostering dialogue on national security and public policy (2023)."
+
+  - name: "Parliamentary Consultancy in Healthcare"
+    description: "Served as the first medical expert consultant for a Parliamentary Inquiry Committee investigating medical malpractice at a local hospital, providing expert analysis and recommendations to improve healthcare services (Brazil, Municipal Impact)."
+
+  - name: "Patient Safety Advocacy in the Federal District"
+    description: "Authored a technical report leading to an injunction prohibiting nurses from inserting or removing intrauterine devices (IUDs), ensuring such procedures are performed by licensed physicians to maintain high safety standards (Brazil, Regional Impact)."
+  
+  - name: "Speaker at the Latin American Congress of Legal Medicine"
+    description: "Presented on 'The Medical Expert in Cases Before the State Board of Medicine', highlighting the critical role of medical experts in legal proceedings (Latin America, International Impact)."
+
 
 certifications:
-  - name: "[Certification Name]"
-    description: "[Certification Description]"
-  - name: "[Certification Name]"
-    description: "[Certification Description]"
+  - name: "Orthopedics and Traumatology"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."
+
+  - name: "Psychiatry, Forensic Psychiatry"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."
+
+  - name: "Occupational Safety and Medicine"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."
+
+  - name: "Neurology and Neurosurgery"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."
+
+  - name: "Ophthalmology"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."
+
+  - name: "Medical Expertise"
+    description: "Certified by the União Brasileira de Faculdades (2018-2021)."  
+
+
+# languages:
+#   - language: "[Language]"
+#     proficiency: "[Proficiency Level]"
+#   - language: "[Language]"
+#     proficiency: "[Proficiency Level]"
 
 languages:
-  - language: "[Language]"
-    proficiency: "[Proficiency Level]"
-  - language: "[Language]"
-    proficiency: "[Proficiency Level]"
+  - language: "English"
+    proficiency: "Proficient (TOEFL iBT high-intermediate in reading and listening; intermediate in speaking and writing)"
+  
+  - language: "Portuguese"
+    proficiency: "Native"
+
+# interests:
+#   - "[Interest]"
+#   - "[Interest]"
+#   - "[Interest]"
 
 interests:
-  - "[Interest]"
-  - "[Interest]"
-  - "[Interest]"
+  - "AI in Healthcare"
+  - "Legal Medicine"
+  - "Healthcare Policy Reform"
+  - "Medical Jurisprudence"
+  - "Ethics in Healthcare"
+  - "Forensic Medicine"
+  - "Medical Expertise"
+  - "Occupational Medicine"
+  - "Health Law and Policy"
+  - "Innovation in Healthcare"
+  - "Healthcare Leadership"
+  - "Medical Technology Integration"
+  - "Public Health Policy"
+
+# availability:
+#   notice_period: "[Notice Period]"
 
 availability:
-  notice_period: "[Notice Period]"
+  notice_period: "Available immediately"
+
+# salary_expectations:
+#   salary_range_usd: "[Salary Range]"
 
 salary_expectations:
-  salary_range_usd: "[Salary Range]"
+  salary_range_usd: "200000"
+
+# self_identification:
+#   gender: "[Gender]"
+#   pronouns: "[Pronouns]"
+#   veteran: "[Yes/No]"
+#   disability: "[Yes/No]"
+#   ethnicity: "[Ethnicity]"
+
 
 self_identification:
-  gender: "[Gender]"
-  pronouns: "[Pronouns]"
-  veteran: "[Yes/No]"
-  disability: "[Yes/No]"
-  ethnicity: "[Ethnicity]"
+  gender: "Male"
+  pronouns: "He/Him"
+  veteran: "No"
+  disability: "No"
+  ethnicity: "Latino"
 
+
+# legal_authorization:
+#   eu_work_authorization: "[Yes/No]"
+#   us_work_authorization: "[Yes/No]"
+#   requires_us_visa: "[Yes/No]"
+#   requires_us_sponsorship: "[Yes/No]"
+#   requires_eu_visa: "[Yes/No]"
+#   legally_allowed_to_work_in_eu: "[Yes/No]"
+#   legally_allowed_to_work_in_us: "[Yes/No]"
+#   requires_eu_sponsorship: "[Yes/No]"
+#   canada_work_authorization: "[Yes/No]"
+#   requires_canada_visa: "[Yes/No]"
+#   legally_allowed_to_work_in_canada: "[Yes/No]"
+#   requires_canada_sponsorship: "[Yes/No]"
+#   uk_work_authorization: "[Yes/No]"
+#   requires_uk_visa: "[Yes/No]"
+#   legally_allowed_to_work_in_uk: "[Yes/No]"
+#   requires_uk_sponsorship: "[Yes/No]"
 
 legal_authorization:
-  eu_work_authorization: "[Yes/No]"
-  us_work_authorization: "[Yes/No]"
-  requires_us_visa: "[Yes/No]"
-  requires_us_sponsorship: "[Yes/No]"
-  requires_eu_visa: "[Yes/No]"
-  legally_allowed_to_work_in_eu: "[Yes/No]"
-  legally_allowed_to_work_in_us: "[Yes/No]"
-  requires_eu_sponsorship: "[Yes/No]"
-  canada_work_authorization: "[Yes/No]"
-  requires_canada_visa: "[Yes/No]"
-  legally_allowed_to_work_in_canada: "[Yes/No]"
-  requires_canada_sponsorship: "[Yes/No]"
-  uk_work_authorization: "[Yes/No]"
-  requires_uk_visa: "[Yes/No]"
-  legally_allowed_to_work_in_uk: "[Yes/No]"
-  requires_uk_sponsorship: "[Yes/No]"
+  eu_work_authorization: "No"
+  us_work_authorization: "No"
+  requires_us_visa: "No"
+  requires_us_sponsorship: "Yes"
+  requires_eu_visa: "Yes"
+  legally_allowed_to_work_in_eu: "No"
+  legally_allowed_to_work_in_us: "No"
+  requires_eu_sponsorship: "Yes"
+  canada_work_authorization: "No"
+  requires_canada_visa: "Yes"
+  legally_allowed_to_work_in_canada: "No"
+  requires_canada_sponsorship: "Yes"
+  uk_work_authorization: "No"
+  requires_uk_visa: "Yes"
+  legally_allowed_to_work_in_uk: "No"
+  requires_uk_sponsorship: "Yes"
 
+
+# work_preferences:
+#   remote_work: "[Yes/No]"
+#   in_person_work: "[Yes/No]"
+#   open_to_relocation: "[Yes/No]"
+#   willing_to_complete_assessments: "[Yes/No]"
+#   willing_to_undergo_drug_tests: "[Yes/No]"
+#   willing_to_undergo_background_checks: "[Yes/No]"
 
 work_preferences:
-  remote_work: "[Yes/No]"
-  in_person_work: "[Yes/No]"
-  open_to_relocation: "[Yes/No]"
-  willing_to_complete_assessments: "[Yes/No]"
-  willing_to_undergo_drug_tests: "[Yes/No]"
-  willing_to_undergo_background_checks: "[Yes/No]"
+  remote_work: "Yes"
+  in_person_work: "Yes"
+  open_to_relocation: "Yes"
+  willing_to_complete_assessments: "Yes"
+  willing_to_undergo_drug_tests: "Yes"
+  willing_to_undergo_background_checks: "Yes"

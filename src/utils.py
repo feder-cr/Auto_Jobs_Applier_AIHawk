@@ -99,7 +99,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
                 # Decrease the step but ensure it doesn't reverse direction
                 step = max(10, abs(step) - 10) * (-1 if reverse else 1)
 
-                time.sleep(random.uniform(0.6, 1.5))
+                time.sleep(random.uniform(0, 0.5))
 
             # Ensure the final scroll position is correct
             driver.execute_script(script_scroll_to, scrollable_element, end)
@@ -115,6 +115,14 @@ def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
     ensure_chrome_profile()
     options = webdriver.ChromeOptions()
+    
+    # Modo Headless
+    options.add_argument("--headless")
+    
+    # Especifica o caminho absoluto para o binário do Chrome
+    options.binary_location = '/usr/bin/google-chrome'  # Atualize conforme necessário
+    
+    # Outras opções já existentes
     options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -135,12 +143,21 @@ def chrome_browser_options():
     options.add_argument("--disable-cache")
     options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
 
+    # Flags adicionais para estabilidade
+    options.add_argument("--disable-setuid-sandbox")
+    # options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--no-zygote")
+    options.add_argument("--single-process")
+    options.add_argument("--remote-debugging-port=9222")
+
+    # Preferências para otimizar o carregamento
     prefs = {
         "profile.default_content_setting_values.images": 2,
         "profile.managed_default_content_settings.stylesheets": 2,
     }
     options.add_experimental_option("prefs", prefs)
 
+    # Configuração do perfil do Chrome
     if len(chromeProfilePath) > 0:
         initial_path = os.path.dirname(chromeProfilePath)
         profile_dir = os.path.basename(chromeProfilePath)

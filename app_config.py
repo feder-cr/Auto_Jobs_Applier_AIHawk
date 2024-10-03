@@ -8,6 +8,6 @@ MINIMUM_LOG_LEVEL can only be one of the followings:
     - "ERROR"
     - "CRITICAL"
 """
-MINIMUM_LOG_LEVEL = "DEBUG"
+MINIMUM_LOG_LEVEL = "INFO"
 
-MINIMUM_WAIT_TIME = 60
+MINIMUM_WAIT_TIME = 0
