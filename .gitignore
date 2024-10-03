@@ -157,3 +157,4 @@ virtual/
 # Mono Auto Generated Files
 mono_crash.*
 /generated_cv
+run_auto_jobs.sh
