@@ -158,3 +158,5 @@ virtual/
 mono_crash.*
 /generated_cv
 run_auto_jobs.sh
+resumes/resume.pdf
+job_score.json
