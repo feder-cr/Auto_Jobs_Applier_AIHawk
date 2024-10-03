@@ -35,81 +35,149 @@ def ensure_chrome_profile():
 
 
 def is_scrollable(element):
-    scroll_height = element.get_attribute("scrollHeight")
-    client_height = element.get_attribute("clientHeight")
-    scrollable = int(scroll_height) > int(client_height)
-    logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
-    return scrollable
+    """Utility function to determine if an element is scrollable."""
+    try:
+        scroll_height = int(element.get_attribute("scrollHeight"))
+        client_height = int(element.get_attribute("clientHeight"))
+        scrollable = scroll_height > client_height
+        logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
+        return scrollable
+    except Exception as e:
+        logger.error(f"Error determining scrollability: {e}")
+        return False
 
+def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False, max_attempts=10):
+    """
+    Scrolls a scrollable element slowly to the end (bottom) or back to the top.
 
-def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
-    logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
+    :param driver: Selenium WebDriver instance.
+    :param scrollable_element: The web element to scroll.
+    :param start: Starting scroll position (ignored).
+    :param end: Ending scroll position (ignored).
+    :param step: Scroll step size in pixels.
+    :param reverse: If True, scrolls upwards to the top; otherwise, scrolls downwards to the bottom.
+    :param max_attempts: Maximum number of attempts to scroll without new content (for infinite scroll).
+    """
+    logger.debug("Starting scroll_slow.")
 
-    if reverse:
-        start, end = end, start
-        step = -step
+    if step <= 0:
+        logger.error("Step value must be positive.")
+        raise ValueError("Step must be positive.")
 
-    if step == 0:
-        logger.error("Step value cannot be zero.")
-        raise ValueError("Step cannot be zero.")
-
-    max_scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
-    current_scroll_position = int(float(scrollable_element.get_attribute("scrollTop")))
-    logger.debug(f"Max scroll height of the element: {max_scroll_height}")
-    logger.debug(f"Current scroll position: {current_scroll_position}")
-
-    if reverse:
-        if current_scroll_position < start:
-            start = current_scroll_position
-        logger.debug(f"Adjusted start position for upward scroll: {start}")
-    else:
-        if end > max_scroll_height:
-            logger.warning(f"End value exceeds the scroll height. Adjusting end to {max_scroll_height}")
-            end = max_scroll_height
+    if not is_scrollable(scrollable_element):
+        logger.warning("The element is not scrollable.")
+        return
 
     script_scroll_to = "arguments[0].scrollTop = arguments[1];"
 
     try:
-        if scrollable_element.is_displayed():
-            if not is_scrollable(scrollable_element):
-                logger.warning("The element is not scrollable.")
+        # Ensure the element is visible
+        if not scrollable_element.is_displayed():
+            logger.warning("The element is not visible. Attempting to scroll it into view.")
+            try:
+                driver.execute_script("arguments[0].scrollIntoView(true);", scrollable_element)
+                time.sleep(1)  # Wait for the element to become visible
+                if not scrollable_element.is_displayed():
+                    logger.error("The element is still not visible after attempting to scroll into view.")
+                    return
+                else:
+                    logger.debug("Element is now visible after scrolling into view.")
+            except Exception as e:
+                logger.error(f"Failed to scroll the element into view: {e}")
                 return
 
-            if (step > 0 and start >= end) or (step < 0 and start <= end):
-                logger.warning("No scrolling will occur due to incorrect start/end values.")
-                return
+        # Determine initial scroll positions
+        scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
+        client_height = int(scrollable_element.get_attribute("clientHeight"))
+        max_scroll_position = scroll_height - client_height
 
-            position = start
-            previous_position = None  # Tracking the previous position to avoid duplicate scrolls
-            while (step > 0 and position < end) or (step < 0 and position > end):
-                if position == previous_position:
-                    # Avoid re-scrolling to the same position
-                    logger.debug(f"Stopping scroll as position hasn't changed: {position}")
+        logger.debug(f"Scroll height: {scroll_height}, Client height: {client_height}, Max scroll position: {max_scroll_position}")
+
+        # Set scrolling direction and end position based on 'reverse'
+        if reverse:
+            step = -abs(step)  # Ensure step is negative for upward scrolling
+            end_position = 0
+            logger.debug("Configured to scroll upwards to the top.")
+        else:
+            step = abs(step)   # Ensure step is positive for downward scrolling
+            end_position = max_scroll_position
+            logger.debug("Configured to scroll downwards to the bottom.")
+
+        attempts = 0
+        last_scroll_height = scroll_height
+
+        current_scroll_position = int(float(scrollable_element.get_attribute("scrollTop") or 0))
+        logger.debug(f"Initial scroll position: {current_scroll_position}")
+
+        while True:
+            if reverse:
+                # Scrolling upwards
+                new_scroll_position = current_scroll_position + step
+                if new_scroll_position <= end_position:
+                    new_scroll_position = end_position
+            else:
+                # Scrolling downwards
+                new_scroll_position = current_scroll_position + step
+                if new_scroll_position >= end_position:
+                    new_scroll_position = end_position
+
+            # Execute the scroll
+            try:
+                driver.execute_script(script_scroll_to, scrollable_element, new_scroll_position)
+                logger.debug(f"Scrolled to position: {new_scroll_position}")
+            except Exception as e:
+                logger.error(f"Error during scrolling to position {new_scroll_position}: {e}")
+                break
+
+            time.sleep(random.uniform(0.2, 0.5))  # Adjusted sleep time for smoother scrolling
+
+            # Update current scroll position
+            try:
+                current_scroll_position = int(float(scrollable_element.get_attribute("scrollTop") or 0))
+                logger.debug(f"Current scrollTop after scrolling: {current_scroll_position}")
+            except Exception as e:
+                logger.error(f"Error fetching current scrollTop: {e}")
+                break
+
+            if reverse:
+                # Check if we've reached the top
+                if current_scroll_position <= end_position:
+                    logger.debug("Reached the top of the element.")
+                    break
+            else:
+                # For infinite scroll, detect if new content has loaded
+                new_scroll_height = int(scrollable_element.get_attribute("scrollHeight") or 0)
+                logger.debug(f"New scroll height: {new_scroll_height}")
+
+                if new_scroll_height > last_scroll_height:
+                    logger.debug("New content detected. Updating end_position.")
+                    last_scroll_height = new_scroll_height
+                    end_position = new_scroll_height - client_height
+                    attempts = 0  # Reset attempts if new content is loaded
+                else:
+                    attempts += 1
+                    logger.debug(f"No new content loaded. Attempt {attempts}/{max_attempts}.")
+                    if attempts >= max_attempts:
+                        logger.debug("Maximum scroll attempts reached. Ending scroll.")
+                        break
+
+                # Check if we've reached the bottom
+                if current_scroll_position >= end_position:
+                    logger.debug("Reached the bottom of the element.")
                     break
 
-                try:
-                    driver.execute_script(script_scroll_to, scrollable_element, position)
-                    logger.debug(f"Scrolled to position: {position}")
-                except Exception as e:
-                    logger.error(f"Error during scrolling: {e}")
-
-                previous_position = position
-                position += step
-
-                # Decrease the step but ensure it doesn't reverse direction
-                step = max(10, abs(step) - 10) * (-1 if reverse else 1)
-
-                time.sleep(random.uniform(0, 0.5))
-
-            # Ensure the final scroll position is correct
-            driver.execute_script(script_scroll_to, scrollable_element, end)
-            logger.debug(f"Scrolled to final position: {end}")
+        # Ensure the final scroll position is correct
+        try:
+            driver.execute_script(script_scroll_to, scrollable_element, end_position)
+            logger.debug(f"Scrolled to final position: {end_position}")
             time.sleep(0.5)
-        else:
-            logger.warning("The element is not visible.")
+        except Exception as e:
+            logger.error(f"Error scrolling to final position {end_position}: {e}")
+
     except Exception as e:
         logger.error(f"Exception occurred during scrolling: {e}")
 
+    logger.debug("Completed scroll_slow.")
 
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
@@ -117,7 +185,7 @@ def chrome_browser_options():
     options = webdriver.ChromeOptions()
     
     # Modo Headless
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     
     # Especifica o caminho absoluto para o binário do Chrome
     options.binary_location = '/usr/bin/google-chrome'  # Atualize conforme necessário
