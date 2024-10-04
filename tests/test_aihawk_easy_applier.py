@@ -1,14 +1,11 @@
-import json
 from unittest import mock
 
 import pytest
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from loguru import logger
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
 
 from src.aihawk_easy_applier import AIHawkEasyApplier
-from loguru import logger
-import logging
 
 
 @pytest.fixture
@@ -119,7 +116,6 @@ def test_fill_application_form_failure(mocker, easy_applier, mock_job):
     """Test failing to fill the application form and check logs."""
     log_messages = []
 
-    # Добавляем `sink` для захвата сообщений loguru
     logger.remove()
     logger.add(log_messages.append)
 
@@ -129,9 +125,8 @@ def test_fill_application_form_failure(mocker, easy_applier, mock_job):
     try:
         easy_applier._fill_application_form(mock_job)
     except Exception:
-        pass  # Игнорируем исключение для корректного тестирования логов
+        pass 
 
-    # Проверка наличия сообщения в логах
     assert any("Form filling failed: Form error" in message for message in log_messages), (
         f"Expected log message not found in logs: {log_messages}"
     )
