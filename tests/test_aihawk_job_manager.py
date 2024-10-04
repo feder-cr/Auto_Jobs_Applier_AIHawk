@@ -140,16 +140,16 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
 
 
 
-# def test_is_blacklisted(job_manager):
-#     """Test the is_blacklisted method."""
-#     job_manager.title_blacklist = ["Intern", "Manager"]
-#     job_manager.company_blacklist = ["Company A", "Company B"]
+def test_is_blacklisted(job_manager):
+    """Test the is_blacklisted method."""
+    job_manager.title_blacklist = ["Intern", "Manager"]
+    job_manager.company_blacklist = ["Company A", "Company B"]
 
-#     result = job_manager.is_blacklisted("Software Engineer", "Company A", "Link")
-#     assert result is True
+    result = job_manager.is_blacklisted("Software Engineer", "Company A", "Link")
+    assert result is True
 
-#     result = job_manager.is_blacklisted("Intern", "Company C", "Link")
-#     assert result is True
+    result = job_manager.is_blacklisted("Intern", "Company C", "Link")
+    assert result is True
 
     result = job_manager.is_blacklisted("Senior Developer", "Company C", "Link")
     assert result is False
