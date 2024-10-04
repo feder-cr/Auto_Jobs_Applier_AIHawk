@@ -21,6 +21,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
+from loguru import logger
 
 
 class AIHawkEasyApplier:
@@ -111,6 +112,16 @@ class AIHawkEasyApplier:
 
         time.sleep(random.uniform(3, 5))
         self.check_for_premium_redirect(job)
+
+        try:
+            if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Application submitted')]"):
+                logger.info(f"Job application already submitted for job: {job}. Skipping.")
+                return
+            else:
+                logger.debug("No indication of prior application found. Proceeding with application.")
+        except Exception as e:
+            logger.error(f"Error while checking for application status: {e}")
+            raise
 
         try:
             self.driver.execute_script("document.activeElement.blur();")
@@ -455,6 +466,10 @@ class AIHawkEasyApplier:
         else:
             time.sleep(random.uniform(1.5, 2.5))
             next_button.click()
+
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-content'))
+            )
             time.sleep(random.uniform(3.0, 5.0))
             self._check_for_errors()
             return False
@@ -497,6 +512,8 @@ class AIHawkEasyApplier:
             pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
             for element in pb4_elements:
                 self._process_form_element(element, job)
+
+            self._fill_additional_questions()
         except Exception as e:
             logger.error(f"Failed to find form elements: {e}")
 
@@ -513,8 +530,6 @@ class AIHawkEasyApplier:
                 logger.debug("Successfully clicked on the label")
             except Exception as e:
                 logger.warning(f"Failed to click on the label: {e}")
-
-        self._fill_additional_questions()
 
     def _is_upload_field(self, element: WebElement) -> bool:
         is_upload = bool(element.find_elements(By.XPATH, ".//input[@type='file']"))
@@ -595,7 +610,7 @@ class AIHawkEasyApplier:
 
                 logger.debug(f"Generating resume for job: {job.title} at {job.company}")
                 resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
-                with open(file_path_pdf, "wb") as f:
+                with open(file_path_pdf, "xb") as f:
                     f.write(base64.b64decode(resume_pdf_base64))
                 logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
                 break
