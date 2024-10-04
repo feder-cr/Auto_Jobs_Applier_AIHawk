@@ -45,6 +45,7 @@ class AIHawkJobManager:
         self.set_old_answers = []
         self.easy_applier_component = None
         self.job_application_profile = None
+        self.seen_jobs = []
         logger.debug("AIHawkJobManager initialized successfully")
 
     def set_parameters(self, parameters):
