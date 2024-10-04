@@ -108,7 +108,7 @@ def test_check_for_premium_redirect_with_redirect(mocker, easy_applier, mock_job
 
 def test_find_easy_apply_button_found(mocker, easy_applier, mock_job):
     """Test finding the Easy Apply button successfully."""
-    mock_button = mock.Mock()
+    mock_button = mock.Mock(spec=WebElement)
     mocker.patch.object(WebDriverWait, 'until', return_value=[mock_button])
     mocker.patch.object(easy_applier.driver, 'find_elements', return_value=[mock_button])
 
@@ -119,7 +119,7 @@ def test_find_easy_apply_button_found(mocker, easy_applier, mock_job):
 def test_find_easy_apply_button_not_found(mocker, easy_applier, mock_job):
     """Test finding the Easy Apply button when it is not found."""
     mocker.patch.object(WebDriverWait, 'until', side_effect=TimeoutException)
-    with pytest.raises(Exception, match="No clickable 'Easy Apply' button found"):
+    with pytest.raises(Exception, match=r"No clickable 'Easy Apply' button found"):
         easy_applier._find_easy_apply_button(mock_job)
 
 
@@ -144,9 +144,9 @@ def test_fill_application_form_failure(mocker, easy_applier, mock_job):
 
 def test_get_job_description_success(mocker, easy_applier):
     """Test successfully retrieving the job description."""
-    mock_description_element = mock.Mock()
-    mock_description_element.text = "Job description text"
-    mocker.patch.object(easy_applier.driver, 'find_element', return_value=mock_description_element)
+    mock_see_more_button = mock.Mock(spec=WebElement)
+
+    mocker.patch.object(easy_applier.driver, 'find_element', return_value=mock_see_more_button)
 
     description = easy_applier._get_job_description()
     assert description == "Job description text"
