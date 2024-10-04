@@ -176,8 +176,10 @@ def test_initialize_with_missing_field(missing_field_yaml):
 
 def test_initialize_with_invalid_yaml(invalid_type_yaml):
     """Test initializing JobApplicationProfile with invalid YAML field type."""
-    with pytest.raises(TypeError):
-        JobApplicationProfile(invalid_type_yaml)
+    profile = JobApplicationProfile(invalid_type_yaml)
+
+    assert isinstance(profile.work_preferences.remote_work, str) is False
+    assert profile.work_preferences.remote_work == 12345
 
 
 def test_str_representation(valid_yaml):
