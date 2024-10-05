@@ -254,25 +254,29 @@ def create_and_run_bot(email, password, parameters, llm_api_key):
         browser = init_browser()
         logger.debug("Browser initialized successfully.")
 
-        logger.info("Initializing login component...")
-        login_component = AIHawkAuthenticator(browser)
-        logger.debug(f"Login component created: {login_component}")
-
         logger.info("Initializing job application component...")
         apply_component = AIHawkJobManager(browser)
         logger.debug(f"Job application component created: {apply_component}")
 
-        logger.info("Initializing GPT Answerer component...")
-        gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
-        logger.debug(f"GPT Answerer component created: {gpt_answerer_component}")
-
         logger.info("Creating AIHawkBotFacade object...")
-        bot = AIHawkBotFacade(login_component, apply_component)
+        bot = AIHawkBotFacade(None, apply_component)
         logger.debug(f"Bot facade created: {bot}")
 
         logger.info("Setting secrets for the bot...")
         bot.set_secrets(email, password)
         logger.info("Secrets set successfully.")
+
+        logger.info("Initializing login component...")
+        login_component = AIHawkAuthenticator(driver=browser, bot_facade=bot)
+        logger.debug(f"Login component created: {login_component}")
+
+        bot.login_component = login_component
+        logger.debug("Login component set in bot facade.")
+
+        logger.info("Initializing GPT Answerer component...")
+        gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
+        logger.debug(f"GPT Answerer component created: {gpt_answerer_component}")
+
 
         logger.info("Setting job application profile and resume...")
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
