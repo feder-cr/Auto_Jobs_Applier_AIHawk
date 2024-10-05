@@ -254,20 +254,22 @@ class AIHawkJobManager:
 
     def apply_jobs(self):
         try:
+            # Check if no matching jobs are found on the current page
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
                 logger.debug("No matching jobs found on this page, skipping")
                 return
         except NoSuchElementException:
             pass
-
+    
+        # Find the job results container and job elements
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+        
         # utils.scroll_slow(self.driver, job_results)
         # utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-            0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-
+        job_list_elements = job_results.find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+    
         if not job_list_elements:
             utils.printyellow("No job class elements found on page, moving to next page.")
             logger.debug("No job class elements found on page, skipping")
@@ -276,98 +278,98 @@ class AIHawkJobManager:
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
 
         for job in job_list:
-
+            logger.debug(f"Starting applicant count search for job: {job.title} at {job.company}")
+    
             try:
-                logger.debug(f"Starting applicant count search for job: {job.title} at {job.company}")
-
-                # Find all job insight elements
-                job_insight_elements = self.driver.find_elements(By.CLASS_NAME,
-                                                                 "job-details-jobs-unified-top-card__job-insight")
-                logger.debug(f"Found {len(job_insight_elements)} job insight elements")
-
-                # Initialize applicants_count as None
-                applicants_count = None
-
-                # Iterate over each job insight element to find the one containing the word "applicant"
-                for element in job_insight_elements:
-                    positive_text_element = element.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--positive')]")
-                    applicants_text = positive_text_element.text.strip().lower()
-                    logger.debug(f"Checking element text: {applicants_text}")
-
-                    # Look for keywords indicating the presence of applicants count
-                    if "applicant" in applicants_text:
-                        logger.info(f"Applicants text found: {applicants_text}")
-
-                        # Try to find numeric value in the text, such as "27 applicants" or "over 100 applicants"
-                        applicants_count = ''.join(filter(str.isdigit, applicants_text))
-
-                        if applicants_count:
-                            applicants_count = int(applicants_count)  # Convert the extracted number to an integer
-                            logger.info(f"Extracted numeric applicants count: {applicants_count}")
-
-                            # Handle case with "over X applicants"
-                            if "over" in applicants_text:
-                                applicants_count += 1
-                                logger.info(f"Adjusted applicants count for 'over': {applicants_count}")
-
-                            logger.info(f"Final applicants count: {applicants_count}")
-                        else:
-                            logger.warning(f"Applicants count could not be extracted from text: {applicants_text}")
-
-                        break  # Stop after finding the first valid applicants count element
-                    else:
-                        logger.debug(f"Skipping element as it does not contain 'applicant': {applicants_text}")
-
-                # Check if applicants_count is valid (not None) before performing comparisons
-                if applicants_count is not None:
-                    # Perform the threshold check for applicants count
-                    if applicants_count < self.min_applicants or applicants_count > self.max_applicants:
-                        utils.printyellow(
-                            f"Skipping {job.title} at {job.company} due to applicants count: {applicants_count}")
-                        logger.debug(f"Skipping {job.title} at {job.company}, applicants count: {applicants_count}")
-                        self.write_to_file(job, "skipped_due_to_applicants", applicants_count=applicants_count)
-                        continue
-                    else:
-                        logger.debug(f"Applicants count {applicants_count} is within the threshold")
-                else:
-                    # If no applicants count was found, log a warning but continue the process
-                    logger.warning(
-                        f"Applicants count not found for {job.title} at {job.company}, but continuing with application.")
-
-            except NoSuchElementException:
-                # Log a warning if the job insight elements are not found, but do not stop the job application process
-                logger.warning(
-                    f"Applicants count elements not found for {job.title} at {job.company}, continuing with application.")
-            except ValueError as e:
-                # Handle errors when parsing the applicants count
-                logger.error(f"Error parsing applicants count for {job.title} at {job.company}: {e}")
-            except Exception as e:
-                # Catch any other exceptions to ensure the process continues
-                logger.error(
-                    f"Unexpected error during applicants count processing for {job.title} at {job.company}: {e}")
-
-            # Continue with the job application process regardless of the applicants count check
-            logger.debug(f"Continuing with job application for {job.title} at {job.company}")
-
-            if self.is_blacklisted(job.title, job.company, job.link):
-                logger.debug("Job blacklisted: %s at %s", job.title, job.company)
-                self.write_to_file(job, "skipped", applicants_count=applicants_count)
-                continue
-            if self.is_already_applied_to_job(job.title, job.company, job.link):
-                self.write_to_file(job, "skipped", applicants_count=applicants_count)
-                continue
-            if self.is_already_applied_to_company(job.company):
-                self.write_to_file(job, "skipped", applicants_count=applicants_count)
-                continue
-            try:
+                # Use the new function to check the applicant count and decide whether to continue or skip
+                if not self.check_applicant_count(job):
+                    utils.printyellow(f"Skipping {job.title} at {job.company} due to applicant count criteria.")
+                    logger.debug(f"Skipping {job.title} at {job.company} based on applicant count.")
+                    self.write_to_file(job, "skipped_due_to_applicants")
+                    continue
+    
+                # Continue with other conditions and apply if not blacklisted or already applied
+                if self.is_blacklisted(job.title, job.company, job.link):
+                    logger.debug("Job blacklisted: %s at %s", job.title, job.company)
+                    self.write_to_file(job, "skipped")
+                    continue
+    
+                if self.is_already_applied_to_job(job.title, job.company, job.link):
+                    self.write_to_file(job, "skipped")
+                    continue
+    
+                if self.is_already_applied_to_company(job.company):
+                    self.write_to_file(job, "skipped")
+                    continue
+    
+                # Apply to the job if eligible
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
                     self.easy_applier_component.job_apply(job)
-                    self.write_to_file(job, "success", applicants_count=applicants_count)
-                    logger.debug("Applied to job: %s at %s", job.title, job.company)
+                    self.write_to_file(job, "success")
+                    logger.debug("Successfully applied to job: %s at %s", job.title, job.company)
+    
             except Exception as e:
-                logger.error("Failed to apply for %s at %s: %s", job.title, job.company, e)
-                self.write_to_file(job, "failed", applicants_count=applicants_count)
+                logger.error("Unexpected error during job application for %s at %s: %s", job.title, job.company, e)
+                self.write_to_file(job, "failed")
                 continue
+    
+    
+    def check_applicant_count(self, job) -> bool:
+        """
+        Checks the applicant count for a job and returns whether to proceed with the application.
+        
+        Args:
+            job (Job): The job object containing title, company, and other details.
+    
+        Returns:
+            bool: True if the applicant count meets the criteria or is not found, False otherwise.
+        """
+        try:
+            # Find job insight elements related to applicant count
+            job_insight_elements = self.driver.find_elements(By.CLASS_NAME, "job-details-jobs-unified-top-card__job-insight")
+            logger.debug(f"Found {len(job_insight_elements)} job insight elements for {job.title} at {job.company}")
+    
+            for element in job_insight_elements:
+                positive_text_element = element.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--positive')]")
+                applicants_text = positive_text_element.text.strip().lower()
+    
+                # Check if element contains the word "applicant" and extract count
+                if "applicant" in applicants_text:
+                    logger.info(f"Applicants text found: {applicants_text}")
+                    applicants_count = ''.join(filter(str.isdigit, applicants_text))
+    
+                    if applicants_count:
+                        applicants_count = int(applicants_count)
+                        logger.info(f"Extracted applicants count: {applicants_count}")
+    
+                        # Adjust count if "over" is mentioned
+                        if "over" in applicants_text:
+                            applicants_count += 1
+                            logger.info(f"Adjusted count for 'over': {applicants_count}")
+    
+                        # Check if the count is within the acceptable range
+                        if self.min_applicants <= applicants_count <= self.max_applicants:
+                            logger.info(f"Applicants count {applicants_count} is within the threshold for {job.title} at {job.company}")
+                            return True
+                        else:
+                            logger.info(f"Applicants count {applicants_count} is outside the threshold for {job.title} at {job.company}")
+                            return False
+    
+            # If no valid applicants count is found, consider it as passing
+            logger.warning(f"No valid applicants count found for {job.title} at {job.company}. Continuing.")
+            return True
+    
+        except NoSuchElementException:
+            logger.warning(f"Applicants count elements not found for {job.title} at {job.company}. Continuing.")
+            return True
+        except ValueError as e:
+            logger.error(f"Error parsing applicants count for {job.title} at {job.company}: {e}")
+            return True
+        except Exception as e:
+            logger.error(f"Unexpected error during applicant count check for {job.title} at {job.company}: {e}")
+            return True
+                
+                
 
     def write_to_file(self, job, file_name, applicants_count=None):
         logger.debug("Writing job application result to file: %s", file_name)
