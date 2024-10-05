@@ -143,10 +143,14 @@ class AIHawkEasyApplier:
 
             # Try clicking the "Easy Apply" button
             try:
+                self.handle_safety_reminder_modal(self.driver)
+
                 logger.debug("Attempting to click 'Easy Apply' button using ActionChains")
                 actions = ActionChains(self.driver)
                 actions.move_to_element(easy_apply_button).click().perform()
                 logger.debug("'Easy Apply' button clicked successfully")
+
+                self.handle_safety_reminder_modal(self.driver)
 
                 # Verify if the form has opened
                 time.sleep(2)
@@ -556,7 +560,17 @@ class AIHawkEasyApplier:
             if 'upload-resume' in upload_element.get_attribute('id') and not resume_uploaded:
                 logger.debug("Detected resume upload input by ID")
 
-                if self.resume_path is not None and os.path.isfile(self.resume_path):
+                # Step 1: Check if resume file path is valid and if the file is already uploaded
+                resume_filename = os.path.basename(self.resume_path) if self.resume_path else None
+
+                if resume_filename and self.resume_path and os.path.isfile(self.resume_path):
+                    # Check if the resume is already uploaded
+                    if self.is_resume_already_uploaded(self.driver, resume_filename):
+                        logger.info(f"Resume '{resume_filename}' is already uploaded. Skipping re-upload.")
+                        resume_uploaded = True
+                        continue
+
+                    # Upload the resume if it hasn't been uploaded yet
                     logger.debug(f"Uploading resume from path: {self.resume_path}")
                     upload_element.send_keys(os.path.abspath(self.resume_path))
                     resume_uploaded = True
@@ -575,6 +589,14 @@ class AIHawkEasyApplier:
                 if 'resume' in output:
                     logger.debug("Uploading resume based on text detection")
                     if self.resume_path is not None and os.path.isfile(self.resume_path):
+                        # Check again before uploading based on text detection
+                        resume_filename = os.path.basename(self.resume_path)
+                        if is_resume_already_uploaded(self.driver, resume_filename):
+                            logger.info(
+                                f"Resume '{resume_filename}' is already uploaded based on text detection. Skipping upload.")
+                            resume_uploaded = True
+                            continue
+
                         upload_element.send_keys(os.path.abspath(self.resume_path))
                         logger.debug(f"Resume uploaded from path: {self.resume_path}")
                         resume_uploaded = True
@@ -1092,3 +1114,49 @@ class AIHawkEasyApplier:
             return True
         except TimeoutException:
             return False
+
+    def handle_safety_reminder_modal(driver, timeout=5):
+        """
+        Handles the job safety reminder modal window.
+        If the modal is present, clicks the 'Continue applying' button.
+
+        Args:
+            driver (webdriver): The Selenium WebDriver instance.
+            timeout (int): Time to wait for the modal window to appear (default: 5 seconds).
+        """
+        try:
+            logger.debug("Checking for the presence of the job safety reminder modal...")
+            # Check if the 'Continue applying' button is present
+            continue_button = WebDriverWait(driver, timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//span[text()='Continue applying']/ancestor::button"))
+            )
+            logger.info("Job safety reminder modal detected. Clicking the 'Continue applying' button.")
+            continue_button.click()
+            logger.debug("'Continue applying' button clicked successfully.")
+        except TimeoutException:
+            logger.info("Job safety reminder modal not found. Continuing with the process.")
+
+    def is_resume_already_uploaded(driver, resume_filename: str) -> bool:
+        """
+        Checks if the resume with the given filename is already uploaded.
+
+        Args:
+            driver (webdriver): The Selenium WebDriver instance.
+            resume_filename (str): The name of the resume file to check.
+
+        Returns:
+            bool: True if the resume is already uploaded, False otherwise.
+        """
+        try:
+            logger.debug(f"Checking if the resume '{resume_filename}' is already uploaded.")
+            uploaded_resumes = driver.find_elements(By.XPATH,
+                                                    "//h3[contains(@class, 'jobs-document-upload-redesign-card__file-name')]")
+            for resume_element in uploaded_resumes:
+                if resume_element.text.strip() == resume_filename:
+                    logger.info(f"Resume '{resume_filename}' is already uploaded.")
+                    return True
+            logger.info(f"Resume '{resume_filename}' not found in uploaded documents.")
+        except Exception as e:
+            logger.error(f"Error while checking uploaded resumes: {str(e)}")
+
+        return False
