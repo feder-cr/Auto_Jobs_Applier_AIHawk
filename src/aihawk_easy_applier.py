@@ -591,7 +591,7 @@ class AIHawkEasyApplier:
                     if self.resume_path is not None and os.path.isfile(self.resume_path):
                         # Check again before uploading based on text detection
                         resume_filename = os.path.basename(self.resume_path)
-                        if is_resume_already_uploaded(self.driver, resume_filename):
+                        if self.is_resume_already_uploaded(self.driver, resume_filename):
                             logger.info(
                                 f"Resume '{resume_filename}' is already uploaded based on text detection. Skipping upload.")
                             resume_uploaded = True
