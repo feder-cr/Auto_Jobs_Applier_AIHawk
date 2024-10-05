@@ -1,26 +1,26 @@
 import random
 import time
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoAlertPresentException, TimeoutException, UnexpectedAlertPresentException
+from loguru import logger
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from loguru import logger
-
 
 class AIHawkAuthenticator:
 
-    def __init__(self, driver=None):
+    def __init__(self, driver=None, bot_facade=None):
         self.driver = driver
-        self.email = ""
-        self.password = ""
+        self.email = bot_facade.email if bot_facade else ""
+        self.password = bot_facade.password if bot_facade else ""
         logger.debug(f"AIHawkAuthenticator initialized with driver: {driver}")
 
-    def set_secrets(self, email, password):
-        self.email = email
-        self.password = password
-        logger.debug("Secrets set with email: %s", email)
+    def set_bot_facade(self, bot_facade):
+        self.email = bot_facade.email
+        self.password = bot_facade.password
+        logger.debug(f"Email and password set from bot_facade: email={self.email}, password={'*' * len(self.password)}")
+
 
     def start(self):
         logger.info("Starting Chrome browser to log in to LinkedIn.")
@@ -52,17 +52,60 @@ class AIHawkAuthenticator:
 
     def enter_credentials(self):
         try:
-            logger.debug("Entering credentials...")
-            email_field = WebDriverWait(self.driver, 10).until(
+            logger.debug("Starting the process to enter credentials...")
+
+            # Ожидание появления поля для ввода email
+            logger.debug("Waiting for the email input field to be present...")
+            email_field = WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "username"))
             )
+            logger.debug(f"Email input field found: {email_field}. Clearing and entering email now.")
+            email_field.clear()
+            email_field.click()
+            logger.debug(f"Attempting to enter email: {self.email}")
             email_field.send_keys(self.email)
-            logger.debug("Email entered: %s", self.email)
-            password_field = self.driver.find_element(By.ID, "password")
+            logger.debug("Email entered successfully. Verifying value in the field...")
+
+            # Проверка значения в поле email
+            entered_email = email_field.get_attribute("value")
+            if entered_email != self.email:
+                logger.warning(f"Email was not correctly entered. Field value: {entered_email}. Retrying...")
+                email_field.clear()
+                email_field.send_keys(self.email)
+
+            logger.debug(f"Email field final value: {entered_email}")
+
+            # Ожидание появления поля для ввода пароля
+            logger.debug("Waiting for the password input field to be present...")
+            password_field = WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.ID, "password"))
+            )
+            logger.debug(f"Password input field found: {password_field}. Clearing and entering password now.")
+            password_field.clear()
+            password_field.click()
+            logger.debug(f"Attempting to enter password: {'*' * len(self.password)}")  # Маскируем отображение пароля
             password_field.send_keys(self.password)
-            logger.debug("Password entered.")
+            logger.debug("Password entered successfully. Verifying value in the field...")
+
+            # Проверка значения в поле пароля
+            entered_password = password_field.get_attribute("value")
+            if entered_password != self.password:
+                logger.warning(f"Password was not correctly entered. Field value: {entered_password}. Retrying...")
+                password_field.clear()
+                password_field.send_keys(self.password)
+
+            logger.debug(f"Password field final value: {'*' * len(entered_password)}")
+
         except TimeoutException:
-            logger.error("Login form not found. Aborting login.")
+            logger.error("Login form not found within the timeout period. Aborting login.")
+            raise
+        except NoSuchElementException as e:
+            logger.error(f"An element was not found: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"An unexpected error occurred while entering credentials: {str(e)}")
+            raise
+
 
     def submit_login_form(self):
         try:
