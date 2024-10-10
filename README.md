@@ -51,14 +51,15 @@ Join our **Telegram community** for:
 1. [Introduction](#introduction)
 2. [Features](#features)
 3. [Installation](#installation)
-4. [Configuration](#configuration)
-5. [Usage](#usage)
-6. [Documentation](#documentation)
-7. [Troubleshooting](#troubleshooting)
-8. [Conclusion](#conclusion)
-9. [Contributors](#contributors)
-10. [License](#license)
-11. [Disclaimer](#disclaimer)
+4. [Docker Setup](#docker-setup)
+5. [Configuration](#configuration)
+6. [Usage](#usage)
+7. [Documentation](#documentation)
+8. [Troubleshooting](#troubleshooting)
+9. [Conclusion](#conclusion)
+10. [Contributors](#contributors)
+11. [License](#license)
+12. [Disclaimer](#disclaimer)
 
 ## Introduction
 
@@ -152,6 +153,44 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    ```bash
    pip install -r requirements.txt
    ```
+
+## Docker Setup
+
+This project supports Docker to easily set up and run the development environment without needing to install Python locally. Follow the instructions below to build and run the application using Docker.
+
+### Prerequisites
+- Make sure Docker and Docker Compose are installed on your machine.
+  - [Install Docker](https://docs.docker.com/get-docker/)
+  - [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+### Build the Docker Image
+1. Clone the repository if you haven't already:
+   ```bash
+   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+
+   cd Auto_Jobs_Applier_AIHawk
+
+2. Build the Docker image:
+   ```bash
+   docker-compose build
+
+### Running the Application
+1. Start the application using Docker Compose:
+   ```bash
+   docker-compose up -d
+   
+2. Access the running container's shell (for development):
+   ```bash
+   docker-compose exec app bash
+
+### Stopping the Application
+- To stop the application, run:
+  ```bash
+  docker-compose down
+  
+### Notes
+- The application files are mounted as a volume in the container, allowing changes to be reflected immediately.
+- The container is set up for a development environment by default. For production deployment, additional configurations might be necessary.
 
 ## Configuration
 
