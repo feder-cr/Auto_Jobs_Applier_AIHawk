@@ -107,7 +107,7 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 
 ## Installation
 
-**Confirmed succesfull runs on the following:**
+**Confirmed successful runs on the following:**
 - Operating Systems:
   - Windows 10
   - Ubuntu 22
