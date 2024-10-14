@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
-from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator
+from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from src.utils import chrome_browser_options
 from src.llm.llm_manager import GPTAnswerer
 from src.aihawk_authenticator import AIHawkAuthenticator
@@ -158,7 +158,7 @@ def init_browser() -> webdriver.Chrome:
 
 def create_and_run_bot(parameters, llm_api_key):
     try:
-        style_manager = FacadeManager.StyleManager()
+        style_manager = StyleManager()
         resume_generator = ResumeGenerator()
         with open(parameters['uploads']['plainTextResume'], "r", encoding='utf-8') as file:
             plain_text_resume = file.read()
