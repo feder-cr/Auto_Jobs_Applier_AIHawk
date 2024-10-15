@@ -16,6 +16,7 @@ from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
 from src.aihawk_easy_applier import AIHawkEasyApplier
 from loguru import logger
+from src.extractors.extraction_chains import EXTRACTORS
 
 
 class EnvironmentKeys:
@@ -46,6 +47,7 @@ class AIHawkJobManager:
         self.easy_applier_component = None
         self.job_application_profile = None
         self.seen_jobs = []
+        self.extractor = None
         logger.debug("AIHawkJobManager initialized successfully")
 
     def set_parameters(self, parameters):
@@ -253,29 +255,16 @@ class AIHawkJobManager:
             return []
 
     def apply_jobs(self):
-        try:
-            # Check if no matching jobs are found on the current page
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                logger.debug("No matching jobs found on this page, skipping")
-                return
-        except NoSuchElementException:
-            pass
-    
-        # Find the job results container and job elements
-        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        
-        # utils.scroll_slow(self.driver, job_results)
-        # utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-
-        job_list_elements = job_results.find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-    
-        if not job_list_elements:
-            utils.printyellow("No job class elements found on page, moving to next page.")
-            logger.debug("No job class elements found on page, skipping")
-            return
-
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
+        job_list = []
+        if self.extractor is not None: # we found a working extractor
+            job_list = self.extractor.get_job_list(self.driver)
+        else:
+            for e in EXTRACTORS:
+                extracted_jobs = e.get_job_list(self.driver)
+                if len(extracted_jobs) > 0:
+                    job_list = extracted_jobs # break when we find a valid extractor
+                    self.extractor = e
+                    break
 
         for job in job_list:
             logger.debug(f"Starting applicant count search for job: {job.title} at {job.company}")
