@@ -166,7 +166,3 @@ def printyellow(text):
     reset = "\033[0m"
     logger.debug("Printing text in yellow: %s", text)
     print(f"{yellow}{text}{reset}")
-
-def stringWidth(text, font, font_size):
-    bbox = font.getbbox(text)
-    return bbox[2] - bbox[0]
