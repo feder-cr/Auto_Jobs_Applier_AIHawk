@@ -348,6 +348,16 @@ class AIHawkEasyApplier:
 
         dropdown = element.find_element(By.TAG_NAME, 'select')
         select = Select(dropdown)
+        dropdown_id = dropdown.get_attribute('id')
+        if 'phoneNumber-Country' in dropdown_id:
+            country = self.resume_generator_manager.get_resume_country()
+            if country:
+                try:
+                    select.select_by_value(country)
+                    logger.debug(f"Selected phone country: {country}")
+                    return True
+                except NoSuchElementException:
+                    logger.warning(f"Country {country} not found in dropdown options")
 
         options = [option.text for option in select.options]
         logger.debug(f"Dropdown options found: {options}")
@@ -371,7 +381,6 @@ class AIHawkEasyApplier:
         if existing_answer:
             logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
         else:
-
             logger.debug(f"No existing answer found, querying model for: {question_text}")
             existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             logger.debug(f"Model provided answer: {existing_answer}")
