@@ -45,6 +45,6 @@ job_applicants_threshold:
   min_applicants: 0
   max_applicants: 30
 
-llm_model_type: openai
+llm_model_type: openai # supported - openai, openrouter, claude, ollama, gemini, huggingface
 llm_model: 'gpt-4o-mini'
 # llm_api_url: https://api.pawan.krd/cosmosrp/v1'
