@@ -179,7 +179,12 @@ def create_and_run_bot(parameters, llm_api_key):
         bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
         bot.set_parameters(parameters)
         bot.start_login()
-        bot.start_apply()
+        if (parameters['collectMode'] == True):
+            print('Collecting')
+            bot.start_collect_data()
+        else:
+            print('Applying')
+            bot.start_apply()
     except WebDriverException as e:
         logger.error(f"WebDriver error occurred: {e}")
     except Exception as e:
@@ -188,7 +193,8 @@ def create_and_run_bot(parameters, llm_api_key):
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
-def main(resume: Path = None):
+@click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
+def main(collect: False, resume: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
@@ -198,11 +204,13 @@ def main(resume: Path = None):
         
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
+        parameters['collectMode'] = collect
         
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
-        logger.error(f"Refer to the configuration guide for troubleshooting.")
+        logger.error(f"Refer to the configuration guide for troubleshooting: https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk?tab=readme-ov-file#configuration {str(ce)}")
+
     except FileNotFoundError as fnf:
         logger.error(f"File not found: {str(fnf)}")
         logger.error("Ensure all required files are present in the data folder.")
