@@ -15,7 +15,7 @@ personal_information:
     email: {type: string, format: email}
     github: {type: string, format: uri}
     linkedin: {type: string, format: uri}
-  required: [name, surname, date_of_birth, country, city, address,zip_code, phone_prefix, phone, email]
+  required: [name, surname, date_of_birth, country, city, address, zip_code, phone_prefix, phone, email]
 
 education_details:
   type: array
