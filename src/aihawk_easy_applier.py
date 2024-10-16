@@ -11,6 +11,7 @@ from httpx import HTTPStatusError
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -536,11 +537,11 @@ class AIHawkEasyApplier:
                     wrapped_lines = []
                     for line in text.splitlines():
 
-                        if utils.stringWidth(line, font, font_size) > max_width:
+                        if stringWidth(line, font, font_size) > max_width:
                             words = line.split()
                             new_line = ""
                             for word in words:
-                                if utils.stringWidth(new_line + word + " ", font, font_size) <= max_width:
+                                if stringWidth(new_line + word + " ", font, font_size) <= max_width:
                                     new_line += word + " "
                                 else:
                                     wrapped_lines.append(new_line.strip())
