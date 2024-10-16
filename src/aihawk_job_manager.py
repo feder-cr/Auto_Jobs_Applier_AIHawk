@@ -14,6 +14,7 @@ from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
 from src.aihawk_easy_applier import AIHawkEasyApplier
 from loguru import logger
+import urllib.parse
 
 
 class EnvironmentKeys:
@@ -438,8 +439,9 @@ class AIHawkJobManager:
 
     def next_job_page(self, position, location, job_page):
         logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
+        encoded_position = urllib.parse.quote(position)
         self.driver.get(
-            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
+            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
 
     def extract_job_information_from_tile(self, job_tile):
         logger.debug("Extracting job information from tile")
@@ -501,3 +503,4 @@ class AIHawkJobManager:
                     except json.JSONDecodeError:
                         continue
         return False
+
