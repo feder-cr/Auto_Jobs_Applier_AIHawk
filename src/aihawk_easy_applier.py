@@ -844,7 +844,7 @@ class AIHawkEasyApplier:
             data.append(question_data)
             with open(output_file, 'w') as f:
                 json.dump(data, f, indent=4)
-                self.all_data.append(question_data)
+                self.all_data = data
             logger.debug("Question data saved successfully to JSON")
         except Exception:
             tb_str = traceback.format_exc()
