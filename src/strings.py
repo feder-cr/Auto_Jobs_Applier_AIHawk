@@ -422,7 +422,7 @@ Resume: {resume}
 Instructions:
 1. Extract the key requirements from the job description, identifying hard requirements (must-haves) and soft requirements (nice-to-haves).
 2. Identify the relevant qualifications from the resume.
-3. Compare the qualifications against the requirements, ensuring all hard requirements are met. Allow for a 1-year experience gap if applicable.
+3. Compare the qualifications against the requirements, ensuring all hard requirements are met. Allow for a 1-year experience gap if applicable, as experience is usually a hard requirement.
 4. Provide a suitability score from 1 to 10. where 1 indicates the candidate does not meet any requirements and 10 indicates the candidate meets all requirements.
 5. Provide a brief reasoning for the score, highlighting which requirements are met and which are not.
 
