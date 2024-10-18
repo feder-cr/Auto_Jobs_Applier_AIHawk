@@ -232,7 +232,12 @@ class AIHawkEasyApplier:
             except NoSuchElementException:
                 logger.debug("See more button not found, skipping")
 
-            description = self.driver.find_element(By.CLASS_NAME, 'jobs-description-content__text').text
+            try:
+                description = self.driver.find_element(By.CLASS_NAME, 'jobs-description-content__text').text
+            except NoSuchElementException:
+                logger.debug("First class not found, checking for second class for premium members")
+                description = self.driver.find_element(By.CLASS_NAME, 'job-details-about-the-job-module__description').text
+
             logger.debug("Job description retrieved successfully")
             return description
         except NoSuchElementException:
