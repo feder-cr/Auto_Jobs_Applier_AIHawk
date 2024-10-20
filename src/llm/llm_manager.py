@@ -42,6 +42,18 @@ class OpenAIModel(AIModel):
         return response
 
 
+class OpenRouterModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str):
+        from langchain_openai import ChatOpenAI
+        self.model = ChatOpenAI(base_url="https://openrouter.ai/api/v1", model_name=llm_model, openai_api_key=api_key,
+                                temperature=0.4)
+
+    def invoke(self, prompt: str) -> BaseMessage:
+        logger.debug("Invoking OpenRouter API")
+        response = self.model.invoke(prompt)
+        return response
+
+
 class ClaudeModel(AIModel):
     def __init__(self, api_key: str, llm_model: str):
         from langchain_anthropic import ChatAnthropic
@@ -117,6 +129,8 @@ class AIAdapter:
 
         if llm_model_type == "openai":
             return OpenAIModel(api_key, llm_model)
+        elif llm_model_type == "openrouter":
+            return OpenRouterModel(api_key, llm_model)
         elif llm_model_type == "claude":
             return ClaudeModel(api_key, llm_model)
         elif llm_model_type == "ollama":
