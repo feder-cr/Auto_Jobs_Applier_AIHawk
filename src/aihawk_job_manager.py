@@ -470,7 +470,7 @@ class AIHawkJobManager:
     def is_blacklisted(self, job_title, company, link):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company}")
         job_title_words = job_title.lower().split(' ')
-        title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
+        title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
