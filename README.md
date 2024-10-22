@@ -552,8 +552,8 @@ Using this folder as a guide can be particularly helpful for:
     - `skipped.json` applications that were skipped
     - `success.json` successful applications
 
-    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers.
-  
+    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
+
 3. **Run the Bot:**
 
    Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your pdf resume:
