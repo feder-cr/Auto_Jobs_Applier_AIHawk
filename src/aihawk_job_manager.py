@@ -76,7 +76,7 @@ class AIHawkJobManager:
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
-        minimum_time = 60 * 5
+        minimum_time = 60 * 2
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:
@@ -268,8 +268,7 @@ class AIHawkJobManager:
             pass
         
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        utils.scroll_slow(self.driver, job_results)
-        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        utils.scroll_slow(self.driver, job_results)        
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
             raise Exception("No job class elements found on page")
