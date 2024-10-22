@@ -534,31 +534,47 @@ Using this folder as a guide can be particularly helpful for:
 
 
 ## Usage
+
 0. **Account language**
    To ensure the bot works, your account language must be set to English.
-   
-2. **Data Folder:**
+
+1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
 
+2. **Output Folder:**
+    Contains the output of the bot.
+    - `data.json` results of the --collect mode
+    - `failed.json` failed applications
+    - `open_ai_calls.json` all the calls made to the LLM model
+    - `skipped.json` applications that were skipped
+    - `success.json` successful applications
+
+    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers.
+  
 3. **Run the Bot:**
 
    Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your pdf resume:
 
 - **Dynamic Resume Generation:**
   If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
+
    ```bash
    python main.py
    ```
+
 - **Using a Specific Resume:**
   If you want to use a specific PDF resume for all applications, place your resume PDF in the `data_folder` directory and run the bot with the `--resume` option:
+
   ```bash
   python main.py --resume /path/to/your/resume.pdf
   ```
+
 - **Using the colled mode:**
   If you want to collect job data only to perform any type of data analytics you can use the bot with the `--collect` option. This will store in output/data.json file all data found from linkedin jobs offers.
+
   ```bash
   python main.py --collect
   ```
