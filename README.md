@@ -315,11 +315,11 @@ Each section has specific fields to fill out:
   - This section details your work experience, including job roles, companies, and key responsibilities.
     - **position**: Your job title or role.
     - **company**: The name of the company or organization where you worked.
-    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
+    - **employment_period**: The timeframe during which you were employed in the role, using the format MM/YYYY - MM/YYYY.
     - **location**: The city and country where the company is located.
     - **industry**: The industry or field in which the company operates.
-    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
-    - **skills_acquired**: Skills or expertise gained through this role.
+    - **key_responsibilities**: A list of major responsibilities or duties you had in the role, e.g. responsibility: "Developed web applications using React and Node.js".
+    - **skills_acquired**: Skills or expertise gained through this role, e.g. "React".
 
   - Example:
   ```yaml
@@ -330,9 +330,9 @@ Each section has specific fields to fill out:
       location: "San Francisco, CA"
       industry: "Technology"
       key_responsibilities:
-        - "Developed web applications using React and Node.js"
-        - "Collaborated with cross-functional teams to design and implement new features"
-        - "Troubleshot and resolved complex software issues"
+        - responsibility: "Developed web applications using React and Node.js"
+        - responsibility: "Collaborated with cross-functional teams to design and implement new features"
+        - responsibility: "Troubleshot and resolved complex software issues"
       skills_acquired:
         - "React"
         - "Node.js"
