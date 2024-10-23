@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from src.aihawk_authenticator import AIHawkAuthenticator
+from ai_hwak.aihawk_authenticator import AIHawkAuthenticator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 

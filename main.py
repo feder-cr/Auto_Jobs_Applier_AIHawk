@@ -10,15 +10,21 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from src.utils import chrome_browser_options
-from src.llm.llm_manager import GPTAnswerer
-from src.aihawk_authenticator import AIHawkAuthenticator
-from src.aihawk_bot_facade import AIHawkBotFacade
-from src.aihawk_job_manager import AIHawkJobManager
+
 from src.job_application_profile import JobApplicationProfile
 from loguru import logger
 
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr
+
+# Add the src directory to the Python path
+sys.path.append(str(Path(__file__).resolve().parent / 'src'))
+
+from ai_hawk.authenticator import AIHawkAuthenticator
+from ai_hawk.bot_facade import AIHawkBotFacade
+from ai_hawk.job_manager import AIHawkJobManager
+from ai_hawk.llm.llm_manager import GPTAnswerer
+
 
 class ConfigError(Exception):
     pass
