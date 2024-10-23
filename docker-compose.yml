@@ -2,12 +2,16 @@ version: '3.8'
 
 services:
   app:
+    platform: linux/arm64  # Ensure the container is built for ARM64 architecture (M1 Mac)
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
       - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Mount X11 socket from host
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
+      - DISPLAY=host.docker.internal:0  # Set DISPLAY for X11 forwarding
+    shm_size: 2g  # Allocate 2GB of shared memory
     tty: true

@@ -157,16 +157,55 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 ## Docker Setup
 
 This project supports Docker to easily set up and run the development environment without needing to install Python locally. Follow the instructions below to build and run the application using Docker.
+> **Note:** This setup has been tested only on a MacBook Pro with an M1 chip. Some steps may vary on other devices or architectures.
 
 ### Prerequisites
 - Make sure Docker and Docker Compose are installed on your machine.
+  - [Using Quartz with Docker and Chromium](#using-quartz-with-docker-and-chromium)
   - [Install Docker](https://docs.docker.com/get-docker/)
   - [Install Docker Compose](https://docs.docker.com/compose/install/)
+  - Run application
+    - [Build the Docker Image](#build-the-docker-image)
+    - [Running the Application](#running-the-application)
+    - [Stopping the Application](#stopping-the-application)
+
+
+### Using Quartz with Docker and Chromium
+
+This section explains how to install Quartz as a standalone application on your host machine, configure IP settings using `xhost`, and run a Chromium-based container to view the browser interface from the container.
+
+
+#### Step 1: Install Quartz on Host
+To install Quartz as a standalone application on your host machine:
+
+1. On **Linux/macOS**:
+   ```bash
+   sudo apt-get install quartz
+2. Alternatively, download the Quartz package directly from its repository if not available via your package manager.
+
+#### Step 2: Set IPs Using `xhost` on Host
+`xhost` allows access control for X server connections, enabling the container to display the browser UI.
+
+1. Allow local connections:
+   ```bash
+   xhost +local:
+2. Allow access from a specific IP (e.g., Mac/Local IP):
+   ```bash
+   xhost + <your-local-ip>
+   ```
+   Find your local IP by running
+   ```bash
+   ifconfig | grep inet
+3. Verify access:
+   ```bash
+   xhost
+   ```
+   You should see the allowed IPs listed
 
 ### Build the Docker Image
 1. Clone the repository if you haven't already:
    ```bash
-   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+   git clone https://github.com/eyadfarra/Auto_Jobs_Applier_AIHawk.git
 
    cd Auto_Jobs_Applier_AIHawk
 
@@ -182,11 +221,16 @@ This project supports Docker to easily set up and run the development environmen
 2. Access the running container's shell (for development):
    ```bash
    docker-compose exec app bash
+   
+3. Run the application from within the container:
+   ```bash
+   python main.py
 
 ### Stopping the Application
 - To stop the application, run:
   ```bash
   docker-compose down
+  
   
 ### Notes
 - The application files are mounted as a volume in the container, allowing changes to be reflected immediately.
