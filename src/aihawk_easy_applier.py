@@ -35,6 +35,7 @@ class AIHawkEasyApplier:
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
+        self.current_job = None
 
         logger.debug("AIHawkEasyApplier initialized successfully")
 
@@ -125,6 +126,8 @@ class AIHawkEasyApplier:
             recruiter_link = self._get_job_recruiter()
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
+
+            self.current_job = job
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
@@ -840,6 +843,9 @@ class AIHawkEasyApplier:
         for item in self.all_data:
             if self._sanitize_text(item['question']) == question_data['question'] and item['type'] == question_data['type']:
                 logger.debug(f"Question already exists in answers.json. Aborting save of: {item['question']}")
+                return
+            if self.current_job.company in item['answer']:
+                logger.debug(f"Answer contains the Company name. Aborting save of: {item['question']}")
                 return
 
         logger.debug(f"Saving question data to JSON: {question_data}")
