@@ -21,6 +21,10 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
 from loguru import logger
+import threading
+
+# Create a thread-local storage
+local = threading.local()
 
 
 class AIHawkEasyApplier:
@@ -182,7 +186,9 @@ class AIHawkEasyApplier:
 
             for method in search_methods:
                 try:
-                    logger.debug(f"Attempting search using {method['description']}")
+                    if not hasattr(local, 'logger'):
+                        local.logger = logger.bind(thread_id=threading.get_ident())
+                    local.logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
 
@@ -280,7 +286,9 @@ class AIHawkEasyApplier:
             return ""
 
     def _scroll_page(self) -> None:
-        logger.debug("Scrolling the page")
+        if not hasattr(local, 'logger'):
+            local.logger = logger.bind(thread_id=threading.get_ident())
+        local.logger.debug("Scrolling the page")
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
@@ -881,3 +889,5 @@ class AIHawkEasyApplier:
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+
+
