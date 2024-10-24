@@ -127,15 +127,19 @@ class AIHawkEasyApplier:
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
 
+
             self.current_job = job
+
+            logger.debug("Passing job information to GPT Answerer")
+            self.gpt_answerer.set_job(job)
+            
+            if not self.gpt_answerer.is_job_suitable():
+                return
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
             logger.debug("'Easy Apply' button clicked successfully")
-
-            logger.debug("Passing job information to GPT Answerer")
-            self.gpt_answerer.set_job(job)
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
