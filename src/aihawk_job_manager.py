@@ -14,6 +14,7 @@ from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
 from src.aihawk_easy_applier import AIHawkEasyApplier
 from loguru import logger
+import urllib.parse
 
 
 class EnvironmentKeys:
@@ -71,6 +72,51 @@ class AIHawkJobManager:
     def set_resume_generator_manager(self, resume_generator_manager):
         logger.debug("Setting resume generator manager")
         self.resume_generator_manager = resume_generator_manager
+
+    def start_collecting_data(self):
+        searches = list(product(self.positions, self.locations))
+        random.shuffle(searches)
+        page_sleep = 0
+        minimum_time = 60 * 5
+        minimum_page_time = time.time() + minimum_time
+
+        for position, location in searches:
+            location_url = "&location=" + location
+            job_page_number = -1
+            utils.printyellow(f"Collecting data for {position} in {location}.")
+            try:
+                while True:
+                    page_sleep += 1
+                    job_page_number += 1
+                    utils.printyellow(f"Going to job page {job_page_number}")
+                    self.next_job_page(position, location_url, job_page_number)
+                    time.sleep(random.uniform(1.5, 3.5))
+                    utils.printyellow("Starting the collecting process for this page")
+                    self.read_jobs()
+                    utils.printyellow("Collecting data on this page has been completed!")
+
+                    time_left = minimum_page_time - time.time()
+                    if time_left > 0:
+                        utils.printyellow(f"Sleeping for {time_left} seconds.")
+                        time.sleep(time_left)
+                        minimum_page_time = time.time() + minimum_time
+                    if page_sleep % 5 == 0:
+                        sleep_time = random.randint(1, 5)
+                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                        time.sleep(sleep_time)
+                        page_sleep += 1
+            except Exception:
+                pass
+            time_left = minimum_page_time - time.time()
+            if time_left > 0:
+                utils.printyellow(f"Sleeping for {time_left} seconds.")
+                time.sleep(time_left)
+                minimum_page_time = time.time() + minimum_time
+            if page_sleep % 5 == 0:
+                sleep_time = random.randint(50, 90)
+                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                time.sleep(sleep_time)
+                page_sleep += 1
 
     def start_applying(self):
         logger.debug("Starting job application process")
@@ -213,6 +259,32 @@ class AIHawkJobManager:
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
             return []
+
+    def read_jobs(self):
+        try:
+            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
+            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
+                raise Exception("No more jobs on this page")
+        except NoSuchElementException:
+            pass
+        
+        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+        utils.scroll_slow(self.driver, job_results)
+        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        if not job_list_elements:
+            raise Exception("No job class elements found on page")
+        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        for job in job_list:            
+            if self.is_blacklisted(job.title, job.company, job.link):
+                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+                self.write_to_file(job, "skipped")
+                continue
+            try:
+                self.write_to_file(job,'data')
+            except Exception as e:
+                self.write_to_file(job, "failed")
+                continue
 
     def apply_jobs(self):
         try:
@@ -367,8 +439,9 @@ class AIHawkJobManager:
 
     def next_job_page(self, position, location, job_page):
         logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
+        encoded_position = urllib.parse.quote(position)
         self.driver.get(
-            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={position}{location}&start={job_page * 25}")
+            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
 
     def extract_job_information_from_tile(self, job_tile):
         logger.debug("Extracting job information from tile")
@@ -397,7 +470,7 @@ class AIHawkJobManager:
     def is_blacklisted(self, job_title, company, link):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company}")
         job_title_words = job_title.lower().split(' ')
-        title_blacklisted = any(word in job_title_words for word in self.title_blacklist)
+        title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or link_seen
@@ -430,3 +503,4 @@ class AIHawkJobManager:
                     except json.JSONDecodeError:
                         continue
         return False
+

@@ -47,4 +47,4 @@ job_applicants_threshold:
 
 llm_model_type: openai
 llm_model: 'gpt-4o-mini'
-# llm_api_url: https://api.pawan.krd/cosmosrp/v1'
+# llm_api_url: 'https://api.pawan.krd/cosmosrp/v1'
