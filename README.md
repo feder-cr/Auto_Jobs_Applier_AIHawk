@@ -555,11 +555,21 @@ Using this folder as a guide can be particularly helpful for:
 0. **Account language**
    To ensure the bot works, your account language must be set to English.
 
-2. **Data Folder:**
+1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
+
+2. **Output Folder:**
+    Contains the output of the bot.
+    - `data.json` results of the --collect mode
+    - `failed.json` failed applications
+    - `open_ai_calls.json` all the calls made to the LLM model
+    - `skipped.json` applications that were skipped
+    - `success.json` successful applications
+
+    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
 
 3. **Run the Bot:**
 
