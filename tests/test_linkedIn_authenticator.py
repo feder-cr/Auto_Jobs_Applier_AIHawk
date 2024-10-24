@@ -1,8 +1,10 @@
+from httpx import get
+from numpy import place
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from ai_hwak.aihawk_authenticator import AIHawkAuthenticator
+from ai_hawk.authenticator import AIHawkAuthenticator, get_authenticator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 
@@ -15,7 +17,7 @@ def mock_driver(mocker):
 @pytest.fixture
 def authenticator(mock_driver):
     """Fixture to initialize AIHawkAuthenticator with a mocked driver."""
-    return AIHawkAuthenticator(mock_driver)
+    return get_authenticator(mock_driver, platform='linkedin') 
 
 
 def test_handle_login(mocker, authenticator):

@@ -20,7 +20,7 @@ original_stderr = sys.stderr
 # Add the src directory to the Python path
 sys.path.append(str(Path(__file__).resolve().parent / 'src'))
 
-from ai_hawk.authenticator import AIHawkAuthenticator
+from ai_hawk.authenticator import get_authenticator
 from ai_hawk.bot_facade import AIHawkBotFacade
 from ai_hawk.job_manager import AIHawkJobManager
 from ai_hawk.llm.llm_manager import GPTAnswerer
@@ -177,7 +177,7 @@ def create_and_run_bot(parameters, llm_api_key):
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
         browser = init_browser()
-        login_component = AIHawkAuthenticator(browser)
+        login_component = get_authenticator(driver=browser, platform='linkedin')
         apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
         bot = AIHawkBotFacade(login_component, apply_component)
