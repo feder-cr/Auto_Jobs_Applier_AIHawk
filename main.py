@@ -194,7 +194,8 @@ def create_and_run_bot(parameters, llm_api_key):
 def cleanup_log_file():
     log_file_path = Path('./log/app.log')
     if log_file_path.exists() and log_file_path.stat().st_size > 100 * 1024 * 1024:  # 100MB
-        os.remove(log_file_path)
+        with open(log_file_path, 'w'):
+            pass
         logger.info(f"Deleted large log file: {log_file_path}")
 
 @click.command()
