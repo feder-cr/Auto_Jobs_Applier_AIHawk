@@ -28,4 +28,3 @@ webdriver-manager==4.0.2
 pytest
 pytest-mock
 pytest-cov
-fnmatch
