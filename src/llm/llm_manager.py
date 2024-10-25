@@ -556,7 +556,7 @@ class GPTAnswerer:
         logger.debug(f"Question answered: {output}")
         return output
 
-    def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
+    def answer_question_numeric(self, question: str, default_experience: str = 3) -> str:
         logger.debug(f"Answering numeric question: {question}")
         func_template = self._preprocess_template_string(
             strings.numeric_question_template)
@@ -580,7 +580,7 @@ class GPTAnswerer:
         numbers = re.findall(r"\d+", output_str)
         if numbers:
             logger.debug(f"Numbers found: {numbers}")
-            return int(numbers[0])
+            return str(numbers[0])
         else:
             logger.error("No numbers found in the string")
             raise ValueError("No numbers found in the string")
