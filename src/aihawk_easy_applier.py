@@ -21,6 +21,10 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
 from loguru import logger
+import threading
+
+# Create a thread-local storage
+local = threading.local()
 
 
 class AIHawkEasyApplier:
@@ -127,15 +131,19 @@ class AIHawkEasyApplier:
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
 
+
             self.current_job = job
+
+            logger.debug("Passing job information to GPT Answerer")
+            self.gpt_answerer.set_job(job)
+            
+            if not self.gpt_answerer.is_job_suitable():
+                return
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
             logger.debug("'Easy Apply' button clicked successfully")
-
-            logger.debug("Passing job information to GPT Answerer")
-            self.gpt_answerer.set_job(job)
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
@@ -178,7 +186,9 @@ class AIHawkEasyApplier:
 
             for method in search_methods:
                 try:
-                    logger.debug(f"Attempting search using {method['description']}")
+                    if not hasattr(local, 'logger'):
+                        local.logger = logger.bind(thread_id=threading.get_ident())
+                    local.logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
 
@@ -276,7 +286,9 @@ class AIHawkEasyApplier:
             return ""
 
     def _scroll_page(self) -> None:
-        logger.debug("Scrolling the page")
+        if not hasattr(local, 'logger'):
+            local.logger = logger.bind(thread_id=threading.get_ident())
+        local.logger.debug("Scrolling the page")
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
@@ -877,3 +889,5 @@ class AIHawkEasyApplier:
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+
+

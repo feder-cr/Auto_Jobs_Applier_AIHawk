@@ -1,24 +1,68 @@
-import logging
 import os
 import random
 import sys
 import time
-
+import queue
+import threading
 from selenium import webdriver
 from loguru import logger
 
-from app_config import MINIMUM_LOG_LEVEL
+from app_config import MINIMUM_LOG_LEVEL, LOG_TO_FILE, LOG_TO_CONSOLE
 
-log_file = "app_log.log"
+log_file = "log/app.log"
 
+# Ensure the log directory exists
+os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-    logger.remove()
-    logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL)
-else:
-    logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
-    logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
+# Remove default logger
+logger.remove()
+
+# Configure Loguru logger
+config = {
+    "handlers": []
+}
+
+# Add file logger if LOG_TO_FILE is True
+if LOG_TO_FILE:
+    config["handlers"].append({
+        "sink": log_file,
+        "level": MINIMUM_LOG_LEVEL,
+        "rotation": "10 MB",
+        "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    })
+
+# Add console logger if LOG_TO_CONSOLE is True
+if LOG_TO_CONSOLE:
+    config["handlers"].append({
+        "sink": sys.stderr,
+        "level": MINIMUM_LOG_LEVEL,
+        "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    })
+
+# Configure Loguru with the new settings
+logger.configure(**config)
+
+# Define log_queue before the log_worker function
+log_queue = queue.Queue()
+
+# Worker function to process log messages
+def log_worker():
+    while True:
+        record = log_queue.get()
+        if record is None:
+            break
+        with open(log_file, "a") as log_file_handle:
+            print(record, file=log_file_handle)
+        if LOG_TO_CONSOLE:
+            print(record, file=sys.stderr)
+
+# Start the log worker thread
+log_thread = threading.Thread(target=log_worker, daemon=True)
+log_thread.start()
+
+# Intercept Selenium's logging
+from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
+selenium_logger.setLevel(MINIMUM_LOG_LEVEL)
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
@@ -166,3 +210,12 @@ def printyellow(text):
     reset = "\033[0m"
     logger.debug("Printing text in yellow: %s", text)
     print(f"{yellow}{text}{reset}")
+
+# Make sure to add this at the end of your main script
+def cleanup():
+    log_queue.put(None)
+    log_thread.join()
+
+# Register the cleanup function to be called at exit
+import atexit
+atexit.register(cleanup)
