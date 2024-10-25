@@ -1,4 +1,4 @@
-remote: true
+remote: false
 
 experienceLevel:
   internship: false
@@ -10,11 +10,11 @@ experienceLevel:
 
 jobTypes:
   full-time: true
-  contract: false
-  part-time: false
+  contract: true
+  part-time: true
   temporary: true
   internship: false
-  other: false
+  other: true
   volunteer: true
 
 date:
@@ -25,29 +25,28 @@ date:
 
 positions:
   - Software engineer
+  - Software developer
 
 locations:
-  - Germany
+  - Canada
 
-apply_once_at_company: true
+apply_once_at_company: false
 
 distance: 100
 
 company_blacklist:
-  - wayfair
-  - Crossover
+  - Google
+  - Amazon
+  - Meta
 
 title_blacklist:
-  - word1
-  - word2
-
-location_blacklist:
-  - Brazil
+  - Senior
+  - Embedded
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 30
+  max_applicants: 3000
 
 llm_model_type: openai
-llm_model: 'gpt-4o-mini'
+llm_model: "gpt-4o-mini"
 # llm_api_url: 'https://api.pawan.krd/cosmosrp/v1'
