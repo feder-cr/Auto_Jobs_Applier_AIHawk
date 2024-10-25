@@ -20,6 +20,18 @@ Answer the following question based on the provided self-identification details.
 
 ## Rules
 - Answer questions directly.
+- Applicant will answer 'Yes' for disability
+- No for veteran
+- Answer Yes for visa sponsorship
+- No for citizenship/greencard
+- The applicant is 'not' a US citizen
+
+## Visa Sponsorship Rules
+- The applicant is on Student visa(F1) and working on OPT and needs visa sponsorship.
+- The applicant needs visa sponsorship always answer 'Yes' for visa sponsorship
+- The applicant is 'not' a US citizen
+- The applicant might not be able to get security Clearance for some jobs since applicant is not a US citizen
+- The applicant is 'Non-citizen allowed to work for current employer'
 
 ## Example
 My resume: Male, uses he/him pronouns, not a veteran, no disability.
@@ -37,10 +49,41 @@ Answer the following question based on the provided legal authorization details.
 ## Rules
 - Answer questions directly.
 
-## Example
-My resume: Authorized to work in the EU, no US visa required.
-Question: Are you legally allowed to work in the EU?
+## Visa Sponsorship Rules
+- The applicant is on Student visa(F1) and working on OPT and needs visa sponsorship.
+- The applicant needs visa sponsorship always answer 'Yes' for visa sponsorship
+- The applicant is 'not' a US citizen
+- The applicant might not be able to get security Clearance for some jobs since applicant is not a US citizen
+- The applicant is 'Non-citizen allowed to work for current employer'
+
+## Real Data Example
+My resume: Authorized to work in the US, but US visa required.
+Question: Are you legally allowed to work in the US?
 Yes
+
+## Real Data Example
+Question: Do you require H1B or sponorship?
+Yes
+
+## Real Data Example
+Question: Do you require visa to continue working in US?
+Yes
+
+## Real Data Example
+Question: Are you located in US?
+Yes
+
+## Real Data Example
+Question: Are you authorized to work in US?
+Yes
+
+## Real Data Example
+Question: Do you have security clearance in US?
+No
+
+## Real Data Example
+Question: Are you US a citizen or green card hodler?
+No
 
 Legal Authorization: {resume_section}
 Question: {question}
@@ -52,6 +95,7 @@ Answer the following question based on the provided work preferences.
 
 ## Rules
 - Answer questions directly.
+- If visa sponsorship is asked , always say 'yes'
 
 ## Example
 My resume: Open to remote work, willing to relocate.
@@ -69,13 +113,19 @@ Answer the following question based on the provided education details.
 ## Rules
 - Answer questions directly.
 - If it seems likely that you have the experience, even if not explicitly defined, answer as if you have the experience.
+- If no experience is found, but question is techically/dev related and asks yes/no question mostly answer yes, unless it is very differnt from applicant tech stack.(check example 2)
 - If unsure, respond with "I have no experience with that, but I learn fast" or "Not yet, but willing to learn."
-- Keep the answer under 140 characters.
+- not followed by period under 10 characters if needed under 140.
 
 ## Example
 My resume: Bachelor's degree in Computer Science with experience in Python.
 Question: Do you have experience with Python?
 Yes, I have experience with Python.
+
+## Example 2
+My resume: Software engineer
+Question: do you have any experience in developing and deploying machine learning/llm/slm/generative ai models? do you have any experience in developing and deploying machine learning/llm/slm/generative ai models?
+Yes
 
 Education Details: {resume_section}
 Question: {question}
@@ -88,13 +138,30 @@ Answer the following question based on the provided experience details.
 ## Rules
 - Answer questions directly.
 - If it seems likely that you have the experience, even if not explicitly defined, answer as if you have the experience.
+- if any related experience, say total experience of related field, be lenient.
+- If no experience is found, but question is techically/dev related and asks yes/no question mostly answer yes, unless it is very differnt from applicant tech stack.(check example 2)
 - If unsure, respond with "I have no experience with that, but I learn fast" or "Not yet, but willing to learn."
-- Keep the answer under 140 characters.
+- Keep the answer under 10 characters unless describing is asked in that case limit is 140.
+- If visa sponsorship is asked , always say 'yes'
 
 ## Example
 My resume: 3 years as a software developer with leadership experience.
 Question: Do you have leadership experience?
 Yes, I have 3 years of leadership experience.
+
+## Example 2
+My resume: Software engineer
+Question: do you have any experience in developing and deploying machine learning/llm/slm/generative ai models? do you have any experience in developing and deploying machine learning/llm/slm/generative ai models?
+Yes
+
+## Example
+My resume: 5 months of React Js project.
+Question: Do you have angular experience?
+Answer in years: 1
+
+## Example
+Question: How many years of CI/CD (DevOps) experience?
+5+
 
 Experience Details: {resume_section}
 Question: {question}
@@ -126,6 +193,7 @@ Answer the following question based on the provided availability details.
 - Answer questions directly.
 - Keep the answer under 140 characters.
 - Use periods only if the answer has multiple sentences.
+- If sponsorship is asked , always say 'yes'
 
 ## Example
 My resume: Available to start immediately.
@@ -142,13 +210,18 @@ Answer the following question based on the provided salary expectations.
 
 ## Rules
 - Answer questions directly.
-- Keep the answer under 140 characters.
+- Keep the answer under 10 characters, in integer format.
 - Use periods only if the answer has multiple sentences.
+- If possible keep numerics answer in integer not followed by period under 10 characters
 
 ## Example
 My resume: Looking for a salary in the range of 50k-60k USD.
 Question: What are your salary expectations?
-55000.
+55000
+
+## Example
+Question: what are your minimum compensation expectations?
+85000
 
 Salary Expectations: {resume_section}
 Question: {question}
@@ -249,6 +322,9 @@ Please write the cover letter in a way that directly addresses the job role and 
 - Provide only the text of the cover letter.
 - Do not include any introductions, explanations, or additional information.
 - The letter should be formatted into paragraph.
+- Add "Dear Hiring Manager" at the start
+- Add "Regards, Akash Bilgi" at the end
+- Add Today's date: 25 October 2024
 
 ## Job Description:
 ```
@@ -308,7 +384,7 @@ How many years of experience do you have with Bash?
 
 ## Answer
 
-2
+5
 ```
 
 ## Example 2
@@ -350,10 +426,10 @@ options_template = """The following is a resume and an answered question about t
 - The answer must exclusively contain one of the options.
 
 ## Example
-My resume: I'm a software engineer with 10 years of experience on swift, python, C, C++.
+My resume: I'm a software engineer with 6 years of experience on  python, C, Java, Groovy, C++.
 Question: How many years of experience do you have on python?
 Options: [1-2, 3-5, 6-10, 10+]
-10+
+6
 
 -----
 

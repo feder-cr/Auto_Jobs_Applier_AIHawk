@@ -466,7 +466,8 @@ class GPTAnswerer:
         3. **Legal Authorization**:
         - **Purpose**: Details your work authorization status and visa requirements.
         - **Use When**: The question asks about your ability to work in specific countries or if you need sponsorship or visas.
-        - **Examples**: Work authorization in EU and US, visa requirements, legally allowed to work.
+        - **Examples**: Work authorization in US, visa requirements, legally allowed to work, Citizenship , greencard, security Clearance
+        - **Hard Rule**: Answer Yes for sponsorship always
 
         4. **Work Preferences**:
         - **Purpose**: Specifies your preferences regarding work conditions and job roles.
@@ -556,7 +557,7 @@ class GPTAnswerer:
         logger.debug(f"Question answered: {output}")
         return output
 
-    def answer_question_numeric(self, question: str, default_experience: int = 3) -> int:
+    def answer_question_numeric(self, question: str, default_experience: str = 3) -> str:
         logger.debug(f"Answering numeric question: {question}")
         func_template = self._preprocess_template_string(
             strings.numeric_question_template)
@@ -580,7 +581,7 @@ class GPTAnswerer:
         numbers = re.findall(r"\d+", output_str)
         if numbers:
             logger.debug(f"Numbers found: {numbers}")
-            return int(numbers[0])
+            return str(numbers[0])
         else:
             logger.error("No numbers found in the string")
             raise ValueError("No numbers found in the string")

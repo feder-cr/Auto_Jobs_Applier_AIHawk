@@ -1,4 +1,4 @@
-remote: true
+remote: false
 
 experienceLevel:
   internship: false
@@ -20,30 +20,44 @@ jobTypes:
 date:
   all time: false
   month: false
-  week: false
+  week: true
   24 hours: true
 
 positions:
   - Software engineer
+  - Devops engineer
+  - SRE engineer
+  - Software Developer
+  - Python Develoepr
+  - Software engineer (Python)
+  - Software Developer (python)
 
 locations:
-  - Germany
+  - US
+  - United States
+  - California
+  - Bay Area
+  - Los Angeles
+  - Seattle
+  - Oregon
 
 apply_once_at_company: true
 
 distance: 100
 
 company_blacklist:
-  - wayfair
-  - Crossover
+
 
 title_blacklist:
-  - word1
-  - word2
+  - Citizen only
+  - Visa Required
+  - Security Clearance
+  - No Visa
+  - No Sponsorship
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 30
+  max_applicants: 1000
 
 llm_model_type: openai
 llm_model: 'gpt-4o-mini'

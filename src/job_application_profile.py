@@ -32,6 +32,10 @@ class LegalAuthorization:
     requires_uk_visa: str 
     legally_allowed_to_work_in_uk: str
     requires_uk_sponsorship: str
+    requires_us_h1b_visa_sponsorship: str
+    us_citizen: str
+    greencard_holder: str
+    security_clearance: str
 
 
 
