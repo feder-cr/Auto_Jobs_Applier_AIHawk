@@ -2,8 +2,6 @@ import os
 import random
 import sys
 import time
-import queue
-import threading
 from selenium import webdriver
 from loguru import logger
 
@@ -28,6 +26,8 @@ if LOG_TO_FILE:
         "sink": log_file,
         "level": MINIMUM_LOG_LEVEL,
         "rotation": "10 MB",
+        "retention": "1 week",
+        "compression": "zip",
         "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     })
 
@@ -41,24 +41,6 @@ if LOG_TO_CONSOLE:
 
 # Configure Loguru with the new settings
 logger.configure(**config)
-
-# Define log_queue before the log_worker function
-log_queue = queue.Queue()
-
-# Worker function to process log messages
-def log_worker():
-    while True:
-        record = log_queue.get()
-        if record is None:
-            break
-        with open(log_file, "a") as log_file_handle:
-            print(record, file=log_file_handle)
-        if LOG_TO_CONSOLE:
-            print(record, file=sys.stderr)
-
-# Start the log worker thread
-log_thread = threading.Thread(target=log_worker, daemon=True)
-log_thread.start()
 
 # Intercept Selenium's logging
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
@@ -77,14 +59,12 @@ def ensure_chrome_profile():
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
 
-
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")
     scrollable = int(scroll_height) > int(client_height)
     logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
     return scrollable
-
 
 def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
     logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
@@ -154,7 +134,6 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
     except Exception as e:
         logger.error(f"Exception occurred during scrolling: {e}")
 
-
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
     ensure_chrome_profile()
@@ -197,25 +176,14 @@ def chrome_browser_options():
 
     return options
 
-
 def printred(text):
     red = "\033[91m"
     reset = "\033[0m"
     logger.debug("Printing text in red: %s", text)
     print(f"{red}{text}{reset}")
 
-
 def printyellow(text):
     yellow = "\033[93m"
     reset = "\033[0m"
     logger.debug("Printing text in yellow: %s", text)
     print(f"{yellow}{text}{reset}")
-
-# Make sure to add this at the end of your main script
-def cleanup():
-    log_queue.put(None)
-    log_thread.join()
-
-# Register the cleanup function to be called at exit
-import atexit
-atexit.register(cleanup)
