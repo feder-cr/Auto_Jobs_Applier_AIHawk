@@ -191,11 +191,17 @@ def create_and_run_bot(parameters, llm_api_key):
     except Exception as e:
         raise RuntimeError(f"Error running the bot: {str(e)}")
 
+def cleanup_log_file():
+    log_file_path = Path('./log/app.log')
+    if log_file_path.exists() and log_file_path.stat().st_size > 100 * 1024 * 1024:  # 100MB
+        os.remove(log_file_path)
+        logger.info(f"Deleted large log file: {log_file_path}")
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
 @click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
 def main(collect: False, resume: Path = None):
+    cleanup_log_file()
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
