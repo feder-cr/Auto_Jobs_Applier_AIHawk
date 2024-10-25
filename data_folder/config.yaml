@@ -1,4 +1,4 @@
-remote: false
+remote: true
 
 experienceLevel:
   internship: false
@@ -10,11 +10,11 @@ experienceLevel:
 
 jobTypes:
   full-time: true
-  contract: true
-  part-time: true
+  contract: false
+  part-time: false
   temporary: true
   internship: false
-  other: true
+  other: false
   volunteer: true
 
 date:
@@ -25,27 +25,28 @@ date:
 
 positions:
   - Software engineer
-  - Software developer
 
 locations:
-  - Canada
+  - Germany
 
-apply_once_at_company: false
+apply_once_at_company: true
 
 distance: 100
 
 company_blacklist:
-  - Google
-  - Amazon
-  - Meta
+  - wayfair
+  - Crossover
 
 title_blacklist:
-  - Senior
-  - Embedded
+  - word1
+  - word2
+
+location_blacklist:
+  - Brazil
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 3000
+  max_applicants: 30
 
 llm_model_type: openai
 llm_model: "gpt-4o-mini"
