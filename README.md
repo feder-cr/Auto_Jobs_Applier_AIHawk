@@ -539,6 +539,7 @@ Inside this folder, you'll find example versions of the key files:
 - `secrets.yaml`
 - `config.yaml`
 - `plain_text_resume.yaml`
+- `answers.json`
 
 These files are already populated with fictitious but realistic data. They show you the correct format and type of information to enter in each file.
 
@@ -569,9 +570,16 @@ Using this folder as a guide can be particularly helpful for:
     - `skipped.json` applications that were skipped
     - `success.json` successful applications
 
-    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
+3. **Answers.json:**
+   - This file is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers.
+   - This version of the file is blank and can be used as a template to answer the questions using your resume.
+     - Use Anthropic Claude 3.5 Sonnet model to answer the questions using your resume as a guide. Perplexity is a good option. 
+     - prompt example:
+   ```review all the questions using the resume and update the answer if incorrect. if you do not have an answer from the resume then do not update the answers file. must not delete or remove entries. your answer must be accurate, no guessing. the formating of the json must be maintained.```
+   - Copy `/data_folder/answers.json` file to `/answers.json`
+   - **Reminder** Review answers.json file after the bot has finished running. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
 
-3. **Run the Bot:**
+4. **Run the Bot:**
 
    Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your pdf resume:
 

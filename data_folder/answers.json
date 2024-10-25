@@ -1,0 +1,802 @@
+[
+    {
+        "type": "radio",
+        "question": "are you comfortable working in a remote setting?are you comfortable working in a remote setting?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you comfortable working in a hybrid setting?are you comfortable working in a hybrid setting?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you comfortable working in an onsite setting?are you comfortable working in an onsite setting?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you commutable to the office location listed on this job posting?are you commutable to the office location listed on this job posting?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "if you are not within a commutable distance from the location of the role you are applying for, are you willing to relocate in order to meet any applicable in-office requirements?if you are not within a commutable distance from the location of the role you are applying for, are you willing to relocate in order to meet any applicable in-office requirements?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "many of our roles operate on a hybrid schedule, requiring a set number of days in office each week. if applicable, are you able to meet that requirement, with or without a reasonable accommodation? if you are contacted for an interview, your recruiter will discuss specifics with you.many of our roles operate on a hybrid schedule, requiring a set number of days in office each week. if applicable, are you able to meet that requirement, with or without a reasonable accommodation? if you are contacted for an interview, your recruiter will discuss specifics with you.",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you open to relocation?are you open to relocation?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you able to engage in light (plane) travel each month? are you able to engage in light (plane) travel each month?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you located in us?are you located in us?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you reside in the usa?do you reside in the usa?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you willing to work in pacific time zone (8am -5pm pst)?are you willing to work in pacific time zone (8am -5pm pst)?",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you legally authorized to work in the united states?are you legally authorized to work in the united states?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you legally authorized to work in the us?are you legally authorized to work in the us?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you legally authorized to work in the country where this job is located?are you legally authorized to work in the country where this job is located?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you currently eligible to work in the country where this position is located for any employer?are you currently eligible to work in the country where this position is located for any employer?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have legal authorization to work in the country where this job is located?do you have legal authorization to work in the country where this job is located?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you a us citizen or a green card holder?are you a us citizen or a green card holder?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "zfrce-zben-pqaa-do you have a work permit to work in usa?zfrce-zben-pqaa-do you have a work permit to work in usa?",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "will you now or in the future require sponsorship for employment visa status (e.g. h-1b visa status)?will you now or in the future require sponsorship for employment visa status (e.g. h-1b visa status)?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "do you now or in the future require visa sponsorship to continue working in the country where this position is located?do you now or in the future require visa sponsorship to continue working in the country where this position is located?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "will you require sponsorship or a visa for employment now or in the future?will you require sponsorship or a visa for employment now or in the future?",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "do you need sponsorship now or in the future for employment?do you need sponsorship now or in the future for employment?yesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "will you now or in the future require sponsorship by the company?will you now or in the future require sponsorship by the company?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "what is your level of proficiency in english?what is your level of proficiency in english?",
+        "answer": ""
+    },
+    {
+        "type": "textbox",
+        "question": "are you fluent in any language other than english? please specify.",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "what is your level of proficiency in chinese?what is your level of proficiency in chinese?",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "have you completed the following level of education: bachelor's degree?have you completed the following level of education: bachelor's degree?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "have you completed the following level of education: master's degree?have you completed the following level of education: master's degree?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "have you completed the following level of education: doctor of law?have you completed the following level of education: doctor of law?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "have you completed the following level of education: master of business administration?have you completed the following level of education: master of business administration?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have a bachelor\u2019s degree in business administration, real estate, operations management, or a related field.do you have a bachelor\u2019s degree in business administration, real estate, operations management, or a related field.",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "degreedegree",
+        "answer": ""
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with information technology?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of information technology experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of it services and it consulting experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with it services?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with it management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with it strategy?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with it governance?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of engineering experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of software development experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with engineering leadership?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have in leadership role ?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of management experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many people are you managing currently - including both direct and indirect?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with hiring?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with business leadership?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with operations management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with p&l management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with stakeholder management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with complex project management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with program management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with technical project management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience as technical project manager?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have with task management prioritization?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with agile project management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with agile & waterfall methodologies?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with software development life cycle (sdlc)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with software architecture?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with solution architecture?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have in cloud engineering?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with devops?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with amazon web services (aws)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have in aws environments?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with microsoft azure?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with google cloud platform (gcp)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have in building solutions on google cloud?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "years of experience serving as a solution architect, specializing in data analytics solutions on google cloud?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with azure devops services?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with terraform?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with microservices?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with application programming interfaces (api)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with python (programming language)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with django?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with javascript?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with vue.js?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with react native?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with core java?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with react.js?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with ruby on rails?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with sql?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with java?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with jira?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with microsoft office?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with microsoft powerpoint?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with salesforce.com?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have with salesforce's einstein ai?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with artificial intelligence (ai)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with data strategies?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience in data centeric projects?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience in working with data migration, integration, and governance initiatives",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with technology evaluation?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with software licensing?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with contract management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with vendor management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have with complex business negotiations",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have with contract drafting and redlining?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with global client management?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with communication?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with negotiation?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with thinking skills?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with product development?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of product management experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "product owner",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with software as a service (saas)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with enterprise resource planning (erp)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with active directory experience?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with dns administration?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience do you have with microsoft servers (iis, ad, ssrs, etc.)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of storage administration experience do you have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of hitachi storage experience do you have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of vantage storage software experience do you have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with general data protection regulation (gdpr)?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with healthcare?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of work experience do you have with automotive?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of production experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of experience or knowledge do you have in the cryptocurrency space?",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "how many years of other experience do you currently have?",
+        "answer": null
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have experience as a senior or technical lead engineer?do you have experience as a senior or technical lead engineer?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have experience as a technical leader in it?do you have experience as a technical leader in it?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have experience deploying on linux systems?do you have experience deploying on linux systems?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have experience with on-prem or hardware environments? you will not need cloud experience for this position. do you have experience with on-prem or hardware environments? you will not need cloud experience for this position.",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have 7+ years of experience in designing and managing hpc environments, with a strong understanding of compute clusters, storage, networking, and scheduling systems?do you have 7+ years of experience in designing and managing hpc environments, with a strong understanding of compute clusters, storage, networking, and scheduling systems?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have 5+ years of experience building software products? do you have 5+ years of experience building software products?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have experience developing a digital product?do you have experience developing a digital product?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have strong conversational / genai experience within a start-up? do you have strong conversational / genai experience within a start-up?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have any experience working on pre-revenue startups?do you have any experience working on pre-revenue startups?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "have you successfully developed and executed a business growth strategy in a previous role?have you successfully developed and executed a business growth strategy in a previous role?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have a network of contacts in the blockchain, fintech, or web3 industry?do you have a network of contacts in the blockchain, fintech, or web3 industry?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have a network of contacts in the software industry? (e.g., any kind of apps on apple store or google play store, whether learning, gaming, shopping, etc.)do you have a network of contacts in the software industry? (e.g., any kind of apps on apple store or google play store, whether learning, gaming, shopping, etc.)",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "are you proficient in microsoft office suite and property management software?are you proficient in microsoft office suite and property management software?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "zfrce-zben-dq-do you have experience with jira?zfrce-zben-dq-do you have experience with jira?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you have telegram?do you have telegram?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "do you understand and agree to the terms of this job posting?do you understand and agree to the terms of this job posting?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "to apply, please submit your resume and cover letter to samantha@alphaxcapital.io. please use assistant operation manager application as your subject line.to apply, please submit your resume and cover letter to samantha@alphaxcapital.io. please use assistant operation manager application as your subject line.",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you willing to submit to a drug test? are you willing to submit to a drug test?requiredyesmaybeno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you willing to take a drug test, in accordance with local law/regulations?are you willing to take a drug test, in accordance with local law/regulations?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "are you willing to undergo a background check, in accordance with local law/regulations?are you willing to undergo a background check, in accordance with local law/regulations?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "do you understand as a condition of employment and continued employment if you are hired, we will require you to provide proof that you have received the covid-19 vaccine unless you are granted a religious or medical exemption?do you understand as a condition of employment and continued employment if you are hired, we will require you to provide proof that you have received the covid-19 vaccine unless you are granted a religious or medical exemption?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "we must fill this position urgently. can you start immediately?we must fill this position urgently. can you start immediately?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "if selected, what is your timing to start a new position?if selected, what is your timing to start a new position?",
+        "answer": ""
+    },
+    {
+        "type": "textbox",
+        "question": "what is your notice period?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "what is your desired salary?what is your desired salary?",
+        "answer": ""
+    },
+    {
+        "type": "textbox",
+        "question": "expected compensation",
+        "answer": ""
+    },
+    {
+        "type": "numeric",
+        "question": "current ctc",
+        "answer": null
+    },
+    {
+        "type": "numeric",
+        "question": "expected ctc",
+        "answer": null
+    },
+    {
+        "type": "dropdown",
+        "question": "which location are you applying for?which location are you applying for?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "how did you hear about us?how did you hear about us?",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "how did you learn about this role?how did you learn about this role?",
+        "answer": ""
+    },
+    {
+        "type": "textbox",
+        "question": "if you were referred by a current employee, provide the employee's name.",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "would you like to be considered for future opportunities?would you like to be considered for future opportunities?requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "do you consent to linkedin holding your data for 5 years for future opportunities?do you consent to linkedin holding your data for 5 years for future opportunities?requiredyes - consider me for future opportunitiesno - only consider me for this opportunity",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "would you like to receive emails, text messages, or phone calls about this job and other matching opportunities?would you like to receive emails, text messages, or phone calls about this job and other matching opportunities?",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "i am allowing contrast security to contact me about future job opportunities for up to 3 years. privacy policyi am allowing contrast security to contact me about future job opportunities for up to 3 years.requiredyesno",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "nium has my consent to contact me about future job opportunities.",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "by checking this box, you will declare that you read and agree to the privacy policy of freshworks.by checking this box, you will declare that you read and agree to the privacy policy of freshworks.requiredi consent",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "i acknowledge the above noticesi acknowledge the above noticesrequiredconfirmed",
+        "answer": ""
+    },
+    {
+        "type": "radio",
+        "question": "i understand that the information i submit as part of my job application will be used in accordance with [palo alto network's candidate privacy notice](https://www.paloaltoprivacy-notice.html). i understand the processing of my information as described in that policy including that, in limited circumstances, palo alto networks may share my contact information with trusted third parties, to assist in certain phases of the hiring process (such as conducting background checks).requiredconfirmed",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "gender",
+        "answer": ""
+    },
+    {
+        "type": "dropdown",
+        "question": "race/ethnicity race categories are defined as follows: hispanic or latino - a person of cuban, mexican, puerto rican, south or central american, or other spanish culture or origin regardless of race white (not hispanic or latino) - a person having origins in any of the original peoples of europe, the middle east, or north africa black or african american (not hispanic or latino) - a person having origins in any of the black racial groups of africa native hawaiian or other pacific islander (not hispanic or latino) - a person having origins in any of the peoples of hawaii, guam, samoa, or other pacific islands asian (not hispanic or latino) - a person having origins in any of person having origins in any of the original peoples of the far east, southeast asia, or the indian subcontinent, including, for example, cambodia, china, india, japan, korea, malaysia, pakistan, the philippine islands, thailand, and vietnam american indian or alaska native (not hispanic or latino) - a person having origins in any of the original peoples of north and south america (including central america), and who maintain tribal affiliation or community attachment two or more races (not hispanic or latino) - all persons who identify with more than one of the above five races",
+        "answer": ""
+    }
+]
