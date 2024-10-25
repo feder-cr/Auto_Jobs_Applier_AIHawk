@@ -843,15 +843,6 @@ class AIHawkEasyApplier:
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
 
-        # Check if the question already exists in the JSON file and bail out if it does
-        for item in self.all_data:
-            if self._sanitize_text(item['question']) == question_data['question'] and item['type'] == question_data['type']:
-                logger.debug(f"Question already exists in answers.json. Aborting save of: {item['question']}")
-                return
-            if self.current_job.company in item['answer']:
-                logger.debug(f"Answer contains the Company name. Aborting save of: {item['question']}")
-                return
-
         logger.debug(f"Saving question data to JSON: {question_data}")
         try:
             try:
@@ -869,7 +860,6 @@ class AIHawkEasyApplier:
             data.append(question_data)
             with open(output_file, 'w') as f:
                 json.dump(data, f, indent=4)
-                self.all_data = data
             logger.debug("Question data saved successfully to JSON")
         except Exception:
             tb_str = traceback.format_exc()
