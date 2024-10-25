@@ -101,6 +101,7 @@ self_identification:
   disability: "[Yes/No]"
   ethnicity: "[Ethnicity]"
 
+
 legal_authorization:
   eu_work_authorization: "[Yes/No]"
   us_work_authorization: "[Yes/No]"
@@ -118,6 +119,7 @@ legal_authorization:
   requires_uk_visa: "[Yes/No]"
   legally_allowed_to_work_in_uk: "[Yes/No]"
   requires_uk_sponsorship: "[Yes/No]"
+
 
 work_preferences:
   remote_work: "[Yes/No]"
