@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import base64
 import json
 import os
@@ -22,9 +23,15 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 import src.utils as utils
 from loguru import logger
 
+class AIHawkEasyApplier(ABC):
 
-class AIHawkEasyApplier:
-    def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
+    @abstractmethod
+    def job_apply(self, job):
+        pass
+    
+
+class LinkedInEasyApplier(AIHawkEasyApplier):
+    def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: set[Tuple[str, str, str]],
                  gpt_answerer: Any, resume_generator_manager):
         logger.debug("Initializing AIHawkEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):

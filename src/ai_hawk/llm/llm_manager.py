@@ -6,8 +6,7 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
-from typing import Union
+from typing import Dict, List, Union, cast
 
 import httpx
 from Levenshtein import distance

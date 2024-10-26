@@ -10,7 +10,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
+from ai_hawk.job_portal import LinkedIn
+from ai_hawk.linkedIn_easy_applier import LinkedInEasyApplier
 import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
@@ -45,6 +46,7 @@ class AIHawkJobManager:
         self.driver = driver
         self.set_old_answers = set()
         self.easy_applier_component = None
+        self.job_portal = LinkedIn(driver)
         logger.debug("AIHawkJobManager initialized successfully")
 
     def set_parameters(self, parameters):
@@ -54,7 +56,7 @@ class AIHawkJobManager:
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
-        self.base_search_url = self.get_base_search_url(parameters)
+        self.job_portal.set_parameters(parameters)
         self.seen_jobs = []
 
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
@@ -91,7 +93,7 @@ class AIHawkJobManager:
                     page_sleep += 1
                     job_page_number += 1
                     utils.printyellow(f"Going to job page {job_page_number}")
-                    self.next_job_page(position, location_url, job_page_number)
+                    self.job_portal.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     utils.printyellow("Starting the collecting process for this page")
                     self.read_jobs()
@@ -122,8 +124,13 @@ class AIHawkJobManager:
 
     def start_applying(self):
         logger.debug("Starting job application process")
-        self.easy_applier_component = AIHawkEasyApplier(self.driver, self.resume_path, self.set_old_answers,
-                                                          self.gpt_answerer, self.resume_generator_manager)
+        self.easy_applier_component = LinkedInEasyApplier(
+            self.driver, 
+            str(self.resume_path), 
+            self.set_old_answers,  
+            self.gpt_answerer, 
+            self.resume_generator_manager
+        )
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
@@ -140,12 +147,13 @@ class AIHawkJobManager:
                     page_sleep += 1
                     job_page_number += 1
                     logger.debug(f"Going to job page {job_page_number}")
-                    self.next_job_page(position, location_url, job_page_number)
+                    self.job_portal.next_job_page(position, location_url, job_page_number)
                     time.sleep(random.uniform(1.5, 3.5))
                     logger.debug("Starting the application process for this page...")
 
                     try:
-                        jobs = self.get_jobs_from_page()
+                        # Todo: we are not using ths jobs list later - Fix this
+                        jobs = self.job_portal.get_jobs_from_page(show_animation=true)
                         if not jobs:
                             logger.debug("No more jobs found on this page. Exiting loop.")
                             break
@@ -229,38 +237,6 @@ class AIHawkJobManager:
                     time.sleep(sleep_time)
                 page_sleep += 1
 
-    def get_jobs_from_page(self):
-
-        try:
-
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                logger.debug("No matching jobs found on this page, skipping.")
-                return []
-
-        except NoSuchElementException:
-            pass
-
-        try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-                0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            if not job_list_elements:
-                logger.debug("No job class elements found on page, skipping.")
-                return []
-
-            return job_list_elements
-
-        except NoSuchElementException:
-            logger.debug("No job results found on the page.")
-            return []
-
-        except Exception as e:
-            logger.error(f"Error while fetching job elements: {e}")
-            return []
 
     def read_jobs(self):
         try:
@@ -276,7 +252,7 @@ class AIHawkJobManager:
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
             raise Exception("No job class elements found on page")
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        job_list = [Job(*self.job_portal.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link):
                 utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
@@ -289,22 +265,8 @@ class AIHawkJobManager:
                 continue
 
     def apply_jobs(self):
-        try:
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                logger.debug("No matching jobs found on this page, skipping")
-                return
-        except NoSuchElementException:
-            pass
-
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-            0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-
-        if not job_list_elements:
-            logger.debug("No job class elements found on page, skipping")
-            return
-
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
+        
+        job_list = self.job_portal.get_jobs_from_page()
 
         for job in job_list:
 
@@ -375,7 +337,7 @@ class AIHawkJobManager:
                 continue
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
-                    self.easy_applier_component.job_apply(job)
+                    self.easy_applier_component.job_apply(job) # type: ignore
                     self.write_to_file(job, "success")
                     logger.debug(f"Applied to job: {job.title} at {job.company}")
             except Exception as e:
@@ -413,61 +375,6 @@ class AIHawkJobManager:
                 f.truncate()
                 logger.debug(f"Job data appended to existing file: {file_name}")
 
-    def get_base_search_url(self, parameters):
-        logger.debug("Constructing base search URL")
-        url_parts = []
-        if parameters['remote']:
-            url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
-                             v]
-        if experience_levels:
-            url_parts.append(f"f_E={','.join(experience_levels)}")
-        url_parts.append(f"distance={parameters['distance']}")
-        job_types = [key[0].upper() for key, value in parameters.get('jobTypes', {}).items() if value]
-        if job_types:
-            url_parts.append(f"f_JT={','.join(job_types)}")
-        date_mapping = {
-            "all time": "",
-            "month": "&f_TPR=r2592000",
-            "week": "&f_TPR=r604800",
-            "24 hours": "&f_TPR=r86400"
-        }
-        date_param = next((v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), "")
-        url_parts.append("f_LF=f_AL")  # Easy Apply
-        base_url = "&".join(url_parts)
-        full_url = f"?{base_url}{date_param}"
-        logger.debug(f"Base search URL constructed: {full_url}")
-        return full_url
-
-    def next_job_page(self, position, location, job_page):
-        logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
-        encoded_position = urllib.parse.quote(position)
-        self.driver.get(
-            f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
-
-    def extract_job_information_from_tile(self, job_tile):
-        logger.debug("Extracting job information from tile")
-        job_title, company, job_location, apply_method, link = "", "", "", "", ""
-        try:
-            print(job_tile.get_attribute('outerHTML'))
-            job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
-            
-            link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
-            company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-            logger.debug(f"Job information extracted: {job_title} at {company}")
-        except NoSuchElementException:
-            logger.warning("Some job information (title, link, or company) is missing.")
-        try:
-            job_location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
-        except NoSuchElementException:
-            logger.warning("Job location is missing.")
-        try:
-            apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
-        except NoSuchElementException:
-            apply_method = "Applied"
-            logger.warning("Apply method not found, assuming 'Applied'.")
-
-        return job_title, company, job_location, link, apply_method
 
     def is_blacklisted(self, job_title, company, link):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company}")
