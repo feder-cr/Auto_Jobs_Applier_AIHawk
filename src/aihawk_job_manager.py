@@ -362,6 +362,9 @@ class AIHawkJobManager:
             """
         
 
+            if self.is_previously_failed_to_apply(job.link):
+                logger.debug(f"Previously failed to apply for {job.title} at {job.company}, skipping...")
+                continue
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
                 self.write_to_file(job, "skipped")
@@ -506,3 +509,20 @@ class AIHawkJobManager:
                         continue
         return False
 
+    def is_previously_failed_to_apply(self, link):
+        file_name = "failed"
+        file_path = self.output_file_directory / f"{file_name}.json"
+
+        with open(file_path, 'r', encoding='utf-8') as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                logger.error(f"JSON decode error in file: {file_path}")
+                return False
+            
+        for data in existing_data:
+            data_link = data['link']
+            if data_link == link:
+                return True
+                
+        return False
