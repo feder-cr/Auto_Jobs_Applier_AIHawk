@@ -709,7 +709,10 @@ class AIHawkEasyApplier:
                 logger.debug(f"Using existing answer: {answer}")
             else:
                 if is_numeric:
-                    answer = self.gpt_answerer.answer_question_numeric(question_text)
+                    if 'how many years' in question_text:
+                        answer = 0
+                    else:
+                        answer = self.gpt_answerer.answer_question_numeric(question_text)
                     logger.debug(f"Generated numeric answer: {answer}")
                 else:
                     answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
