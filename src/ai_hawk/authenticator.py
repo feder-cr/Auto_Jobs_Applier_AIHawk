@@ -41,9 +41,9 @@ class AIHawkAuthenticator(ABC):
             return
         else:
             logger.info("User is not logged in. Proceeding with login.")
-            self.__handle_login()
+            self.handle_login()
 
-    def __handle_login(self):
+    def handle_login(self):
         try:
             logger.info("Navigating to the AIHawk login page...")
             self.navigate_to_login()
