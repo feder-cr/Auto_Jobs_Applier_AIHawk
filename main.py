@@ -15,7 +15,7 @@ from src.aihawk_authenticator import AIHawkAuthenticator
 from src.aihawk_bot_facade import AIHawkBotFacade
 from src.aihawk_job_manager import AIHawkJobManager
 from src.job_application_profile import JobApplicationProfile
-from loguru import logger
+from src.logging import logger
 
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr
