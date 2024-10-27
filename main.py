@@ -4,6 +4,9 @@ import sys
 from pathlib import Path
 import yaml
 import click
+import shutil
+import gzip
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -191,11 +194,39 @@ def create_and_run_bot(parameters, llm_api_key):
     except Exception as e:
         raise RuntimeError(f"Error running the bot: {str(e)}")
 
+def cleanup_log_file():
+    log_file_path = Path('./log/app.log')
+    compressed_dir = Path('./log/compressed_logs')
+    compressed_dir.mkdir(exist_ok=True)  # Ensure the directory for compressed logs exists
+
+    if log_file_path.exists() and log_file_path.stat().st_size > 1024 * 1024 * 100:  # 100 MB
+        # Compress and archive the old log
+        timestamp = datetime.fromtimestamp(log_file_path.stat().st_mtime).strftime('%Y%m%d%H%M%S')
+        backup_log_path = compressed_dir / f"app.log.{timestamp}"
+        shutil.copy2(log_file_path, backup_log_path)
+        with open(backup_log_path, 'rb') as f_in, gzip.open(f"{backup_log_path}.gz", 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+        backup_log_path.unlink()
+        
+        # Clear the original log file
+        with open(log_file_path, 'w'):
+            pass
+        
+        logger.info(f"Archived and cleared large log file: {log_file_path}")
+        
+        # Remove compressed files older than 5 days
+        now = datetime.now()
+        for file in compressed_dir.glob("app.log.*.gz"):
+            file_mod_time = datetime.fromtimestamp(file.stat().st_mtime)
+            if now - file_mod_time > timedelta(days=5):
+                file.unlink()
+                logger.info(f"Deleted old compressed log file: {file}")
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
 @click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
 def main(collect: False, resume: Path = None):
+    cleanup_log_file()
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
