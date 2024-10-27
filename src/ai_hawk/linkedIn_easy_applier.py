@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from loguru import logger
+from src.logging import logger
 
 
 class AIHawkEasyApplier:
@@ -176,7 +176,6 @@ class AIHawkEasyApplier:
         ]
 
         while attempt < 2:
-
             self.check_for_premium_redirect(job)
             self._scroll_page()
 
@@ -185,12 +184,10 @@ class AIHawkEasyApplier:
                     logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
-
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
                                 try:
-
                                     WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
                                     WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
                                     logger.debug(f"Found 'Easy Apply' button {index + 1}, attempting to click")
@@ -200,7 +197,6 @@ class AIHawkEasyApplier:
                         else:
                             raise TimeoutException("No 'Easy Apply' buttons found")
                     else:
-
                         button = WebDriverWait(self.driver, 10).until(
                             EC.presence_of_element_located((By.XPATH, method['xpath']))
                         )

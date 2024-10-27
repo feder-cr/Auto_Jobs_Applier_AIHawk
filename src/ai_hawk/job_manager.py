@@ -14,8 +14,8 @@ from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
+from src.logging import logger
 
-from loguru import logger
 import urllib.parse
 
 
