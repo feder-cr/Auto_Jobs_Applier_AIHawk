@@ -178,9 +178,19 @@ This file contains sensitive information. Never share or commit this file to ver
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
 - `remote: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `hybrid: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `onsite: [true/false]`
+
   - Set to `true` to include remote jobs, `false` to exclude them
 
 - `experienceLevel:`
+
   - Set desired experience levels to `true`, others to `false`
 
 - `jobTypes:`
@@ -506,7 +516,7 @@ Each section has specific fields to fill out:
     requires_uk_visa: "No"
     legally_allowed_to_work_in_uk: "Yes"
     requires_uk_sponsorship: "No"
-     ```
+    ```
 
 - `work_preferences:`
   - Specify your preferences for work arrangements and conditions.
