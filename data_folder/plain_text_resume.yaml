@@ -128,3 +128,5 @@ work_preferences:
   willing_to_complete_assessments: "[Yes/No]"
   willing_to_undergo_drug_tests: "[Yes/No]"
   willing_to_undergo_background_checks: "[Yes/No]"
+
+cover_letter: "[Your Cover Letter]"

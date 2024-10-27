@@ -137,3 +137,5 @@ work_preferences:
   willing_to_complete_assessments: "Yes"
   willing_to_undergo_drug_tests: "Yes"
   willing_to_undergo_background_checks: "Yes"
+
+cover_letter: "I am writing to express my interest in the Software Engineer position at your esteemed company. With a strong background in software development and a passion for creating innovative solutions, I am confident in my ability to contribute to your team. My experience includes developing web applications using React and Node.js, collaborating with cross-functional teams, and troubleshooting complex software issues. I am excited about the opportunity to bring my skills and enthusiasm to your organization. Thank you for considering my application."

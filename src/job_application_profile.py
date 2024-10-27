@@ -62,6 +62,7 @@ class JobApplicationProfile:
     work_preferences: WorkPreferences
     availability: Availability
     salary_expectations: SalaryExpectations
+    cover_letter: str
 
     def __init__(self, yaml_str: str):
         logger.debug("Initializing JobApplicationProfile with provided YAML string")
@@ -169,6 +170,15 @@ class JobApplicationProfile:
             logger.error(f"An unexpected error occurred while processing salary_expectations: {e}")
             raise RuntimeError("An unexpected error occurred while processing salary_expectations.") from e
 
+        # Process cover_letter
+        try:
+            logger.debug("Processing cover_letter")
+            self.cover_letter = data.get('cover_letter', '')
+            logger.debug(f"cover_letter processed: {self.cover_letter}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred while processing cover_letter: {e}")
+            raise RuntimeError("An unexpected error occurred while processing cover_letter.") from e
+
         logger.debug("JobApplicationProfile initialization completed successfully.")
 
     def __str__(self):
@@ -181,6 +191,7 @@ class JobApplicationProfile:
                          f"Legal Authorization:\n{format_dataclass(self.legal_authorization)}\n\n"
                          f"Work Preferences:\n{format_dataclass(self.work_preferences)}\n\n"
                          f"Availability: {self.availability.notice_period}\n\n"
-                         f"Salary Expectations: {self.salary_expectations.salary_range_usd}\n\n")
+                         f"Salary Expectations: {self.salary_expectations.salary_range_usd}\n\n"
+                         f"Cover Letter: {self.cover_letter}\n\n")
         logger.debug(f"String representation generated: {formatted_str}")
         return formatted_str

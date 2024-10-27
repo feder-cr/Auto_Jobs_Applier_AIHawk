@@ -136,7 +136,7 @@ class FileManager:
         return (app_data_folder / 'secrets.yaml', app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
 
     @staticmethod
-    def file_paths_to_dict(resume_file: Path | None, plain_text_resume_file: Path) -> dict:
+    def file_paths_to_dict(resume_file: Path | None, plain_text_resume_file: Path, cover_letter_file: Path | None = None) -> dict:
         if not plain_text_resume_file.exists():
             raise FileNotFoundError(f"Plain text resume file not found: {plain_text_resume_file}")
 
@@ -146,6 +146,11 @@ class FileManager:
             if not resume_file.exists():
                 raise FileNotFoundError(f"Resume file not found: {resume_file}")
             result['resume'] = resume_file
+
+        if cover_letter_file:
+            if not cover_letter_file.exists():
+                raise FileNotFoundError(f"Cover letter file not found: {cover_letter_file}")
+            result['coverLetter'] = cover_letter_file
 
         return result
 
@@ -194,8 +199,9 @@ def create_and_run_bot(parameters, llm_api_key):
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
+@click.option('--cover_letter', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the cover letter file")
 @click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
-def main(collect: False, resume: Path = None):
+def main(collect: False, resume: Path = None, cover_letter: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
@@ -203,7 +209,7 @@ def main(collect: False, resume: Path = None):
         parameters = ConfigValidator.validate_config(config_file)
         llm_api_key = ConfigValidator.validate_secrets(secrets_file)
         
-        parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
+        parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file, cover_letter)
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
         
