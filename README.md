@@ -1,3 +1,4 @@
+<a name="top"></a>
 <div align="center">
 <img src="./assets/AIHawk.png">
 
@@ -680,37 +681,38 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ## Documentation
 
-### Ollama & Gemini Setup
+### For Users
 
-To install and configure **Ollama** and **Gemini**, please refer to the following documents:
+- Ollama & Gemini Setup
+  - To install and configure **Ollama** and **Gemini**, [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+  - Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-- [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+- Editing YAML Files
+  - For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
+  - [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+- Auto-start AIHawk
+  - To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
+  - [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-### Editing YAML Files
+- Video Tutorial
+  - [How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
-
-- [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
-
-### Auto-start AIHawk
-
-To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
-
-- [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
-
-Navigate to the docs/ directory and download the PDF guides you need.
-
-Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
-
-### Additional Resources
-
-- [Video Tutorial: How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
 - [OpenAI API Documentation](https://platform.openai.com/docs/)
+
+### For Developers
+
+- [Contribution Guidelines](CONTRIBUTING.md)
+
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
-If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
+- [Workflow diagrams](docs/workflow_diagrams.md)
+
+- If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
 
@@ -731,3 +733,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Disclaimer
 
 This tool, Auto_Jobs_Applier_AIHawk, is intended for educational purposes only. The creator assumes no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
+
+[Back to top 🚀](#top)
