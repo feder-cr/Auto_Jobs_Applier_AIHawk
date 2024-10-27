@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from loguru import logger
+from src.logging import logger
 
 
 class AIHawkEasyApplier:

@@ -13,7 +13,7 @@ import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
 from src.aihawk_easy_applier import AIHawkEasyApplier
-from loguru import logger
+from src.logging import logger
 import urllib.parse
 
 

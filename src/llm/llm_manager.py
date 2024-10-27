@@ -19,7 +19,7 @@ from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
 import src.strings as strings
-from loguru import logger
+from src.logging import logger
 
 load_dotenv()
 

@@ -5,7 +5,7 @@ import os
 import pytest
 from src.aihawk_job_manager import AIHawkJobManager
 from selenium.common.exceptions import NoSuchElementException
-from loguru import logger
+from src.logging import logger
 
 
 @pytest.fixture
