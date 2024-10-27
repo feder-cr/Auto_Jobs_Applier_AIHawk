@@ -55,21 +55,22 @@ class ConfigValidator:
             'date': dict,
             'positions': list,
             'locations': list,
+            'location_blacklist': list,
             'distance': int,
-            'companyBlacklist': list,
-            'titleBlacklist': list,
+            'company_blacklist': list,
+            'title_blacklist': list,
             'llm_model_type': str,
             'llm_model': str
         }
 
         for key, expected_type in required_keys.items():
             if key not in parameters:
-                if key in ['companyBlacklist', 'titleBlacklist']:
+                if key in ['company_blacklist', 'title_blacklist', 'location_blacklist']:
                     parameters[key] = []
                 else:
                     raise ConfigError(f"Missing or invalid key '{key}' in config file {config_yaml_path}")
             elif not isinstance(parameters[key], expected_type):
-                if key in ['companyBlacklist', 'titleBlacklist'] and parameters[key] is None:
+                if key in ['company_blacklist', 'title_blacklist', 'location_blacklist'] and parameters[key] is None:
                     parameters[key] = []
                 else:
                     raise ConfigError(f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}.")
@@ -104,7 +105,7 @@ class ConfigValidator:
             raise ConfigError(f"Invalid distance value in config file {config_yaml_path}. Must be one of: {approved_distances}")
 
         # Ensure blacklists are lists
-        for blacklist in ['companyBlacklist', 'titleBlacklist']:
+        for blacklist in ['company_blacklist', 'title_blacklist','location_blacklist']:
             if not isinstance(parameters.get(blacklist), list):
                 raise ConfigError(f"'{blacklist}' must be a list in config file {config_yaml_path}")
             if parameters[blacklist] is None:

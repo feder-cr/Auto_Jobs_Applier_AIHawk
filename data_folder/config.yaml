@@ -1,4 +1,6 @@
 remote: true
+hybrid: true
+onsite: true
 
 experienceLevel:
   internship: false
@@ -40,6 +42,9 @@ company_blacklist:
 title_blacklist:
   - word1
   - word2
+
+location_blacklist:
+  - Brazil
 
 job_applicants_threshold:
   min_applicants: 0
