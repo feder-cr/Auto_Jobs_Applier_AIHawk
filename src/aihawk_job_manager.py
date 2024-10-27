@@ -2,6 +2,7 @@ import json
 import os
 import random
 import time
+import fnmatch
 from itertools import product
 from pathlib import Path
 
@@ -475,7 +476,7 @@ class AIHawkJobManager:
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
-        company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
+        company_blacklisted = any(fnmatch.fnmatch(company.strip().lower(), word.strip().lower()) for word in self.company_blacklist)
         location_blacklisted= job_location.strip().lower() in (word.strip().lower() for word in self.location_blacklist)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or location_blacklisted or link_seen
