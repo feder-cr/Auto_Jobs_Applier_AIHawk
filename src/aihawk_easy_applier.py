@@ -434,7 +434,11 @@ class AIHawkEasyApplier:
                     self._create_and_upload_resume(element, job)
             elif 'cover' in output:
                 logger.debug("Uploading cover letter")
-                self._create_and_upload_cover_letter(element, job)
+                if job.cover_letter_path is not None and os.path.exists(job.cover_letter_path):
+                    element.send_keys(job.cover_letter_path)
+                    logger.debug(f"Cover letter uploaded from path: {job.cover_letter_path}")
+                else:
+                    self._create_and_upload_cover_letter(element, job)
 
         logger.debug("Finished handling upload fields")
 
