@@ -3,6 +3,8 @@ import os
 import random
 import sys
 import time
+import cv2
+from datetime import datetime
 
 from selenium import webdriver
 from loguru import logger
@@ -166,3 +168,33 @@ def printyellow(text):
     reset = "\033[0m"
     logger.debug("Printing text in yellow: %s", text)
     print(f"{yellow}{text}{reset}")
+
+
+def capture_error(driver, error_message):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    error_dir = os.path.join("error_logs", timestamp)
+    os.makedirs(error_dir, exist_ok=True)
+
+    # Save the error message to a log file
+    log_file_path = os.path.join(error_dir, "error.log")
+    with open(log_file_path, "w") as log_file:
+        log_file.write(error_message)
+
+    # Capture a screenshot
+    screenshot_path = os.path.join(error_dir, "screenshot.png")
+    driver.save_screenshot(screenshot_path)
+
+    # Record a video of the browser screen
+    video_path = os.path.join(error_dir, "error_video.avi")
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    out = cv2.VideoWriter(video_path, fourcc, 20.0, (1920, 1080))
+
+    start_time = time.time()
+    while time.time() - start_time < 10:  # Record for 10 seconds
+        img = driver.get_screenshot_as_base64()
+        img_array = cv2.imdecode(np.frombuffer(base64.b64decode(img), np.uint8), cv2.IMREAD_COLOR)
+        out.write(img_array)
+        time.sleep(0.5)
+
+    out.release()
+    logger.error(f"Error captured: {error_message}. Logs and video saved to {error_dir}")

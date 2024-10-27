@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
-from src.utils import chrome_browser_options
+from src.utils import chrome_browser_options, capture_error
 from src.llm.llm_manager import GPTAnswerer
 from src.aihawk_authenticator import AIHawkAuthenticator
 from src.aihawk_bot_facade import AIHawkBotFacade
@@ -188,7 +188,9 @@ def create_and_run_bot(parameters, llm_api_key):
             bot.start_apply()
     except WebDriverException as e:
         logger.error(f"WebDriver error occurred: {e}")
+        capture_error(browser, str(e))
     except Exception as e:
+        capture_error(browser, str(e))
         raise RuntimeError(f"Error running the bot: {str(e)}")
 
 
