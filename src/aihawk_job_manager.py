@@ -49,6 +49,7 @@ class AIHawkJobManager:
         logger.debug("Setting parameters for AIHawkJobManager")
         self.company_blacklist = parameters.get('company_blacklist', []) or []
         self.title_blacklist = parameters.get('title_blacklist', []) or []
+        self.location_blacklist = parameters.get('location_blacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
@@ -276,8 +277,8 @@ class AIHawkJobManager:
             raise Exception("No job class elements found on page")
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:            
-            if self.is_blacklisted(job.title, job.company, job.link):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company}, skipping...")
+            if self.is_blacklisted(job.title, job.company, job.link, job.location):
+                utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
             try:
@@ -361,8 +362,8 @@ class AIHawkJobManager:
             """
         
 
-            if self.is_blacklisted(job.title, job.company, job.link):
-                logger.debug(f"Job blacklisted: {job.title} at {job.company}")
+            if self.is_blacklisted(job.title, job.company, job.link, job.location):
+                logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
                 self.write_to_file(job, "skipped")
                 continue
             if self.is_already_applied_to_job(job.title, job.company, job.link):
@@ -467,16 +468,17 @@ class AIHawkJobManager:
 
         return job_title, company, job_location, link, apply_method
 
-    def is_blacklisted(self, job_title, company, link):
-        logger.debug(f"Checking if job is blacklisted: {job_title} at {company}")
+    def is_blacklisted(self, job_title, company, link, job_location):
+        logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
         job_title_words = job_title.lower().split(' ')
         title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
         company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
+        location_blacklisted= job_location.strip().lower() in (word.strip().lower() for word in self.location_blacklist)
         link_seen = link in self.seen_jobs
-        is_blacklisted = title_blacklisted or company_blacklisted or link_seen
+        is_blacklisted = title_blacklisted or company_blacklisted or location_blacklisted or link_seen
         logger.debug(f"Job blacklisted status: {is_blacklisted}")
 
-        return title_blacklisted or company_blacklisted or link_seen
+        return title_blacklisted or company_blacklisted or location_blacklisted or link_seen
 
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs
