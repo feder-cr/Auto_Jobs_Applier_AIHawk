@@ -181,7 +181,7 @@ This file defines your job search parameters and bot behavior. Each section cont
 
   - Set to `true` to include remote jobs, `false` to exclude them
 
-- `hbyrid: [true/false]`
+- `hybrid: [true/false]`
 
   - Set to `true` to include remote jobs, `false` to exclude them
 
