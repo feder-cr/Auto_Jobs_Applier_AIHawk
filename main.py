@@ -190,7 +190,7 @@ def create_and_run_bot(parameters, llm_api_key):
             except Exception as e:
                 raise logger.error(f"Custom wait time input invalid: {e}")
             print('Applying')
-            bot.start_apply()
+            bot.start_apply(wait_time)
     except WebDriverException as e:
         logger.error(f"WebDriver error occurred: {e}")
     except Exception as e:
