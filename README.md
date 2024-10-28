@@ -1,3 +1,4 @@
+<a name="top"></a>
 <div align="center">
 <img src="./assets/AIHawk.png">
 
@@ -250,7 +251,7 @@ This file defines your job search parameters and bot behavior. Each section cont
     - openai: <https://api.pawan.krd/cosmosrp/v1>
     - ollama: <http://127.0.0.1:11434/>
     - claude: <https://api.anthropic.com/v1>
-    - gemini: no api_url
+    - gemini: <https://aistudio.google.com/app/apikey>
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
@@ -555,11 +556,21 @@ Using this folder as a guide can be particularly helpful for:
 0. **Account language**
    To ensure the bot works, your account language must be set to English.
 
-2. **Data Folder:**
+1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
+
+2. **Output Folder:**
+    Contains the output of the bot.
+    - `data.json` results of the --collect mode
+    - `failed.json` failed applications
+    - `open_ai_calls.json` all the calls made to the LLM model
+    - `skipped.json` applications that were skipped
+    - `success.json` successful applications
+
+    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
 
 3. **Run the Bot:**
 
@@ -660,37 +671,38 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ## Documentation
 
-### Ollama & Gemini Setup
+### For Users
 
-To install and configure **Ollama** and **Gemini**, please refer to the following documents:
+- Ollama & Gemini Setup
+  - To install and configure **Ollama** and **Gemini**, [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+  - Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-- [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+- Editing YAML Files
+  - For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
+  - [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+- Auto-start AIHawk
+  - To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
+  - [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-### Editing YAML Files
+- Video Tutorial
+  - [How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
-
-- [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
-
-### Auto-start AIHawk
-
-To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
-
-- [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
-
-Navigate to the docs/ directory and download the PDF guides you need.
-
-Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
-
-### Additional Resources
-
-- [Video Tutorial: How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
 - [OpenAI API Documentation](https://platform.openai.com/docs/)
+
+### For Developers
+
+- [Contribution Guidelines](CONTRIBUTING.md)
+
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
-If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
+- [Workflow diagrams](docs/workflow_diagrams.md)
+
+- If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
 
@@ -711,3 +723,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Disclaimer
 
 This tool, Auto_Jobs_Applier_AIHawk, is intended for educational purposes only. The creator assumes no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
+
+[Back to top 🚀](#top)

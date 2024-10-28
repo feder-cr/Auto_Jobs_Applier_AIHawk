@@ -55,6 +55,9 @@ title_blacklist:
   - No Visa
   - No Sponsorship
 
+location_blacklist:
+  - Brazil
+
 job_applicants_threshold:
   min_applicants: 0
   max_applicants: 1000

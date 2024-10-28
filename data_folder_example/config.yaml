@@ -41,6 +41,9 @@ title_blacklist:
   - word1
   - word2
 
+location_blacklist:
+  - Brazil
+
 job_applicants_threshold:
   min_applicants: 0
   max_applicants: 30
