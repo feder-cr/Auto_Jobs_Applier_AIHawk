@@ -11,9 +11,22 @@ from loguru import logger
 
 class AIHawkAuthenticator:
 
+    LOGIN_TIMEOUT = 300  # 5 minutes timeout for login
+    SECURITY_CHECK_TIMEOUT = 600  # 10 minutes timeout for security check
+    
     def __init__(self, driver=None):
         self.driver = driver
+        self._setup_wait()
         logger.debug(f"AIHawkAuthenticator initialized with driver: {driver}")
+
+    def _setup_wait(self):
+        """Configure WebDriverWait with custom timeout and poll frequency"""
+        self.wait = WebDriverWait(
+            self.driver,
+            timeout=10,
+            poll_frequency=0.5,
+            ignored_exceptions=(NoSuchElementException, TimeoutException)
+        )
 
     def start(self):
         logger.info("Starting Chrome browser to log in to AIHawk.")
@@ -82,32 +95,61 @@ class AIHawkAuthenticator:
             logger.error("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
+        """
+        Check login status with improved reliability and caching
+        Returns: bool indicating login status
+        """
+        cache_key = 'login_status'
+        cache_timeout = 60  # Cache login status for 60 seconds
+        
+        if hasattr(self, '_login_cache'):
+            timestamp, status = self._login_cache.get(cache_key, (0, False))
+            if time.time() - timestamp < cache_timeout:
+                return status
+
         try:
             self.driver.get('https://www.linkedin.com/feed')
-            logger.debug("Checking if user is logged in...")
-            WebDriverWait(self.driver, 3).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
-            )
+            logged_in = any([
+                self._check_post_button(),
+                self._check_profile_image(),
+                self._check_nav_menu()
+            ])
+            
+            self._login_cache = {
+                cache_key: (time.time(), logged_in)
+            }
+            return logged_in
 
-            # Check for the presence of the "Start a post" button
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            logger.debug(f"Found {len(buttons)} 'Start a post' buttons")
-
-            for i, button in enumerate(buttons):
-                logger.debug(f"Button {i + 1} text: {button.text.strip()}")
-
-            if any(button.text.strip().lower() == 'start a post' for button in buttons):
-                logger.info("Found 'Start a post' button indicating user is logged in.")
-                return True
-
-            profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
-            if profile_img_elements:
-                logger.info("Profile image found. Assuming user is logged in.")
-                return True
-
-            logger.info("Did not find 'Start a post' button or profile image. User might not be logged in.")
+        except Exception as e:
+            logger.error(f"Error checking login status: {e}")
             return False
 
+    def _check_post_button(self):
+        """Check for 'Start a post' button"""
+        try:
+            buttons = self.wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.CLASS_NAME, 'share-box-feed-entry__trigger')
+                )
+            )
+            return any(b.text.strip().lower() == 'start a post' for b in buttons)
         except TimeoutException:
-            logger.error("Page elements took too long to load or were not found.")
+            return False
+
+    def _check_profile_image(self):
+        """Check for profile image"""
+        try:
+            profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
+            return len(profile_img_elements) > 0
+        except Exception as e:
+            logger.error(f"Error checking profile image: {e}")
+            return False
+
+    def _check_nav_menu(self):
+        """Check for nav menu"""
+        try:
+            nav_menu_elements = self.driver.find_elements(By.XPATH, "//nav[contains(@class, 'nav-menu')]")
+            return len(nav_menu_elements) > 0
+        except Exception as e:
+            logger.error(f"Error checking nav menu: {e}")
             return False

@@ -282,12 +282,30 @@ class AIHawkEasyApplier:
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
-        logger.debug(f"Filling out application form for job: {job}")
-        while True:
-            self.fill_up(job)
-            if self._next_or_submit():
-                logger.debug("Application form submitted")
-                break
+        """
+        Fills out the entire application form for a given job.
+        Uses a retry mechanism for handling intermittent failures.
+        
+        Args:
+            job: Job object containing the job details
+        """
+        MAX_RETRIES = 3
+        retry_count = 0
+        
+        while retry_count < MAX_RETRIES:
+            try:
+                logger.debug(f"Attempt {retry_count + 1} to fill application form")
+                self.fill_up(job)
+                if self._next_or_submit():
+                    logger.debug("Application form submitted successfully")
+                    return
+            except Exception as e:
+                retry_count += 1
+                if retry_count == MAX_RETRIES:
+                    logger.error(f"Failed to fill application form after {MAX_RETRIES} attempts")
+                    raise
+                logger.warning(f"Error filling form (attempt {retry_count}): {e}")
+                time.sleep(random.uniform(2, 4))
 
     def _next_or_submit(self):
         logger.debug("Clicking 'Next' or 'Submit' button")
@@ -408,35 +426,51 @@ class AIHawkEasyApplier:
         return is_upload
 
     def _handle_upload_fields(self, element: WebElement, job) -> None:
-        logger.debug("Handling upload fields")
+        """
+        Handles file upload fields with improved caching and error handling.
+        """
+        CACHE_TIMEOUT = 300  # 5 minutes cache
+        cache = {}
+        
+        def get_cached_file(file_type, job_id):
+            cache_key = f"{file_type}_{job_id}"
+            if cache_key in cache:
+                timestamp, path = cache.get(cache_key)
+                if time.time() - timestamp < CACHE_TIMEOUT:
+                    return path
+            return None
 
         try:
-            show_more_button = self.driver.find_element(By.XPATH,
-                                                        "//button[contains(@aria-label, 'Show more resumes')]")
-            show_more_button.click()
-            logger.debug("Clicked 'Show more resumes' button")
-        except NoSuchElementException:
-            logger.debug("'Show more resumes' button not found, continuing...")
+            file_upload_elements = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, "//input[@type='file']"))
+            )
+            
+            for upload_element in file_upload_elements:
+                parent = upload_element.find_element(By.XPATH, "..")
+                self.driver.execute_script(
+                    "arguments[0].classList.remove('hidden')", 
+                    upload_element
+                )
 
-        file_upload_elements = self.driver.find_elements(By.XPATH, "//input[@type='file']")
-        for element in file_upload_elements:
-            parent = element.find_element(By.XPATH, "..")
-            self.driver.execute_script("arguments[0].classList.remove('hidden')", element)
+                field_type = self.gpt_answerer.resume_or_cover(parent.text.lower())
+                
+                if 'resume' in field_type:
+                    cached_path = get_cached_file('resume', job.id)
+                    if cached_path and os.path.exists(cached_path):
+                        upload_element.send_keys(cached_path)
+                    else:
+                        self._create_and_upload_resume(upload_element, job)
+                        
+                elif 'cover' in field_type:
+                    cached_path = get_cached_file('cover', job.id)
+                    if cached_path and os.path.exists(cached_path):
+                        upload_element.send_keys(cached_path)
+                    else:
+                        self._create_and_upload_cover_letter(upload_element, job)
 
-            output = self.gpt_answerer.resume_or_cover(parent.text.lower())
-            if 'resume' in output:
-                logger.debug("Uploading resume")
-                if self.resume_path is not None and self.resume_path.resolve().is_file():
-                    element.send_keys(str(self.resume_path.resolve()))
-                    logger.debug(f"Resume uploaded from path: {self.resume_path.resolve()}")
-                else:
-                    logger.debug("Resume path not found or invalid, generating new resume")
-                    self._create_and_upload_resume(element, job)
-            elif 'cover' in output:
-                logger.debug("Uploading cover letter")
-                self._create_and_upload_cover_letter(element, job)
-
-        logger.debug("Finished handling upload fields")
+        except Exception as e:
+            logger.error(f"Error handling upload fields: {e}")
+            raise
 
     def _create_and_upload_resume(self, element, job):
         logger.debug("Starting the process of creating and uploading resume.")
@@ -867,3 +901,4 @@ class AIHawkEasyApplier:
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+

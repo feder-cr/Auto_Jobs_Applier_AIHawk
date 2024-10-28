@@ -43,72 +43,80 @@ def is_scrollable(element):
 
 
 def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
-    logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
+    """
+    Improved smooth scrolling with adaptive speed and error recovery
+    """
+    SCROLL_CONFIGS = {
+        'min_step': 10,
+        'max_retries': 3,
+        'retry_delay': 1.5,
+        'scroll_delay': (0.6, 1.5)
+    }
 
-    if reverse:
-        start, end = end, start
-        step = -step
-
-    if step == 0:
-        logger.error("Step value cannot be zero.")
-        raise ValueError("Step cannot be zero.")
-
-    max_scroll_height = int(scrollable_element.get_attribute("scrollHeight"))
-    current_scroll_position = int(float(scrollable_element.get_attribute("scrollTop")))
-    logger.debug(f"Max scroll height of the element: {max_scroll_height}")
-    logger.debug(f"Current scroll position: {current_scroll_position}")
-
-    if reverse:
-        if current_scroll_position < start:
-            start = current_scroll_position
-        logger.debug(f"Adjusted start position for upward scroll: {start}")
-    else:
-        if end > max_scroll_height:
-            logger.warning(f"End value exceeds the scroll height. Adjusting end to {max_scroll_height}")
-            end = max_scroll_height
-
-    script_scroll_to = "arguments[0].scrollTop = arguments[1];"
+    def calculate_adaptive_step(current_step, progress):
+        """Calculate adaptive step size based on scroll progress"""
+        if progress < 0.2:  # Start slow
+            return current_step * 0.8
+        elif progress > 0.8:  # End slow
+            return current_step * 0.6
+        return current_step
 
     try:
-        if scrollable_element.is_displayed():
-            if not is_scrollable(scrollable_element):
-                logger.warning("The element is not scrollable.")
-                return
+        if not scrollable_element.is_displayed() or not is_scrollable(scrollable_element):
+            logger.warning("Element is not scrollable or visible")
+            return
 
-            if (step > 0 and start >= end) or (step < 0 and start <= end):
-                logger.warning("No scrolling will occur due to incorrect start/end values.")
-                return
+        max_height = int(scrollable_element.get_attribute("scrollHeight"))
+        current_pos = int(float(scrollable_element.get_attribute("scrollTop")))
+        
+        if reverse:
+            start, end = end, start
+            step = -abs(step)
 
-            position = start
-            previous_position = None  # Tracking the previous position to avoid duplicate scrolls
-            while (step > 0 and position < end) or (step < 0 and position > end):
-                if position == previous_position:
-                    # Avoid re-scrolling to the same position
-                    logger.debug(f"Stopping scroll as position hasn't changed: {position}")
-                    break
+        position = start
+        total_distance = abs(end - start)
+        retries = 0
 
-                try:
-                    driver.execute_script(script_scroll_to, scrollable_element, position)
-                    logger.debug(f"Scrolled to position: {position}")
-                except Exception as e:
-                    logger.error(f"Error during scrolling: {e}")
+        while (step > 0 and position < end) or (step < 0 and position > end):
+            try:
+                progress = abs(position - start) / total_distance
+                adaptive_step = calculate_adaptive_step(step, progress)
+                
+                driver.execute_script(
+                    "arguments[0].scrollTop = arguments[1];", 
+                    scrollable_element, 
+                    position
+                )
+                
+                new_pos = int(float(scrollable_element.get_attribute("scrollTop")))
+                if new_pos == position:
+                    retries += 1
+                    if retries >= SCROLL_CONFIGS['max_retries']:
+                        logger.warning("Scroll position stuck, breaking")
+                        break
+                else:
+                    retries = 0
 
-                previous_position = position
-                position += step
+                position += adaptive_step
+                time.sleep(random.uniform(*SCROLL_CONFIGS['scroll_delay']))
 
-                # Decrease the step but ensure it doesn't reverse direction
-                step = max(10, abs(step) - 10) * (-1 if reverse else 1)
+            except Exception as e:
+                logger.error(f"Scroll error: {e}")
+                time.sleep(SCROLL_CONFIGS['retry_delay'])
+                retries += 1
+                if retries >= SCROLL_CONFIGS['max_retries']:
+                    raise
 
-                time.sleep(random.uniform(0.6, 1.5))
+        # Final scroll to ensure target position
+        driver.execute_script(
+            "arguments[0].scrollTop = arguments[1];", 
+            scrollable_element, 
+            end
+        )
 
-            # Ensure the final scroll position is correct
-            driver.execute_script(script_scroll_to, scrollable_element, end)
-            logger.debug(f"Scrolled to final position: {end}")
-            time.sleep(0.5)
-        else:
-            logger.warning("The element is not visible.")
     except Exception as e:
-        logger.error(f"Exception occurred during scrolling: {e}")
+        logger.error(f"Fatal scroll error: {e}")
+        raise
 
 
 def chrome_browser_options():

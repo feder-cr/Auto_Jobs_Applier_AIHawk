@@ -4,10 +4,13 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+from typing import List, Optional, Dict, Any
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
@@ -18,11 +21,14 @@ import urllib.parse
 
 
 class EnvironmentKeys:
+    """Manages environment configuration with improved validation"""
+    
     def __init__(self):
         logger.debug("Initializing EnvironmentKeys")
         self.skip_apply = self._read_env_key_bool("SKIP_APPLY")
         self.disable_description_filter = self._read_env_key_bool("DISABLE_DESCRIPTION_FILTER")
-        logger.debug(f"EnvironmentKeys initialized: skip_apply={self.skip_apply}, disable_description_filter={self.disable_description_filter}")
+        logger.debug(f"EnvironmentKeys initialized: skip_apply={self.skip_apply}, "
+                    f"disable_description_filter={self.disable_description_filter}")
 
     @staticmethod
     def _read_env_key(key: str) -> str:
@@ -38,33 +44,178 @@ class EnvironmentKeys:
 
 
 class AIHawkJobManager:
-    def __init__(self, driver):
+    """Manages job search and application process with improved error handling and caching"""
+
+    def __init__(self, driver: Any):
         logger.debug("Initializing AIHawkJobManager")
         self.driver = driver
         self.set_old_answers = set()
         self.easy_applier_component = None
+        self._initialize_caches()
         logger.debug("AIHawkJobManager initialized successfully")
 
-    def set_parameters(self, parameters):
+    def _initialize_caches(self) -> None:
+        """Initialize caches for better performance"""
+        self._job_cache = {}
+        self._company_cache = {}
+        self._blacklist_cache = {}
+        self._page_cache = {}
+
+    def set_parameters(self, parameters: Dict[str, Any]) -> None:
+        """
+        Set job search parameters with validation
+        
+        Args:
+            parameters: Dictionary containing search parameters
+        """
         logger.debug("Setting parameters for AIHawkJobManager")
+        self._validate_parameters(parameters)
+        
         self.company_blacklist = parameters.get('company_blacklist', []) or []
         self.title_blacklist = parameters.get('title_blacklist', []) or []
         self.location_blacklist = parameters.get('location_blacklist', []) or []
         self.positions = parameters.get('positions', [])
         self.locations = parameters.get('locations', [])
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
-        self.base_search_url = self.get_base_search_url(parameters)
+        
+        self._setup_applicants_threshold(parameters)
+        self._setup_resume_path(parameters)
+        self._setup_output_directory(parameters)
+        
+        self.base_search_url = self._construct_search_url(parameters)
         self.seen_jobs = []
+        self.env_config = EnvironmentKeys()
+        
+        logger.debug("Parameters set successfully")
 
+    def _validate_parameters(self, parameters: Dict[str, Any]) -> None:
+        """Validate input parameters"""
+        required_params = ['positions', 'locations', 'outputFileDirectory']
+        missing_params = [param for param in required_params if param not in parameters]
+        
+        if missing_params:
+            raise ValueError(f"Missing required parameters: {', '.join(missing_params)}")
+
+    def _setup_applicants_threshold(self, parameters: Dict[str, Any]) -> None:
+        """Setup applicants threshold parameters"""
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
         self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
 
+    def _setup_resume_path(self, parameters: Dict[str, Any]) -> None:
+        """Setup resume path with validation"""
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
-        self.output_file_directory = Path(parameters['outputFileDirectory'])
-        self.env_config = EnvironmentKeys()
-        logger.debug("Parameters set successfully")
+
+    def _setup_output_directory(self, parameters: Dict[str, Any]) -> None:
+        """Setup and validate output directory"""
+        output_dir = Path(parameters['outputFileDirectory'])
+        if not output_dir.exists():
+            output_dir.mkdir(parents=True)
+        self.output_file_directory = output_dir
+
+    def _construct_search_url(self, parameters: Dict[str, Any]) -> str:
+        """Construct search URL with parameters"""
+        url_parts = []
+        
+        if parameters.get('remote'):
+            url_parts.append("f_CF=f_WRA")
+            
+        self._add_experience_levels(parameters, url_parts)
+        self._add_job_types(parameters, url_parts)
+        self._add_date_filter(parameters, url_parts)
+        
+        url_parts.append("f_LF=f_AL")  # Easy Apply
+        return f"?{'&'.join(url_parts)}"
+
+    def _add_experience_levels(self, parameters: Dict[str, Any], url_parts: List[str]) -> None:
+        """Add experience levels to URL parts"""
+        experience_levels = [
+            str(i + 1) 
+            for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) 
+            if v
+        ]
+        if experience_levels:
+            url_parts.append(f"f_E={','.join(experience_levels)}")
+
+    def _add_job_types(self, parameters: Dict[str, Any], url_parts: List[str]) -> None:
+        """Add job types to URL parts"""
+        job_types = [
+            key[0].upper() 
+            for key, value in parameters.get('jobTypes', {}).items() 
+            if value
+        ]
+        if job_types:
+            url_parts.append(f"f_JT={','.join(job_types)}")
+
+    def _add_date_filter(self, parameters: Dict[str, Any], url_parts: List[str]) -> None:
+        """Add date filter to URL parts"""
+        date_mapping = {
+            "all time": "",
+            "month": "&f_TPR=r2592000",
+            "week": "&f_TPR=r604800",
+            "24 hours": "&f_TPR=r86400"
+        }
+        date_param = next(
+            (v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), 
+            ""
+        )
+        if date_param:
+            url_parts.append(date_param.lstrip('&'))
+
+    def write_to_file(self, job: Job, file_name: str) -> None:
+        """
+        Write job application result to file with error handling
+        
+        Args:
+            job: Job object containing job details
+            file_name: Name of the output file
+        """
+        logger.debug(f"Writing job application result to file: {file_name}")
+        
+        try:
+            pdf_path = Path(job.pdf_path).resolve().as_uri()
+            
+            data = {
+                "company": job.company,
+                "job_title": job.title,
+                "link": job.link,
+                "job_recruiter": job.recruiter_link,
+                "job_location": job.location,
+                "pdf_path": pdf_path
+            }
+            
+            file_path = self.output_file_directory / f"{file_name}.json"
+            self._write_json_data(file_path, data)
+            
+        except Exception as e:
+            logger.error(f"Failed to write job data to file: {e}")
+            raise
+
+    def _write_json_data(self, file_path: Path, data: Dict[str, Any]) -> None:
+        """Write data to JSON file with proper error handling"""
+        try:
+            if not file_path.exists():
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump([data], f, indent=4)
+                logger.debug(f"Created new file with job data: {file_path}")
+            else:
+                with open(file_path, 'r+', encoding='utf-8') as f:
+                    try:
+                        existing_data = json.load(f)
+                    except json.JSONDecodeError:
+                        logger.error(f"JSON decode error in file: {file_path}")
+                        existing_data = []
+                    
+                    existing_data.append(data)
+                    f.seek(0)
+                    json.dump(existing_data, f, indent=4)
+                    f.truncate()
+                    logger.debug(f"Appended job data to existing file: {file_path}")
+                    
+        except Exception as e:
+            logger.error(f"Error writing to JSON file: {e}")
+            raise
 
     def set_gpt_answerer(self, gpt_answerer):
         logger.debug("Setting GPT answerer")
@@ -75,6 +226,7 @@ class AIHawkJobManager:
         self.resume_generator_manager = resume_generator_manager
 
     def start_collecting_data(self):
+        """Start collecting data for all job searches with improved error handling"""
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
@@ -82,42 +234,112 @@ class AIHawkJobManager:
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:
+            logger.info(f"Starting data collection for {position} in {location}")
             location_url = "&location=" + location
             job_page_number = -1
-            utils.printyellow(f"Collecting data for {position} in {location}.")
+
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    utils.printyellow(f"Going to job page {job_page_number}")
-                    self.next_job_page(position, location_url, job_page_number)
-                    time.sleep(random.uniform(1.5, 3.5))
-                    utils.printyellow("Starting the collecting process for this page")
-                    self.read_jobs()
-                    utils.printyellow("Collecting data on this page has been completed!")
+                    logger.debug(f"Processing job page {job_page_number}")
+                    
+                    try:
+                        self.next_job_page(position, location_url, job_page_number)
+                        time.sleep(random.uniform(1.5, 3.5))
+                        
+                        logger.debug("Starting data collection for current page")
+                        self.read_jobs()
+                        logger.info("Data collection completed for current page")
 
-                    time_left = minimum_page_time - time.time()
-                    if time_left > 0:
-                        utils.printyellow(f"Sleeping for {time_left} seconds.")
-                        time.sleep(time_left)
-                        minimum_page_time = time.time() + minimum_time
-                    if page_sleep % 5 == 0:
-                        sleep_time = random.randint(1, 5)
-                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                        time.sleep(sleep_time)
-                        page_sleep += 1
-            except Exception:
-                pass
-            time_left = minimum_page_time - time.time()
-            if time_left > 0:
-                utils.printyellow(f"Sleeping for {time_left} seconds.")
-                time.sleep(time_left)
-                minimum_page_time = time.time() + minimum_time
-            if page_sleep % 5 == 0:
-                sleep_time = random.randint(50, 90)
-                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
-                time.sleep(sleep_time)
-                page_sleep += 1
+                    except Exception as e:
+                        logger.error(f"Error processing page {job_page_number}: {e}")
+                        break
+
+                    # Handle minimum time requirements
+                    self._handle_time_requirements(minimum_page_time, page_sleep)
+                    minimum_page_time = time.time() + minimum_time
+
+            except Exception as e:
+                logger.error(f"Error in search loop for {position} in {location}: {e}")
+                continue
+
+    def _handle_time_requirements(self, minimum_page_time: float, page_sleep: int) -> None:
+        """Handle timing requirements between page processing"""
+        time_left = minimum_page_time - time.time()
+        if time_left > 0:
+            logger.debug(f"Waiting {time_left:.2f} seconds before next page")
+            time.sleep(time_left)
+
+        if page_sleep % 5 == 0:
+            sleep_time = random.randint(50, 90)
+            logger.debug(f"Taking extended break of {sleep_time} seconds")
+            time.sleep(sleep_time)
+
+    def read_jobs(self):
+        """Read and process jobs from the current page"""
+        try:
+            if self._check_no_jobs_banner():
+                logger.debug("No jobs found on current page")
+                return
+
+            job_results = self._get_job_results()
+            if not job_results:
+                logger.debug("No job results found")
+                return
+
+            job_list = self._extract_jobs_from_results(job_results)
+            self._process_job_list(job_list)
+
+        except Exception as e:
+            logger.error(f"Error reading jobs: {e}")
+            raise
+
+    def _check_no_jobs_banner(self) -> bool:
+        """Check if the page shows no jobs banner"""
+        try:
+            no_jobs_element = self.driver.find_element(
+                By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand'
+            )
+            return ('No matching jobs found' in no_jobs_element.text or 
+                    'unfortunately, things aren' in self.driver.page_source.lower())
+        except NoSuchElementException:
+            return False
+
+    def _get_job_results(self):
+        """Get job results container and scroll through results"""
+        try:
+            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            utils.scroll_slow(self.driver, job_results)
+            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+            
+            job_list_elements = (self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0]
+                               .find_elements(By.CLASS_NAME, 'jobs-search-results__list-item'))
+            
+            return job_list_elements if job_list_elements else None
+            
+        except Exception as e:
+            logger.error(f"Error getting job results: {e}")
+            return None
+
+    def _extract_jobs_from_results(self, job_results):
+        """Extract job information from results"""
+        return [Job(*self.extract_job_information_from_tile(job_element)) 
+                for job_element in job_results]
+
+    def _process_job_list(self, job_list):
+        """Process each job in the list"""
+        for job in job_list:
+            if self.is_blacklisted(job.title, job.company, job.link, job.location):
+                logger.debug(f"Blacklisted {job.title} at {job.company} in {job.location}")
+                self.write_to_file(job, "skipped")
+                continue
+            
+            try:
+                self.write_to_file(job, 'data')
+            except Exception as e:
+                logger.error(f"Error processing job {job.title}: {e}")
+                self.write_to_file(job, "failed")
 
     def start_applying(self):
         logger.debug("Starting job application process")
@@ -385,62 +607,6 @@ class AIHawkJobManager:
                 self.write_to_file(job, "failed")
                 continue
 
-    def write_to_file(self, job, file_name):
-        logger.debug(f"Writing job application result to file: {file_name}")
-        pdf_path = Path(job.pdf_path).resolve()
-        pdf_path = pdf_path.as_uri()
-        data = {
-            "company": job.company,
-            "job_title": job.title,
-            "link": job.link,
-            "job_recruiter": job.recruiter_link,
-            "job_location": job.location,
-            "pdf_path": pdf_path
-        }
-        file_path = self.output_file_directory / f"{file_name}.json"
-        if not file_path.exists():
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump([data], f, indent=4)
-                logger.debug(f"Job data written to new file: {file_name}")
-        else:
-            with open(file_path, 'r+', encoding='utf-8') as f:
-                try:
-                    existing_data = json.load(f)
-                except json.JSONDecodeError:
-                    logger.error(f"JSON decode error in file: {file_path}")
-                    existing_data = []
-                existing_data.append(data)
-                f.seek(0)
-                json.dump(existing_data, f, indent=4)
-                f.truncate()
-                logger.debug(f"Job data appended to existing file: {file_name}")
-
-    def get_base_search_url(self, parameters):
-        logger.debug("Constructing base search URL")
-        url_parts = []
-        if parameters['remote']:
-            url_parts.append("f_CF=f_WRA")
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
-                             v]
-        if experience_levels:
-            url_parts.append(f"f_E={','.join(experience_levels)}")
-        url_parts.append(f"distance={parameters['distance']}")
-        job_types = [key[0].upper() for key, value in parameters.get('jobTypes', {}).items() if value]
-        if job_types:
-            url_parts.append(f"f_JT={','.join(job_types)}")
-        date_mapping = {
-            "all time": "",
-            "month": "&f_TPR=r2592000",
-            "week": "&f_TPR=r604800",
-            "24 hours": "&f_TPR=r86400"
-        }
-        date_param = next((v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), "")
-        url_parts.append("f_LF=f_AL")  # Easy Apply
-        base_url = "&".join(url_parts)
-        full_url = f"?{base_url}{date_param}"
-        logger.debug(f"Base search URL constructed: {full_url}")
-        return full_url
-
     def next_job_page(self, position, location, job_page):
         logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
         encoded_position = urllib.parse.quote(position)
@@ -526,3 +692,4 @@ class AIHawkJobManager:
                 return True
                 
         return False
+
