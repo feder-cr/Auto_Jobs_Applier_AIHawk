@@ -119,14 +119,14 @@ class AIHawkJobManager:
                 time.sleep(sleep_time)
                 page_sleep += 1
 
-    def start_applying(self):
+    def start_applying(self, wait_time = MINIMUM_WAIT_TIME):
         logger.debug("Starting job application process")
         self.easy_applier_component = AIHawkEasyApplier(self.driver, self.resume_path, self.set_old_answers,
                                                           self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
-        minimum_time = MINIMUM_WAIT_TIME
+        minimum_time = wait_time
         minimum_page_time = time.time() + minimum_time
 
         for position, location in searches:

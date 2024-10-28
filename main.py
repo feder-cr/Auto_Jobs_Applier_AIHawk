@@ -184,6 +184,11 @@ def create_and_run_bot(parameters, llm_api_key):
             print('Collecting')
             bot.start_collect_data()
         else:
+            wait_time = input(f"Set your custom wait time as type <int>. If NULL defaults to 60s: ")
+            try:
+                wait_time = int(wait_time)
+            except Exception as e:
+                raise logger.error(f"Custom wait time input invalid: {e}")
             print('Applying')
             bot.start_apply()
     except WebDriverException as e:
