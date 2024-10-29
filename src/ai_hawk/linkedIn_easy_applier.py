@@ -708,7 +708,7 @@ class AIHawkEasyApplier:
                 answer = existing_answer
                 logger.debug(f"Using existing answer: {answer}")
             else:
-                if is_numeric: 
+                if is_numeric:
                     answer = self.gpt_answerer.answer_question_numeric(question_text)
                     logger.debug(f"Generated numeric answer: {answer}")
                 else:
