@@ -631,4 +631,4 @@ class GPTAnswerer:
         logger.info(f"Job suitability score: {score}")
         if int(score) < 7 :
             logger.debug(f"Job is not suitable: {reasoning}")
-        return int(score) > 7
+        return int(score) >= 7
