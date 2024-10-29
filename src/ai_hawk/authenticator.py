@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from loguru import logger
+from src.logging import logger
 
 def get_authenticator(driver, platform):
     if platform == 'linkedin':

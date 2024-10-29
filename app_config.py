@@ -9,5 +9,7 @@ MINIMUM_LOG_LEVEL can only be one of the followings:
     - "CRITICAL"
 """
 MINIMUM_LOG_LEVEL = "DEBUG"
+LOG_TO_FILE = True
+LOG_TO_CONSOLE = True
 
 MINIMUM_WAIT_TIME = 60
