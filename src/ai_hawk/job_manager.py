@@ -9,11 +9,13 @@ from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
+
+from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 import src.utils as utils
 from app_config import MINIMUM_WAIT_TIME
 from src.job import Job
-from src.aihawk_easy_applier import AIHawkEasyApplier
-from loguru import logger
+from src.logging import logger
+
 import urllib.parse
 
 
@@ -418,8 +420,17 @@ class AIHawkJobManager:
     def get_base_search_url(self, parameters):
         logger.debug("Constructing base search URL")
         url_parts = []
-        if parameters['remote']:
-            url_parts.append("f_CF=f_WRA")
+        working_type_filter = []
+        if parameters.get("onsite") == True:
+            working_type_filter.append("1")
+        if parameters.get("remote") == True:
+            working_type_filter.append("2")
+        if parameters.get("hybrid") == True:
+            working_type_filter.append("3")
+
+        if working_type_filter:
+            url_parts.append(f"f_WT={'%2C'.join(working_type_filter)}")
+
         experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
                              v]
         if experience_levels:
@@ -512,6 +523,10 @@ class AIHawkJobManager:
     def is_previously_failed_to_apply(self, link):
         file_name = "failed"
         file_path = self.output_file_directory / f"{file_name}.json"
+
+        if not file_path.exists():
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([], f)
 
         with open(file_path, 'r', encoding='utf-8') as f:
             try:

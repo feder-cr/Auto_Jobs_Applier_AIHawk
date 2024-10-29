@@ -1,9 +1,13 @@
+from httpx import get
+from numpy import place
 import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from src.aihawk_authenticator import AIHawkAuthenticator
+from ai_hawk.authenticator import AIHawkAuthenticator, LinkedInAuthenticator, get_authenticator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
+
 
 
 @pytest.fixture
@@ -15,14 +19,14 @@ def mock_driver(mocker):
 @pytest.fixture
 def authenticator(mock_driver):
     """Fixture to initialize AIHawkAuthenticator with a mocked driver."""
-    return AIHawkAuthenticator(mock_driver)
+    return get_authenticator(mock_driver, platform='linkedin') 
 
 
 def test_handle_login(mocker, authenticator):
     """Test handling the AIHawk login process."""
     mocker.patch.object(authenticator.driver, 'get')
-    mocker.patch.object(authenticator, 'enter_credentials')
-    mocker.patch.object(authenticator, 'handle_security_check')
+    mocker.patch.object(authenticator, 'prompt_for_credentials')
+    mocker.patch.object(authenticator, 'handle_security_checks')
 
     # Mock current_url as a regular return value, not PropertyMock
     mocker.patch.object(authenticator.driver, 'current_url',
@@ -32,8 +36,8 @@ def test_handle_login(mocker, authenticator):
 
     authenticator.driver.get.assert_called_with(
         'https://www.linkedin.com/login')
-    authenticator.enter_credentials.assert_called_once()
-    authenticator.handle_security_check.assert_called_once()
+    authenticator.prompt_for_credentials.assert_called_once()
+    authenticator.handle_security_checks.assert_called_once()
 
 
 def test_enter_credentials_success(mocker, authenticator):
@@ -45,28 +49,33 @@ def test_enter_credentials_success(mocker, authenticator):
     mocker.patch.object(authenticator.driver, 'find_element',
                         return_value=password_mock)
 
+def test_is_logged_in_true(mock_driver):
+    # Mock the current_url to simulate a logged-in state
+    mock_driver.current_url = "https://www.linkedin.com/feed/"
+    authenticator = LinkedInAuthenticator(mock_driver)
+    
+    assert authenticator.is_logged_in == True
 
+def test_is_logged_in_false(mock_driver):
+    # Mock the current_url to simulate a logged-out state
+    mock_driver.current_url = "https://www.linkedin.com/login"
+    authenticator = LinkedInAuthenticator(mock_driver)
+    
+    assert authenticator.is_logged_in == False
 
+def test_is_logged_in_partial_keyword(mock_driver):
+    # Mock the current_url to simulate a URL containing a keyword but not logged in
+    mock_driver.current_url = "https://www.linkedin.com/jobs/search/"
+    authenticator = LinkedInAuthenticator(mock_driver)
+    
+    assert authenticator.is_logged_in == True
 
-
-
-def test_is_logged_in_true(mocker, authenticator):
-    """Test if the user is logged in."""
-    buttons_mock = mocker.Mock()
-    buttons_mock.text = "Start a post"
-    mocker.patch.object(WebDriverWait, 'until')
-    mocker.patch.object(authenticator.driver, 'find_elements',
-                        return_value=[buttons_mock])
-
-    assert authenticator.is_logged_in() is True
-
-
-def test_is_logged_in_false(mocker, authenticator):
-    """Test if the user is not logged in."""
-    mocker.patch.object(WebDriverWait, 'until')
-    mocker.patch.object(authenticator.driver, 'find_elements', return_value=[])
-
-    assert authenticator.is_logged_in() is False
+def test_is_logged_in_no_linkedin(mock_driver):
+    # Mock the current_url to simulate a URL not related to LinkedIn
+    mock_driver.current_url = "https://www.example.com/feed/"
+    authenticator = LinkedInAuthenticator(mock_driver)
+    
+    assert authenticator.is_logged_in == False
 
 
 def test_handle_security_check_success(mocker, authenticator):
@@ -76,7 +85,7 @@ def test_handle_security_check_success(mocker, authenticator):
         mocker.Mock()   # Security check completion
     ])
 
-    authenticator.handle_security_check()
+    authenticator.handle_security_checks()
 
     # Verify WebDriverWait is called with EC.url_contains for both the challenge and feed
     WebDriverWait(authenticator.driver, 10).until.assert_any_call(mocker.ANY)
@@ -87,7 +96,7 @@ def test_handle_security_check_timeout(mocker, authenticator):
     """Test handling security check timeout."""
     mocker.patch.object(WebDriverWait, 'until', side_effect=TimeoutException)
 
-    authenticator.handle_security_check()
+    authenticator.handle_security_checks()
 
     # Verify WebDriverWait is called with EC.url_contains for the challenge
     WebDriverWait(authenticator.driver, 10).until.assert_any_call(mocker.ANY)

@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from loguru import logger
+from src.logging import logger
 
 
 class AIHawkEasyApplier:
@@ -127,15 +127,19 @@ class AIHawkEasyApplier:
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
 
+
             self.current_job = job
+
+            logger.debug("Passing job information to GPT Answerer")
+            self.gpt_answerer.set_job(job)
+            
+            if not self.gpt_answerer.is_job_suitable():
+                return
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
             logger.debug("'Easy Apply' button clicked successfully")
-
-            logger.debug("Passing job information to GPT Answerer")
-            self.gpt_answerer.set_job(job)
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
@@ -172,7 +176,6 @@ class AIHawkEasyApplier:
         ]
 
         while attempt < 2:
-
             self.check_for_premium_redirect(job)
             self._scroll_page()
 
@@ -181,12 +184,10 @@ class AIHawkEasyApplier:
                     logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
-
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
                                 try:
-
                                     WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
                                     WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
                                     logger.debug(f"Found 'Easy Apply' button {index + 1}, attempting to click")
@@ -196,7 +197,6 @@ class AIHawkEasyApplier:
                         else:
                             raise TimeoutException("No 'Easy Apply' buttons found")
                     else:
-
                         button = WebDriverWait(self.driver, 10).until(
                             EC.presence_of_element_located((By.XPATH, method['xpath']))
                         )
