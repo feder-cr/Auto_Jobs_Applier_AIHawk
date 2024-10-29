@@ -1,6 +1,8 @@
 import pytest
 from unittest import mock
-from src.aihawk_easy_applier import AIHawkEasyApplier
+
+from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
+
 
 
 @pytest.fixture

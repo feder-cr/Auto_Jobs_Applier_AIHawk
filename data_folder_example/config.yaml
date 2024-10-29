@@ -1,4 +1,6 @@
 remote: true
+hybrid: true
+onsite: true
 
 experienceLevel:
   internship: false

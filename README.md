@@ -6,8 +6,6 @@
 
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
 
-  [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
-
 # Auto_Jobs_Applier_AIHawk
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
@@ -15,11 +13,11 @@
 **🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
 
 <!-- Message Clarity -->
-## 🚀 Join the AIHawk Community 🚀
+## 🚀 Join the AIHawk Community (For Jobs) 🚀
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+💡 **Get support:** ask questions, seek help, review resume, application tips for making successfull applciation in landing interviews
 
 🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
 
@@ -33,15 +31,21 @@ Connect with like-minded individuals and get the most out of AIHawk.
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 )](https://t.me/AIhawkCommunity)
 
-<!-- 🚀 **Join Our Telegram Community!** 🚀
 
-Join our **Telegram community** for:
-- **Support with AIHawk software**
-- **Share your experiences** with AIhawk and learn from others
-- **Job search tips** and **resume advice**
-- **Idea exchange** and resources for your projects
+## Join AI Hawk FOSS community
 
-<-- **[Join now!](https://t.me/AIhawkCommunity)** -->
+🌐 **Contribute to FOSS:** Collaborate to this open-source projects, improve code, and share your contributions with the community.
+
+💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+
+🔔 **Stay updated:** Get the latest news and updates on AIHawk.
+
+🚀 **Innovate Together:** Work on cutting-edge projects and bring new ideas to life with the support of the community.
+
+
+
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
+
 </div>
 
 ## Table of Contents
@@ -178,9 +182,19 @@ This file contains sensitive information. Never share or commit this file to ver
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
 - `remote: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `hybrid: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `onsite: [true/false]`
+
   - Set to `true` to include remote jobs, `false` to exclude them
 
 - `experienceLevel:`
+
   - Set desired experience levels to `true`, others to `false`
 
 - `jobTypes:`
@@ -251,7 +265,7 @@ This file defines your job search parameters and bot behavior. Each section cont
     - openai: <https://api.pawan.krd/cosmosrp/v1>
     - ollama: <http://127.0.0.1:11434/>
     - claude: <https://api.anthropic.com/v1>
-    - gemini: no api_url
+    - gemini: <https://aistudio.google.com/app/apikey>
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
@@ -506,7 +520,7 @@ Each section has specific fields to fill out:
     requires_uk_visa: "No"
     legally_allowed_to_work_in_uk: "Yes"
     requires_uk_sponsorship: "No"
-     ```
+    ```
 
 - `work_preferences:`
   - Specify your preferences for work arrangements and conditions.

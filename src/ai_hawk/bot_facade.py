@@ -1,4 +1,4 @@
-from loguru import logger
+from src.logging import logger
 
 
 class AIHawkBotState:
