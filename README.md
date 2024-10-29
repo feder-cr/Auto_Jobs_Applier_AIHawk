@@ -6,8 +6,6 @@
 
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
 
-  [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
-
 # Auto_Jobs_Applier_AIHawk
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
@@ -15,7 +13,7 @@
 **🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
 
 <!-- Message Clarity -->
-## 🚀 Join the AIHawk Community 🚀
+## 🚀 Join the AIHawk Community (For Jobs) 🚀
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
@@ -33,15 +31,21 @@ Connect with like-minded individuals and get the most out of AIHawk.
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 )](https://t.me/AIhawkCommunity)
 
-<!-- 🚀 **Join Our Telegram Community!** 🚀
 
-Join our **Telegram community** for:
-- **Support with AIHawk software**
-- **Share your experiences** with AIhawk and learn from others
-- **Job search tips** and **resume advice**
-- **Idea exchange** and resources for your projects
+## Join AI Hawk FOSS community
 
-<-- **[Join now!](https://t.me/AIhawkCommunity)** -->
+🌐 **Contribute to FOSS:** Collaborate to this open-source projects, improve code, and share your contributions with the community.
+
+💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+
+🔔 **Stay updated:** Get the latest news and updates on AIHawk.
+
+🚀 **Innovate Together:** Work on cutting-edge projects and bring new ideas to life with the support of the community.
+
+
+
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
+
 </div>
 
 ## Table of Contents
