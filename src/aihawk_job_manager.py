@@ -106,7 +106,8 @@ class AIHawkJobManager:
                         utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                         time.sleep(sleep_time)
                         page_sleep += 1
-            except Exception:
+            except Exception as e:
+                utils.capture_error(self.driver, str(e))
                 pass
             time_left = minimum_page_time - time.time()
             if time_left > 0:
@@ -150,12 +151,14 @@ class AIHawkJobManager:
                             break
                     except Exception as e:
                         logger.error(f"Failed to retrieve jobs: {e}")
+                        utils.capture_error(self.driver, str(e))
                         break
 
                     try:
                         self.apply_jobs()
                     except Exception as e:
                         logger.error(f"Error during job application: {e}")
+                        utils.capture_error(self.driver, str(e))
                         continue
 
                     logger.debug("Applying to jobs on this page has been completed!")
@@ -194,6 +197,7 @@ class AIHawkJobManager:
                         page_sleep += 1
             except Exception as e:
                 logger.error(f"Unexpected error during job search: {e}")
+                utils.capture_error(self.driver, str(e))
                 continue
 
             time_left = minimum_page_time - time.time()
@@ -259,6 +263,7 @@ class AIHawkJobManager:
 
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
+            utils.capture_error(self.driver, str(e))
             return []
 
     def read_jobs(self):
@@ -285,6 +290,7 @@ class AIHawkJobManager:
                 self.write_to_file(job,'data')
             except Exception as e:
                 self.write_to_file(job, "failed")
+                utils.capture_error(self.driver, str(e))
                 continue
 
     def apply_jobs(self):
@@ -383,6 +389,7 @@ class AIHawkJobManager:
             except Exception as e:
                 logger.error(f"Failed to apply for {job.title} at {job.company}: {e}")
                 self.write_to_file(job, "failed")
+                utils.capture_error(self.driver, str(e))
                 continue
 
     def write_to_file(self, job, file_name):

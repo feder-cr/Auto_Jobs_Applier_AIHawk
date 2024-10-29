@@ -39,7 +39,7 @@ class AIHawkEasyApplier:
 
         logger.debug("AIHawkEasyApplier initialized successfully")
 
-    def _load_questions_from_json(self) -> List[dict]:
+    def _load_questions_from_json(self) -> List<dict]:
         output_file = 'answers.json'
         logger.debug(f"Loading questions from JSON file: {output_file}")
         try:
@@ -91,6 +91,7 @@ class AIHawkEasyApplier:
             logger.info(f"Successfully applied to job: {job.title}")
         except Exception as e:
             logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
+            utils.capture_error(self.driver, str(e))
             raise e
 
     def job_apply(self, job: Any):
@@ -101,6 +102,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Navigated to job link: {job.link}")
         except Exception as e:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
+            utils.capture_error(self.driver, str(e))
             raise
 
         time.sleep(random.uniform(3, 5))
@@ -149,6 +151,7 @@ class AIHawkEasyApplier:
             logger.debug("Discarding application due to failure")
             self._discard_application()
 
+            utils.capture_error(self.driver, str(e))
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
     def _find_easy_apply_button(self, job: Any) -> WebElement:
@@ -180,7 +183,7 @@ class AIHawkEasyApplier:
                 try:
                     logger.debug(f"Attempting search using {method['description']}")
 
-                    if method.get('find_elements'):
+                    if (method.get('find_elements')):
 
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
