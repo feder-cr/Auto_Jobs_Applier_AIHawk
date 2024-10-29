@@ -84,7 +84,7 @@ class AIHawkBotFacade:
         self.apply_component.start_collecting_data()
         logger.debug("Collecting data process started successfully")
 
-    def _validate_non_empty(self, value, name):git p
+    def _validate_non_empty(self, value, name):
         logger.debug(f"Validating that {name} is not empty")
         if not value:
             logger.error(f"Validation failed: {name} is empty")
