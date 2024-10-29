@@ -72,10 +72,10 @@ class AIHawkBotFacade:
         self.state.logged_in = True
         logger.debug("Login process completed successfully")
 
-    def start_apply(self):
+    def start_apply(self, wait_time):
         logger.debug("Starting apply process")
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
-        self.apply_component.start_applying()
+        self.apply_component.start_applying(wait_time)
         logger.debug("Apply process started successfully")
         
     def start_collect_data(self):
@@ -84,7 +84,7 @@ class AIHawkBotFacade:
         self.apply_component.start_collecting_data()
         logger.debug("Collecting data process started successfully")
 
-    def _validate_non_empty(self, value, name):
+    def _validate_non_empty(self, value, name):git p
         logger.debug(f"Validating that {name} is not empty")
         if not value:
             logger.error(f"Validation failed: {name} is empty")
