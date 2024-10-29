@@ -660,12 +660,7 @@ class AIHawkEasyApplier:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
 
-            existing_answer = None
-            for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
-                    existing_answer = item
-
-                    break
+            existing_answer = self._find_existing_answer(question_text)
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
                 logger.debug("Selected existing radio answer")
@@ -719,7 +714,7 @@ class AIHawkEasyApplier:
             logger.debug("Entered answer into the textbox.")
 
             # Save non-cover letter answers
-            if not is_cover_letter:
+            if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
                 logger.debug("Saved non-cover letter answer to JSON.")
 
@@ -789,14 +784,13 @@ class AIHawkEasyApplier:
                     if current_selection != existing_answer:
                         logger.debug(f"Updating selection to: {existing_answer}")
                         self._select_dropdown_option(dropdown, existing_answer)
-                    return True
+                else:
+                    logger.debug(f"No existing answer found, querying model for: {question_text}")
+                    answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+                    self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                    self._select_dropdown_option(dropdown, answer)
+                    logger.debug(f"Selected new dropdown answer: {answer}")
 
-                logger.debug(f"No existing answer found, querying model for: {question_text}")
-
-                answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-                self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
-                self._select_dropdown_option(dropdown, answer)
-                logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
 
             else:
@@ -839,24 +833,34 @@ class AIHawkEasyApplier:
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
 
-        logger.debug(f"Saving question data to JSON: {question_data}")
+        logger.debug(f"Checking if question data already exists: {question_data}")
         try:
-            try:
-                with open(output_file, 'r') as f:
-                    try:
-                        data = json.load(f)
-                        if not isinstance(data, list):
-                            raise ValueError("JSON file format is incorrect. Expected a list of questions.")
-                    except json.JSONDecodeError:
-                        logger.error("JSON decoding failed")
-                        data = []
-            except FileNotFoundError:
-                logger.warning("JSON file not found, creating new file")
-                data = []
-            data.append(question_data)
+            with open(output_file, 'r+') as f:
+                try:
+                    data = json.load(f)
+                    if not isinstance(data, list):
+                        raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                except json.JSONDecodeError:
+                    logger.error("JSON decoding failed")
+                    data = []
+
+                # Check if the question already exists
+                question_exists = any(item['question'] == question_data['question'] for item in data)
+
+                if not question_exists:
+                    logger.debug("New question found, appending to JSON")
+                    data.append(question_data)
+                    f.seek(0)
+                    json.dump(data, f, indent=4)
+                    f.truncate()
+                    logger.debug("Question data saved successfully to JSON")
+                else:
+                    logger.debug("Question already exists, skipping save")
+        except FileNotFoundError:
+            logger.warning("JSON file not found, creating new file")
             with open(output_file, 'w') as f:
-                json.dump(data, f, indent=4)
-            logger.debug("Question data saved successfully to JSON")
+                json.dump([question_data], f, indent=4)
+            logger.debug("Question data saved successfully to new JSON file")
         except Exception:
             tb_str = traceback.format_exc()
             logger.error(f"Error saving questions data to JSON file: {tb_str}")
@@ -867,3 +871,12 @@ class AIHawkEasyApplier:
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+
+    def _find_existing_answer(self, question_text):
+        for item in self.all_data:
+            if self._sanitize_text(item['question']) == self._sanitize_text(question_text):
+                return item
+        return None
+
+
+
