@@ -17,7 +17,7 @@
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+💡 **Get support:** ask questions, seek help, review resume, application tips for making successfull applciation in landing interviews
 
 🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
 
