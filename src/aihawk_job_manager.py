@@ -513,6 +513,10 @@ class AIHawkJobManager:
         file_name = "failed"
         file_path = self.output_file_directory / f"{file_name}.json"
 
+        if not file_path.exists():
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([], f)
+                
         with open(file_path, 'r', encoding='utf-8') as f:
             try:
                 existing_data = json.load(f)
