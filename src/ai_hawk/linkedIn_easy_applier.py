@@ -844,8 +844,8 @@ class AIHawkEasyApplier:
                     logger.error("JSON decoding failed")
                     data = []
 
-                # Check if the question already exists
-                question_exists = any(item['question'] == question_data['question'] for item in data)
+                # Use the new function to check for existing questions
+                question_exists = self._question_exists_in_data(question_data['question'], data)
 
                 if not question_exists:
                     logger.debug("New question found, appending to JSON")
@@ -865,6 +865,19 @@ class AIHawkEasyApplier:
             tb_str = traceback.format_exc()
             logger.error(f"Error saving questions data to JSON file: {tb_str}")
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
+
+    def _question_exists_in_data(self, question: str, data: List[dict]) -> bool:
+        """
+        Check if a question already exists in the data list.
+        
+        Args:
+            question: The question text to search for
+            data: List of question dictionaries to search through
+            
+        Returns:
+            bool: True if question exists, False otherwise
+        """
+        return any(item['question'] == question for item in data)
 
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
