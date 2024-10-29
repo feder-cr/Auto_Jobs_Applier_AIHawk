@@ -17,6 +17,12 @@ def ensure_chrome_profile():
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
 
+def short_sleep() -> None:
+    time.sleep(random.uniform(1.2, 3))
+
+def medium_sleep() -> None:
+    time.sleep(random.uniform(3, 5))
+
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")

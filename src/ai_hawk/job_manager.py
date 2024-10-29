@@ -93,7 +93,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     utils.printyellow(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    time.sleep(random.uniform(1.5, 3.5))
+                    utils.medium_sleep()
                     utils.printyellow("Starting the collecting process for this page")
                     self.read_jobs()
                     utils.printyellow("Collecting data on this page has been completed!")
@@ -142,7 +142,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     logger.debug(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    time.sleep(random.uniform(1.5, 3.5))
+                    utils.medium_sleep()
                     logger.debug("Starting the application process for this page...")
 
                     try:

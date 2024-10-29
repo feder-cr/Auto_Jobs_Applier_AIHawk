@@ -720,6 +720,8 @@ For further assistance, please create an issue on the [GitHub repository](https:
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
 
+- Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features make it into the main branch.
+
 ## Conclusion
 
 Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, Auto_Jobs_Applier_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
