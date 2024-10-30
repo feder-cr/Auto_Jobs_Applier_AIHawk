@@ -31,9 +31,10 @@ class AIModel(ABC):
 
 
 class OpenAIModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str):
+    def __init__(self, api_key: str, llm_model: str, url: str):
         from langchain_openai import ChatOpenAI
         self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
+                                base_url=url,
                                 temperature=0.4)
 
     def invoke(self, prompt: str) -> BaseMessage:
@@ -116,7 +117,7 @@ class AIAdapter:
         logger.debug(f"Using {llm_model_type} with {llm_model}")
 
         if llm_model_type == "openai":
-            return OpenAIModel(api_key, llm_model)
+            return OpenAIModel(api_key, llm_model, llm_api_url)
         elif llm_model_type == "claude":
             return ClaudeModel(api_key, llm_model)
         elif llm_model_type == "ollama":
