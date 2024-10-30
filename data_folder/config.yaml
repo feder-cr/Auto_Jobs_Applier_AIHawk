@@ -1,6 +1,6 @@
 remote: true
 
-experienceLevel:
+experience_level:
   internship: false
   entry: true
   associate: true
@@ -8,7 +8,7 @@ experienceLevel:
   director: false
   executive: false
 
-jobTypes:
+job_types:
   full-time: true
   contract: false
   part-time: false
