@@ -69,19 +69,19 @@ class ConfigValidator:
                     raise ConfigError(f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}.")
 
         # Validate experience levels, ensure they are boolean
-        experience_levels = ['internship', 'entry', 'associate', 'mid-senior level', 'director', 'executive']
+        experience_levels = ['internship', 'entry', 'associate', 'mid_senior_level', 'director', 'executive']
         for level in experience_levels:
             if not isinstance(parameters['experience_level'].get(level), bool):
                 raise ConfigError(f"Experience level '{level}' must be a boolean in config file {config_yaml_path}")
 
         # Validate job types, ensure they are boolean
-        job_types = ['full-time', 'contract', 'part-time', 'temporary', 'internship', 'other', 'volunteer']
+        job_types = ['full_time', 'contract', 'part_time', 'temporary', 'internship', 'other', 'volunteer']
         for job_type in job_types:
             if not isinstance(parameters['job_types'].get(job_type), bool):
                 raise ConfigError(f"Job type '{job_type}' must be a boolean in config file {config_yaml_path}")
 
         # Validate date filters
-        date_filters = ['all time', 'month', 'week', '24 hours']
+        date_filters = ['all_time', 'month', 'week', '24_hours']
         for date_filter in date_filters:
             if not isinstance(parameters['date'].get(date_filter), bool):
                 raise ConfigError(f"Date filter '{date_filter}' must be a boolean in config file {config_yaml_path}")
