@@ -462,7 +462,7 @@ class AIHawkJobManager:
         logger.debug("Extracting job information from tile")
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
-            print(job_tile.get_attribute('outerHTML'))
+            logger.trace(job_tile.get_attribute('outerHTML'))
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
             
             link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]

@@ -99,8 +99,7 @@ class HuggingFaceModel(AIModel):
 
     def invoke(self, prompt: str) -> BaseMessage:
         response = self.chatmodel.invoke(prompt)
-        logger.debug("Invoking Model from Hugging Face API")
-        print(response,type(response))
+        logger.debug(f"Invoking Model from Hugging Face API. Response: {response}, Type: {type(response)}")
         return response
 
 class AIAdapter:

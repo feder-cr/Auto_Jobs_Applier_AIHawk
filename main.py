@@ -188,10 +188,10 @@ def create_and_run_bot(parameters, llm_api_key):
         bot.set_parameters(parameters)
         bot.start_login()
         if (parameters['collectMode'] == True):
-            print('Collecting')
+            logger.info('Collecting')
             bot.start_collect_data()
         else:
-            print('Applying')
+            logger.info('Applying')
             bot.start_apply()
     except WebDriverException as e:
         logger.error(f"WebDriver error occurred: {e}")
