@@ -219,8 +219,8 @@ class AIHawkEasyApplier:
                 time.sleep(random.randint(3, 5))
             attempt += 1
 
-        page_source = self.driver.page_source
-        logger.error(f"No clickable 'Easy Apply' button found after 2 attempts. Page source:\n{page_source}")
+        page_url = self.driver.current_url
+        logger.error(f"No clickable 'Easy Apply' button found after 2 attempts. page url: {page_url}")
         raise Exception("No clickable 'Easy Apply' button found")
 
     def _get_job_description(self) -> str:
