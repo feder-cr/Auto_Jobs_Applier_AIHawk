@@ -429,4 +429,5 @@ Instructions:
 Output Format (Strictly follow this format):
 Score: [numerical score]
 Reasoning: [brief explanation]
+Do not output anything else in the response other than the score and reasoning.
 """
