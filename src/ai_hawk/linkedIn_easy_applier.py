@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from loguru import logger
+from src.logging import logger
 
 
 class AIHawkEasyApplier:
@@ -103,7 +103,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        time.sleep(random.uniform(3, 5))
+        utils.medium_sleep()
         self.check_for_premium_redirect(job)
 
         try:
@@ -127,15 +127,19 @@ class AIHawkEasyApplier:
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
 
+
             self.current_job = job
+
+            logger.debug("Passing job information to GPT Answerer")
+            self.gpt_answerer.set_job(job)
+            
+            if not self.gpt_answerer.is_job_suitable():
+                return
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
             logger.debug("'Easy Apply' button clicked successfully")
-
-            logger.debug("Passing job information to GPT Answerer")
-            self.gpt_answerer.set_job(job)
 
             logger.debug("Filling out application form")
             self._fill_application_form(job)
@@ -172,7 +176,6 @@ class AIHawkEasyApplier:
         ]
 
         while attempt < 2:
-
             self.check_for_premium_redirect(job)
             self._scroll_page()
 
@@ -181,12 +184,10 @@ class AIHawkEasyApplier:
                     logger.debug(f"Attempting search using {method['description']}")
 
                     if method.get('find_elements'):
-
                         buttons = self.driver.find_elements(By.XPATH, method['xpath'])
                         if buttons:
                             for index, button in enumerate(buttons):
                                 try:
-
                                     WebDriverWait(self.driver, 10).until(EC.visibility_of(button))
                                     WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(button))
                                     logger.debug(f"Found 'Easy Apply' button {index + 1}, attempting to click")
@@ -196,7 +197,6 @@ class AIHawkEasyApplier:
                         else:
                             raise TimeoutException("No 'Easy Apply' buttons found")
                     else:
-
                         button = WebDriverWait(self.driver, 10).until(
                             EC.presence_of_element_located((By.XPATH, method['xpath']))
                         )
@@ -296,13 +296,13 @@ class AIHawkEasyApplier:
         if 'submit application' in button_text:
             logger.debug("Submit button found, submitting application")
             self._unfollow_company()
-            time.sleep(random.uniform(1.5, 2.5))
+            utils.short_sleep()
             next_button.click()
-            time.sleep(random.uniform(1.5, 2.5))
+            utils.short_sleep()
             return True
-        time.sleep(random.uniform(1.5, 2.5))
+        utils.short_sleep()
         next_button.click()
-        time.sleep(random.uniform(3.0, 5.0))
+        utils.medium_sleep()
         self._check_for_errors()
 
     def _unfollow_company(self) -> None:
@@ -325,9 +325,9 @@ class AIHawkEasyApplier:
         logger.debug("Discarding application")
         try:
             self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
-            time.sleep(random.uniform(3, 5))
+            utils.medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
-            time.sleep(random.uniform(3, 5))
+            utils.medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 
@@ -660,12 +660,7 @@ class AIHawkEasyApplier:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
 
-            existing_answer = None
-            for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
-                    existing_answer = item
-
-                    break
+            existing_answer = self._find_existing_answer(question_text)
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
                 logger.debug("Selected existing radio answer")
@@ -719,7 +714,7 @@ class AIHawkEasyApplier:
             logger.debug("Entered answer into the textbox.")
 
             # Save non-cover letter answers
-            if not is_cover_letter:
+            if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
                 logger.debug("Saved non-cover letter answer to JSON.")
 
@@ -789,14 +784,13 @@ class AIHawkEasyApplier:
                     if current_selection != existing_answer:
                         logger.debug(f"Updating selection to: {existing_answer}")
                         self._select_dropdown_option(dropdown, existing_answer)
-                    return True
+                else:
+                    logger.debug(f"No existing answer found, querying model for: {question_text}")
+                    answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+                    self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                    self._select_dropdown_option(dropdown, answer)
+                    logger.debug(f"Selected new dropdown answer: {answer}")
 
-                logger.debug(f"No existing answer found, querying model for: {question_text}")
-
-                answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-                self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
-                self._select_dropdown_option(dropdown, answer)
-                logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
 
             else:
@@ -839,31 +833,63 @@ class AIHawkEasyApplier:
         output_file = 'answers.json'
         question_data['question'] = self._sanitize_text(question_data['question'])
 
-        logger.debug(f"Saving question data to JSON: {question_data}")
+        logger.debug(f"Checking if question data already exists: {question_data}")
         try:
-            try:
-                with open(output_file, 'r') as f:
-                    try:
-                        data = json.load(f)
-                        if not isinstance(data, list):
-                            raise ValueError("JSON file format is incorrect. Expected a list of questions.")
-                    except json.JSONDecodeError:
-                        logger.error("JSON decoding failed")
-                        data = []
-            except FileNotFoundError:
-                logger.warning("JSON file not found, creating new file")
-                data = []
-            data.append(question_data)
+            with open(output_file, 'r+') as f:
+                try:
+                    data = json.load(f)
+                    if not isinstance(data, list):
+                        raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                except json.JSONDecodeError:
+                    logger.error("JSON decoding failed")
+                    data = []
+
+                # Use the new function to check for existing questions
+                question_exists = self._question_exists_in_data(question_data['question'], data)
+
+                if not question_exists:
+                    logger.debug("New question found, appending to JSON")
+                    data.append(question_data)
+                    f.seek(0)
+                    json.dump(data, f, indent=4)
+                    f.truncate()
+                    logger.debug("Question data saved successfully to JSON")
+                else:
+                    logger.debug("Question already exists, skipping save")
+        except FileNotFoundError:
+            logger.warning("JSON file not found, creating new file")
             with open(output_file, 'w') as f:
-                json.dump(data, f, indent=4)
-            logger.debug("Question data saved successfully to JSON")
+                json.dump([question_data], f, indent=4)
+            logger.debug("Question data saved successfully to new JSON file")
         except Exception:
             tb_str = traceback.format_exc()
             logger.error(f"Error saving questions data to JSON file: {tb_str}")
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
+
+    def _question_exists_in_data(self, question: str, data: List[dict]) -> bool:
+        """
+        Check if a question already exists in the data list.
+        
+        Args:
+            question: The question text to search for
+            data: List of question dictionaries to search through
+            
+        Returns:
+            bool: True if question exists, False otherwise
+        """
+        return any(item['question'] == question for item in data)
 
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
+
+    def _find_existing_answer(self, question_text):
+        for item in self.all_data:
+            if self._sanitize_text(item['question']) == self._sanitize_text(question_text):
+                return item
+        return None
+
+
+
