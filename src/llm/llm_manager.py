@@ -31,11 +31,18 @@ class AIModel(ABC):
 
 
 class OpenAIModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str, url: str):
+    def __init__(self, api_key: str, llm_model: str, url: str = ""):
         from langchain_openai import ChatOpenAI
-        self.model = ChatOpenAI(model_name=llm_model, openai_api_key=api_key,
-                                base_url=url,
-                                temperature=0.4)
+        kwargs = {
+            'model_name': llm_model,
+            'openai_api_key': api_key,
+            'temperature': 0.4
+        }
+        
+        if url:
+            kwargs['base_url'] = url
+        
+        self.model = ChatOpenAI(**kwargs)
 
     def invoke(self, prompt: str) -> BaseMessage:
         logger.debug("Invoking OpenAI API")
