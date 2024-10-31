@@ -21,7 +21,20 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
 from src.logging import logger
+from src.job import Job
 
+def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
+        """
+        Check if a question already exists in the data list.
+        
+        Args:
+            question: The question text to search for
+            data: List of question dictionaries to search through
+            
+        Returns:
+            bool: True if question exists, False otherwise
+        """
+        return any(item['question'] == question for item in data)
 
 class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
@@ -79,7 +92,7 @@ class AIHawkEasyApplier:
             raise Exception(
                 f"Redirected to AIHawk Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
             
-    def apply_to_job(self, job: Any) -> None:
+    def apply_to_job(self, job: Job) -> None:
         """
         Starts the process of applying to a job.
         :param job: A job object with the job details.
@@ -93,7 +106,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
             raise e
 
-    def job_apply(self, job: Any):
+    def job_apply(self, job: Job):
         logger.debug(f"Starting job application for job: {job}")
 
         try:
@@ -844,10 +857,9 @@ class AIHawkEasyApplier:
                     logger.error("JSON decoding failed")
                     data = []
 
-                # Use the new function to check for existing questions
-                question_exists = self._question_exists_in_data(question_data['question'], data)
+                should_be_saved: bool = not question_already_exists_in_data(question_data['question'], data) and not self.answer_contians_company_name(question_data['answer'])
 
-                if not question_exists:
+                if should_be_saved:
                     logger.debug("New question found, appending to JSON")
                     data.append(question_data)
                     f.seek(0)
@@ -866,19 +878,6 @@ class AIHawkEasyApplier:
             logger.error(f"Error saving questions data to JSON file: {tb_str}")
             raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
-    def _question_exists_in_data(self, question: str, data: List[dict]) -> bool:
-        """
-        Check if a question already exists in the data list.
-        
-        Args:
-            question: The question text to search for
-            data: List of question dictionaries to search through
-            
-        Returns:
-            bool: True if question exists, False otherwise
-        """
-        return any(item['question'] == question for item in data)
-
     def _sanitize_text(self, text: str) -> str:
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
@@ -891,5 +890,6 @@ class AIHawkEasyApplier:
                 return item
         return None
 
-
+    def answer_contians_company_name(self,answer:Any)->bool:
+        return isinstance(answer,str) and not self.current_job.company is None and self.current_job.company in answer
 
