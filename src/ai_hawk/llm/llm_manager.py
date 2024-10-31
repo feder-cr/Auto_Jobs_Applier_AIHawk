@@ -624,7 +624,7 @@ class GPTAnswerer:
         logger.info("Checking if job is suitable")
         prompt = ChatPromptTemplate.from_template(strings.is_relavant_position_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({"resume": self.resume, "job_description": self.job_description})
+        output = chain.invoke({"resume": self.resume, "job_description": self.job_description}).replace("*", "")
         logger.debug(f"Job suitability output: {output}")
         score = re.search(r'Score: (\d+)', output).group(1)
         reasoning = re.search(r'Reasoning: (.+)', output, re.DOTALL).group(1)
