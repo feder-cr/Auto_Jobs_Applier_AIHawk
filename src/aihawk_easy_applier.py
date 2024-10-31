@@ -382,8 +382,9 @@ class AIHawkEasyApplier:
         logger.debug(f"Detected question text: {question_text}")
 
         existing_answer = None
+        current_question_sanitized = self._sanitize_text(question_text) 
         for item in self.all_data:
-            if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+            if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                 existing_answer = item['answer']
                 break
 
@@ -394,6 +395,7 @@ class AIHawkEasyApplier:
             existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             logger.debug(f"Model provided answer: {existing_answer}")
             self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
+            self.all_data = self._load_questions_from_json()
 
         if existing_answer in options:
             select.select_by_visible_text(existing_answer)
@@ -661,8 +663,9 @@ class AIHawkEasyApplier:
             options = [radio.text.lower() for radio in radios]
 
             existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
             for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
+                if current_question_sanitized in item['question'] and item['type'] == 'radio':
                     existing_answer = item
 
                     break
@@ -673,6 +676,7 @@ class AIHawkEasyApplier:
 
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+            self.all_data = self._load_questions_from_json()
             self._select_radio(radios, answer)
             logger.debug("Selected new radio answer")
             return True
@@ -694,12 +698,13 @@ class AIHawkEasyApplier:
 
             # Check if it's a cover letter field (case-insensitive)
             is_cover_letter = 'cover letter' in question_text.lower()
-
+            logger.debug(f"question: {question_text}")
             # Look for existing answer if it's not a cover letter field
             existing_answer = None
             if not is_cover_letter:
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
+                    if item['question'] == current_question_sanitized and item.get('type') == question_type:
                         existing_answer = item['answer']
                         logger.debug(f"Found existing answer: {existing_answer}")
                         break
@@ -719,8 +724,9 @@ class AIHawkEasyApplier:
             logger.debug("Entered answer into the textbox.")
 
             # Save non-cover letter answers
-            if not is_cover_letter:
+            if not existing_answer and not is_cover_letter:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+                self.all_data = self._load_questions_from_json()
                 logger.debug("Saved non-cover letter answer to JSON.")
 
             time.sleep(1)
@@ -741,8 +747,9 @@ class AIHawkEasyApplier:
             answer_text = answer_date.strftime("%Y-%m-%d")
 
             existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
             for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
+                if current_question_sanitized in item['question'] and item['type'] == 'date':
                     existing_answer = item
 
                     break
@@ -752,6 +759,7 @@ class AIHawkEasyApplier:
                 return True
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+            self.all_data = self._load_questions_from_json()
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
             return True
@@ -779,8 +787,9 @@ class AIHawkEasyApplier:
                 logger.debug(f"Current selection: {current_selection}")
 
                 existing_answer = None
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+                    if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item['answer']
                         break
 
@@ -795,6 +804,7 @@ class AIHawkEasyApplier:
 
                 answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                 self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                self.all_data = self._load_questions_from_json()
                 self._select_dropdown_option(dropdown, answer)
                 logger.debug(f"Selected new dropdown answer: {answer}")
                 return True
