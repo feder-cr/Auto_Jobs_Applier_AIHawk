@@ -173,8 +173,9 @@ def create_and_run_bot(parameters, llm_api_key):
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
         
-        # Run the resume generator manager's functions
-        resume_generator_manager.choose_style()
+        # Run the resume generator manager's functions if resume is not provided
+        if 'resume' not in parameters['uploads']:
+            resume_generator_manager.choose_style()
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
