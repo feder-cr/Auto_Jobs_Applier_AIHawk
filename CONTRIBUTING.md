@@ -90,6 +90,30 @@ last week, release candidate
 
 week one is repeated for `release/v4.2.0`
 
+```mermaid
+gantt
+    title Release Cycle Process
+    dateFormat  YYYY-MM-DD
+    section Retro/Plan
+    Planning release/v4.1.0    : 2025-01-01, 2d
+    Publish release/v4.0.0     :milestone, m1, 2025-01-01, 1d
+    
+    section Dev Cycle
+    Feature Development        :2025-01-03, 27d
+    PR Reviews                 :2025-01-03, 27d
+    
+    section Release
+    Freeze develop              :milestone, m3, 2025-01-30, 1d
+    Create release/v4.1.0   :milestone, m4, 2025-01-30, 1d
+    Bug Fixes Only         :2025-01-30, 2d
+    RC Testing             :2025-01-30, 2d
+    
+    section Next Cycle
+    Skip Weekend             :2025-02-01, 2d
+    Planning release/v4.2.0      :2025-02-03, 2d
+    Publish release/v4.1.0     :milestone, m4, 2025-02-03, 1d
+```
+
 ## Roles
 
 ### Organization Owner
@@ -108,14 +132,16 @@ week one is repeated for `release/v4.2.0`
 ### Maintainer
 
 - Reviews and approves develop, feature PRs
+- Triage issues, bugs, PRs
 - Manages feature, bugfix PRs merge into develop
-- lead on feature development, bug prioritization
+- Leads feature development, bug prioritization
+- Manages README, CONTRIBUTING, and other documentation
 
-### Community Manager
+### Moderator
 
-- triage issues, bugs, PRs
-- moderate telegram channels
-- manage README, CONTRIBUTING, and other documentation
+- Moderates Telegram, Discord channels
+- Manages project wiki
+- Contributes to README, CONTRIBUTING, and other documentation
 
 ### Contributor
 
@@ -127,10 +153,19 @@ week one is repeated for `release/v4.2.0`
 ## Pull Request Process
 
 1. Fork the repository
-2. Create a new branch for your feature/fix
+2. Create a new branch for your feature or bug
 3. Write clear commit messages
 4. Update documentation as needed
-5. Submit a pull request with a clear description
+5. Add tests for new functionality
+6. Ensure tests pass
+7. Submit a pull request with a clear description
+
+## Merging Pull Requests
+
+- All PRs are reviewed by maintainers
+- At least 2 Maintainers approve PRs for merge
+- PRs are merged into `develop`
+- PRs are tested and verified to work as expected
 
 ## Code Style Guidelines
 
@@ -138,6 +173,8 @@ week one is repeated for `release/v4.2.0`
 - Include docstrings for new functions and classes
 - Add comments for complex logic
 - Maintain consistent naming conventions
+- Security best practices
+- Any performance considerations
 
 ## Development Setup
 
