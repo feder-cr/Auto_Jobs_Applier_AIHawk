@@ -21,6 +21,7 @@ else:
     logger.add(sys.stderr, level="DEBUG")
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
+firefoxProfilePath = os.path.join(os.getcwd(), "firefox_profile", "linkedin_profile")
 
 def ensure_chrome_profile():
     logger.debug(f"Ensuring Chrome profile exists at path: {chromeProfilePath}")
@@ -33,6 +34,16 @@ def ensure_chrome_profile():
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
 
+def ensure_firefox_profile():
+    logger.debug(f"Ensuring Firefox profile exists at path: {firefoxProfilePath}")
+    profile_dir = os.path.dirname(firefoxProfilePath)
+    if not os.path.exists(profile_dir):
+        os.makedirs(profile_dir)
+        logger.debug(f"Created directory for Firefox profile: {profile_dir}")
+    if not os.path.exists(firefoxProfilePath):
+        os.makedirs(firefoxProfilePath)
+        logger.debug(f"Created Firefox profile directory: {firefoxProfilePath}")
+    return firefoxProfilePath
 
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
@@ -153,6 +164,44 @@ def chrome_browser_options():
 
     return options
 
+def firefox_browser_options():
+    logger.debug("Setting Firefox browser options")
+    ensure_firefox_profile()
+    options = webdriver.FirefoxOptions()
+    options.add_argument("--start-maximized")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-backgrounding-occluded-windows")
+    options.add_argument("--disable-translate")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--no-first-run")
+    options.add_argument("--no-default-browser-check")
+    options.add_argument("--disable-logging")
+    options.add_argument("--disable-autofill")
+    options.add_argument("--disable-plugins")
+    options.add_argument("--disable-animations")
+    options.add_argument("--disable-cache")
+
+    prefs = {
+        "permissions.default.image": 2,
+        "permissions.default.stylesheet": 2,
+    }
+    for key, value in prefs.items():
+        options.set_preference(key, value)
+
+    if len(firefoxProfilePath) > 0:  # You'll need to define firefoxProfilePath similar to chromeProfilePath
+        profile = webdriver.FirefoxProfile(firefoxProfilePath)
+        options.profile = profile
+        logger.debug(f"Using Firefox profile directory: {firefoxProfilePath}")
+    else:
+        options.set_preference("browser.privatebrowsing.autostart", True)
+        logger.debug("Using Firefox in private browsing mode")
+
+    return options
 
 def printred(text):
     red = "\033[91m"
