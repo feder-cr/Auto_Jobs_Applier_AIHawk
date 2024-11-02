@@ -41,7 +41,7 @@ def test_set_parameters(mocker, job_manager):
         },
         'remote': False,
         'distance': 50,
-        'date': {'all time': True}
+        'date': {'all_time': True}
     }
 
     job_manager.set_parameters(params)

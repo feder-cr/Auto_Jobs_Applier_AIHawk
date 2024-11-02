@@ -440,10 +440,10 @@ class AIHawkJobManager:
         if job_types:
             url_parts.append(f"f_JT={','.join(job_types)}")
         date_mapping = {
-            "all time": "",
+            "all_time": "",
             "month": "&f_TPR=r2592000",
             "week": "&f_TPR=r604800",
-            "24 hours": "&f_TPR=r86400"
+            "24_hours": "&f_TPR=r86400"
         }
         date_param = next((v for k, v in date_mapping.items() if parameters.get('date', {}).get(k)), "")
         url_parts.append("f_LF=f_AL")  # Easy Apply
