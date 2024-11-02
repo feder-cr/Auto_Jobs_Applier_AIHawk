@@ -9,16 +9,23 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
+from typing import Optional
 from src.utils import chrome_browser_options
-from src.llm.llm_manager import GPTAnswerer
-from src.aihawk_authenticator import AIHawkAuthenticator
-from src.aihawk_bot_facade import AIHawkBotFacade
-from src.aihawk_job_manager import AIHawkJobManager
+
 from src.job_application_profile import JobApplicationProfile
-from loguru import logger
+from src.logging import logger
 
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr
+
+# Add the src directory to the Python path
+sys.path.append(str(Path(__file__).resolve().parent / 'src'))
+
+from ai_hawk.authenticator import get_authenticator
+from ai_hawk.bot_facade import AIHawkBotFacade
+from ai_hawk.job_manager import AIHawkJobManager
+from ai_hawk.llm.llm_manager import GPTAnswerer
+
 
 class ConfigError(Exception):
     pass
@@ -43,8 +50,8 @@ class ConfigValidator:
         parameters = ConfigValidator.validate_yaml_file(config_yaml_path)
         required_keys = {
             'remote': bool,
-            'experienceLevel': dict,
-            'jobTypes': dict,
+            'experience_level': dict,
+            'job_types': dict,
             'date': dict,
             'positions': list,
             'locations': list,
@@ -69,19 +76,19 @@ class ConfigValidator:
                     raise ConfigError(f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}.")
 
         # Validate experience levels, ensure they are boolean
-        experience_levels = ['internship', 'entry', 'associate', 'mid-senior level', 'director', 'executive']
+        experience_levels = ['internship', 'entry', 'associate', 'mid_senior_level', 'director', 'executive']
         for level in experience_levels:
-            if not isinstance(parameters['experienceLevel'].get(level), bool):
+            if not isinstance(parameters['experience_level'].get(level), bool):
                 raise ConfigError(f"Experience level '{level}' must be a boolean in config file {config_yaml_path}")
 
         # Validate job types, ensure they are boolean
-        job_types = ['full-time', 'contract', 'part-time', 'temporary', 'internship', 'other', 'volunteer']
+        job_types = ['full_time', 'contract', 'part_time', 'temporary', 'internship', 'other', 'volunteer']
         for job_type in job_types:
-            if not isinstance(parameters['jobTypes'].get(job_type), bool):
+            if not isinstance(parameters['job_types'].get(job_type), bool):
                 raise ConfigError(f"Job type '{job_type}' must be a boolean in config file {config_yaml_path}")
 
         # Validate date filters
-        date_filters = ['all time', 'month', 'week', '24 hours']
+        date_filters = ['all_time', 'month', 'week', '24_hours']
         for date_filter in date_filters:
             if not isinstance(parameters['date'].get(date_filter), bool):
                 raise ConfigError(f"Date filter '{date_filter}' must be a boolean in config file {config_yaml_path}")
@@ -166,13 +173,14 @@ def create_and_run_bot(parameters, llm_api_key):
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
         
-        # Run the resume generator manager's functions
-        resume_generator_manager.choose_style()
+        # Run the resume generator manager's functions if resume is not provided
+        if 'resume' not in parameters['uploads']:
+            resume_generator_manager.choose_style()
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
         browser = init_browser()
-        login_component = AIHawkAuthenticator(browser)
+        login_component = get_authenticator(driver=browser, platform='linkedin')
         apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
         bot = AIHawkBotFacade(login_component, apply_component)
@@ -181,10 +189,10 @@ def create_and_run_bot(parameters, llm_api_key):
         bot.set_parameters(parameters)
         bot.start_login()
         if (parameters['collectMode'] == True):
-            print('Collecting')
+            logger.info('Collecting')
             bot.start_collect_data()
         else:
-            print('Applying')
+            logger.info('Applying')
             bot.start_apply()
     except WebDriverException as e:
         logger.error(f"WebDriver error occurred: {e}")
@@ -195,7 +203,7 @@ def create_and_run_bot(parameters, llm_api_key):
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
 @click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
-def main(collect: False, resume: Path = None):
+def main(collect: bool = False, resume: Optional[Path] = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
