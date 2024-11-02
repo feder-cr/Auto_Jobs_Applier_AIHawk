@@ -27,7 +27,7 @@ class ConfigValidator:
     @staticmethod
     def validate_email(email: str) -> bool:
         return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is not None
-    
+
     @staticmethod
     def validate_yaml_file(yaml_path: Path) -> dict:
         try:
@@ -127,7 +127,7 @@ class FileManager:
 
         required_files = ['secrets.yaml', 'config.yaml', 'plain_text_resume.yaml']
         missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
-        
+
         if missing_files:
             raise FileNotFoundError(f"Missing files in the data folder: {', '.join(missing_files)}")
 
@@ -165,12 +165,15 @@ def create_and_run_bot(parameters, llm_api_key):
             plain_text_resume = file.read()
         resume_object = Resume(plain_text_resume)
         resume_generator_manager = FacadeManager(llm_api_key, style_manager, resume_generator, resume_object, Path("data_folder/output"))
-        
-        # Run the resume generator manager's functions
-        resume_generator_manager.choose_style()
-        
+
+        if parameters.get('uploads', {}).get('resume'):
+            logger.debug("Resume flag detected. Skipping style selection.")
+        else:
+            # Run the resume generator manager's functions
+            resume_generator_manager.choose_style()
+
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
-        
+
         browser = init_browser()
         login_component = AIHawkAuthenticator(browser)
         apply_component = AIHawkJobManager(browser)
@@ -199,14 +202,14 @@ def main(collect: False, resume: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
-        
+
         parameters = ConfigValidator.validate_config(config_file)
         llm_api_key = ConfigValidator.validate_secrets(secrets_file)
-        
+
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
-        
+
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
