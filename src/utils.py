@@ -140,14 +140,4 @@ def chrome_browser_options():
 
     return options
 
-def printred(text):
-    red = "\033[91m"
-    reset = "\033[0m"
-    logger.debug("Printing text in red: %s", text)
-    print(f"{red}{text}{reset}")
 
-def printyellow(text):
-    yellow = "\033[93m"
-    reset = "\033[0m"
-    logger.debug("Printing text in yellow: %s", text)
-    print(f"{yellow}{text}{reset}")
