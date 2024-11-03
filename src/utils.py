@@ -1,24 +1,8 @@
-import logging
 import os
-import random
-import sys
 import time
-
+import random
 from selenium import webdriver
-from loguru import logger
-
-from app_config import MINIMUM_LOG_LEVEL
-
-log_file = "app_log.log"
-
-
-if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-    logger.remove()
-    logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL)
-else:
-    logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
-    logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
+from src.logging import logger
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
@@ -33,6 +17,11 @@ def ensure_chrome_profile():
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
 
+def short_sleep() -> None:
+    time.sleep(random.uniform(1.2, 3))
+
+def medium_sleep() -> None:
+    time.sleep(random.uniform(3, 5))
 
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
@@ -40,7 +29,6 @@ def is_scrollable(element):
     scrollable = int(scroll_height) > int(client_height)
     logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
     return scrollable
-
 
 def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
     logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
@@ -110,7 +98,6 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
     except Exception as e:
         logger.error(f"Exception occurred during scrolling: {e}")
 
-
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
     ensure_chrome_profile()
@@ -154,15 +141,3 @@ def chrome_browser_options():
     return options
 
 
-def printred(text):
-    red = "\033[91m"
-    reset = "\033[0m"
-    logger.debug("Printing text in red: %s", text)
-    print(f"{red}{text}{reset}")
-
-
-def printyellow(text):
-    yellow = "\033[93m"
-    reset = "\033[0m"
-    logger.debug("Printing text in yellow: %s", text)
-    print(f"{yellow}{text}{reset}")

@@ -17,7 +17,7 @@
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+💡 **Get support:** ask questions, seek help, review resume, application tips for making successfull applciation in landing interviews
 
 🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
 
@@ -182,9 +182,19 @@ This file contains sensitive information. Never share or commit this file to ver
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
 - `remote: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `hybrid: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `onsite: [true/false]`
+
   - Set to `true` to include remote jobs, `false` to exclude them
 
 - `experienceLevel:`
+
   - Set desired experience levels to `true`, others to `false`
 
 - `jobTypes:`
@@ -510,7 +520,7 @@ Each section has specific fields to fill out:
     requires_uk_visa: "No"
     legally_allowed_to_work_in_uk: "Yes"
     requires_uk_sponsorship: "No"
-     ```
+    ```
 
 - `work_preferences:`
   - Specify your preferences for work arrangements and conditions.
@@ -721,6 +731,12 @@ Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job mark
 - [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
 
 Auto_Jobs_Applier_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk an even more powerful tool for job seekers worldwide.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=feder-cr/Auto_Jobs_Applier_AIHawk&type=Date)](https://star-history.com/#feder-cr/Auto_Jobs_Applier_AIHawk&Date)
+
+If you like the project please star ⭐ the repository!
 
 ## License
 

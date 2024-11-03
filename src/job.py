@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from loguru import logger
+from src.logging import logger
 
 
 @dataclass

@@ -411,3 +411,23 @@ func_summarize_prompt_template = """
         {text_with_placeholders}
         
         ## Text without placeholders:"""
+
+is_relavant_position_template = """
+   Evaluate whether the provided resume meets the requirements outlined in the job description. Determine if the candidate is suitable for the job based on the information provided.
+
+Job Description: {job_description}
+
+Resume: {resume}
+
+Instructions:
+1. Extract the key requirements from the job description, identifying hard requirements (must-haves) and soft requirements (nice-to-haves).
+2. Identify the relevant qualifications from the resume.
+3. Compare the qualifications against the requirements, ensuring all hard requirements are met. Allow for a 1-year experience gap if applicable, as experience is usually a hard requirement.
+4. Provide a suitability score from 1 to 10. where 1 indicates the candidate does not meet any requirements and 10 indicates the candidate meets all requirements.
+5. Provide a brief reasoning for the score, highlighting which requirements are met and which are not.
+
+Output Format (Strictly follow this format):
+Score: [numerical score]
+Reasoning: [brief explanation]
+Do not output anything else in the response other than the score and reasoning.
+"""

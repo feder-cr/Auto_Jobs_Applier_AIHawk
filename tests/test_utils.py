@@ -4,12 +4,12 @@ import os
 import time
 from unittest import mock
 from selenium.webdriver.remote.webelement import WebElement
-from src.utils import ensure_chrome_profile, is_scrollable, scroll_slow, chrome_browser_options, printred, printyellow
+from src.utils import ensure_chrome_profile, is_scrollable, scroll_slow, chrome_browser_options
 
 # Mocking logging to avoid actual file writing
 @pytest.fixture(autouse=True)
 def mock_logger(mocker):
-    mocker.patch("src.utils.logger")
+    mocker.patch("src.logging.logger")
 
 # Test ensure_chrome_profile function
 def test_ensure_chrome_profile(mocker):
@@ -83,14 +83,3 @@ def test_chrome_browser_options(mocker):
     # Ensure options were set
     assert mock_options.add_argument.called
     assert options == mock_options
-
-# Test printred and printyellow functions
-def test_printred(mocker):
-    mocker.patch("builtins.print")
-    printred("Test")
-    print.assert_called_once_with("\033[91mTest\033[0m")
-
-def test_printyellow(mocker):
-    mocker.patch("builtins.print")
-    printyellow("Test")
-    print.assert_called_once_with("\033[93mTest\033[0m")

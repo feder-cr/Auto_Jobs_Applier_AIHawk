@@ -19,7 +19,7 @@ from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
 import src.strings as strings
-from loguru import logger
+from src.logging import logger
 
 load_dotenv()
 
@@ -99,8 +99,7 @@ class HuggingFaceModel(AIModel):
 
     def invoke(self, prompt: str) -> BaseMessage:
         response = self.chatmodel.invoke(prompt)
-        logger.debug("Invoking Model from Hugging Face API")
-        print(response,type(response))
+        logger.debug(f"Invoking Model from Hugging Face API. Response: {response}, Type: {type(response)}")
         return response
 
 class AIAdapter:
@@ -619,3 +618,16 @@ class GPTAnswerer:
             return "cover"
         else:
             return "resume"
+    
+    def is_job_suitable(self):
+        logger.info("Checking if job is suitable")
+        prompt = ChatPromptTemplate.from_template(strings.is_relavant_position_template)
+        chain = prompt | self.llm_cheap | StrOutputParser()
+        output = chain.invoke({"resume": self.resume, "job_description": self.job_description}).replace("*", "")
+        logger.debug(f"Job suitability output: {output}")
+        score = re.search(r'Score: (\d+)', output).group(1)
+        reasoning = re.search(r'Reasoning: (.+)', output, re.DOTALL).group(1)
+        logger.info(f"Job suitability score: {score}")
+        if int(score) < 7 :
+            logger.debug(f"Job is not suitable: {reasoning}")
+        return int(score) >= 7

@@ -1,23 +1,42 @@
 import random
 import time
 
+from abc import ABC, abstractmethod
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoAlertPresentException, TimeoutException, UnexpectedAlertPresentException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 
-from loguru import logger
+from src.logging import logger
 
+def get_authenticator(driver, platform):
+    if platform == 'linkedin':
+        return LinkedInAuthenticator(driver)
+    else:
+        raise NotImplementedError(f"Platform {platform} not implemented yet.")
 
-class AIHawkAuthenticator:
+class AIHawkAuthenticator(ABC):
 
-    def __init__(self, driver=None):
+    @property
+    def home_url(self):
+        pass
+
+    @abstractmethod
+    def navigate_to_login(self):
+        pass
+
+    @property
+    def is_logged_in(self):
+        pass
+
+    def __init__(self, driver):
         self.driver = driver
         logger.debug(f"AIHawkAuthenticator initialized with driver: {driver}")
 
     def start(self):
         logger.info("Starting Chrome browser to log in to AIHawk.")
-        if self.is_logged_in():
+        self.driver.get(self.home_url)
+        if self.is_logged_in:
             logger.info("User is already logged in. Skipping login process.")
             return
         else:
@@ -25,32 +44,32 @@ class AIHawkAuthenticator:
             self.handle_login()
 
     def handle_login(self):
-        logger.info("Navigating to the AIHawk login page...")
-        self.driver.get("https://www.linkedin.com/login")
-        if 'feed' in self.driver.current_url:
-            logger.debug("User is already logged in.")
-            return
         try:
-            self.enter_credentials()
+            logger.info("Navigating to the AIHawk login page...")
+            self.navigate_to_login()
+            self.prompt_for_credentials()
         except NoSuchElementException as e:
             logger.error(f"Could not log in to AIHawk. Element not found: {e}")
-        self.handle_security_check()
+        self.handle_security_checks()
 
 
-    def enter_credentials(self):
+    def prompt_for_credentials(self):
         try:
             logger.debug("Enter credentials...")
-            
             check_interval = 4  # Interval to log the current URL
             elapsed_time = 0
 
             while True:
+                # Bring the browser window to the front
+                current_window = self.driver.current_window_handle
+                self.driver.switch_to.window(current_window)
+
                 # Log current URL every 4 seconds and remind the user to log in
                 current_url = self.driver.current_url
                 logger.info(f"Please login on {current_url}")
 
                 # Check if the user is already on the feed page
-                if 'feed' in current_url:
+                if self.is_logged_in:
                     logger.debug("Login successful, redirected to feed page.")
                     break
                 else:
@@ -66,8 +85,20 @@ class AIHawkAuthenticator:
         except TimeoutException:
             logger.error("Login form not found. Aborting login.")
 
+    @abstractmethod
+    def handle_security_checks(self):
+        pass
+        
+class LinkedInAuthenticator(AIHawkAuthenticator):
 
-    def handle_security_check(self):
+    @property
+    def home_url(self):
+        return "https://www.linkedin.com"
+
+    def navigate_to_login(self):
+        return self.driver.get("https://www.linkedin.com/login")
+    
+    def handle_security_checks(self):
         try:
             logger.debug("Handling security check...")
             WebDriverWait(self.driver, 10).until(
@@ -80,34 +111,12 @@ class AIHawkAuthenticator:
             logger.info("Security check completed")
         except TimeoutException:
             logger.error("Security check not completed. Please try again later.")
-
+    
+    @property
     def is_logged_in(self):
-        try:
-            self.driver.get('https://www.linkedin.com/feed')
-            logger.debug("Checking if user is logged in...")
-            WebDriverWait(self.driver, 3).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
-            )
+        keywords = ['feed', 'mynetwork','jobs','messaging','notifications']
+        return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
 
-            # Check for the presence of the "Start a post" button
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            logger.debug(f"Found {len(buttons)} 'Start a post' buttons")
-
-            for i, button in enumerate(buttons):
-                logger.debug(f"Button {i + 1} text: {button.text.strip()}")
-
-            if any(button.text.strip().lower() == 'start a post' for button in buttons):
-                logger.info("Found 'Start a post' button indicating user is logged in.")
-                return True
-
-            profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
-            if profile_img_elements:
-                logger.info("Profile image found. Assuming user is logged in.")
-                return True
-
-            logger.info("Did not find 'Start a post' button or profile image. User might not be logged in.")
-            return False
-
-        except TimeoutException:
-            logger.error("Page elements took too long to load or were not found.")
-            return False
+    def __init__(self, driver):
+        super().__init__(driver)
+        pass
