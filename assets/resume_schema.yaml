@@ -3,16 +3,16 @@
 personal_information:
   type: object
   properties:
-    name: {type: string}
+    name: {type: Zhuowei Liao}
     surname: {type: string}
-    date_of_birth: {type: string, format: date}
-    country: {type: string}
+    date_of_birth: {type: 06/27/2001, format: date}
+    country: {type: the United States of America}
     zip_code: {type: string, pattern: "^[0-9]{5,10}$"}
-    city: {type: string}
+    city: {type:Temple City}
     address: {type: string}
     phone_prefix: {type: string, format: phone_prefix}
     phone: {type: string, format: phone}
-    email: {type: string, format: email}
+    email: {type: aaronxliao@gmail.com, format: email}
     github: {type: string, format: uri}
     linkedin: {type: string, format: uri}
   required: [name, surname, date_of_birth, country, city, address, zip_code, phone_prefix, phone, email]
