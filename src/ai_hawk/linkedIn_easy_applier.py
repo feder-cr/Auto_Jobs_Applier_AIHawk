@@ -295,7 +295,7 @@ class AIHawkEasyApplier:
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
         utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
-    def _fill_application_form(self, job):
+    def _fill_application_form(self, job: Job):
         logger.debug(f"Filling out application form for job: {job}")
         while True:
             self.fill_up(job)
@@ -345,7 +345,7 @@ class AIHawkEasyApplier:
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 
-    def fill_up(self, job) -> None:
+    def fill_up(self, job: Job) -> None:
         logger.debug(f"Filling up form sections for job: {job}")
 
         try:
@@ -359,7 +359,7 @@ class AIHawkEasyApplier:
         except Exception as e:
             logger.error(f"Failed to find form elements: {e}")
 
-    def _process_form_element(self, element: WebElement, job) -> None:
+    def _process_form_element(self, element: WebElement, job:Job) -> None:
         logger.debug("Processing form element")
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job)
@@ -421,7 +421,7 @@ class AIHawkEasyApplier:
         logger.debug(f"Element is upload field: {is_upload}")
         return is_upload
 
-    def _handle_upload_fields(self, element: WebElement, job) -> None:
+    def _handle_upload_fields(self, element: WebElement, job:Job) -> None:
         logger.debug("Handling upload fields")
 
         try:
@@ -452,7 +452,11 @@ class AIHawkEasyApplier:
 
         logger.debug("Finished handling upload fields")
 
-    def _create_and_upload_resume(self, element, job):
+    def _create_resume_filepath(self,job:Job,folder_path:str,version:int)->str:
+        return os.path.join(folder_path, f"CV_{job.company}({version}).pdf")
+
+
+    def _create_and_upload_resume(self, element: WebElement, job: Job):
         logger.debug("Starting the process of creating and uploading resume.")
         folder_path = 'generated_cv'
 
@@ -466,8 +470,11 @@ class AIHawkEasyApplier:
 
         while True:
             try:
-                timestamp = int(time.time())
-                file_path_pdf = os.path.join(folder_path, f"CV_{timestamp}.pdf")
+                file_path_pdf = os.path.join(folder_path, f"CV_{job.company}.pdf")
+                repeat_company_count = 0
+                while os.path.isfile(file_path_pdf):
+                    repeat_company_count+=1
+                    file_path_pdf = self._create_resume_filepath(job, folder_path,repeat_company_count)
                 logger.debug(f"Generated file path for resume: {file_path_pdf}")
 
                 logger.debug(f"Generating resume for job: {job.title} at {job.company}")
