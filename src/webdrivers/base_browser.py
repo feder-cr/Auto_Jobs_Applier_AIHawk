@@ -1,21 +1,21 @@
-from enum import Enum, auto
 import os
 
 from abc import ABC, abstractmethod
+from enum import Enum
 from loguru import logger
 
 
 class BrowserType(Enum):
     """Enum for supported browser types"""
-    CHROME = auto()
-    FIREFOX = auto()
-    
+    CHROME = 'chrome'
+    FIREFOX = 'firefox'
+
 class BrowserProfile:
     """Manages browser profile creation and configuration"""
     def __init__(self, browser_type: BrowserType):
-        self.browser_type: BrowserType = browser_type
+        self.browser_type: BrowserType = browser_type.name.lower()
         self.profile_path = os.path.join(
-            os.getcwd(), 
+            os.getcwd(),
             f"{self.browser_type}_profile",
             "linkedin_profile"
         )
