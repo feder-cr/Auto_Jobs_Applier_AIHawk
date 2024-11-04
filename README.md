@@ -186,16 +186,9 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 4. **Install dependencies:**
    ```bash
    # Install from requirements.txt
-   conda install --file requirements.txt
-
-   # Or create environment from provided file
-   conda env create -f environment.yml
+   pip install -r requirements.txt
    ```
-
-Note: If you encounter any issues with conda installation, try installing packages from conda-forge:
-```bash
-conda install -c conda-forge package_name
-```
+ 
 
 ## Configuration
 
