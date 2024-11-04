@@ -250,6 +250,9 @@ Please write the cover letter in a way that directly addresses the job role and 
 - Do not include any introductions, explanations, or additional information.
 - The letter should be formatted into paragraph.
 
+## Company Name:
+{company}
+
 ## Job Description:
 ```
 {job_description}

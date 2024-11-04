@@ -22,6 +22,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 import src.utils as utils
 from src.logging import logger
 from src.job import Job
+from src.ai_hawk.llm.llm_manager import GPTAnswerer
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
         """
@@ -38,7 +39,7 @@ def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
 
 class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
-                 gpt_answerer: Any, resume_generator_manager):
+                 gpt_answerer: GPTAnswerer, resume_generator_manager):
         logger.debug("Initializing AIHawkEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
