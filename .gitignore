@@ -124,9 +124,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# GitHub
-.github/
-
 # MacOS
 .DS_Store
 
