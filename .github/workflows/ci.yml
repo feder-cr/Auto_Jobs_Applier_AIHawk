@@ -3,6 +3,7 @@ name: Python CI
 on:
   push:
   pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
@@ -21,4 +22,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest
+        run: pytest 
