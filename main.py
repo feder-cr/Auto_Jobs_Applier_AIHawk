@@ -5,13 +5,10 @@ from pathlib import Path
 import yaml
 import click
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
-from src.utils import chrome_browser_options, firefox_browser_options
+from src.webdrivers.base_browser import BrowserType
+from src.webdrivers.browser_factory import BrowserFactory
 from src.llm.llm_manager import GPTAnswerer
 from src.aihawk_authenticator import AIHawkAuthenticator
 from src.aihawk_bot_facade import AIHawkBotFacade
@@ -151,16 +148,9 @@ class FileManager:
 
         return result
 
-def init_browser(browser: str = 'chrome') -> webdriver.Chrome | webdriver.Firefox:
+def init_browser(browser_type: BrowserType = BrowserType.CHROME) -> webdriver.Chrome | webdriver.Firefox:
     try:
-        if browser == 'chrome':
-            options = chrome_browser_options()
-            service = ChromeService(ChromeDriverManager().install())
-            return webdriver.Chrome(service=service, options=options)
-        elif browser == 'firefox':
-            options = firefox_browser_options()
-            service = FirefoxService(GeckoDriverManager().install())
-            return webdriver.Firefox(service=service, options=options)
+        return BrowserFactory.get_driver(browser_type)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
@@ -178,7 +168,7 @@ def create_and_run_bot(parameters, llm_api_key):
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
-        browser = init_browser(parameters['browser'])
+        browser = init_browser(BrowserFactory.get_browser_type())
         login_component = AIHawkAuthenticator(browser)
         apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
@@ -201,9 +191,8 @@ def create_and_run_bot(parameters, llm_api_key):
 
 @click.command()
 @click.option('--resume', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), help="Path to the resume PDF file")
-@click.option('--browser', type=click.Choice(['chrome', 'firefox']), default=None, help='Browser to use for the bot')
 @click.option('--collect', is_flag=True, help="Only collects data job information into data.json file")
-def main(collect: False, browser: str = 'chrome', resume: Path = None):
+def main(collect: False, resume: Path = None):
     try:
         data_folder = Path("data_folder")
         secrets_file, config_file, plain_text_resume_file, output_folder = FileManager.validate_data_folder(data_folder)
@@ -214,8 +203,12 @@ def main(collect: False, browser: str = 'chrome', resume: Path = None):
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
-        parameters['browser'] = browser
-        
+
+        BrowserFactory.set_browser_type(
+            BrowserType.CHROME if parameters.get('browser') is None or parameters['browser'].lower() == 'chrome'
+            else BrowserType.FIREFOX
+        )
+
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
