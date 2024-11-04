@@ -17,6 +17,7 @@ from src.job import Job
 from src.logging import logger
 
 import urllib.parse
+import re
 
 
 class EnvironmentKeys:
@@ -61,6 +62,11 @@ class AIHawkJobManager:
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
         self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
+
+        # Generate regex patterns from blacklist lists
+        self.title_blacklist_patterns = self.generate_regex_patterns(self.title_blacklist)
+        self.company_blacklist_patterns = self.generate_regex_patterns(self.company_blacklist)
+        self.location_blacklist_patterns = self.generate_regex_patterns(self.location_blacklist)
 
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
@@ -484,15 +490,27 @@ class AIHawkJobManager:
 
     def is_blacklisted(self, job_title, company, link, job_location):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
-        job_title_words = job_title.lower().split(' ')
-        title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
-        company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
-        location_blacklisted= job_location.strip().lower() in (word.strip().lower() for word in self.location_blacklist)
+        title_blacklisted = any(re.search(pattern, job_title, re.IGNORECASE) for pattern in self.title_blacklist_patterns)
+        company_blacklisted = any(re.search(pattern, company, re.IGNORECASE) for pattern in self.company_blacklist_patterns)
+        location_blacklisted = any(re.search(pattern, job_location, re.IGNORECASE) for pattern in self.location_blacklist_patterns)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or location_blacklisted or link_seen
         logger.debug(f"Job blacklisted status: {is_blacklisted}")
 
-        return title_blacklisted or company_blacklisted or location_blacklisted or link_seen
+        return is_blacklisted
+
+    def generate_regex_patterns(self, blacklist):
+        # Converts each blacklist entry to a regex pattern that ensures all words appear, in any order
+        patterns = []
+        for term in blacklist:
+            # Split term into individual words
+            words = term.split()
+            # Create a lookahead for each word to ensure it appears independently
+            lookaheads = [fr"(?=.*\b{re.escape(word)}\b)" for word in words]
+            # Combine lookaheads with a pattern that allows flexible separators between the words
+            pattern = "".join(lookaheads)  # Ensures all words are present
+            patterns.append(pattern)
+        return patterns
 
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs
