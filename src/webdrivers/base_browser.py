@@ -1,22 +1,8 @@
 from enum import Enum, auto
 import os
-import sys
 
 from abc import ABC, abstractmethod
 from loguru import logger
-
-from app_config import MINIMUM_LOG_LEVEL
-
-log_file = "app_log.log"
-
-
-if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-    logger.remove()
-    logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL)
-else:
-    logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
-    logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
 
 
 class BrowserType(Enum):

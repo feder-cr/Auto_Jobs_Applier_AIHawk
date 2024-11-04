@@ -18,9 +18,6 @@ else:
     logger.remove()
     logger.add(sys.stderr, level="DEBUG")
 
-chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
-firefoxProfilePath = os.path.join(os.getcwd(), "firefox_profile", "linkedin_profile")
-
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")
