@@ -17,6 +17,7 @@ from src.job import Job
 from src.logging import logger
 
 import urllib.parse
+from src.regex_utils import generate_regex_patterns_for_blacklisting
 import re
 
 
@@ -64,9 +65,9 @@ class AIHawkJobManager:
         self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
 
         # Generate regex patterns from blacklist lists
-        self.title_blacklist_patterns = self.generate_regex_patterns(self.title_blacklist)
-        self.company_blacklist_patterns = self.generate_regex_patterns(self.company_blacklist)
-        self.location_blacklist_patterns = self.generate_regex_patterns(self.location_blacklist)
+        self.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.title_blacklist)
+        self.company_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.company_blacklist)
+        self.location_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.location_blacklist)
 
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
@@ -498,19 +499,6 @@ class AIHawkJobManager:
         logger.debug(f"Job blacklisted status: {is_blacklisted}")
 
         return is_blacklisted
-
-    def generate_regex_patterns(self, blacklist):
-        # Converts each blacklist entry to a regex pattern that ensures all words appear, in any order
-        patterns = []
-        for term in blacklist:
-            # Split term into individual words
-            words = term.split()
-            # Create a lookahead for each word to ensure it appears independently
-            lookaheads = [fr"(?=.*\b{re.escape(word)}\b)" for word in words]
-            # Combine lookaheads with a pattern that allows flexible separators between the words
-            pattern = "".join(lookaheads)  # Ensures all words are present
-            patterns.append(pattern)
-        return patterns
 
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs
