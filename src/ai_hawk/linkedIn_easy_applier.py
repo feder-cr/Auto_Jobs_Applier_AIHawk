@@ -22,6 +22,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 import src.utils as utils
 from src.logging import logger
 from src.job import Job
+import utils.time_utils
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
         """
@@ -116,7 +117,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        utils.medium_sleep()
+        utils.time_utils.medium_sleep()
         self.check_for_premium_redirect(job)
 
         try:
@@ -309,13 +310,13 @@ class AIHawkEasyApplier:
         if 'submit application' in button_text:
             logger.debug("Submit button found, submitting application")
             self._unfollow_company()
-            utils.short_sleep()
+            utils.time_utils.short_sleep()
             next_button.click()
-            utils.short_sleep()
+            utils.time_utils.short_sleep()
             return True
-        utils.short_sleep()
+        utils.time_utils.short_sleep()
         next_button.click()
-        utils.medium_sleep()
+        utils.time_utils.medium_sleep()
         self._check_for_errors()
 
     def _unfollow_company(self) -> None:
@@ -338,9 +339,9 @@ class AIHawkEasyApplier:
         logger.debug("Discarding application")
         try:
             self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
-            utils.medium_sleep()
+            utils.time_utils.medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
-            utils.medium_sleep()
+            utils.time_utils.medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 

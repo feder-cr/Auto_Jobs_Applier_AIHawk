@@ -18,6 +18,8 @@ from src.logging import logger
 
 import urllib.parse
 
+import utils.time_utils
+
 
 class EnvironmentKeys:
     def __init__(self):
@@ -93,7 +95,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     utils.printyellow(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    utils.medium_sleep()
+                    utils.time_utils.medium_sleep()
                     utils.printyellow("Starting the collecting process for this page")
                     self.read_jobs()
                     utils.printyellow("Collecting data on this page has been completed!")
@@ -142,7 +144,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     logger.debug(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    utils.medium_sleep()
+                    utils.time_utils.medium_sleep()
                     logger.debug("Starting the application process for this page...")
 
                     try:
