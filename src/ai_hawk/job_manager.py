@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 import src.utils as utils
-from app_config import MINIMUM_WAIT_TIME_IN_SECONDS
+from config import MINIMUM_WAIT_TIME_IN_SECONDS
 from src.job import Job
 from src.logging import logger
 
