@@ -141,3 +141,6 @@ def chrome_browser_options():
     return options
 
 
+
+def printyellow(text):
+    print(f"\033[93m{text}\033[0m")
