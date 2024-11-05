@@ -81,7 +81,7 @@ class AIHawkEasyApplier:
         attempts = 0
 
         while "linkedin.com/premium" in current_url and attempts < max_attempts:
-            logger.warning("Redirected to AIHawk Premium page. Attempting to return to job page.")
+            logger.warning("Redirected to linkedIn Premium page. Attempting to return to job page.")
             attempts += 1
 
             self.driver.get(job.link)
@@ -91,7 +91,7 @@ class AIHawkEasyApplier:
         if "linkedin.com/premium" in current_url:
             logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
-                f"Redirected to AIHawk Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+                f"Redirected to linkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
             
     def apply_to_job(self, job: Job) -> None:
         """
