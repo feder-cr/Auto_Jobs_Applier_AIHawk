@@ -223,11 +223,11 @@ This file defines your job search parameters and bot behavior. Each section cont
 
   - Set to `true` to include remote jobs, `false` to exclude them
 
-- `experienceLevel:`
+- `experience_level:`
 
   - Set desired experience levels to `true`, others to `false`
 
-- `jobTypes:`
+- `job_types:`
   - Set desired job types to `true`, others to `false`
 
 - `date:`
