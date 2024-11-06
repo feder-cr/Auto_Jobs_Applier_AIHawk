@@ -17,6 +17,8 @@ from src.job import Job
 from src.logging import logger
 
 import urllib.parse
+from src.regex_utils import generate_regex_patterns_for_blacklisting
+import re
 
 import utils.browser_utils as browser_utils
 import utils.time_utils
@@ -64,6 +66,11 @@ class AIHawkJobManager:
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
         self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
+
+        # Generate regex patterns from blacklist lists
+        self.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.title_blacklist)
+        self.company_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.company_blacklist)
+        self.location_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.location_blacklist)
 
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
@@ -372,13 +379,13 @@ class AIHawkJobManager:
                 continue
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Job blacklisted")
                 continue
             if self.is_already_applied_to_job(job.title, job.company, job.link):
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Already applied to this job")
                 continue
             if self.is_already_applied_to_company(job.company):
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Already applied to this company")
                 continue
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
@@ -387,10 +394,10 @@ class AIHawkJobManager:
                     logger.debug(f"Applied to job: {job.title} at {job.company}")
             except Exception as e:
                 logger.error(f"Failed to apply for {job.title} at {job.company}: {e}")
-                self.write_to_file(job, "failed")
+                self.write_to_file(job, "failed", f"Application error: {str(e)}")
                 continue
 
-    def write_to_file(self, job : Job, file_name):
+    def write_to_file(self, job : Job, file_name, reason=None):
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
@@ -402,6 +409,10 @@ class AIHawkJobManager:
             "job_location": job.location,
             "pdf_path": pdf_path
         }
+        
+        if reason:
+            data["reason"] = reason
+            
         file_path = self.output_file_directory / f"{file_name}.json"
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -497,15 +508,14 @@ class AIHawkJobManager:
 
     def is_blacklisted(self, job_title, company, link, job_location):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
-        job_title_words = job_title.lower().split(' ')
-        title_blacklisted = any(word in job_title_words for word in map(str.lower, self.title_blacklist))
-        company_blacklisted = company.strip().lower() in (word.strip().lower() for word in self.company_blacklist)
-        location_blacklisted= job_location.strip().lower() in (word.strip().lower() for word in self.location_blacklist)
+        title_blacklisted = any(re.search(pattern, job_title, re.IGNORECASE) for pattern in self.title_blacklist_patterns)
+        company_blacklisted = any(re.search(pattern, company, re.IGNORECASE) for pattern in self.company_blacklist_patterns)
+        location_blacklisted = any(re.search(pattern, job_location, re.IGNORECASE) for pattern in self.location_blacklist_patterns)
         link_seen = link in self.seen_jobs
         is_blacklisted = title_blacklisted or company_blacklisted or location_blacklisted or link_seen
         logger.debug(f"Job blacklisted status: {is_blacklisted}")
 
-        return title_blacklisted or company_blacklisted or location_blacklisted or link_seen
+        return is_blacklisted
 
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs

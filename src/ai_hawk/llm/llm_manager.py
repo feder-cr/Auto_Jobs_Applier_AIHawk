@@ -19,7 +19,10 @@ from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
 import ai_hawk.llm.prompts as prompts
+from config import JOB_SUITABILITY_SCORE
 from src.logging import logger
+from src.job import Job
+
 
 load_dotenv()
 
@@ -388,7 +391,7 @@ class GPTAnswerer:
         logger.debug(f"Setting resume: {resume}")
         self.resume = resume
 
-    def set_job(self, job):
+    def set_job(self, job: Job):
         logger.debug(f"Setting job: {job}")
         self.job = job
         self.job.set_summarize_job_description(
@@ -537,7 +540,7 @@ class GPTAnswerer:
         if section_name == "cover_letter":
             chain = chains.get(section_name)
             output = chain.invoke(
-                {"resume": self.resume, "job_description": self.job_description})
+                {"resume": self.resume, "job_description": self.job_description, "company": self.job.company})
             logger.debug(f"Cover letter generated: {output}")
             return output
         resume_section = getattr(self.resume, section_name, None) or getattr(self.job_application_profile, section_name,
@@ -628,6 +631,6 @@ class GPTAnswerer:
         score = re.search(r'Score: (\d+)', output).group(1)
         reasoning = re.search(r'Reasoning: (.+)', output, re.DOTALL).group(1)
         logger.info(f"Job suitability score: {score}")
-        if int(score) < 7 :
+        if int(score) < JOB_SUITABILITY_SCORE :
             logger.debug(f"Job is not suitable: {reasoning}")
-        return int(score) >= 7
+        return int(score) >= JOB_SUITABILITY_SCORE
