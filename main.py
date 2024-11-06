@@ -10,7 +10,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
-from src.utils import chrome_browser_options
+from src.utils.chrome_utils import chrome_browser_options
 
 from src.job_application_profile import JobApplicationProfile
 from src.logging import logger

@@ -4,6 +4,7 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -11,13 +12,13 @@ from selenium.webdriver.common.by import By
 
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
-import src.utils as utils
 from config import MINIMUM_WAIT_TIME_IN_SECONDS
 from src.job import Job
 from src.logging import logger
 
 import urllib.parse
 
+import utils.browser_utils as browser_utils
 import utils.time_utils
 
 
@@ -88,38 +89,38 @@ class AIHawkJobManager:
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
-            utils.printyellow(f"Collecting data for {position} in {location}.")
+            logger.info(f"Collecting data for {position} in {location}.",color="yellow")
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    utils.printyellow(f"Going to job page {job_page_number}")
+                    logger.info(f"Going to job page {job_page_number}", color="yellow")
                     self.next_job_page(position, location_url, job_page_number)
                     utils.time_utils.medium_sleep()
-                    utils.printyellow("Starting the collecting process for this page")
+                    logger.info("Starting the collecting process for this page", color="yellow")
                     self.read_jobs()
-                    utils.printyellow("Collecting data on this page has been completed!")
+                    logger.info("Collecting data on this page has been completed!", color="yellow")
 
                     time_left = minimum_page_time - time.time()
                     if time_left > 0:
-                        utils.printyellow(f"Sleeping for {time_left} seconds.")
+                        logger.info(f"Sleeping for {time_left} seconds.",color="yellow")
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(1, 5)
-                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                        logger.info(f"Sleeping for {sleep_time / 60} minutes.",color="yellow")
                         time.sleep(sleep_time)
                         page_sleep += 1
             except Exception:
                 pass
             time_left = minimum_page_time - time.time()
             if time_left > 0:
-                utils.printyellow(f"Sleeping for {time_left} seconds.")
+                logger.info(f"Sleeping for {time_left} seconds.",color="yellow")
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                logger.info(f"Sleeping for {sleep_time / 60} minutes.",color="yellow")
                 time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -246,8 +247,8 @@ class AIHawkJobManager:
 
         try:
             job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+            browser_utils.scroll_slow(self.driver, job_results)
+            browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
             job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
                 0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
@@ -274,15 +275,15 @@ class AIHawkJobManager:
             pass
         
         job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        utils.scroll_slow(self.driver, job_results)
-        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+        browser_utils.scroll_slow(self.driver, job_results)
+        browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
             raise Exception("No job class elements found on page")
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
+                logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
             try:
@@ -462,7 +463,15 @@ class AIHawkJobManager:
 
     def extract_job_information_from_tile(self, job_tile):
         logger.debug("Extracting job information from tile")
-        job_title, company, job_location, apply_method, link = "", "", "", "", ""
+        job_id, job_title, company, job_location, apply_method, link = "", "", "", "", "", ""
+        
+        # Extract job ID from the URL
+        try:
+            job_id = urllib.parse.parse_qs(urllib.parse.urlparse(link).query).get('currentJobId', [''])[0]
+            logger.debug(f"Job ID extracted: {job_id}")
+        except Exception as e:
+            logger.warning(f"Failed to extract job ID: {e}")
+
         try:
             logger.trace(job_tile.get_attribute('outerHTML'))
             job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
@@ -472,10 +481,12 @@ class AIHawkJobManager:
             logger.debug(f"Job information extracted: {job_title} at {company}")
         except NoSuchElementException:
             logger.warning("Some job information (title, link, or company) is missing.")
+        
         try:
             job_location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
+        
         try:
             apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
         except NoSuchElementException:

@@ -19,9 +19,12 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from job_application import JobApplication
+from job_application_saver import ApplicationSaver
 import src.utils as utils
 from src.logging import logger
 from src.job import Job
+from utils import browser_utils
 import utils.time_utils
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
@@ -109,7 +112,7 @@ class AIHawkEasyApplier:
 
     def job_apply(self, job: Job):
         logger.debug(f"Starting job application for job: {job}")
-
+        self.job_application = JobApplication(job)
         try:
             self.driver.get(job.link)
             logger.debug(f"Navigated to job link: {job.link}")
@@ -292,14 +295,15 @@ class AIHawkEasyApplier:
     def _scroll_page(self) -> None:
         logger.debug("Scrolling the page")
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
-        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
-        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
+        browser_utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
+        browser_utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
         logger.debug(f"Filling out application form for job: {job}")
         while True:
             self.fill_up(job)
             if self._next_or_submit():
+                ApplicationSaver.save(self.job_application)
                 logger.debug("Application form submitted")
                 break
 
@@ -412,6 +416,7 @@ class AIHawkEasyApplier:
         if existing_answer in options:
             select.select_by_visible_text(existing_answer)
             logger.debug(f"Selected option: {existing_answer}")
+            self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
         else:
             logger.error(f"Answer '{existing_answer}' is not a valid option in the dropdown")
             raise Exception(f"Invalid option selected: {existing_answer}")
@@ -526,6 +531,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Uploading resume from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
             job.resume_path = os.path.abspath(file_path_pdf)
+            self.job_application.resume_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Resume created and uploaded successfully: {file_path_pdf}")
         except Exception as e:
@@ -533,7 +539,7 @@ class AIHawkEasyApplier:
             logger.error(f"Resume upload failed: {tb_str}")
             raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
 
-    def _create_and_upload_cover_letter(self, element: WebElement, job) -> None:
+    def _create_and_upload_cover_letter(self, element: WebElement, job : Job) -> None:
         logger.debug("Starting the process of creating and uploading cover letter.")
 
         cover_letter_text = self.gpt_answerer.answer_question_textual_wide_range("Write a cover letter")
@@ -626,6 +632,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Uploading cover letter from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
             job.cover_letter_path = os.path.abspath(file_path_pdf)
+            self.job_application.cover_letter_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Cover letter created and uploaded successfully: {file_path_pdf}")
         except Exception as e:
@@ -675,13 +682,16 @@ class AIHawkEasyApplier:
             options = [radio.text.lower() for radio in radios]
 
             existing_answer = self._find_existing_answer(question_text)
+
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
+                self.job_application.save_application_data(existing_answer)
                 logger.debug("Selected existing radio answer")
                 return True
 
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+            self.job_application.save_application_data({'type': 'radio', 'question': question_text, 'answer': answer})
             self._select_radio(radios, answer)
             logger.debug("Selected new radio answer")
             return True
@@ -727,6 +737,8 @@ class AIHawkEasyApplier:
             self._enter_text(text_field, answer)
             logger.debug("Entered answer into the textbox.")
 
+            self.job_application.save_application_data({'type': question_type, 'question': question_text, 'answer': answer})
+
             # Save non-cover letter answers
             if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
@@ -753,14 +765,16 @@ class AIHawkEasyApplier:
             for item in self.all_data:
                 if self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
                     existing_answer = item
-
                     break
+
             if existing_answer:
                 self._enter_text(date_field, existing_answer['answer'])
                 logger.debug("Entered existing date answer")
+                self.job_application.save_application_data(existing_answer)
                 return True
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+            self.job_application.save_application_data({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
             return True
@@ -795,6 +809,7 @@ class AIHawkEasyApplier:
 
                 if existing_answer:
                     logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
+                    self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
                     if current_selection != existing_answer:
                         logger.debug(f"Updating selection to: {existing_answer}")
                         self._select_dropdown_option(dropdown, existing_answer)
@@ -802,6 +817,7 @@ class AIHawkEasyApplier:
                     logger.debug(f"No existing answer found, querying model for: {question_text}")
                     answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                     self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                    self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': answer})
                     self._select_dropdown_option(dropdown, answer)
                     logger.debug(f"Selected new dropdown answer: {answer}")
 
