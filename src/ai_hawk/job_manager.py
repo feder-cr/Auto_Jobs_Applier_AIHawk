@@ -376,13 +376,13 @@ class AIHawkJobManager:
                 continue
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Job blacklisted")
                 continue
             if self.is_already_applied_to_job(job.title, job.company, job.link):
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Already applied to this job")
                 continue
             if self.is_already_applied_to_company(job.company):
-                self.write_to_file(job, "skipped")
+                self.write_to_file(job, "skipped", "Already applied to this company")
                 continue
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
@@ -391,10 +391,10 @@ class AIHawkJobManager:
                     logger.debug(f"Applied to job: {job.title} at {job.company}")
             except Exception as e:
                 logger.error(f"Failed to apply for {job.title} at {job.company}: {e}")
-                self.write_to_file(job, "failed")
+                self.write_to_file(job, "failed", f"Application error: {str(e)}")
                 continue
 
-    def write_to_file(self, job, file_name):
+    def write_to_file(self, job, file_name, reason=None):
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.pdf_path).resolve()
         pdf_path = pdf_path.as_uri()
@@ -406,6 +406,10 @@ class AIHawkJobManager:
             "job_location": job.location,
             "pdf_path": pdf_path
         }
+        
+        if reason:
+            data["reason"] = reason
+            
         file_path = self.output_file_directory / f"{file_name}.json"
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
