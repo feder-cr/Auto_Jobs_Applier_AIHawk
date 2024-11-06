@@ -452,7 +452,7 @@ class AIHawkEasyApplier:
 
         logger.debug("Finished handling upload fields")
 
-    def _create_and_upload_resume(self, element, job):
+    def _create_and_upload_resume(self, element, job : Job):
         logger.debug("Starting the process of creating and uploading resume.")
         folder_path = 'generated_cv'
 
@@ -525,7 +525,7 @@ class AIHawkEasyApplier:
         try:
             logger.debug(f"Uploading resume from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
-            job.pdf_path = os.path.abspath(file_path_pdf)
+            job.resume_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Resume created and uploaded successfully: {file_path_pdf}")
         except Exception as e:

@@ -389,9 +389,9 @@ class AIHawkJobManager:
                 self.write_to_file(job, "failed")
                 continue
 
-    def write_to_file(self, job, file_name):
+    def write_to_file(self, job : Job, file_name):
         logger.debug(f"Writing job application result to file: {file_name}")
-        pdf_path = Path(job.pdf_path).resolve()
+        pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
         data = {
             "company": job.company,
