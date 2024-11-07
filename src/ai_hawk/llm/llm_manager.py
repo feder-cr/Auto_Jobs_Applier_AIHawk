@@ -18,10 +18,11 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
-import src.strings as strings
+import ai_hawk.llm.prompts as prompts
+from config import JOB_SUITABILITY_SCORE
 from src.logging import logger
 from src.job import Job
-from app_config import JOB_SUITABILITY_SCORE
+
 
 load_dotenv()
 
@@ -402,11 +403,11 @@ class GPTAnswerer:
 
     def summarize_job_description(self, text: str) -> str:
         logger.debug(f"Summarizing job description: {text}")
-        strings.summarize_prompt_template = self._preprocess_template_string(
-            strings.summarize_prompt_template
+        prompts.summarize_prompt_template = self._preprocess_template_string(
+            prompts.summarize_prompt_template
         )
         prompt = ChatPromptTemplate.from_template(
-            strings.summarize_prompt_template)
+            prompts.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"text": text})
         logger.debug(f"Summary generated: {output}")
@@ -420,19 +421,19 @@ class GPTAnswerer:
     def answer_question_textual_wide_range(self, question: str) -> str:
         logger.debug(f"Answering textual question: {question}")
         chains = {
-            "personal_information": self._create_chain(strings.personal_information_template),
-            "self_identification": self._create_chain(strings.self_identification_template),
-            "legal_authorization": self._create_chain(strings.legal_authorization_template),
-            "work_preferences": self._create_chain(strings.work_preferences_template),
-            "education_details": self._create_chain(strings.education_details_template),
-            "experience_details": self._create_chain(strings.experience_details_template),
-            "projects": self._create_chain(strings.projects_template),
-            "availability": self._create_chain(strings.availability_template),
-            "salary_expectations": self._create_chain(strings.salary_expectations_template),
-            "certifications": self._create_chain(strings.certifications_template),
-            "languages": self._create_chain(strings.languages_template),
-            "interests": self._create_chain(strings.interests_template),
-            "cover_letter": self._create_chain(strings.coverletter_template),
+            "personal_information": self._create_chain(prompts.personal_information_template),
+            "self_identification": self._create_chain(prompts.self_identification_template),
+            "legal_authorization": self._create_chain(prompts.legal_authorization_template),
+            "work_preferences": self._create_chain(prompts.work_preferences_template),
+            "education_details": self._create_chain(prompts.education_details_template),
+            "experience_details": self._create_chain(prompts.experience_details_template),
+            "projects": self._create_chain(prompts.projects_template),
+            "availability": self._create_chain(prompts.availability_template),
+            "salary_expectations": self._create_chain(prompts.salary_expectations_template),
+            "certifications": self._create_chain(prompts.certifications_template),
+            "languages": self._create_chain(prompts.languages_template),
+            "interests": self._create_chain(prompts.interests_template),
+            "cover_letter": self._create_chain(prompts.coverletter_template),
         }
         section_prompt = """You are assisting a bot designed to automatically apply for jobs on AIHawk. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
@@ -560,7 +561,7 @@ class GPTAnswerer:
     def answer_question_numeric(self, question: str, default_experience: str = 3) -> str:
         logger.debug(f"Answering numeric question: {question}")
         func_template = self._preprocess_template_string(
-            strings.numeric_question_template)
+            prompts.numeric_question_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
@@ -589,7 +590,7 @@ class GPTAnswerer:
     def answer_question_from_options(self, question: str, options: list[str]) -> str:
         logger.debug(f"Answering question from options: {question}")
         func_template = self._preprocess_template_string(
-            strings.options_template)
+            prompts.options_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
@@ -623,7 +624,7 @@ class GPTAnswerer:
     
     def is_job_suitable(self):
         logger.info("Checking if job is suitable")
-        prompt = ChatPromptTemplate.from_template(strings.is_relavant_position_template)
+        prompt = ChatPromptTemplate.from_template(prompts.is_relavant_position_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke({"resume": self.resume, "job_description": self.job_description}).replace("*", "")
         logger.debug(f"Job suitability output: {output}")
