@@ -12,41 +12,23 @@
 
 **🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
 
-<!-- Message Clarity -->
-## 🚀 Join the AIHawk Community (For Jobs) 🚀
+Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/mMZcMTH9K6) (for Open Source contributors)
 
-Connect with like-minded individuals and get the most out of AIHawk.
-
-💡 **Get support:** ask questions, seek help, review resume, application tips for making successfull applciation in landing interviews
-
-🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
-
-🤝 **Network:** Connect with other professionals and explore new opportunities.
-
-🔔 **Stay updated:** Get the latest news and updates on AIHawk.
-
-<!-- Strong Call to Action -->
-### Join Now 👇
-
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
-)](https://t.me/AIhawkCommunity)
-
-
-## Join AI Hawk FOSS community
-
-🌐 **Contribute to FOSS:** Collaborate to this open-source projects, improve code, and share your contributions with the community.
-
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
-
-🔔 **Stay updated:** Get the latest news and updates on AIHawk.
-
-🚀 **Innovate Together:** Work on cutting-edge projects and bring new ideas to life with the support of the community.
-
-
-
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity)
 [![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
 
 </div>
+
+**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of Ai Hawk </br>
+As AI Hawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
+
+**Project Maintainers / Leads**: [surapuramakhil](https://github.com/surapuramakhil), [sarob](https://github.com/sarob), [cjbbb](https://github.com/cjbbb)
+
+We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and buidling better version of this product.
+
+reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/mMZcMTH9K6). [Special thanks](#special-thanks) 
+
+Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk a powerful tool for job seekers worldwide.
 
 ## Table of Contents
 
@@ -726,24 +708,27 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, Auto_Jobs_Applier_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
 
-## Contributors
-
-- [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
-
-Auto_Jobs_Applier_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk an even more powerful tool for job seekers worldwide.
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=feder-cr/Auto_Jobs_Applier_AIHawk&type=Date)](https://star-history.com/#feder-cr/Auto_Jobs_Applier_AIHawk&Date)
 
 If you like the project please star ⭐ the repository!
 
+## Special Thanks
+[![Contributors](https://img.shields.io/github/contributors/feder-cr/Auto_Jobs_Applier_AIHawk)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/graphs/contributors)
+
+<a href="https://github.com/AIHawk-co/Auto_Jobs_Applier/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=AIHawk-co/Auto_Jobs_Applier" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the  MIT + Commons Clause License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
 
-This tool, Auto_Jobs_Applier_AIHawk, is intended for educational purposes only. The creator assumes no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
+This tool, Auto_Jobs_Applier_AIHawk, is intended for use at your own risk. The creators / maintainers / contributors assume no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
 
 [Back to top 🚀](#top)
