@@ -17,7 +17,7 @@
 
 Connect with like-minded individuals and get the most out of AIHawk.
 
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
+💡 **Get support:** ask questions, seek help, review resume, application tips for making successfull applciation in landing interviews
 
 🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
 
@@ -119,6 +119,8 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
   - 3.11.9(64b)
   - 3.12.5(64b)
 
+### Option 1: Using Python Virtual Environment 
+
 1. **Download and Install Python:**
 
    Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
@@ -160,6 +162,34 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
+### Option 2: Using Conda 
+
+1. **Install Conda:**
+   - Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html)
+   - Or install Anaconda from the [Anaconda website](https://www.anaconda.com/download)
+
+2. **Create and activate conda environment:**
+   ```bash
+   # Create new environment
+   conda create -n aihawk python=3.11
+
+   # Activate environment
+   conda activate aihawk
+   ```
+
+3. **Clone the repository:**
+   ```bash
+   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+   cd Auto_Jobs_Applier_AIHawk
+   ```
+
+4. **Install dependencies:**
+   ```bash
+   # Install from requirements.txt
+   pip install -r requirements.txt
+   ```
+ 
+
 ## Configuration
 
 ### 1. secrets.yaml
@@ -182,12 +212,22 @@ This file contains sensitive information. Never share or commit this file to ver
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
 - `remote: [true/false]`
+
   - Set to `true` to include remote jobs, `false` to exclude them
 
-- `experienceLevel:`
+- `hybrid: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `onsite: [true/false]`
+
+  - Set to `true` to include remote jobs, `false` to exclude them
+
+- `experience_level:`
+
   - Set desired experience levels to `true`, others to `false`
 
-- `jobTypes:`
+- `job_types:`
   - Set desired job types to `true`, others to `false`
 
 - `date:`
@@ -510,7 +550,7 @@ Each section has specific fields to fill out:
     requires_uk_visa: "No"
     legally_allowed_to_work_in_uk: "Yes"
     requires_uk_sponsorship: "No"
-     ```
+    ```
 
 - `work_preferences:`
   - Specify your preferences for work arrangements and conditions.
@@ -721,6 +761,12 @@ Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job mark
 - [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
 
 Auto_Jobs_Applier_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk an even more powerful tool for job seekers worldwide.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=feder-cr/Auto_Jobs_Applier_AIHawk&type=Date)](https://star-history.com/#feder-cr/Auto_Jobs_Applier_AIHawk&Date)
+
+If you like the project please star ⭐ the repository!
 
 ## License
 

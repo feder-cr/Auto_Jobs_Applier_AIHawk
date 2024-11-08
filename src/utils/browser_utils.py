@@ -1,21 +1,9 @@
+
 import random
-import sys
 import time
 
-from loguru import logger
+from src.logging import logger
 
-from app_config import MINIMUM_LOG_LEVEL
-
-log_file = "app_log.log"
-
-
-if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-    logger.remove()
-    logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL)
-else:
-    logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
-    logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
 
 def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
@@ -23,6 +11,7 @@ def is_scrollable(element):
     scrollable = int(scroll_height) > int(client_height)
     logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
     return scrollable
+
 
 def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse=False):
     logger.debug(f"Starting slow scroll: start={start}, end={end}, step={step}, reverse={reverse}")
@@ -91,16 +80,3 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
             logger.warning("The element is not visible.")
     except Exception as e:
         logger.error(f"Exception occurred during scrolling: {e}")
-
-def printred(text):
-    red = "\033[91m"
-    reset = "\033[0m"
-    logger.debug("Printing text in red: %s", text)
-    print(f"{red}{text}{reset}")
-
-
-def printyellow(text):
-    yellow = "\033[93m"
-    reset = "\033[0m"
-    logger.debug("Printing text in yellow: %s", text)
-    print(f"{yellow}{text}{reset}")
