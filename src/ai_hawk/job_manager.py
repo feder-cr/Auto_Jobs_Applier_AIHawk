@@ -17,6 +17,9 @@ from src.job import Job
 from src.logging import logger
 
 import urllib.parse
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 
 class EnvironmentKeys:
@@ -57,6 +60,7 @@ class AIHawkJobManager:
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
+        self.job_description_keywords = parameters.get('job-description-keywords', []) or []
 
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
@@ -377,6 +381,21 @@ class AIHawkJobManager:
             if self.is_already_applied_to_company(job.company):
                 self.write_to_file(job, "skipped")
                 continue
+            
+            # Add the new keyword check
+            if len(self.job_description_keywords) > 0:
+                try:
+                    # Navigate to the job's page
+                    self.driver.get(job.link)
+                    
+                    if not self._check_job_description_keywords():
+                        logger.debug(f"Job description keywords not found for {job.title} at {job.company}")
+                        self.write_to_file(job, "skipped")
+                        continue
+                except Exception as e:
+                    logger.error(f"Error checking job description keywords: {e}")
+                    continue        
+            
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
                     self.easy_applier_component.job_apply(job)
@@ -541,3 +560,47 @@ class AIHawkJobManager:
                 return True
                 
         return False
+
+    def _check_job_description_keywords(self):
+        """
+        Check if job description contains any of the specified keywords.
+        
+        Returns:
+            bool: True if any keyword is found in description, False otherwise
+        """
+        logger.debug("Checking job description for keywords")
+        try:
+            # Wait for job description to load
+            description_element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div#job-details"))
+            )
+            
+            # Try to find and click the "Show more" button
+            try:
+                show_more_button = self.driver.find_element(By.CSS_SELECTOR, 
+                    "button.jobs-description__footer-button")
+                if show_more_button.is_displayed() and show_more_button.get_attribute('aria-expanded') == 'false':
+                    logger.debug("Clicking 'Show more' button to expand description")
+                    show_more_button.click()
+                    time.sleep(1)  # Give time for expansion animation
+            except NoSuchElementException:
+                logger.debug("No 'Show more' button found - description might already be expanded")
+            
+            # Get the full description text
+            description_text = description_element.text.lower()
+            
+            # Check if any keyword exists in the description
+            for keyword in self.job_description_keywords:
+                if keyword.lower() in description_text:
+                    logger.debug(f"Found keyword '{keyword}' in job description")
+                    return True
+                    
+            logger.debug("No matching keywords found in job description")
+            return False
+            
+        except TimeoutException:
+            logger.warning("Timeout waiting for job description to load")
+            return False
+        except Exception as e:
+            logger.error(f"Error checking job description keywords: {e}")
+            return False

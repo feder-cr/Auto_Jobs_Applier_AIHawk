@@ -28,6 +28,9 @@ date:
 positions:
   - Software engineer
 
+# One or more keywords to look for in the job description
+job-description-keywords:
+
 locations:
   - Germany
 
