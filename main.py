@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
-from src.webdrivers.base_browser.chrome_utils import BrowserType
+from src.webdrivers.base_browser import BrowserType
 from src.webdrivers.browser_factory import BrowserFactory
 
 from src.job_application_profile import JobApplicationProfile
