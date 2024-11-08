@@ -280,7 +280,7 @@ class AIHawkJobManager:
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
+                # utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
             try:
