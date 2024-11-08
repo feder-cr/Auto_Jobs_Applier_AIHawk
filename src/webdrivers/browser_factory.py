@@ -3,6 +3,7 @@ from typing import Union
 from selenium import webdriver
 from loguru import logger
 
+from config import BROWSER_TYPE_CONFIG
 from src.webdrivers.base_browser import BrowserType
 from src.webdrivers.chrome import Chrome
 from src.webdrivers.firefox import Firefox
@@ -29,6 +30,11 @@ class BrowserFactory:
             raise ValueError(f"Unsupported browser type: {browser_type}")
         cls._browser_type = browser_type
         logger.debug(f"Browser type set to: {browser_type}")
+
+    @classmethod
+    def init_browser_type(cls) -> None:
+        """Initialize browser type from the config"""
+        cls.set_browser_type(BROWSER_TYPE_CONFIG)
 
     @classmethod
     def get_driver(cls, browser_type: BrowserType) -> Union[webdriver.Chrome, webdriver.Firefox]:

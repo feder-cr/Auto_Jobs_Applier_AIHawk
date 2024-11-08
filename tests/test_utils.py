@@ -5,6 +5,8 @@ import time
 from unittest import mock
 from selenium.webdriver.remote.webelement import WebElement
 from src.utils.browser_utils import  is_scrollable, scroll_slow
+from src.webdrivers.chrome import Chrome
+from src.webdrivers.firefox import Firefox
 
 # Mocking logging to avoid actual file writing
 @pytest.fixture(autouse=True)
@@ -66,3 +68,37 @@ def test_scroll_slow_element_not_scrollable(mocker):
 
     # Ensure it detected non-scrollable element
     mock_driver.execute_script.assert_not_called()
+
+# Test chrome_browser_options function
+def test_chrome_browser_options(mocker):
+    mocker.patch("src.utils.chrome_utils.ensure_chrome_profile")
+    mocker.patch("os.path.dirname", return_value="/mocked/path")
+    mocker.patch("os.path.basename", return_value="profile_directory")
+
+    mock_options = mocker.Mock()
+
+    mocker.patch("selenium.webdriver.ChromeOptions", return_value=mock_options)
+
+    # Call the function
+    options = Chrome.creaet_options()
+
+    # Ensure options were set
+    assert mock_options.add_argument.called
+    assert options == mock_options
+
+# Test firefox_browser_options function
+def test_firefox_browser_options(mocker):
+    mocker.patch("src.utils.chrome_utils.ensure_chrome_profile")
+    mocker.patch("os.path.dirname", return_value="/mocked/path")
+    mocker.patch("os.path.basename", return_value="profile_directory")
+
+    mock_options = mocker.Mock()
+
+    mocker.patch("selenium.webdriver.ChromeOptions", return_value=mock_options)
+
+    # Call the function
+    options = Firefox.creaet_options()
+
+    # Ensure options were set
+    assert mock_options.add_argument.called
+    assert options == mock_options

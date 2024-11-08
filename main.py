@@ -9,7 +9,6 @@ from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
 
-from config import BROWSER_TYPE_CONFIG
 from src.webdrivers.base_browser import BrowserType
 from src.webdrivers.browser_factory import BrowserFactory
 from src.job_application_profile import JobApplicationProfile
@@ -213,10 +212,7 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
         # check if the config is not set as well
-        BrowserFactory.set_browser_type(
-            BrowserType.CHROME if BROWSER_TYPE_CONFIG is None or BROWSER_TYPE_CONFIG == BrowserType.CHROME
-            else BrowserType.FIREFOX
-        )
+        BrowserFactory.init_browser_type()
 
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
