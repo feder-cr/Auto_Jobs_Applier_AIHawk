@@ -6,14 +6,14 @@ experience_level:
   internship: false
   entry: true
   associate: true
-  mid-senior-level: true
+  mid_senior_level: true
   director: false
   executive: false
 
 job_types:
-  full-time: true
+  full_time: true
   contract: false
-  part-time: false
+  part_time: false
   temporary: true
   internship: false
   other: false
