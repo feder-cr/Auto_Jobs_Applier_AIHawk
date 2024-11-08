@@ -12,7 +12,10 @@ from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logge
 from constants import LOG_TO_CONSOLE, LOG_TO_FILE, MINIMUM_LOG_LEVEL
 selenium_logger.setLevel(LOG_CONFIG[MINIMUM_LOG_LEVEL])
 
-log_file = "log/app.log"
+def get_log_filename():
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    return f"log/app_{timestamp}.log"
+log_file = get_log_filename()
 
 # Ensure the log directory exists
 os.makedirs(os.path.dirname(log_file), exist_ok=True)
