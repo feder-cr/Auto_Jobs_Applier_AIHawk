@@ -1,16 +1,44 @@
-Proprietary License for Auto Jobs Applier AIHawk
+MIT License
 
-1.	Freedom to Use, Modify, and Distribute
-The software may be freely used, modified, and distributed by anyone, provided that the source code remains accessible and open to the public. Any derivative work or modification may be released as open source but cannot be converted into proprietary software without prior written authorization from the original author.
+Copyright (c) 2024 AI Hawk & its contibutors
 
-2.	Prohibition of Resale and Non-Commercial Use
-The software may not be sold without explicit authorization from the original author. It is intended for non-commercial use unless specific permission for commercial use is granted.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
 
-3.	Copyright
-Copyright remains with the original author. Any unauthorized use will be considered a copyright infringement.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-4.	Disclaimer of Warranty
-This software is provided “as is,” without warranties of any kind. The author shall not be liable for any damages arising from its use.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+SOFTWARE.
 
-5.	Governing Law
-This agreement shall be governed by the laws of Italy.
+---
+
+“Commons Clause” License Condition v1.0
+
+The Software is provided to you by the Licensor under the License as defined below,
+subject to the following condition.
+
+Without limiting other conditions in the License, the grant of rights under 
+the License will not include, and the License does not grant to you,
+the right to Sell the Software.
+
+For purposes of this clause “Sell” means practicing any or all of 
+the rights granted under this license for a fee or other consideration 
+(including without limitation fees for hosting or consulting/support services related 
+to using/hosting/deploying this software), a product or service whose value derives,
+entirely or substantially from using this software.
+
+Software: Auto Job Applier
+
+License: MIT
+
+Licensor: AI Hawk & its contibutors
