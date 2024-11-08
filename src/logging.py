@@ -4,9 +4,9 @@ import sys
 import time
 import logging
 from loguru import logger
-from config import LOG_LEVEL, LOG_SELENIUM_LEVEL, LOG_TO_CONSOLE, LOG_TO_FILE
-
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
+from app_config import LOG_CONFIG
+from constants import LOG_TO_FILE,MINIMUM_LOG_LEVEL
 
 
 def remove_default_loggers():
@@ -31,10 +31,10 @@ def init_loguru_logger():
     logger.remove()
 
     # Add file logger if LOG_TO_FILE is True
-    if LOG_TO_FILE:
+    if LOG_CONFIG[LOG_TO_FILE]:
         logger.add(
             log_file,
-            level=LOG_LEVEL,
+            level=LOG_CONFIG[MINIMUM_LOG_LEVEL],
             rotation="10 MB",
             retention="1 week",
             compression="zip",
@@ -44,10 +44,10 @@ def init_loguru_logger():
         )
 
     # Add console logger if LOG_TO_CONSOLE is True
-    if LOG_TO_CONSOLE:
+    if LOG_CONFIG[LOG_TO_FILE]:
         logger.add(
             sys.stderr,
-            level=LOG_LEVEL,
+            level=LOG_CONFIG[MINIMUM_LOG_LEVEL],
             format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
             backtrace=True,
             diagnose=True,
@@ -61,13 +61,13 @@ def init_selenium_logger():
 
     selenium_logger.handlers.clear()
 
-    selenium_logger.setLevel(LOG_SELENIUM_LEVEL)
+    selenium_logger.setLevel(LOG_CONFIG[MINIMUM_LOG_LEVEL])
 
     # Create file handler for selenium logger
     file_handler = logging.handlers.TimedRotatingFileHandler(
         log_file, when="D", interval=1, backupCount=5
     )
-    file_handler.setLevel(LOG_SELENIUM_LEVEL)
+    file_handler.setLevel(LOG_CONFIG[MINIMUM_LOG_LEVEL])
 
     # Define a simplified format for selenium logger entries
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
