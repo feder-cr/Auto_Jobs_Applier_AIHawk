@@ -1,3 +1,4 @@
+import logging.handlers
 import os
 import sys
 import time
@@ -64,7 +65,12 @@ def init_selenium_logger():
     selenium_logger.setLevel(LOG_SELENIUM_LEVEL)
 
     # Create file handler for selenium logger
-    file_handler = logging.FileHandler(log_file)
+    file_handler = logging.handlers.TimedRotatingFileHandler(
+            log_file,
+            when="D",
+            interval=1,
+            backupCount=5
+        )
     file_handler.setLevel(LOG_SELENIUM_LEVEL)
 
     # Define a simplified format for selenium logger entries
