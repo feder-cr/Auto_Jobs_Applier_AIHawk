@@ -383,7 +383,7 @@ class AIHawkJobManager:
                 continue
             
             # Add the new keyword check
-            if len(self.job_description_keywords) > 0:
+            if hasattr(self, 'job_description_keywords') and self.job_description_keywords:
                 try:
                     # Navigate to the job's page
                     self.driver.get(job.link)
