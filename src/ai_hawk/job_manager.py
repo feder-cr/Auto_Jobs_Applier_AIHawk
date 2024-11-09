@@ -86,38 +86,38 @@ class AIHawkJobManager:
         for position, location in searches:
             location_url = "&location=" + location
             job_page_number = -1
-            utils.printyellow(f"Collecting data for {position} in {location}.")
+            # utils.printyellow(f"Collecting data for {position} in {location}.")
             try:
                 while True:
                     page_sleep += 1
                     job_page_number += 1
-                    utils.printyellow(f"Going to job page {job_page_number}")
+                    # utils.printyellow(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
                     utils.medium_sleep()
-                    utils.printyellow("Starting the collecting process for this page")
+                    # utils.printyellow("Starting the collecting process for this page")
                     self.read_jobs()
-                    utils.printyellow("Collecting data on this page has been completed!")
+                    # utils.printyellow("Collecting data on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
                     if time_left > 0:
-                        utils.printyellow(f"Sleeping for {time_left} seconds.")
+                        # utils.printyellow(f"Sleeping for {time_left} seconds.")
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(1, 5)
-                        utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                        # utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                         time.sleep(sleep_time)
                         page_sleep += 1
             except Exception:
                 pass
             time_left = minimum_page_time - time.time()
             if time_left > 0:
-                utils.printyellow(f"Sleeping for {time_left} seconds.")
+                # utils.printyellow(f"Sleeping for {time_left} seconds.")
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
-                utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
+                # utils.printyellow(f"Sleeping for {sleep_time / 60} minutes.")
                 time.sleep(sleep_time)
                 page_sleep += 1
 
@@ -280,7 +280,7 @@ class AIHawkJobManager:
         job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
-                utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
+                # utils.printyellow(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
             try:
