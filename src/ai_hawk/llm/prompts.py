@@ -363,6 +363,7 @@ Options: [1-2, 3-5, 6-10, 10+]
 ## My resume:
 ```
 {resume}
+{job_application_profile}
 ```
 
 ## Question:

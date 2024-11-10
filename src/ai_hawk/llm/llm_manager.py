@@ -594,7 +594,7 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
-            {"resume": self.resume, "question": question, "options": options})
+            {"resume": self.resume, "job_application_profile": self.job_application_profile, "question": question, "options": options})
         logger.debug(f"Raw output for options question: {output_str}")
         best_option = self.find_best_match(output_str, options)
         logger.debug(f"Best option determined: {best_option}")
