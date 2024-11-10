@@ -1,8 +1,7 @@
-import logging.handlers
 import os
 import sys
-import time
 import logging
+import logging.handlers
 from loguru import logger
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
 
@@ -21,7 +20,7 @@ def init_loguru_logger():
     """Initialize and configure loguru logger."""
 
     def get_log_filename():
-        return f"log/app.log"
+        return "log/app.log"
 
     log_file = get_log_filename()
 
@@ -62,17 +61,14 @@ def init_selenium_logger():
 
     selenium_logger.setLevel(LOG_SELENIUM_LEVEL)
 
-    # Create file handler for selenium logger
     file_handler = logging.handlers.TimedRotatingFileHandler(
         log_file, when="D", interval=1, backupCount=5
     )
     file_handler.setLevel(LOG_SELENIUM_LEVEL)
 
-    # Define a simplified format for selenium logger entries
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
 
-    # Add the file handler to selenium_logger
     selenium_logger.addHandler(file_handler)
 
 
