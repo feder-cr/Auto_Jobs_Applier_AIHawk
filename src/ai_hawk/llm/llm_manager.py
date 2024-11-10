@@ -68,6 +68,18 @@ class OllamaModel(AIModel):
         response = self.model.invoke(prompt)
         return response
 
+class PerplexityModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str):
+        from langchain_community.chat_models import ChatPerplexity
+        self.model = ChatPerplexity(model=llm_model, api_key=api_key,
+                                   temperature=0.4)
+
+    def invoke(self, prompt: str) -> BaseMessage:
+        response = self.model.invoke(prompt)
+        logger.debug("Invoking Perplexity API")
+        return response
+
+
 #gemini doesn't seem to work because API doesn't rstitute answers for questions that involve answers that are too short
 class GeminiModel(AIModel):
     def __init__(self, api_key:str, llm_model: str):
@@ -123,7 +135,9 @@ class AIAdapter:
         elif llm_model_type == "gemini":
             return GeminiModel(api_key, llm_model)
         elif llm_model_type == "huggingface":
-            return HuggingFaceModel(api_key, llm_model)        
+            return HuggingFaceModel(api_key, llm_model)
+        elif llm_model_type == "perplexity":
+            return PerplexityModel(api_key, llm_model)        
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
 
