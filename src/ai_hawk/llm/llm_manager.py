@@ -18,8 +18,59 @@ from langchain_core.prompts import ChatPromptTemplate
 from Levenshtein import distance
 
 import ai_hawk.llm.prompts as prompts
-import constants
 from config import JOB_SUITABILITY_SCORE
+from constants import (
+    AVAILABILITY,
+    CERTIFICATIONS,
+    CLAUDE,
+    COMPANY,
+    CONTENT,
+    COVER_LETTER,
+    EDUCATION_DETAILS,
+    EXPERIENCE_DETAILS,
+    FINISH_REASON,
+    GEMINI,
+    HUGGINGFACE,
+    ID,
+    INPUT_TOKENS,
+    INTERESTS,
+    JOB_APPLICATION_PROFILE,
+    JOB_DESCRIPTION,
+    LANGUAGES,
+    LEGAL_AUTHORIZATION,
+    LLM_API_URL,
+    LLM_MODEL,
+    LLM_MODEL_TYPE,
+    LOGPROBS,
+    MODEL,
+    MODEL_NAME,
+    OLLAMA,
+    OPENAI,
+    OPTIONS,
+    OUTPUT_TOKENS,
+    PERSONAL_INFORMATION,
+    PHRASE,
+    PROJECTS,
+    PROMPTS,
+    QUESTION,
+    REPLIES,
+    RESPONSE_METADATA,
+    RESUME,
+    RESUME_EDUCATIONS,
+    RESUME_JOBS,
+    RESUME_PROJECTS,
+    RESUME_SECTION,
+    SALARY_EXPECTATIONS,
+    SELF_IDENTIFICATION,
+    SYSTEM_FINGERPRINT,
+    TEXT,
+    TIME,
+    TOKEN_USAGE,
+    TOTAL_COST,
+    TOTAL_TOKENS,
+    USAGE_METADATA,
+    WORK_PREFERENCES,
+)
 from src.job import Job
 from src.logging import logger
 
@@ -127,22 +178,22 @@ class AIAdapter:
         self.model = self._create_model(config, api_key)
 
     def _create_model(self, config: dict, api_key: str) -> AIModel:
-        llm_model_type = config["llm_model_type"]
-        llm_model = config["llm_model"]
+        llm_model_type = config[LLM_MODEL_TYPE]
+        llm_model = config[LLM_MODEL]
 
-        llm_api_url = config.get("llm_api_url", "")
+        llm_api_url = config.get(LLM_API_URL, "")
 
         logger.debug(f"Using {llm_model_type} with {llm_model}")
 
-        if llm_model_type == "openai":
+        if llm_model_type == OPENAI:
             return OpenAIModel(api_key, llm_model)
-        elif llm_model_type == "claude":
+        elif llm_model_type == CLAUDE:
             return ClaudeModel(api_key, llm_model)
-        elif llm_model_type == "ollama":
+        elif llm_model_type == OLLAMA:
             return OllamaModel(llm_model, llm_api_url)
-        elif llm_model_type == "gemini":
+        elif llm_model_type == GEMINI:
             return GeminiModel(api_key, llm_model)
-        elif llm_model_type == "huggingface":
+        elif llm_model_type == HUGGINGFACE:
             return HuggingFaceModel(api_key, llm_model)
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
@@ -206,10 +257,10 @@ class LLMLogger:
             raise
 
         try:
-            token_usage = parsed_reply[constants.USAGE_METADATA]
-            output_tokens = token_usage[constants.OUTPUT_TOKENS]
-            input_tokens = token_usage[constants.INPUT_TOKENS]
-            total_tokens = token_usage[constants.TOTAL_TOKENS]
+            token_usage = parsed_reply[USAGE_METADATA]
+            output_tokens = token_usage[OUTPUT_TOKENS]
+            input_tokens = token_usage[INPUT_TOKENS]
+            total_tokens = token_usage[TOTAL_TOKENS]
             logger.debug(
                 f"Token usage - Input: {input_tokens}, Output: {output_tokens}, Total: {total_tokens}"
             )
@@ -218,7 +269,7 @@ class LLMLogger:
             raise
 
         try:
-            model_name = parsed_reply[constants.RESPONSE_METADATA][constants.MODEL_NAME]
+            model_name = parsed_reply[RESPONSE_METADATA][MODEL_NAME]
             logger.debug(f"Model name: {model_name}")
         except KeyError as e:
             logger.error(f"KeyError in response_metadata: {str(e)}")
@@ -237,14 +288,14 @@ class LLMLogger:
 
         try:
             log_entry = {
-                constants.MODEL: model_name,
-                constants.TIME: current_time,
-                constants.PROMPTS: prompts,
-                constants.REPLIES: parsed_reply[constants.CONTENT],
-                constants.TOTAL_TOKENS: total_tokens,
-                constants.INPUT_TOKENS: input_tokens,
-                constants.OUTPUT_TOKENS: output_tokens,
-                constants.TOTAL_COST: total_cost,
+                MODEL: model_name,
+                TIME: current_time,
+                PROMPTS: prompts,
+                REPLIES: parsed_reply[CONTENT],
+                TOTAL_TOKENS: total_tokens,
+                INPUT_TOKENS: input_tokens,
+                OUTPUT_TOKENS: output_tokens,
+                TOTAL_COST: total_cost,
             }
             logger.debug(f"Log entry created: {log_entry}")
         except KeyError as e:
@@ -327,38 +378,38 @@ class LoggerChatModel:
         logger.debug(f"Parsing LLM result: {llmresult}")
 
         try:
-            if hasattr(llmresult, constants.USAGE_METADATA):
+            if hasattr(llmresult, USAGE_METADATA):
                 content = llmresult.content
                 response_metadata = llmresult.response_metadata
                 id_ = llmresult.id
                 usage_metadata = llmresult.usage_metadata
 
                 parsed_result = {
-                    constants.CONTENT: content,
-                    constants.RESPONSE_METADATA: {
-                        constants.MODEL_NAME: response_metadata.get(
-                            constants.MODEL_NAME, ""
+                    CONTENT: content,
+                    RESPONSE_METADATA: {
+                        MODEL_NAME: response_metadata.get(
+                            MODEL_NAME, ""
                         ),
-                        constants.SYSTEM_FINGERPRINT: response_metadata.get(
-                            constants.SYSTEM_FINGERPRINT, ""
+                        SYSTEM_FINGERPRINT: response_metadata.get(
+                            SYSTEM_FINGERPRINT, ""
                         ),
-                        constants.FINISH_REASON: response_metadata.get(
-                            constants.FINISH_REASON, ""
+                        FINISH_REASON: response_metadata.get(
+                            FINISH_REASON, ""
                         ),
-                        constants.LOGPROBS: response_metadata.get(
-                            constants.LOGPROBS, None
+                        LOGPROBS: response_metadata.get(
+                            LOGPROBS, None
                         ),
                     },
-                    constants.ID: id_,
-                    constants.USAGE_METADATA: {
-                        constants.INPUT_TOKENS: usage_metadata.get(
-                            constants.INPUT_TOKENS, 0
+                    ID: id_,
+                    USAGE_METADATA: {
+                        INPUT_TOKENS: usage_metadata.get(
+                            INPUT_TOKENS, 0
                         ),
-                        constants.OUTPUT_TOKENS: usage_metadata.get(
-                            constants.OUTPUT_TOKENS, 0
+                        OUTPUT_TOKENS: usage_metadata.get(
+                            OUTPUT_TOKENS, 0
                         ),
-                        constants.TOTAL_TOKENS: usage_metadata.get(
-                            constants.TOTAL_TOKENS, 0
+                        TOTAL_TOKENS: usage_metadata.get(
+                            TOTAL_TOKENS, 0
                         ),
                     },
                 }
@@ -366,23 +417,23 @@ class LoggerChatModel:
                 content = llmresult.content
                 response_metadata = llmresult.response_metadata
                 id_ = llmresult.id
-                token_usage = response_metadata[constants.TOKEN_USAGE]
+                token_usage = response_metadata[TOKEN_USAGE]
 
                 parsed_result = {
-                    constants.CONTENT: content,
-                    constants.RESPONSE_METADATA: {
-                        constants.MODEL_NAME: response_metadata.get(
-                            constants.MODEL, ""
+                    CONTENT: content,
+                    RESPONSE_METADATA: {
+                        MODEL_NAME: response_metadata.get(
+                            MODEL, ""
                         ),
-                        constants.FINISH_REASON: response_metadata.get(
-                            constants.FINISH_REASON, ""
+                        FINISH_REASON: response_metadata.get(
+                            FINISH_REASON, ""
                         ),
                     },
-                    constants.ID: id_,
-                    constants.USAGE_METADATA: {
-                        constants.INPUT_TOKENS: token_usage.prompt_tokens,
-                        constants.OUTPUT_TOKENS: token_usage.completion_tokens,
-                        constants.TOTAL_TOKENS: token_usage.total_tokens,
+                    ID: id_,
+                    USAGE_METADATA: {
+                        INPUT_TOKENS: token_usage.prompt_tokens,
+                        OUTPUT_TOKENS: token_usage.completion_tokens,
+                        TOTAL_TOKENS: token_usage.total_tokens,
                     },
                 }
             logger.debug(f"Parsed LLM result successfully: {parsed_result}")
@@ -449,7 +500,7 @@ class GPTAnswerer:
         )
         prompt = ChatPromptTemplate.from_template(prompts.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({constants.TEXT: text})
+        output = chain.invoke({TEXT: text})
         logger.debug(f"Summary generated: {output}")
         return output
 
@@ -461,40 +512,40 @@ class GPTAnswerer:
     def answer_question_textual_wide_range(self, question: str) -> str:
         logger.debug(f"Answering textual question: {question}")
         chains = {
-            constants.PERSONAL_INFORMATION: self._create_chain(
+            PERSONAL_INFORMATION: self._create_chain(
                 prompts.personal_information_template
             ),
-            constants.SELF_IDENTIFICATION: self._create_chain(
+            SELF_IDENTIFICATION: self._create_chain(
                 prompts.self_identification_template
             ),
-            constants.LEGAL_AUTHORIZATION: self._create_chain(
+            LEGAL_AUTHORIZATION: self._create_chain(
                 prompts.legal_authorization_template
             ),
-            constants.WORK_PREFERENCES: self._create_chain(
+            WORK_PREFERENCES: self._create_chain(
                 prompts.work_preferences_template
             ),
-            constants.EDUCATION_DETAILS: self._create_chain(
+            EDUCATION_DETAILS: self._create_chain(
                 prompts.education_details_template
             ),
-            constants.EXPERIENCE_DETAILS: self._create_chain(
+            EXPERIENCE_DETAILS: self._create_chain(
                 prompts.experience_details_template
             ),
-            constants.PROJECTS: self._create_chain(prompts.projects_template),
-            constants.AVAILABILITY: self._create_chain(prompts.availability_template),
-            constants.SALARY_EXPECTATIONS: self._create_chain(
+            PROJECTS: self._create_chain(prompts.projects_template),
+            AVAILABILITY: self._create_chain(prompts.availability_template),
+            SALARY_EXPECTATIONS: self._create_chain(
                 prompts.salary_expectations_template
             ),
-            constants.CERTIFICATIONS: self._create_chain(
+            CERTIFICATIONS: self._create_chain(
                 prompts.certifications_template
             ),
-            constants.LANGUAGES: self._create_chain(prompts.languages_template),
-            constants.INTERESTS: self._create_chain(prompts.interests_template),
-            constants.COVER_LETTER: self._create_chain(prompts.coverletter_template),
+            LANGUAGES: self._create_chain(prompts.languages_template),
+            INTERESTS: self._create_chain(prompts.interests_template),
+            COVER_LETTER: self._create_chain(prompts.coverletter_template),
         }
 
         prompt = ChatPromptTemplate.from_template(prompts.determine_section_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({constants.QUESTION: question})
+        output = chain.invoke({QUESTION: question})
 
         match = re.search(
             r"(Personal information|Self Identification|Legal Authorization|Work Preferences|Education "
@@ -512,9 +563,9 @@ class GPTAnswerer:
             chain = chains.get(section_name)
             output = chain.invoke(
                 {
-                    constants.RESUME: self.resume,
-                    constants.JOB_DESCRIPTION: self.job_description,
-                    constants.COMPANY: self.job.company,
+                    RESUME: self.resume,
+                    JOB_DESCRIPTION: self.job_description,
+                    COMPANY: self.job.company,
                 }
             )
             logger.debug(f"Cover letter generated: {output}")
@@ -534,7 +585,7 @@ class GPTAnswerer:
             logger.error(f"Chain not defined for section '{section_name}'")
             raise ValueError(f"Chain not defined for section '{section_name}'")
         output = chain.invoke(
-            {constants.RESUME_SECTION: resume_section, constants.QUESTION: question}
+            {RESUME_SECTION: resume_section, QUESTION: question}
         )
         logger.debug(f"Question answered: {output}")
         return output
@@ -550,10 +601,10 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
             {
-                constants.RESUME_EDUCATIONS: self.resume.education_details,
-                constants.RESUME_JOBS: self.resume.experience_details,
-                constants.RESUME_PROJECTS: self.resume.projects,
-                constants.QUESTION: question,
+                RESUME_EDUCATIONS: self.resume.education_details,
+                RESUME_JOBS: self.resume.experience_details,
+                RESUME_PROJECTS: self.resume.projects,
+                QUESTION: question,
             }
         )
         logger.debug(f"Raw output for numeric question: {output_str}")
@@ -584,10 +635,10 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         output_str = chain.invoke(
             {
-                constants.RESUME: self.resume,
-                constants.JOB_APPLICATION_PROFILE: self.job_application_profile,
-                constants.QUESTION: question,
-                constants.OPTIONS: options,
+                RESUME: self.resume,
+                JOB_APPLICATION_PROFILE: self.job_application_profile,
+                QUESTION: question,
+                OPTIONS: options,
             }
         )
         logger.debug(f"Raw output for options question: {output_str}")
@@ -603,7 +654,7 @@ class GPTAnswerer:
             prompts.resume_or_cover_letter_template
         )
         chain = prompt | self.llm_cheap | StrOutputParser()
-        response = chain.invoke({constants.PHRASE: phrase})
+        response = chain.invoke({PHRASE: phrase})
         logger.debug(f"Response for resume_or_cover: {response}")
         if "resume" in response:
             return "resume"
@@ -618,8 +669,8 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         output = chain.invoke(
             {
-                constants.RESUME: self.resume,
-                constants.JOB_DESCRIPTION: self.job_description,
+                RESUME: self.resume,
+                JOB_DESCRIPTION: self.job_description,
             }
         ).replace("*", "")
         logger.debug(f"Job suitability output: {output}")
