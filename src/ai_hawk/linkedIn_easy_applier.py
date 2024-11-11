@@ -371,57 +371,6 @@ class AIHawkEasyApplier:
         else:
             self._fill_additional_questions()
 
-    def _handle_dropdown_fields(self, element: WebElement) -> None:
-        logger.debug("Handling dropdown fields")
-
-        dropdown = element.find_element(By.TAG_NAME, 'select')
-        select = Select(dropdown)
-        dropdown_id = dropdown.get_attribute('id')
-        if 'phoneNumber-Country' in dropdown_id:
-            country = self.resume_generator_manager.get_resume_country()
-            if country:
-                try:
-                    select.select_by_value(country)
-                    logger.debug(f"Selected phone country: {country}")
-                    return True
-                except NoSuchElementException:
-                    logger.warning(f"Country {country} not found in dropdown options")
-
-        options = [option.text for option in select.options]
-        logger.debug(f"Dropdown options found: {options}")
-
-        parent_element = dropdown.find_element(By.XPATH, '../..')
-
-        label_elements = parent_element.find_elements(By.TAG_NAME, 'label')
-        if label_elements:
-            question_text = label_elements[0].text.lower()
-        else:
-            question_text = "unknown"
-
-        logger.debug(f"Detected question text: {question_text}")
-
-        existing_answer = None
-        for item in self.all_data:
-            if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
-                existing_answer = item['answer']
-                break
-
-        if existing_answer:
-            logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
-        else:
-            logger.debug(f"No existing answer found, querying model for: {question_text}")
-            existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-            logger.debug(f"Model provided answer: {existing_answer}")
-            self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
-
-        if existing_answer in options:
-            select.select_by_visible_text(existing_answer)
-            logger.debug(f"Selected option: {existing_answer}")
-            self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
-        else:
-            logger.error(f"Answer '{existing_answer}' is not a valid option in the dropdown")
-            raise Exception(f"Invalid option selected: {existing_answer}")
-
     def _is_upload_field(self, element: WebElement) -> bool:
         is_upload = bool(element.find_elements(By.XPATH, ".//input[@type='file']"))
         logger.debug(f"Element is upload field: {is_upload}")
