@@ -251,13 +251,11 @@ This file defines your job search parameters and bot behavior. Each section cont
     - claude: any model
     - gemini: any model
     - aiml: any model
+      
 - `llm_api_url`:
-  - Link of the API endpoint for the LLM model
-    - openai: <https://api.pawan.krd/cosmosrp/v1>
+  - Link of the API endpoint for the LLM model. (only requried for ollama)
     - ollama: <http://127.0.0.1:11434/>
-    - claude: <https://api.anthropic.com/v1>
-    - gemini: <https://aistudio.google.com/app/apikey>
-    - aiml: <https://api.aimlapi.com/v2>
+      
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
