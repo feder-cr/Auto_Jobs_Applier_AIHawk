@@ -29,4 +29,3 @@ webdriver-manager==4.0.2
 flask==3.0.3
 flask-bootstrap==3.3.7.1
 marshmallow==3.23.1
-lib_resume_builder_AIHawk @ git+https://github.com/queukat/lib_resume_builder_AIHawk.git@V3#egg=lib_resume_builder_AIHawk
