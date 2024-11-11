@@ -3,9 +3,9 @@ from unittest import mock
 from pathlib import Path
 import os
 import pytest
-from src.aihawk_job_manager import AIHawkJobManager
+from ai_hawk.job_manager import AIHawkJobManager
 from selenium.common.exceptions import NoSuchElementException
-from loguru import logger
+from src.logging import logger
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def test_set_parameters(mocker, job_manager):
         },
         'remote': False,
         'distance': 50,
-        'date': {'all time': True}
+        'date': {'all_time': True}
     }
 
     job_manager.set_parameters(params)
