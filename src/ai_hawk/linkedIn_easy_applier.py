@@ -168,8 +168,8 @@ class AIHawkEasyApplier:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
-            logger.debug("Discarding application due to failure")
-            self._discard_application()
+            logger.debug("Saving application process due to failure")
+            self._save_job_application_process()
 
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
@@ -349,6 +349,16 @@ class AIHawkEasyApplier:
             utils.time_utils.medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
+    
+    def _save_job_application_process(self) -> None:
+        logger.debug("Application not completed. Saving job to My Jobs, In Progess section")
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
+            utils.time_utils.medium_sleep()
+            self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[1].click()
+            utils.time_utils.medium_sleep()
+        except Exception as e:
+            logger.error(f"Failed to save application process: {e}")
 
     def fill_up(self, job) -> None:
         logger.debug(f"Filling up form sections for job: {job}")
