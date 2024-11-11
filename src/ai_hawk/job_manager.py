@@ -60,7 +60,7 @@ class AIHawkJobManager:
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
-        self.job_description_keywords = parameters.get('job-description-keywords', []) or []
+        self.job_description_keywords = parameters.get('job_description_keywords', []) or []
 
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
@@ -568,7 +568,7 @@ class AIHawkJobManager:
         Returns:
             bool: True if any keyword is found in description, False otherwise
         """
-        logger.debug("Checking job description for keywords")
+        logger.debug(f"Checking job description for keywords: {self.job_description_keywords}")
         try:
             # Wait for job description to load
             description_element = WebDriverWait(self.driver, 10).until(

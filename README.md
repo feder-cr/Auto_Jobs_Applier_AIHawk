@@ -213,6 +213,17 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Data Scientist
     ```
 
+- `job_description_keywords:`
+  - List keywords to look for in the job description, for example, "chromium browser"
+  - Only use this field to find jobs that require specific technologies, products, or skills that is not mentioned in the job title.
+  - Warning: Any jobs without matching keywords in the job description will be skipped.
+  - Example:
+
+    ```yaml
+    job_description_keywords:
+      - chromium browser
+    ```
+
 - `locations:`
   - List locations you want to search in, one per line
   - Example:
