@@ -12,6 +12,7 @@ Question: What is your city?
 
 Personal Information: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Self Identification Template
@@ -28,6 +29,7 @@ Male
 
 Self-Identification: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Legal Authorization Template
@@ -44,6 +46,7 @@ Yes
 
 Legal Authorization: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Work Preferences Template
@@ -60,6 +63,7 @@ Yes
 
 Work Preferences: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Education Details Template
@@ -79,6 +83,7 @@ Yes, I have experience with Python.
 
 Education Details: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Experience Details Template
@@ -98,6 +103,7 @@ Yes, I have 3 years of leadership experience.
 
 Experience Details: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Projects Template
@@ -116,6 +122,7 @@ Yes, led the development of a mobile app
 
 Projects: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Availability Template
@@ -134,6 +141,7 @@ I can start immediately.
 
 Availability: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Salary Expectations Template
@@ -152,6 +160,7 @@ Question: What are your salary expectations?
 
 Salary Expectations: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Certifications Template
@@ -171,6 +180,7 @@ Yes, I am PMP certified.
 
 Certifications: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Languages Template
@@ -190,6 +200,7 @@ Fluent in Italian and English.
 
 Languages: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Interests Template
@@ -208,6 +219,7 @@ AI and data science.
 
 Interests: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 summarize_prompt_template = """
@@ -342,7 +354,7 @@ How many years of experience do you have with AI?
 ---
 
 When responding, consider all available information, including projects, work experience, and academic background, to provide an accurate and well-reasoned answer. Make every effort to infer relevant experience and avoid defaulting to 0 if any related experience can be estimated.
-
+Do not output anything else in the response other than the answer.
 """
 
 options_template = """The following is a resume and an answered question about the resume, the answer is one of the options.
@@ -371,7 +383,8 @@ Options: [1-2, 3-5, 6-10, 10+]
 
 ## Options:
 {options}
-
+-----
+Do not output anything else in the response other than the answer.
 ## """
 
 try_to_fix_template = """\
