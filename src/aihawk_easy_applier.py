@@ -1,18 +1,16 @@
-import base64
 import json
 import os
 import random
 import re
 import time
 import traceback
-from typing import List, Optional, Any, Tuple
-
+from typing import List, Any, Dict
 from httpx import HTTPStatusError
 from loguru import logger
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -21,7 +19,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 import src.utils as utils
-from loguru import logger
 
 
 class AIHawkEasyApplier:
@@ -32,54 +29,101 @@ class AIHawkEasyApplier:
         self.set_old_answers = set_old_answers
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
-        self.job_application_profile = job_application_profile  # Store the job_application_profile
+        self.job_application_profile = job_application_profile
         self.all_data = self._load_questions_from_json()
+        # Create a mapping from sanitized questions to answers for quick lookup
+        self.questions_answers_map = {self._sanitize_text(item['question']): item for item in self.all_data}
         logger.debug("AIHawkEasyApplier initialized successfully")
 
     def _load_questions_from_json(self) -> List[dict]:
         """Load previously stored questions and answers from a JSON file."""
         output_file = 'answers.json'
         logger.debug(f"Loading questions from JSON file: {output_file}")
+        data = []
         try:
-            with open(output_file, 'r') as f:
-                try:
-                    data = json.load(f)
-                    if not isinstance(data, list):
-                        raise ValueError("JSON file format is incorrect. Expected a list of questions.")
-                except json.JSONDecodeError:
-                    logger.error("JSON decoding failed")
-                    data = []
-            logger.debug("Questions loaded successfully from JSON")
-            return data
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if not isinstance(data, list):
+                    raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+                logger.debug("Questions loaded successfully from JSON")
         except FileNotFoundError:
             logger.warning("JSON file not found, returning empty list")
-            return []
-        except Exception:
+        except json.JSONDecodeError:
+            logger.error("JSON decoding failed")
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            logger.error(f"Error loading questions data from JSON file: {tb_str}")
+            raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
+        return data
+
+    def _save_questions_to_json(self, question_data: dict) -> None:
+        """
+        Save question data to a JSON file, with filtering to exclude company-specific or unsuitable questions.
+
+        Args:
+            question_data (dict): The question and answer data to be saved.
+        """
+        output_file = 'answers.json'
+        sanitized_question = self._sanitize_text(question_data['question'])
+        question_data['question'] = sanitized_question
+        logger.debug(f"Saving question data to JSON: {question_data}")
+
+        # List of keywords to exclude certain questions from being saved
+        exclusion_keywords = ["why us", "summary", "cover letter", "your message", "want to work"]
+
+        # Check if the question contains any exclusion keywords
+        if any(keyword in sanitized_question.lower() for keyword in exclusion_keywords):
+            logger.info(f"Skipping saving question due to company-specific keywords: {sanitized_question}")
+            return  # Skip saving this question if it's company-specific
+
+        if sanitized_question in self.questions_answers_map:
+            logger.info(f"Duplicate question found, skipping save: {sanitized_question}")
+            return
+
+        # Add the sanitized question to the mapping to avoid future duplicates
+        self.questions_answers_map[sanitized_question] = question_data
+
+        # Load existing data
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if not isinstance(data, list):
+                    raise ValueError("JSON file format is incorrect. Expected a list of questions.")
+        except FileNotFoundError:
+            logger.warning("JSON file not found, creating new file")
+            data = []
+        except json.JSONDecodeError:
+            logger.error("JSON decoding failed")
+            data = []
+        except Exception as e:
             tb_str = traceback.format_exc()
             logger.error(f"Error loading questions data from JSON file: {tb_str}")
             raise Exception(f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}")
 
-    def check_for_premium_redirect(self, job: Any, max_attempts=3):
-        """
-        Checks if the current page redirects to a LinkedIn Premium page and attempts to navigate back to the job page.
-        Args:
-            job (Any): The job object containing the job link.
-            max_attempts (int): Maximum number of attempts to try navigating back.
-        """
-        current_url = self.driver.current_url
-        attempts = 0
+        data.append(question_data)
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            logger.debug("Question data saved successfully to JSON")
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            logger.error(f"Error saving questions data to JSON file: {tb_str}")
+            raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
 
-        while "linkedin.com/premium" in current_url and attempts < max_attempts:
-            logger.warning("Redirected to LinkedIn Premium page. Attempting to return to the job page.")
-            attempts += 1
-            self.driver.get(job.link)
-            time.sleep(2)
-            current_url = self.driver.current_url
+    def _sanitize_text(self, text: str) -> str:
+        sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
+        # Remove control characters but keep Unicode symbols
+        sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text)
+        sanitized_text = sanitized_text.replace('\n', ' ').replace('\r', '').rstrip(',')
+        logger.debug(f"Sanitized text: {sanitized_text}")
+        return sanitized_text
 
-        if "linkedin.com/premium" in current_url:
-            logger.error(f"Failed to return to the job page after {max_attempts} attempts. Cannot apply for the job.")
-            raise Exception(
-                f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+    def _get_existing_answer(self, question_text: str, question_type: str) -> Any:
+        sanitized_question = self._sanitize_text(question_text)
+        existing_answer = self.questions_answers_map.get(sanitized_question)
+        if existing_answer and existing_answer.get('type') == question_type:
+            return existing_answer['answer']
+        return None
 
     def apply_to_job(self, job: Any) -> None:
         """
@@ -91,6 +135,12 @@ class AIHawkEasyApplier:
         try:
             self.job_apply(job)
             logger.info(f"Successfully applied to job: {job.title}")
+        except ApplicationLimitReachedException as e:
+            logger.warning(str(e))
+            time_to_wait = 2 * 60 * 60  # 2 hours in seconds
+            logger.info(f"Waiting for {time_to_wait / 3600} hours before retrying.")
+            time.sleep(time_to_wait)
+            # After waiting, you can retry or stop execution
         except Exception as e:
             logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
             raise e
@@ -123,6 +173,9 @@ class AIHawkEasyApplier:
             logger.error(f"Error while checking for application status: {e}")
             raise
 
+        # Check for application limit
+        self.check_for_application_limit()
+
         try:
             self.driver.execute_script("document.activeElement.blur();")
             logger.debug("Focus removed from the active element")
@@ -150,7 +203,7 @@ class AIHawkEasyApplier:
                 actions.move_to_element(easy_apply_button).click().perform()
                 logger.debug("'Easy Apply' button clicked successfully")
 
-                self.handle_safety_reminder_modal(self.driver)
+                self.handle_safety_reminder_modal(driver=self.driver, timeout=5)
 
                 # Verify if the form has opened
                 time.sleep(2)
@@ -179,7 +232,9 @@ class AIHawkEasyApplier:
             logger.debug("Filling out the application form")
             self._fill_application_form(job)
             logger.debug(f"Job application process completed successfully for job: {job}")
-
+        except ApplicationLimitReachedException as e:
+            # Перехватываем и перекидываем исключение дальше без изменений
+            raise
         except Exception as e:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply to job: {job}. Error traceback: {tb_str}")
@@ -466,6 +521,7 @@ class AIHawkEasyApplier:
             time.sleep(random.uniform(1.5, 2.5))
             next_button.click()
             time.sleep(random.uniform(1.5, 2.5))
+            self.close_modal_window()
             return True
         else:
             time.sleep(random.uniform(1.5, 2.5))
@@ -631,9 +687,9 @@ class AIHawkEasyApplier:
                 logger.debug(f"Generated file path for resume: {file_path_pdf}")
 
                 logger.debug(f"Generating resume for job: {job.title} at {job.company}")
-                resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
-                with open(file_path_pdf, "xb") as f:
-                    f.write(base64.b64decode(resume_pdf_base64))
+                resume_pdf_data = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
+                with open(file_path_pdf, "wb") as f:
+                    f.write(resume_pdf_data)
                 logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
                 break
             except HTTPStatusError as e:
@@ -711,13 +767,20 @@ class AIHawkEasyApplier:
                 logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
 
                 styles = getSampleStyleSheet()
-                style = styles["Normal"]
-                style.fontName = "Helvetica"
-                style.fontSize = 12
-                style.leading = 15
+                paragraph_style = ParagraphStyle(
+                    name='CoverLetterStyle',
+                    parent=styles['Normal'],
+                    fontName='Helvetica',
+                    fontSize=12,
+                    leading=15,
+                    spaceAfter=12,
+                )
 
-                story = [Paragraph(cover_letter_text, style)]
+                # Format text into paragraphs
+                formatted_paragraphs = cover_letter_text.split("\n\n")
+                story = [Paragraph(para, paragraph_style) for para in formatted_paragraphs]
 
+                # Create and save PDF
                 doc = SimpleDocTemplate(
                     file_path_pdf,
                     pagesize=A4,
@@ -799,27 +862,25 @@ class AIHawkEasyApplier:
         return False
 
     def _find_and_handle_radio_question(self, section: WebElement) -> bool:
-        question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
-        radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
-        if radios:
-            question_text = section.text.lower()
-            options = [radio.text.lower() for radio in radios]
+        try:
+            question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+            radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
+            if radios:
+                question_text = section.text.lower().strip()
+                existing_answer = self._get_existing_answer(question_text, 'radio')
+                if existing_answer:
+                    self._select_radio(radios, existing_answer)
+                    logger.debug("Selected existing radio answer")
+                    return True
 
-            existing_answer = None
-            for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'radio':
-                    existing_answer = item
-                    break
-            if existing_answer:
-                self._select_radio(radios, existing_answer['answer'])
-                logger.debug("Selected existing radio answer")
+                options = [radio.text.lower() for radio in radios]
+                answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+                self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+                self._select_radio(radios, answer)
+                logger.debug("Selected new radio answer")
                 return True
-
-            answer = self.gpt_answerer.answer_question_from_options(question_text, options)
-            self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
-            self._select_radio(radios, answer)
-            logger.debug("Selected new radio answer")
-            return True
+        except Exception as e:
+            logger.error(f"Error handling radio question: {e}")
         return False
 
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
@@ -842,17 +903,10 @@ class AIHawkEasyApplier:
             is_numeric = self._is_numeric_field(text_field)
             logger.debug(f"Is the field numeric? {'Yes' if is_numeric else 'No'}")
 
-            existing_answer = None
             question_type = 'numeric' if is_numeric else 'textbox'
-
-            for item in self.all_data:
-                if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
-                    existing_answer = item
-                    logger.debug(f"Found existing answer in the data: {existing_answer['answer']}")
-                    break
-
+            existing_answer = self._get_existing_answer(question_text, question_type)
             if existing_answer:
-                self._enter_text(text_field, existing_answer['answer'])
+                self._enter_text(text_field, existing_answer)
                 logger.debug("Entered existing answer into the textbox.")
                 time.sleep(1)
                 text_field.send_keys(Keys.ARROW_DOWN)
@@ -961,12 +1015,7 @@ class AIHawkEasyApplier:
 
             logger.debug(f"Available checkbox options: {options}")
 
-            existing_answers = []
-            for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'checkbox':
-                    existing_answers = item['answer']
-                    break
-
+            existing_answers = self._get_existing_answer(question_text, 'checkbox')
             if existing_answers:
                 logger.debug(f"Found existing answers: {existing_answers}")
                 for checkbox, option in zip(checkboxes, options):
@@ -1015,11 +1064,7 @@ class AIHawkEasyApplier:
 
                 logger.debug(f"Processing dropdown question: {question_text}")
 
-                existing_answer = None
-                for item in self.all_data:
-                    if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
-                        existing_answer = item['answer']
-                        break
+                existing_answer = self._get_existing_answer(question_text, 'dropdown')
 
                 if existing_answer:
                     logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
@@ -1054,58 +1099,6 @@ class AIHawkEasyApplier:
         except Exception as e:
             logger.error(f"Failed to select option '{text}': {e}")
 
-    def _save_questions_to_json(self, question_data: dict) -> None:
-        """
-        Save question data to a JSON file, with filtering to exclude company-specific or unsuitable questions.
-
-        Args:
-            question_data (dict): The question and answer data to be saved.
-        """
-        output_file = 'answers.json'
-        question_data['question'] = self._sanitize_text(question_data['question'])
-        logger.debug(f"Saving question data to JSON: {question_data}")
-
-        # List of keywords to exclude certain questions from being saved
-        exclusion_keywords = ["why us", "summary", "cover letter", "your message", "want to work"]
-
-        # Check if the question contains any exclusion keywords
-        if any(keyword in question_data['question'].lower() for keyword in exclusion_keywords):
-            logger.info(f"Skipping saving question due to company-specific keywords: {question_data['question']}")
-            return  # Skip saving this question if it's company-specific
-
-        try:
-            with open(output_file, 'r') as f:
-                try:
-                    data = json.load(f)
-                    if not isinstance(data, list):
-                        raise ValueError("JSON file format is incorrect. Expected a list of questions.")
-                except json.JSONDecodeError:
-                    logger.error("JSON decoding failed")
-                    data = []
-        except FileNotFoundError:
-            logger.warning("JSON file not found, creating new file")
-            data = []
-
-        if question_data in data:
-            logger.info(f"Duplicate question found, skipping save: {question_data['question']}")
-            return
-
-        data.append(question_data)
-        try:
-            with open(output_file, 'w') as f:
-                json.dump(data, f, indent=4)
-            logger.debug("Question data saved successfully to JSON")
-        except Exception:
-            tb_str = traceback.format_exc()
-            logger.error(f"Error saving questions data to JSON file: {tb_str}")
-            raise Exception(f"Error saving questions data to JSON file: \nTraceback:\n{tb_str}")
-
-    def _sanitize_text(self, text: str) -> str:
-        sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
-        sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text).replace('\n', ' ').replace('\r', '').rstrip(',')
-        logger.debug(f"Sanitized text: {sanitized_text}")
-        return sanitized_text
-
     def _is_form_open(self) -> bool:
         try:
             WebDriverWait(self.driver, 5).until(
@@ -1115,18 +1108,20 @@ class AIHawkEasyApplier:
         except TimeoutException:
             return False
 
-    def handle_safety_reminder_modal(driver, timeout=5):
+    def handle_safety_reminder_modal(self, driver, timeout=5):
         """
         Handles the job safety reminder modal window.
         If the modal is present, clicks the 'Continue applying' button.
 
         Args:
             driver (webdriver): The Selenium WebDriver instance.
-            timeout (int): Time to wait for the modal window to appear (default: 5 seconds).
+            timeout (int or float): Time to wait for the modal window to appear (default: 5 seconds).
         """
+        if not isinstance(timeout, (int, float)):
+            raise TypeError(f"Expected 'timeout' to be int or float, but got {type(timeout)}: {timeout}")
+
         try:
             logger.debug("Checking for the presence of the job safety reminder modal...")
-            # Check if the 'Continue applying' button is present
             continue_button = WebDriverWait(driver, timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//span[text()='Continue applying']/ancestor::button"))
             )
@@ -1136,7 +1131,7 @@ class AIHawkEasyApplier:
         except TimeoutException:
             logger.info("Job safety reminder modal not found. Continuing with the process.")
 
-    def is_resume_already_uploaded(driver, resume_filename: str) -> bool:
+    def is_resume_already_uploaded(self, driver, resume_filename: str) -> bool:
         """
         Checks if the resume with the given filename is already uploaded.
 
@@ -1160,3 +1155,88 @@ class AIHawkEasyApplier:
             logger.error(f"Error while checking uploaded resumes: {str(e)}")
 
         return False
+
+    def check_for_application_limit(self):
+        """
+        Checks if the application limit for Easy Apply has been reached.
+        If the limit is reached, raises an ApplicationLimitReachedException.
+        """
+        logger.debug("Checking for Easy Apply application limit")
+        try:
+            limit_reached_elements = self.driver.find_elements(
+                By.XPATH, "//*[contains(., 'You’ve reached the Easy Apply application limit for today')]"
+            )
+            if limit_reached_elements:
+                logger.info("Reached Easy Apply application limit for today.")
+                raise ApplicationLimitReachedException("Reached Easy Apply application limit for today.")
+            else:
+                logger.debug("No Easy Apply application limit reached. Proceeding with application.")
+        except Exception as e:
+            logger.error(f"Error while checking for Easy Apply application limit: {e}")
+            raise
+
+    def check_for_premium_redirect(self, job: Any, max_attempts=3):
+        """
+        Checks if the current page redirects to a LinkedIn Premium page and attempts to navigate back to the job page.
+        Args:
+            job (Any): The job object containing the job link.
+            max_attempts (int): Maximum number of attempts to try navigating back.
+        """
+        current_url = self.driver.current_url
+        attempts = 0
+
+        while "linkedin.com/premium" in current_url and attempts < max_attempts:
+            logger.warning("Redirected to LinkedIn Premium page. Attempting to return to the job page.")
+            attempts += 1
+            self.driver.get(job.link)
+            time.sleep(2)
+            current_url = self.driver.current_url
+
+        if "linkedin.com/premium" in current_url:
+            logger.error(f"Failed to return to the job page after {max_attempts} attempts. Cannot apply for the job.")
+            raise Exception(
+                f"Redirected to LinkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+
+
+    def is_application_limit_reached(self) -> bool:
+        """
+        Checks if the application limit for Easy Apply has been reached.
+        Returns True if the limit is reached, False otherwise.
+        """
+        logger.debug("Checking for Easy Apply application limit")
+        try:
+            limit_reached_elements = self.driver.find_elements(
+                By.XPATH, "//*[contains(., 'You’ve reached the Easy Apply application limit for today')]"
+            )
+            if limit_reached_elements:
+                logger.info("Reached Easy Apply application limit for today.")
+                return True
+            else:
+                logger.debug("No Easy Apply application limit reached.")
+                return False
+        except Exception as e:
+            logger.error(f"Error while checking for Easy Apply application limit: {e}")
+            # Depending on your preference, you might consider returning True to be safe
+            return True  # Assume limit is reached if there's an error
+
+
+
+    def close_modal_window(self):
+        """
+        Closes the modal window by clicking the 'Dismiss' button.
+        """
+        logger.debug("Attempting to close the modal window.")
+        try:
+            dismiss_button = WebDriverWait(self.driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Dismiss']"))
+            )
+            dismiss_button.click()
+            logger.info("Modal window closed successfully.")
+        except TimeoutException:
+            logger.warning("Dismiss button not found. Modal window may already be closed.")
+        except Exception as e:
+            logger.error(f"Failed to close modal window: {str(e)}. Continuing without interruption.")
+
+class ApplicationLimitReachedException(Exception):
+    """Raised when the Easy Apply application limit for the day has been reached."""
+    pass

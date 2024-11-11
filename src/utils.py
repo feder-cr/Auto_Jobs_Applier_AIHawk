@@ -10,22 +10,19 @@ from app_config import MINIMUM_LOG_LEVEL
 
 log_file = "app_log.log"
 
+# Configure loguru based on the minimum log level
 if MINIMUM_LOG_LEVEL in ["DEBUG", "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-
-    logger.remove()
-
+    logger.remove()  # Remove any default handlers
     logger.add(sys.stderr, level=MINIMUM_LOG_LEVEL, format="{time} - {name} - {level} - {message}")
-
     logger.add(log_file, level=MINIMUM_LOG_LEVEL, format="{time} - {name} - {level} - {message}", encoding='utf-8')
 else:
-
     logger.warning(f"Invalid log level: {MINIMUM_LOG_LEVEL}. Defaulting to DEBUG.")
     logger.remove()
     logger.add(sys.stderr, level="DEBUG", format="{time} - {name} - {level} - {message}")
     logger.add(log_file, level="DEBUG", format="{time} - {name} - {level} - {message}", encoding='utf-8')
 
-logger.disable("urllib3.connectionpool")
-logger.disable("selenium.webdriver.remote.remote_connection")
+# logger.disable("urllib3.connectionpool")
+# logger.disable("selenium.webdriver.remote.remote_connection")
 
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
@@ -68,12 +65,10 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
     logger.debug(f"Current scroll position: {current_scroll_position}")
 
     if reverse:
-
         if current_scroll_position < start:
             start = current_scroll_position
         logger.debug(f"Adjusted start position for upward scroll: {start}")
     else:
-
         if end > max_scroll_height:
             logger.warning(f"End value exceeds the scroll height. Adjusting end to {max_scroll_height}")
             end = max_scroll_height
@@ -109,7 +104,6 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
 
                 # Decrease the step but ensure it doesn't reverse direction
                 step = max(10, abs(step) - 10) * (-1 if reverse else 1)
-
                 time.sleep(random.uniform(0.6, 1.5))
 
             # Ensure the final scroll position is correct

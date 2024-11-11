@@ -202,14 +202,10 @@ class JobApplicationProfile:
 
     def __str__(self):
         logger.debug("Generating string representation of JobApplicationProfile")
-
-        def format_dataclass(obj):
-            return "\n".join(f"{field.name}: {getattr(obj, field.name)}" for field in obj.__dataclass_fields__.values())
-
-        formatted_str = (f"Self Identification:\n{format_dataclass(self.self_identification)}\n\n"
-                         f"Legal Authorization:\n{format_dataclass(self.legal_authorization)}\n\n"
-                         f"Work Preferences:\n{format_dataclass(self.work_preferences)}\n\n"
-                         f"Availability: {self.availability.notice_period}\n\n"
-                         f"Salary Expectations: {self.salary_expectations.salary_range_usd}\n\n")
-        logger.debug(f"String representation generated: {formatted_str}")
-        return formatted_str
+        return "\n\n".join([
+            f"Self Identification:\n{self.self_identification}",
+            f"Legal Authorization:\n{self.legal_authorization}",
+            f"Work Preferences:\n{self.work_preferences}",
+            f"Availability: {self.availability.notice_period}",
+            f"Salary Expectations: {self.salary_expectations.salary_range_usd}"
+        ])

@@ -9,20 +9,38 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class AIHawkAuthenticator:
+    """
+    Handles the authentication process for LinkedIn using Selenium WebDriver.
+    """
 
     def __init__(self, driver=None, bot_facade=None):
+        """
+        Initializes the AIHawkAuthenticator with a WebDriver and bot facade.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            bot_facade: Instance of AIHawkBotFacade containing email and password.
+        """
         self.driver = driver
         self.email = bot_facade.email if bot_facade else ""
         self.password = bot_facade.password if bot_facade else ""
         logger.debug(f"AIHawkAuthenticator initialized with driver: {driver}")
 
     def set_bot_facade(self, bot_facade):
+        """
+        Sets the bot facade to retrieve email and password.
+
+        Args:
+            bot_facade: Instance of AIHawkBotFacade containing email and password.
+        """
         self.email = bot_facade.email
         self.password = bot_facade.password
         logger.debug(f"Email and password set from bot_facade: email={self.email}, password={'*' * len(self.password)}")
 
-
     def start(self):
+        """
+        Starts the authentication process by navigating to LinkedIn and logging in if necessary.
+        """
         logger.info("Starting Chrome browser to log in to LinkedIn.")
         self.driver.get('https://www.linkedin.com/feed')
         self.wait_for_page_load()
@@ -37,6 +55,9 @@ class AIHawkAuthenticator:
             self.handle_login()
 
     def handle_login(self):
+        """
+        Handles the login process by navigating to the login page and entering credentials.
+        """
         logger.info("Navigating to the LinkedIn login page...")
         self.driver.get("https://www.linkedin.com/login")
         if 'feed' in self.driver.current_url:
@@ -51,10 +72,13 @@ class AIHawkAuthenticator:
         self.handle_security_check()
 
     def enter_credentials(self):
+        """
+        Enters the email and password into the login form.
+        """
         try:
             logger.debug("Starting the process to enter credentials...")
 
-            # Ожидание появления поля для ввода email
+            # Wait for the email input field to be present
             logger.debug("Waiting for the email input field to be present...")
             email_field = WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "username"))
@@ -66,7 +90,7 @@ class AIHawkAuthenticator:
             email_field.send_keys(self.email)
             logger.debug("Email entered successfully. Verifying value in the field...")
 
-            # Проверка значения в поле email
+            # Verify the value in the email field
             entered_email = email_field.get_attribute("value")
             if entered_email != self.email:
                 logger.warning(f"Email was not correctly entered. Field value: {entered_email}. Retrying...")
@@ -75,7 +99,7 @@ class AIHawkAuthenticator:
 
             logger.debug(f"Email field final value: {entered_email}")
 
-            # Ожидание появления поля для ввода пароля
+            # Wait for the password input field to be present
             logger.debug("Waiting for the password input field to be present...")
             password_field = WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "password"))
@@ -83,11 +107,11 @@ class AIHawkAuthenticator:
             logger.debug(f"Password input field found: {password_field}. Clearing and entering password now.")
             password_field.clear()
             password_field.click()
-            logger.debug(f"Attempting to enter password: {'*' * len(self.password)}")  # Маскируем отображение пароля
+            logger.debug(f"Attempting to enter password: {'*' * len(self.password)}")
             password_field.send_keys(self.password)
             logger.debug("Password entered successfully. Verifying value in the field...")
 
-            # Проверка значения в поле пароля
+            # Verify the value in the password field
             entered_password = password_field.get_attribute("value")
             if entered_password != self.password:
                 logger.warning(f"Password was not correctly entered. Field value: {entered_password}. Retrying...")
@@ -106,8 +130,10 @@ class AIHawkAuthenticator:
             logger.error(f"An unexpected error occurred while entering credentials: {str(e)}")
             raise
 
-
     def submit_login_form(self):
+        """
+        Submits the login form by clicking the submit button.
+        """
         try:
             logger.debug("Submitting login form...")
             login_button = self.driver.find_element(By.XPATH, '//button[@type="submit"]')
@@ -118,6 +144,9 @@ class AIHawkAuthenticator:
             print("Login button not found. Please verify the page structure.")
 
     def handle_security_check(self):
+        """
+        Handles the security checkpoint that may appear after login.
+        """
         try:
             logger.debug("Handling security check...")
             WebDriverWait(self.driver, 10).until(
@@ -132,13 +161,12 @@ class AIHawkAuthenticator:
             logger.error("Security check not completed. Please try again later.")
 
     def is_logged_in(self):
-        # target_url = 'https://www.linkedin.com/feed'
-        #
-        # # Navigate to the target URL if not already there
-        # if self.driver.current_url != target_url:
-        #     logger.debug("Navigating to target URL: %s", target_url)
-        #     self.driver.get(target_url)
+        """
+        Checks if the user is already logged in to LinkedIn.
 
+        Returns:
+            bool: True if the user is logged in, False otherwise.
+        """
         try:
             # Increase the wait time for the page elements to load
             logger.debug("Checking if user is logged in...")
@@ -170,6 +198,12 @@ class AIHawkAuthenticator:
             return False
 
     def wait_for_page_load(self, timeout=10):
+        """
+        Waits for the page to fully load.
+
+        Args:
+            timeout (int): The maximum time to wait for the page to load.
+        """
         try:
             logger.debug("Waiting for page to load with timeout: %s seconds", timeout)
             WebDriverWait(self.driver, timeout).until(
@@ -179,3 +213,4 @@ class AIHawkAuthenticator:
         except TimeoutException:
             logger.error("Page load timed out.")
             print("Page load timed out.")
+
