@@ -19,9 +19,14 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from job_application import JobApplication
+from job_application_saver import ApplicationSaver
 import src.utils as utils
 from src.logging import logger
 from src.job import Job
+from src.ai_hawk.llm.llm_manager import GPTAnswerer
+from utils import browser_utils
+import utils.time_utils
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
         """
@@ -38,7 +43,7 @@ def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
 
 class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
-                 gpt_answerer: Any, resume_generator_manager):
+                 gpt_answerer: GPTAnswerer, resume_generator_manager):
         logger.debug("Initializing AIHawkEasyApplier")
         if resume_dir is None or not os.path.exists(resume_dir):
             resume_dir = None
@@ -80,7 +85,7 @@ class AIHawkEasyApplier:
         attempts = 0
 
         while "linkedin.com/premium" in current_url and attempts < max_attempts:
-            logger.warning("Redirected to AIHawk Premium page. Attempting to return to job page.")
+            logger.warning("Redirected to linkedIn Premium page. Attempting to return to job page.")
             attempts += 1
 
             self.driver.get(job.link)
@@ -90,7 +95,7 @@ class AIHawkEasyApplier:
         if "linkedin.com/premium" in current_url:
             logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
-                f"Redirected to AIHawk Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
+                f"Redirected to linkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
             
     def apply_to_job(self, job: Job) -> None:
         """
@@ -108,7 +113,7 @@ class AIHawkEasyApplier:
 
     def job_apply(self, job: Job):
         logger.debug(f"Starting job application for job: {job}")
-
+        self.job_application = JobApplication(job)
         try:
             self.driver.get(job.link)
             logger.debug(f"Navigated to job link: {job.link}")
@@ -116,7 +121,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        utils.medium_sleep()
+        utils.time_utils.medium_sleep()
         self.check_for_premium_redirect(job)
 
         try:
@@ -163,8 +168,8 @@ class AIHawkEasyApplier:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
-            logger.debug("Discarding application due to failure")
-            self._discard_application()
+            logger.debug("Saving application process due to failure")
+            self._save_job_application_process()
 
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
@@ -291,14 +296,15 @@ class AIHawkEasyApplier:
     def _scroll_page(self) -> None:
         logger.debug("Scrolling the page")
         scrollable_element = self.driver.find_element(By.TAG_NAME, 'html')
-        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
-        utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
+        browser_utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=False)
+        browser_utils.scroll_slow(self.driver, scrollable_element, step=300, reverse=True)
 
     def _fill_application_form(self, job):
         logger.debug(f"Filling out application form for job: {job}")
         while True:
             self.fill_up(job)
             if self._next_or_submit():
+                ApplicationSaver.save(self.job_application)
                 logger.debug("Application form submitted")
                 break
 
@@ -309,13 +315,13 @@ class AIHawkEasyApplier:
         if 'submit application' in button_text:
             logger.debug("Submit button found, submitting application")
             self._unfollow_company()
-            utils.short_sleep()
+            utils.time_utils.short_sleep()
             next_button.click()
-            utils.short_sleep()
+            utils.time_utils.short_sleep()
             return True
-        utils.short_sleep()
+        utils.time_utils.short_sleep()
         next_button.click()
-        utils.medium_sleep()
+        utils.time_utils.medium_sleep()
         self._check_for_errors()
 
     def _unfollow_company(self) -> None:
@@ -338,11 +344,21 @@ class AIHawkEasyApplier:
         logger.debug("Discarding application")
         try:
             self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
-            utils.medium_sleep()
+            utils.time_utils.medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
-            utils.medium_sleep()
+            utils.time_utils.medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
+    
+    def _save_job_application_process(self) -> None:
+        logger.debug("Application not completed. Saving job to My Jobs, In Progess section")
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
+            utils.time_utils.medium_sleep()
+            self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[1].click()
+            utils.time_utils.medium_sleep()
+        except Exception as e:
+            logger.error(f"Failed to save application process: {e}")
 
     def fill_up(self, job) -> None:
         logger.debug(f"Filling up form sections for job: {job}")
@@ -395,8 +411,9 @@ class AIHawkEasyApplier:
         logger.debug(f"Detected question text: {question_text}")
 
         existing_answer = None
+        current_question_sanitized = self._sanitize_text(question_text) 
         for item in self.all_data:
-            if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+            if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                 existing_answer = item['answer']
                 break
 
@@ -407,10 +424,12 @@ class AIHawkEasyApplier:
             existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             logger.debug(f"Model provided answer: {existing_answer}")
             self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
+            self.all_data = self._load_questions_from_json()
 
         if existing_answer in options:
             select.select_by_visible_text(existing_answer)
             logger.debug(f"Selected option: {existing_answer}")
+            self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
         else:
             logger.error(f"Answer '{existing_answer}' is not a valid option in the dropdown")
             raise Exception(f"Invalid option selected: {existing_answer}")
@@ -451,7 +470,7 @@ class AIHawkEasyApplier:
 
         logger.debug("Finished handling upload fields")
 
-    def _create_and_upload_resume(self, element, job):
+    def _create_and_upload_resume(self, element, job : Job):
         logger.debug("Starting the process of creating and uploading resume.")
         folder_path = 'generated_cv'
 
@@ -524,7 +543,8 @@ class AIHawkEasyApplier:
         try:
             logger.debug(f"Uploading resume from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
-            job.pdf_path = os.path.abspath(file_path_pdf)
+            job.resume_path = os.path.abspath(file_path_pdf)
+            self.job_application.resume_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Resume created and uploaded successfully: {file_path_pdf}")
         except Exception as e:
@@ -532,7 +552,7 @@ class AIHawkEasyApplier:
             logger.error(f"Resume upload failed: {tb_str}")
             raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
 
-    def _create_and_upload_cover_letter(self, element: WebElement, job) -> None:
+    def _create_and_upload_cover_letter(self, element: WebElement, job : Job) -> None:
         logger.debug("Starting the process of creating and uploading cover letter.")
 
         cover_letter_text = self.gpt_answerer.answer_question_textual_wide_range("Write a cover letter")
@@ -625,6 +645,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Uploading cover letter from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
             job.cover_letter_path = os.path.abspath(file_path_pdf)
+            self.job_application.cover_letter_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Cover letter created and uploaded successfully: {file_path_pdf}")
         except Exception as e:
@@ -673,14 +694,24 @@ class AIHawkEasyApplier:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
 
-            existing_answer = self._find_existing_answer(question_text)
+            existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
+            for item in self.all_data:
+                if current_question_sanitized in item['question'] and item['type'] == 'radio':
+                    existing_answer = item
+
+                    break
+
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
+                self.job_application.save_application_data(existing_answer)
                 logger.debug("Selected existing radio answer")
                 return True
 
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+            self.all_data = self._load_questions_from_json()
+            self.job_application.save_application_data({'type': 'radio', 'question': question_text, 'answer': answer})
             self._select_radio(radios, answer)
             logger.debug("Selected new radio answer")
             return True
@@ -702,12 +733,13 @@ class AIHawkEasyApplier:
 
             # Check if it's a cover letter field (case-insensitive)
             is_cover_letter = 'cover letter' in question_text.lower()
-
+            logger.debug(f"question: {question_text}")
             # Look for existing answer if it's not a cover letter field
             existing_answer = None
             if not is_cover_letter:
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
+                    if item['question'] == current_question_sanitized and item.get('type') == question_type:
                         existing_answer = item['answer']
                         logger.debug(f"Found existing answer: {existing_answer}")
                         break
@@ -726,9 +758,12 @@ class AIHawkEasyApplier:
             self._enter_text(text_field, answer)
             logger.debug("Entered answer into the textbox.")
 
+            self.job_application.save_application_data({'type': question_type, 'question': question_text, 'answer': answer})
+
             # Save non-cover letter answers
             if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+                self.all_data = self._load_questions_from_json()
                 logger.debug("Saved non-cover letter answer to JSON.")
 
             time.sleep(1)
@@ -749,17 +784,21 @@ class AIHawkEasyApplier:
             answer_text = answer_date.strftime("%Y-%m-%d")
 
             existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
             for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
+                if current_question_sanitized in item['question'] and item['type'] == 'date':
                     existing_answer = item
-
                     break
+
             if existing_answer:
                 self._enter_text(date_field, existing_answer['answer'])
                 logger.debug("Entered existing date answer")
+                self.job_application.save_application_data(existing_answer)
                 return True
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+            self.all_data = self._load_questions_from_json()
+            self.job_application.save_application_data({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
             return True
@@ -787,13 +826,15 @@ class AIHawkEasyApplier:
                 logger.debug(f"Current selection: {current_selection}")
 
                 existing_answer = None
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+                    if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item['answer']
                         break
 
                 if existing_answer:
                     logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
+                    self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
                     if current_selection != existing_answer:
                         logger.debug(f"Updating selection to: {existing_answer}")
                         self._select_dropdown_option(dropdown, existing_answer)
@@ -801,6 +842,8 @@ class AIHawkEasyApplier:
                     logger.debug(f"No existing answer found, querying model for: {question_text}")
                     answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                     self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                    self.all_data = self._load_questions_from_json()
+                    self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': answer})
                     self._select_dropdown_option(dropdown, answer)
                     logger.debug(f"Selected new dropdown answer: {answer}")
 
