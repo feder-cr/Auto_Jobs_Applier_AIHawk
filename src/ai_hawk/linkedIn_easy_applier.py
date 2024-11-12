@@ -174,8 +174,8 @@ class AIHawkEasyApplier:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
-            logger.debug("Discarding application due to failure")
-            self._discard_application()
+            logger.debug("Saving application process due to failure")
+            self._save_job_application_process()
 
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
@@ -358,6 +358,16 @@ class AIHawkEasyApplier:
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 
+    def _save_job_application_process(self) -> None:
+        logger.debug("Application not completed. Saving job to My Jobs, In Progess section")
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
+            utils.time_utils.medium_sleep()
+            self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[1].click()
+            utils.time_utils.medium_sleep()
+        except Exception as e:
+            logger.error(f"Failed to save application process: {e}")
+
     def fill_up(self, job_context : JobContext) -> None:
         job = job_context.job
         logger.debug(f"Filling up form sections for job: {job}")
@@ -379,6 +389,59 @@ class AIHawkEasyApplier:
             self._handle_upload_fields(element, job_context)
         else:
             self._fill_additional_questions(job_context)
+
+    def _handle_dropdown_fields(self, element: WebElement) -> None:
+        logger.debug("Handling dropdown fields")
+
+        dropdown = element.find_element(By.TAG_NAME, 'select')
+        select = Select(dropdown)
+        dropdown_id = dropdown.get_attribute('id')
+        if 'phoneNumber-Country' in dropdown_id:
+            country = self.resume_generator_manager.get_resume_country()
+            if country:
+                try:
+                    select.select_by_value(country)
+                    logger.debug(f"Selected phone country: {country}")
+                    return True
+                except NoSuchElementException:
+                    logger.warning(f"Country {country} not found in dropdown options")
+
+        options = [option.text for option in select.options]
+        logger.debug(f"Dropdown options found: {options}")
+
+        parent_element = dropdown.find_element(By.XPATH, '../..')
+
+        label_elements = parent_element.find_elements(By.TAG_NAME, 'label')
+        if label_elements:
+            question_text = label_elements[0].text.lower()
+        else:
+            question_text = "unknown"
+
+        logger.debug(f"Detected question text: {question_text}")
+
+        existing_answer = None
+        current_question_sanitized = self._sanitize_text(question_text) 
+        for item in self.all_data:
+            if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
+                existing_answer = item['answer']
+                break
+
+        if existing_answer:
+            logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
+        else:
+            logger.debug(f"No existing answer found, querying model for: {question_text}")
+            existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+            logger.debug(f"Model provided answer: {existing_answer}")
+            self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
+            self.all_data = self._load_questions_from_json()
+
+        if existing_answer in options:
+            select.select_by_visible_text(existing_answer)
+            logger.debug(f"Selected option: {existing_answer}")
+            self.job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
+        else:
+            logger.error(f"Answer '{existing_answer}' is not a valid option in the dropdown")
+            raise Exception(f"Invalid option selected: {existing_answer}")
 
     def _is_upload_field(self, element: WebElement) -> bool:
         is_upload = bool(element.find_elements(By.XPATH, ".//input[@type='file']"))
@@ -646,7 +709,13 @@ class AIHawkEasyApplier:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
 
-            existing_answer = self._find_existing_answer(question_text)
+            existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
+            for item in self.all_data:
+                if current_question_sanitized in item['question'] and item['type'] == 'radio':
+                    existing_answer = item
+
+                    break
 
             if existing_answer:
                 self._select_radio(radios, existing_answer['answer'])
@@ -656,6 +725,7 @@ class AIHawkEasyApplier:
 
             answer = self.gpt_answerer.answer_question_from_options(question_text, options)
             self._save_questions_to_json({'type': 'radio', 'question': question_text, 'answer': answer})
+            self.all_data = self._load_questions_from_json()
             job_application.save_application_data({'type': 'radio', 'question': question_text, 'answer': answer})
             self._select_radio(radios, answer)
             logger.debug("Selected new radio answer")
@@ -679,12 +749,13 @@ class AIHawkEasyApplier:
 
             # Check if it's a cover letter field (case-insensitive)
             is_cover_letter = 'cover letter' in question_text.lower()
-
+            logger.debug(f"question: {question_text}")
             # Look for existing answer if it's not a cover letter field
             existing_answer = None
             if not is_cover_letter:
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
+                    if item['question'] == current_question_sanitized and item.get('type') == question_type:
                         existing_answer = item['answer']
                         logger.debug(f"Found existing answer: {existing_answer}")
                         break
@@ -708,6 +779,7 @@ class AIHawkEasyApplier:
             # Save non-cover letter answers
             if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
+                self.all_data = self._load_questions_from_json()
                 logger.debug("Saved non-cover letter answer to JSON.")
 
             time.sleep(1)
@@ -729,8 +801,9 @@ class AIHawkEasyApplier:
             answer_text = answer_date.strftime("%Y-%m-%d")
 
             existing_answer = None
+            current_question_sanitized = self._sanitize_text(question_text) 
             for item in self.all_data:
-                if self._sanitize_text(question_text) in item['question'] and item['type'] == 'date':
+                if current_question_sanitized in item['question'] and item['type'] == 'date':
                     existing_answer = item
                     break
 
@@ -741,6 +814,7 @@ class AIHawkEasyApplier:
                 return True
 
             self._save_questions_to_json({'type': 'date', 'question': question_text, 'answer': answer_text})
+            self.all_data = self._load_questions_from_json()
             job_application.save_application_data({'type': 'date', 'question': question_text, 'answer': answer_text})
             self._enter_text(date_field, answer_text)
             logger.debug("Entered new date answer")
@@ -770,8 +844,9 @@ class AIHawkEasyApplier:
                 logger.debug(f"Current selection: {current_selection}")
 
                 existing_answer = None
+                current_question_sanitized = self._sanitize_text(question_text) 
                 for item in self.all_data:
-                    if self._sanitize_text(question_text) in item['question'] and item['type'] == 'dropdown':
+                    if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item['answer']
                         break
 
@@ -785,6 +860,7 @@ class AIHawkEasyApplier:
                     logger.debug(f"No existing answer found, querying model for: {question_text}")
                     answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                     self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
+                    self.all_data = self._load_questions_from_json()
                     job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': answer})
                     self._select_dropdown_option(dropdown, answer)
                     logger.debug(f"Selected new dropdown answer: {answer}")
