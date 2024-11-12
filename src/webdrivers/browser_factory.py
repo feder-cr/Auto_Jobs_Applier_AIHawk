@@ -5,6 +5,8 @@ from loguru import logger
 
 from config import BROWSER_TYPE_CONFIG
 from src.webdrivers.base_browser import BrowserType
+from src.webdrivers.chrome import Chrome
+from src.webdrivers.firefox import Firefox
 
 
 class BrowserFactory:
@@ -35,9 +37,11 @@ class BrowserFactory:
         Raises:
             RuntimeError: If browser initialization fails
         """
-        browser_class = browser_type.value
-        if not browser_class:
+        if browser_type == BrowserType.CHROME:
+            browser = Chrome()
+        elif browser_type == BrowserType.FIREFOX:
+            browser = Firefox()
+        else:
             raise ValueError(f"Unsupported browser type: {browser_type}")
 
-        browser = browser_class()
         return browser.create_driver()
