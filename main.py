@@ -212,7 +212,6 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
         # check if the config is not set as well
-        BrowserFactory.init_browser_type()
 
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:

@@ -6,7 +6,6 @@ from unittest import mock
 from selenium.webdriver.remote.webelement import WebElement
 from src.utils.browser_utils import  is_scrollable, scroll_slow
 from src.webdrivers.base_browser import BrowserType, BrowserProfile
-from src.webdrivers.browser_factory import BrowserFactory
 from src.webdrivers.chrome import Chrome
 from src.webdrivers.firefox import Firefox
 
@@ -91,10 +90,9 @@ def test_chrome_browser_options(mocker):
 
 # Test firefox_browser_options function
 def test_firefox_browser_options(mocker):
-    mocker.patch("os.path.dirname", return_value="/mocked/path")
-    mocker.patch("os.path.basename", return_value="profile_directory")
-
     mock_options = mocker.Mock()
+    mock_profile = mocker.Mock(spec=BrowserProfile)
+    mock_profile.profile_path = "/mocked/path"
 
     mocker.patch("selenium.webdriver.FirefoxOptions", return_value=mock_options)
 
@@ -103,4 +101,5 @@ def test_firefox_browser_options(mocker):
 
     # Ensure options were set
     assert mock_options.add_argument.called
+    assert mock_options.set_preference.called
     assert options == mock_options

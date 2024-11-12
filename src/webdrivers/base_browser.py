@@ -7,8 +7,8 @@ from loguru import logger
 
 class BrowserType(Enum):
     """Enum for supported browser types"""
-    CHROME = 'chrome'
-    FIREFOX = 'firefox'
+    CHROME = "chrome"
+    FIREFOX = "firefox"
 
 class BrowserProfile:
     """Manages browser profile creation and configuration"""
