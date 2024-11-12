@@ -4,7 +4,6 @@ import random
 import time
 from itertools import product
 from pathlib import Path
-from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
