@@ -2,7 +2,7 @@
 import random
 import time
 
-from src.logging import logger
+from log import logger
 
 
 def is_scrollable(element):

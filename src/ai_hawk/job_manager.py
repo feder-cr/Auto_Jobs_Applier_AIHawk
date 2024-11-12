@@ -17,7 +17,7 @@ from selenium.webdriver.remote.webdriver import WebElement
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import MINIMUM_WAIT_TIME_IN_SECONDS
 from src.job import Job
-from src.logging import logger
+from log import logger
 
 import urllib.parse
 from src.regex_utils import generate_regex_patterns_for_blacklisting
@@ -292,15 +292,12 @@ class AIHawkJobManager:
 
     # TODO: verify that this skips as expected - it doesn't seem to always work
     def get_jobs_from_page(self) -> List[WebElement]:
-    # TODO: verify that this skips as expected - it doesn't seem to always work
-    def get_jobs_from_page(self) -> List[WebElement]:
         try:
             no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
             no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
-            if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
                 logger.debug("No matching jobs found on this page, skipping.")
                 return []
@@ -313,7 +310,6 @@ class AIHawkJobManager:
         except NoSuchElementException:
             logger.debug("No job results found on the page.")
             return []
-        # TODO: get rid of this
         # TODO: get rid of this
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
@@ -353,12 +349,10 @@ class AIHawkJobManager:
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
-                # FIXME: not exceptional - this is expected behavior and should be handled with normal logic
-            no_jobs_element = self.driver.find_element(
-                By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
+                no_jobs_element = self.driver.find_element(
+                    By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
-                # FIXME: not exceptional - this is expected behavior and should be handled with normal logic
                 raise Exception("No more jobs on this page")
         except NoSuchElementException:
             pass
@@ -371,7 +365,6 @@ class AIHawkJobManager:
             By.CLASS_NAME, "scaffold-layout__list-container")[
             0].find_elements(By.CLASS_NAME, "jobs-search-results__list-item")
 
-        # FIXME: not exceptional - this is expected behavior and should be handled with normal logic
         if not job_list_elements:
             raise Exception("No job class elements found on page")
 
@@ -379,16 +372,14 @@ class AIHawkJobManager:
                     for job_element in job_list_elements]
 
         for job in job_list:
-
-        job_list = [Job(*self.extract_job_information_from_tile(job_element))
-                    for job_element in job_list_elements]
+            job_list = [Job(*self.extract_job_information_from_tile(job_element))
+                        for job_element in job_list_elements]
 
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
-
 
             try:
                 self.write_to_file(job, "data")

@@ -4,17 +4,20 @@ import logging
 import logging.handlers
 from loguru import logger
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
-from app_config import LOG_CONFIG
-from constants import LOG_TO_FILE, MINIMUM_LOG_LEVEL
+
+from config import LOG_LEVEL, LOG_SELENIUM_LEVEL, LOG_TO_CONSOLE, LOG_TO_FILE
 
 
 def remove_default_loggers():
     """Remove default loggers from root logger."""
     root_logger = logging.getLogger()
+
     if root_logger.hasHandlers():
         root_logger.handlers.clear()
+
     if os.path.exists("log/app.log"):
         os.remove("log/app.log")
+
 
 def init_loguru_logger():
     """Initialize and configure loguru logger."""
