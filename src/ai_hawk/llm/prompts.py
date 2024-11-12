@@ -2,13 +2,20 @@
 personal_information_template = """
 Answer the following question based on the provided personal information.
 
+Only add information that is required. Do not add the question in the answer. (When asked for a phone number, say the answer only without "phone number: ")
+
 ## Rules
 - Answer questions directly.
+- Do not add extra information.
 
 ## Example
-My resume: John Doe, born on 01/01/1990, living in Milan, Italy.
+My resume: John Doe, born on 01/01/1990, living in Milan, Italy. Phone +1 6700001234
 Question: What is your city?
  Milan
+Question: phone country code
+Answer: United States (+1)
+Question: phone
+Answer: 6700001234
 
 Personal Information: {resume_section}
 Question: {question}
@@ -23,8 +30,12 @@ Answer the following question based on the provided self-identification details.
 
 ## Example
 My resume: Male, uses he/him pronouns, not a veteran, no disability.
-Question: What are your gender?
-Male
+Question: What is your gender?
+Answer: Male
+Question: do you classify as one of the above types of protected veteran?
+Answer: I identify as one or more of the above classifications of veteran
+Question: have you ever had or currently have a disability?
+Answer: Yes, I had or have a disability
 
 Self-Identification: {resume_section}
 Question: {question}
@@ -245,10 +256,20 @@ Analyze the job description to identify key qualifications and requirements. Int
 
 Please write the cover letter in a way that directly addresses the job role and the company’s characteristics, ensuring it remains concise and engaging without unnecessary embellishments. The letter should be formatted into paragraphs and should not include a greeting or signature.
 
+Only include the necessary information about the cover letter and do not reference the cover letter or use any language to tip off the reader about who is writing the cover letter - it must be from the perspective of the candidate. Do not say things like "Here is the recommended cover letter" or "the above cover letter includes recommended information about the candidate."
+
+You are forbidden from using a resume format for cover letters. You are forbidden from "presenting" the cover letter or ever disclosing that the cover letter is a recommendation, example, or anything that is created by anyone other than the candidate.
+
+You are forbidden from hallucinating job experience that the candidate does not have in the coverletter. If there is no direct mention of a particular role, do not include it. Only ever use light embellishment for specific skills that cannot be disproven by looking at the resume.
+
+You are forbidden from adding a signature. Never, ever add a signature and especially never leave a spot for the candidate's name. Simply end the cover letter with a "Thank you for your time. I look forward to hearing from you soon." and nothing else.
+
 ## Rules:
 - Provide only the text of the cover letter.
 - Do not include any introductions, explanations, or additional information.
-- The letter should be formatted into paragraph.
+- The letter should be paragraph-format.
+- Write the letter as if you are the candidate.
+- NO template formatting
 
 ## Company Name:
 {company}
@@ -278,8 +299,8 @@ Read the following resume carefully and answer the specific questions regarding 
 
 
 3. **Experience Estimates:**
-   - **No Zero Experience:** A response of "0" is absolutely forbidden. If direct experience cannot be confirmed, provide a minimum of "2" years based on inferred or related experience.
-   - **For Low Experience (up to 5 years):** Estimate experience based on inferred bacherol, skills and projects, always providing at least "2" years when relevant.
+   - **No Lying:** A response of "0" is warranted when experience cannot be directly extracted or inferred.
+   - **For Low Experience (up to 1 year for technical skills, up to 5 years for non-technical skills):** Estimate experience based on inferred bacherol, skills and projects, always providing at least "1" years when relevant.
    - **For High Experience:** For high levels of experience, provide a number based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
 4. **Rules:**
