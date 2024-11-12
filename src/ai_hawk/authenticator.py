@@ -1,19 +1,20 @@
-import random
 import time
 
 from abc import ABC, abstractmethod
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoAlertPresentException, TimeoutException, UnexpectedAlertPresentException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.logging import logger
 
+
 def get_authenticator(driver, platform):
-    if platform == 'linkedin':
+    if platform == "linkedin":
         return LinkedInAuthenticator(driver)
     else:
         raise NotImplementedError(f"Platform {platform} not implemented yet.")
+
 
 class AIHawkAuthenticator(ABC):
 
@@ -36,6 +37,7 @@ class AIHawkAuthenticator(ABC):
     def start(self):
         logger.info("Starting Chrome browser to log in to AIHawk.")
         self.driver.get(self.home_url)
+
         if self.is_logged_in:
             logger.info("User is already logged in. Skipping login process.")
             return
@@ -51,7 +53,6 @@ class AIHawkAuthenticator(ABC):
         except NoSuchElementException as e:
             logger.error(f"Could not log in to AIHawk. Element not found: {e}")
         self.handle_security_checks()
-
 
     def prompt_for_credentials(self):
         try:
@@ -88,16 +89,16 @@ class AIHawkAuthenticator(ABC):
     @abstractmethod
     def handle_security_checks(self):
         pass
-        
-class LinkedInAuthenticator(AIHawkAuthenticator):
 
+
+class LinkedInAuthenticator(AIHawkAuthenticator):
     @property
     def home_url(self):
         return "https://www.linkedin.com"
 
     def navigate_to_login(self):
         return self.driver.get("https://www.linkedin.com/login")
-    
+
     def handle_security_checks(self):
         try:
             logger.debug("Handling security check...")
@@ -114,8 +115,8 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
     
     @property
     def is_logged_in(self):
-        keywords = ['feed', 'mynetwork','jobs','messaging','notifications']
-        return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
+        keywords = ["feed", "mynetwork", "jobs", "messaging", "notifications"]
+        return any(item in self.driver.current_url for item in keywords) and "linkedin.com" in self.driver.current_url
 
     def __init__(self, driver):
         super().__init__(driver)

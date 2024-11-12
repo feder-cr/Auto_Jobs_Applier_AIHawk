@@ -565,6 +565,7 @@ class GPTAnswerer:
             {"resume_educations": self.resume.education_details, "resume_jobs": self.resume.experience_details,
              "resume_projects": self.resume.projects, "question": question})
         logger.debug(f"Raw output for numeric question: {output_str}")
+        
         try:
             output = self.extract_number_from_string(output_str)
             logger.debug(f"Extracted number: {output}")
@@ -577,6 +578,7 @@ class GPTAnswerer:
     def extract_number_from_string(self, output_str):
         logger.debug(f"Extracting number from string: {output_str}")
         numbers = re.findall(r"\d+", output_str)
+        
         if numbers:
             logger.debug(f"Numbers found: {numbers}")
             return str(numbers[0])
@@ -612,6 +614,7 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         response = chain.invoke({"phrase": phrase})
         logger.debug(f"Response for resume_or_cover: {response}")
+        
         if "resume" in response:
             return "resume"
         elif "cover" in response:
@@ -628,6 +631,7 @@ class GPTAnswerer:
         score = re.search(r'Score: (\d+)', output).group(1)
         reasoning = re.search(r'Reasoning: (.+)', output, re.DOTALL).group(1)
         logger.info(f"Job suitability score: {score}")
+        
         if int(score) < 7 :
             logger.debug(f"Job is not suitable: {reasoning}")
         return int(score) >= 7

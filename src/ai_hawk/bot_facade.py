@@ -45,7 +45,6 @@ class AIHawkBotFacade:
         self.state.job_application_profile_set = True
         logger.debug("Job application profile and resume set successfully")
 
-
     def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
         self._ensure_job_profile_and_resume_set()
@@ -77,7 +76,7 @@ class AIHawkBotFacade:
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
         self.apply_component.start_applying()
         logger.debug("Apply process started successfully")
-        
+
     def start_collect_data(self):
         logger.debug("Starting collecting data process")
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
@@ -86,13 +85,16 @@ class AIHawkBotFacade:
 
     def _validate_non_empty(self, value, name):
         logger.debug(f"Validating that {name} is not empty")
+        
         if not value:
             logger.error(f"Validation failed: {name} is empty")
             raise ValueError(f"{name} cannot be empty.")
+
         logger.debug(f"Validation passed for {name}")
 
     def _ensure_job_profile_and_resume_set(self):
         logger.debug("Ensuring job profile and resume are set")
+
         if not self.state.job_application_profile_set:
             logger.error("Job application profile and resume are not set")
             raise ValueError("Job application profile and resume must be set before proceeding.")
