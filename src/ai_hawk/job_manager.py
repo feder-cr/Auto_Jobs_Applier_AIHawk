@@ -394,7 +394,7 @@ class AIHawkJobManager:
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
-            no_jobs_element = self.driver.find_element(
+                no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
@@ -457,7 +457,6 @@ class AIHawkJobManager:
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
-        data = {"company": job.company,
         data = {"company": job.company,
             "job_title": job.title,
             "link": job.link,
