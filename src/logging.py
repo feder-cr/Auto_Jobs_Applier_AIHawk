@@ -4,8 +4,8 @@ import logging
 import logging.handlers
 from loguru import logger
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
-
-from config import LOG_LEVEL, LOG_SELENIUM_LEVEL, LOG_TO_CONSOLE, LOG_TO_FILE
+from app_config import LOG_CONFIG
+from constants import LOG_TO_FILE, MINIMUM_LOG_LEVEL
 
 
 def remove_default_loggers():

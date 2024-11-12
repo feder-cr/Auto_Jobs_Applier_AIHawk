@@ -620,6 +620,7 @@ class GPTAnswerer:
         )
         logger.debug(f"Raw output for numeric question: {output_str}")
         
+        
         try:
             output = self.extract_number_from_string(output_str)
             logger.debug(f"Extracted number: {output}")
@@ -633,6 +634,7 @@ class GPTAnswerer:
     def extract_number_from_string(self, output_str):
         logger.debug(f"Extracting number from string: {output_str}")
         numbers = re.findall(r"\d+", output_str)
+        
         
         if numbers:
             logger.debug(f"Numbers found: {numbers}")
@@ -669,6 +671,7 @@ class GPTAnswerer:
         chain = prompt | self.llm_cheap | StrOutputParser()
         response = chain.invoke({PHRASE: phrase})
         logger.debug(f"Response for resume_or_cover: {response}")
+        
         
         if "resume" in response:
             return "resume"

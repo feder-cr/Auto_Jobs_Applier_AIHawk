@@ -3,6 +3,7 @@ import os
 import random
 import time
 from typing import List
+from typing import List
 from itertools import product
 from pathlib import Path
 from turtle import color
@@ -10,6 +11,7 @@ from turtle import color
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebElement
 from selenium.webdriver.remote.webdriver import WebElement
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
@@ -45,6 +47,7 @@ class EnvironmentKeys:
         return value
 
 
+# TODO: refactor this class for better separation of concern and improved maintainability (God Class anti-pattern)
 # TODO: refactor this class for better separation of concern and improved maintainability (God Class anti-pattern)
 class AIHawkJobManager:
     def __init__(self, driver):
@@ -111,10 +114,12 @@ class AIHawkJobManager:
 
                     time_left = minimum_page_time - time.time()
 
+
                     if time_left > 0:
                         logger.info(f"Sleeping for {time_left} seconds.",color="yellow")
                         time.sleep(time_left)
                         minimum_page_time = time.time() + minimum_time
+
 
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(1, 5)
@@ -124,12 +129,15 @@ class AIHawkJobManager:
             except Exception:
                 pass
 
+
             time_left = minimum_page_time - time.time()
+
 
             if time_left > 0:
                 logger.info(f"Sleeping for {time_left} seconds.",color="yellow")
                 time.sleep(time_left)
                 minimum_page_time = time.time() + minimum_time
+
 
             if page_sleep % 5 == 0:
                 sleep_time = random.randint(50, 90)
@@ -139,6 +147,8 @@ class AIHawkJobManager:
 
     def start_applying(self):
         logger.debug("Starting job application process")
+        self.easy_applier_component = AIHawkEasyApplier(
+            self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         self.easy_applier_component = AIHawkEasyApplier(
             self.driver, self.resume_path, self.set_old_answers, self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
@@ -153,6 +163,7 @@ class AIHawkJobManager:
             logger.debug(f"Starting the search for {position} in {location}.")
 
             # FIXME: remove useless top-level try block and use better flow control
+            # FIXME: remove useless top-level try block and use better flow control
             try:
                 while True:
                     page_sleep += 1
@@ -165,7 +176,10 @@ class AIHawkJobManager:
                     try:
                         jobs = self.get_jobs_from_page()
 
+
                         if not jobs:
+                            logger.debug(
+                                "No more jobs found on this page. Exiting loop.")
                             logger.debug(
                                 "No more jobs found on this page. Exiting loop.")
                             break
@@ -181,6 +195,8 @@ class AIHawkJobManager:
 
                     logger.debug(
                         "Applying to jobs on this page has been completed!")
+                    logger.debug(
+                        "Applying to jobs on this page has been completed!")
 
                     time_left = minimum_page_time - time.time()
 
@@ -188,7 +204,11 @@ class AIHawkJobManager:
                     if time_left > 0:
                         try:
                             user_input = inputimeout(prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
+                            user_input = inputimeout(prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
                         except TimeoutOccurred:
+                            user_input = ""  # No input after timeout
+
+                        if user_input == "y":
                             user_input = ""  # No input after timeout
 
                         if user_input == "y":
@@ -202,9 +222,14 @@ class AIHawkJobManager:
                     if page_sleep % 5 == 0:
                         sleep_time = random.randint(5, 34)
 
+
                         try:
                             user_input = inputimeout(prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
+                            user_input = inputimeout(prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
                         except TimeoutOccurred:
+                            user_input = ""  # No input after timeout
+
+                        if user_input == "y":
                             user_input = ""  # No input after timeout
 
                         if user_input == "y":
@@ -212,6 +237,7 @@ class AIHawkJobManager:
                         else:
                             logger.debug(f"Sleeping for {sleep_time} seconds.")
                             time.sleep(sleep_time)
+
 
                         page_sleep += 1
             except Exception as e:
@@ -222,9 +248,14 @@ class AIHawkJobManager:
 
             if time_left > 0:
                 # Redundant code block - consider abstracting this to a function
+                # Redundant code block - consider abstracting this to a function
                 try:
                     user_input = inputimeout(prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
+                    user_input = inputimeout(prompt=f"Sleeping for {time_left} seconds. Press 'y' to skip waiting. Timeout 60 seconds : ", timeout=60).strip().lower()
                 except TimeoutOccurred:
+                    user_input = ""  # No input after timeout
+
+                if user_input == "y":
                     user_input = ""  # No input after timeout
 
                 if user_input == "y":
@@ -239,9 +270,15 @@ class AIHawkJobManager:
                 sleep_time = random.randint(50, 90)
 
                 # See previous if-statement
+
+                # See previous if-statement
                 try:
                     user_input = inputimeout(prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ", timeout=60).strip().lower()
+                    user_input = inputimeout(prompt=f"Sleeping for {sleep_time / 60} minutes. Press 'y' to skip waiting: ", timeout=60).strip().lower()
                 except TimeoutOccurred:
+                    user_input = ""  # No input after timeout
+
+                if user_input == "y":
                     user_input = ""  # No input after timeout
 
                 if user_input == "y":
@@ -250,14 +287,20 @@ class AIHawkJobManager:
                     logger.debug(f"Sleeping for {sleep_time} seconds.")
                     time.sleep(sleep_time)
 
+
                 page_sleep += 1
 
+    # TODO: verify that this skips as expected - it doesn't seem to always work
+    def get_jobs_from_page(self) -> List[WebElement]:
     # TODO: verify that this skips as expected - it doesn't seem to always work
     def get_jobs_from_page(self) -> List[WebElement]:
         try:
             no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
+            no_jobs_element = self.driver.find_element(
+                By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
+            if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
             if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
                 logger.debug("No matching jobs found on this page, skipping.")
                 return []
@@ -265,21 +308,12 @@ class AIHawkJobManager:
             pass
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            utils.scroll_slow(self.driver, job_results)
-            utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-                0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            if not job_list_elements:
-                logger.debug("No job class elements found on page, skipping.")
-                return []
-
-            return job_list_elements
-
+            job_results = self.driver.find_element(
+                By.CLASS_NAME, "jobs-search-results-list")
         except NoSuchElementException:
             logger.debug("No job results found on the page.")
             return []
+        # TODO: get rid of this
         # TODO: get rid of this
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
@@ -299,8 +333,27 @@ class AIHawkJobManager:
 
         return job_list_elements
 
+        utils.scroll_slow(self.driver, job_results)
+        utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+
+        job_list_elements = self.driver.find_elements(
+            By.CLASS_NAME, "scaffold-layout__list-container"
+        )[0].find_elements(
+            By.CLASS_NAME, "jobs-search-results__list-item")
+
+        if not job_list_elements:
+            logger.debug("No job class elements found on page, skipping.")
+            return []
+
+        return job_list_elements
+
     def read_jobs(self):
         try:
+            no_jobs_element = self.driver.find_element(
+                By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
+
+            if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
+                # FIXME: not exceptional - this is expected behavior and should be handled with normal logic
             no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
@@ -326,12 +379,19 @@ class AIHawkJobManager:
                     for job_element in job_list_elements]
 
         for job in job_list:
+
+        job_list = [Job(*self.extract_job_information_from_tile(job_element))
+                    for job_element in job_list_elements]
+
+        for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
                 continue
 
+
             try:
+                self.write_to_file(job, "data")
                 self.write_to_file(job, "data")
             except Exception as e:
                 self.write_to_file(job, "failed")
@@ -339,6 +399,10 @@ class AIHawkJobManager:
 
     def apply_jobs(self):
         try:
+            no_jobs_element = self.driver.find_element(
+                By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
+
+            if "No matching jobs found" in no_jobs_element.text or "unfortunately, things aren" in self.driver.page_source.lower():
             no_jobs_element = self.driver.find_element(
                 By.CLASS_NAME, "jobs-search-two-pane__no-results-banner--expand")
 
@@ -351,11 +415,16 @@ class AIHawkJobManager:
         job_list_elements = self.driver.find_elements(
             By.CLASS_NAME, "scaffold-layout__list-container")[
             0].find_elements(By.CLASS_NAME, "jobs-search-results__list-item")
+        job_list_elements = self.driver.find_elements(
+            By.CLASS_NAME, "scaffold-layout__list-container")[
+            0].find_elements(By.CLASS_NAME, "jobs-search-results__list-item")
 
         if not job_list_elements:
             logger.debug("No job class elements found on page, skipping")
             return
 
+        job_list = [Job(*self.extract_job_information_from_tile(job_element))
+                    for job_element in job_list_elements]
         job_list = [Job(*self.extract_job_information_from_tile(job_element))
                     for job_element in job_list_elements]
 
@@ -366,18 +435,22 @@ class AIHawkJobManager:
                 logger.debug(f"Previously failed to apply for {job.title} at {job.company}, skipping...")
                 continue
 
+
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
                 self.write_to_file(job, "skipped", "Job blacklisted")
                 continue
 
+
             if self.is_already_applied_to_job(job.title, job.company, job.link):
                 self.write_to_file(job, "skipped", "Already applied to this job")
                 continue
 
+
             if self.is_already_applied_to_company(job.company):
                 self.write_to_file(job, "skipped", "Already applied to this company")
                 continue
+
 
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
@@ -394,6 +467,7 @@ class AIHawkJobManager:
         pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
         data = {"company": job.company,
+        data = {"company": job.company,
             "job_title": job.title,
             "link": job.link,
             "job_recruiter": job.recruiter_link,
@@ -406,11 +480,14 @@ class AIHawkJobManager:
             
         file_path = self.output_file_directory / f"{file_name}.json"
 
+
         if not file_path.exists():
+            with open(file_path, "w", encoding="utf-8") as f:
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump([data], f, indent=4)
                 logger.debug(f"Job data written to new file: {file_name}")
         else:
+            with open(file_path, "r+", encoding="utf-8") as f:
             with open(file_path, "r+", encoding="utf-8") as f:
                 try:
                     existing_data = json.load(f)
@@ -418,10 +495,13 @@ class AIHawkJobManager:
                     logger.error(f"JSON decode error in file: {file_path}")
                     existing_data = []
 
+
                 existing_data.append(data)
                 f.seek(0)
                 json.dump(existing_data, f, indent=4)
                 f.truncate()
+                logger.debug(
+                    f"Job data appended to existing file: {file_name}")
                 logger.debug(
                     f"Job data appended to existing file: {file_name}")
 
@@ -431,15 +511,25 @@ class AIHawkJobManager:
         working_type_filter = []
 
         if parameters.get("onsite") is True:
+
+        if parameters.get("onsite") is True:
             working_type_filter.append("1")
+
+        if parameters.get("remote") is True:
 
         if parameters.get("remote") is True:
             working_type_filter.append("2")
 
         if parameters.get("hybrid") is True:
+
+        if parameters.get("hybrid") is True:
             working_type_filter.append("3")
 
         if working_type_filter:
+            url_parts.append(f"f_WT={"%2C".join(working_type_filter)}")
+
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(
+            parameters.get("experience_level", {}).items()) if v]
             url_parts.append(f"f_WT={"%2C".join(working_type_filter)}")
 
         experience_levels = [str(i + 1) for i, (level, v) in enumerate(
@@ -452,7 +542,16 @@ class AIHawkJobManager:
         job_types = [key[0].upper() for key, value in parameters.get(
             "jobTypes", {}).items() if value]
 
+            url_parts.append(f"f_E={",".join(experience_levels)}")
+
+        url_parts.append(f"distance={parameters["distance"]}")
+        job_types = [key[0].upper() for key, value in parameters.get(
+            "jobTypes", {}).items() if value]
+
         if job_types:
+            url_parts.append(f"f_JT={",".join(job_types)}")
+
+        date_mapping = {"all_time": "",
             url_parts.append(f"f_JT={",".join(job_types)}")
 
         date_mapping = {"all_time": "",
@@ -462,10 +561,13 @@ class AIHawkJobManager:
         }
         date_param = next((v for k, v in date_mapping.items()
                           if parameters.get("date", {}).get(k)), "")
+        date_param = next((v for k, v in date_mapping.items()
+                          if parameters.get("date", {}).get(k)), "")
         url_parts.append("f_LF=f_AL")  # Easy Apply
         base_url = "&".join(url_parts)
         full_url = f"?{base_url}{date_param}"
         logger.debug(f"Base search URL constructed: {full_url}")
+
 
         return full_url
 
@@ -501,6 +603,8 @@ class AIHawkJobManager:
         try:
             job_location = job_tile.find_element(
                 By.CLASS_NAME, "job-card-container__metadata-item").text
+            job_location = job_tile.find_element(
+                By.CLASS_NAME, "job-card-container__metadata-item").text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
@@ -508,8 +612,11 @@ class AIHawkJobManager:
         try:
             apply_method = job_tile.find_element(
                 By.CLASS_NAME, "job-card-container__apply-method").text
+            apply_method = job_tile.find_element(
+                By.CLASS_NAME, "job-card-container__apply-method").text
         except NoSuchElementException:
             apply_method = "Applied"
+            logger.warning("Apply method not found, assuming 'Applied.'")
             logger.warning("Apply method not found, assuming 'Applied.'")
 
         return job_title, company, job_location, link, apply_method
@@ -526,29 +633,39 @@ class AIHawkJobManager:
         return is_blacklisted
 
     # Is this function necessary? Is it used more than once?
+    # Is this function necessary? Is it used more than once?
     def is_already_applied_to_job(self, job_title, company, link):
         link_seen = link in self.seen_jobs
+
 
         if link_seen:
             logger.debug(f"Already applied to job: {job_title} at {company}, skipping...")
 
+
         return link_seen
 
+    def is_already_applied_to_company(self, company) -> bool:
     def is_already_applied_to_company(self, company) -> bool:
         if not self.apply_once_at_company:
             return False
 
         output_files = ["success.json"]
 
+
         for file_name in output_files:
             file_path = self.output_file_directory / file_name
 
+
             if file_path.exists():
+                with open(file_path, "r", encoding="utf-8") as f:
                 with open(file_path, "r", encoding="utf-8") as f:
                     try:
                         existing_data = json.load(f)
 
+
                         for applied_job in existing_data:
+                            if applied_job["company"].strip().lower() == company.strip().lower():
+                                logger.debug(f"Already applied at {company} (once per company policy), skipping...")
                             if applied_job["company"].strip().lower() == company.strip().lower():
                                 logger.debug(f"Already applied at {company} (once per company policy), skipping...")
                                 return True
@@ -565,16 +682,21 @@ class AIHawkJobManager:
                 json.dump([], f)
 
         with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             try:
                 existing_data = json.load(f)
             except json.JSONDecodeError:
                 logger.error(f"JSON decode error in file: {file_path}")
                 return False
 
+
         for data in existing_data:
+            data_link = data["link"]
+
             data_link = data["link"]
 
             if data_link == link:
                 return True
+
 
         return False
