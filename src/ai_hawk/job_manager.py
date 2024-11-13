@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
-from config import MINIMUM_WAIT_TIME_IN_SECONDS
+from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
 from src.job import Job
 from src.logging import logger
 
@@ -63,9 +63,8 @@ class AIHawkJobManager:
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
 
-        job_applicants_threshold = parameters.get('job_applicants_threshold', {})
-        self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
-        self.max_applicants = job_applicants_threshold.get('max_applicants', float('inf'))
+        self.min_applicants = JOB_MIN_APPLICATIONS
+        self.max_applicants = JOB_MAX_APPLICATIONS
 
         # Generate regex patterns from blacklist lists
         self.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.title_blacklist)

@@ -38,8 +38,6 @@ from constants import (
     JOB_DESCRIPTION,
     LANGUAGES,
     LEGAL_AUTHORIZATION,
-    LLM_API_URL,
-    LLM_MODEL,
     LLM_MODEL_TYPE,
     LOGPROBS,
     MODEL,
@@ -74,6 +72,7 @@ from constants import (
 )
 from src.job import Job
 from src.logging import logger
+import config as cfg
 
 load_dotenv()
 
@@ -187,10 +186,10 @@ class AIAdapter:
         self.model = self._create_model(config, api_key)
 
     def _create_model(self, config: dict, api_key: str) -> AIModel:
-        llm_model_type = config[LLM_MODEL_TYPE]
-        llm_model = config[LLM_MODEL]
+        llm_model_type = cfg.LLM_MODEL_TYPE
+        llm_model = cfg.LLM_MODEL
 
-        llm_api_url = config.get(LLM_API_URL, "")
+        llm_api_url = cfg.LLM_API_URL
 
         logger.debug(f"Using {llm_model_type} with {llm_model}")
 
