@@ -12,6 +12,7 @@ Question: What is your city?
 
 Personal Information: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Self Identification Template
@@ -28,6 +29,7 @@ Male
 
 Self-Identification: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Legal Authorization Template
@@ -44,6 +46,7 @@ Yes
 
 Legal Authorization: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Work Preferences Template
@@ -60,6 +63,7 @@ Yes
 
 Work Preferences: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Education Details Template
@@ -79,6 +83,7 @@ Yes, I have experience with Python.
 
 Education Details: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Experience Details Template
@@ -98,6 +103,7 @@ Yes, I have 3 years of leadership experience.
 
 Experience Details: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Projects Template
@@ -116,6 +122,7 @@ Yes, led the development of a mobile app
 
 Projects: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Availability Template
@@ -134,6 +141,7 @@ I can start immediately.
 
 Availability: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Salary Expectations Template
@@ -152,6 +160,7 @@ Question: What are your salary expectations?
 
 Salary Expectations: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Certifications Template
@@ -171,6 +180,7 @@ Yes, I am PMP certified.
 
 Certifications: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Languages Template
@@ -190,6 +200,7 @@ Fluent in Italian and English.
 
 Languages: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 # Interests Template
@@ -208,6 +219,7 @@ AI and data science.
 
 Interests: {resume_section}
 Question: {question}
+Do not output anything else in the response other than the answer.
 """
 
 summarize_prompt_template = """
@@ -249,6 +261,9 @@ Please write the cover letter in a way that directly addresses the job role and 
 - Provide only the text of the cover letter.
 - Do not include any introductions, explanations, or additional information.
 - The letter should be formatted into paragraph.
+
+## Company Name:
+{company}
 
 ## Job Description:
 ```
@@ -339,7 +354,7 @@ How many years of experience do you have with AI?
 ---
 
 When responding, consider all available information, including projects, work experience, and academic background, to provide an accurate and well-reasoned answer. Make every effort to infer relevant experience and avoid defaulting to 0 if any related experience can be estimated.
-
+Do not output anything else in the response other than the answer.
 """
 
 options_template = """The following is a resume and an answered question about the resume, the answer is one of the options.
@@ -360,6 +375,7 @@ Options: [1-2, 3-5, 6-10, 10+]
 ## My resume:
 ```
 {resume}
+{job_application_profile}
 ```
 
 ## Question:
@@ -367,7 +383,8 @@ Options: [1-2, 3-5, 6-10, 10+]
 
 ## Options:
 {options}
-
+-----
+Do not output anything else in the response other than the answer.
 ## """
 
 try_to_fix_template = """\
@@ -411,3 +428,120 @@ func_summarize_prompt_template = """
         {text_with_placeholders}
         
         ## Text without placeholders:"""
+
+is_relavant_position_template = """
+   Evaluate whether the provided resume meets the requirements outlined in the job description. Determine if the candidate is suitable for the job based on the information provided.
+
+Job Description: {job_description}
+
+Resume: {resume}
+
+Instructions:
+1. Extract the key requirements from the job description, identifying hard requirements (must-haves) and soft requirements (nice-to-haves).
+2. Identify the relevant qualifications from the resume.
+3. Compare the qualifications against the requirements, ensuring all hard requirements are met. Allow for a 1-year experience gap if applicable, as experience is usually a hard requirement.
+4. Provide a suitability score from 1 to 10. where 1 indicates the candidate does not meet any requirements and 10 indicates the candidate meets all requirements.
+5. Provide a brief reasoning for the score, highlighting which requirements are met and which are not.
+
+Output Format (Strictly follow this format):
+Score: [numerical score]
+Reasoning: [brief explanation]
+Do not output anything else in the response other than the score and reasoning.
+"""
+
+resume_or_cover_letter_template = """
+Given the following phrase, respond with only 'resume' if the phrase is about a resume, or 'cover' if it's about a cover letter.
+If the phrase contains only one word 'upload', consider it as 'cover'.
+If the phrase contains 'upload resume', consider it as 'resume'.
+Do not provide any additional information or explanations.
+
+phrase: {phrase}
+"""
+
+determine_section_template = """You are assisting a bot designed to automatically apply for jobs on AIHawk. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
+
+For the following question: '{question}', determine which section of the resume is most relevant. 
+Respond with exactly one of the following options:
+- Personal information
+- Self Identification
+- Legal Authorization
+- Work Preferences
+- Education Details
+- Experience Details
+- Projects
+- Availability
+- Salary Expectations
+- Certifications
+- Languages
+- Interests
+- Cover letter
+
+Here are detailed guidelines to help you choose the correct section:
+
+1. **Personal Information**:
+- **Purpose**: Contains your basic contact details and online profiles.
+- **Use When**: The question is about how to contact you or requests links to your professional online presence.
+- **Examples**: Email address, phone number, AIHawk profile, GitHub repository, personal website.
+
+2. **Self Identification**:
+- **Purpose**: Covers personal identifiers and demographic information.
+- **Use When**: The question pertains to your gender, pronouns, veteran status, disability status, or ethnicity.
+- **Examples**: Gender, pronouns, veteran status, disability status, ethnicity.
+
+3. **Legal Authorization**:
+- **Purpose**: Details your work authorization status and visa requirements.
+- **Use When**: The question asks about your ability to work in specific countries or if you need sponsorship or visas.
+- **Examples**: Work authorization in EU and US, visa requirements, legally allowed to work.
+
+4. **Work Preferences**:
+- **Purpose**: Specifies your preferences regarding work conditions and job roles.
+- **Use When**: The question is about your preferences for remote work, in-person work, relocation, and willingness to undergo assessments or background checks.
+- **Examples**: Remote work, in-person work, open to relocation, willingness to complete assessments.
+
+5. **Education Details**:
+- **Purpose**: Contains information about your academic qualifications.
+- **Use When**: The question concerns your degrees, universities attended, GPA, and relevant coursework.
+- **Examples**: Degree, university, GPA, field of study, exams.
+
+6. **Experience Details**:
+- **Purpose**: Details your professional work history and key responsibilities.
+- **Use When**: The question pertains to your job roles, responsibilities, and achievements in previous positions.
+- **Examples**: Job positions, company names, key responsibilities, skills acquired.
+
+7. **Projects**:
+- **Purpose**: Highlights specific projects you have worked on.
+- **Use When**: The question asks about particular projects, their descriptions, or links to project repositories.
+- **Examples**: Project names, descriptions, links to project repositories.
+
+8. **Availability**:
+- **Purpose**: Provides information on your availability for new roles.
+- **Use When**: The question is about how soon you can start a new job or your notice period.
+- **Examples**: Notice period, availability to start.
+
+9. **Salary Expectations**:
+- **Purpose**: Covers your expected salary range.
+- **Use When**: The question pertains to your salary expectations or compensation requirements.
+- **Examples**: Desired salary range.
+
+10. **Certifications**:
+   - **Purpose**: Lists your professional certifications or licenses.
+   - **Use When**: The question involves your certifications or qualifications from recognized organizations.
+   - **Examples**: Certification names, issuing bodies, dates of validity.
+
+11. **Languages**:
+   - **Purpose**: Describes the languages you can speak and your proficiency levels.
+   - **Use When**: The question asks about your language skills or proficiency in specific languages.
+   - **Examples**: Languages spoken, proficiency levels.
+
+12. **Interests**:
+   - **Purpose**: Details your personal or professional interests.
+   - **Use When**: The question is about your hobbies, interests, or activities outside of work.
+   - **Examples**: Personal hobbies, professional interests.
+
+13. **Cover Letter**:
+   - **Purpose**: Contains your personalized cover letter or statement.
+   - **Use When**: The question involves your cover letter or specific written content intended for the job application.
+   - **Examples**: Cover letter content, personalized statements.
+
+Provide only the exact name of the section from the list above with no additional text.
+"""
