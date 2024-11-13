@@ -352,7 +352,7 @@ class AIHawkEasyApplier:
             )
         except TimeoutException:
             logger.exception("Timed out waiting for WebDriver")
-            raise
+            return ""
 
         logger.debug("Hiring team section found")
         recruiter_elements = hiring_team_section.find_elements(By.XPATH, './/following::a[contains(@href, "linkedin.com/in/")]')
