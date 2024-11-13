@@ -157,6 +157,7 @@ venv.bak/
 *.user
 *.userosscache
 *.sln.docstates
+*resume*.pdf
 
 # Mono Auto Generated Files
 mono_crash.*
