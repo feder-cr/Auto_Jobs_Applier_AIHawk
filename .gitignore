@@ -1,6 +1,5 @@
 # application files and logs
 /generated_cv
-/data_folder/secrets.yaml
 /log/*
 
 # Byte-compiled / optimized / DLL files
@@ -33,7 +32,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 chrome_profile/*
-data_folder/*
+data_folder/output/*
 answers.json
 # PyInstaller
 # Usually these files are written by a python script from a template
@@ -161,3 +160,5 @@ venv.bak/
 
 # Mono Auto Generated Files
 mono_crash.*
+
+job_applications/
