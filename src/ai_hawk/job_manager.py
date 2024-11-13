@@ -286,7 +286,7 @@ class AIHawkJobManager:
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
         if not job_list_elements:
             raise Exception("No job class elements found on page")
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements] 
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_list_elements] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
@@ -314,7 +314,7 @@ class AIHawkJobManager:
             logger.debug("No job class elements found on page, skipping")
             return
 
-        job_list = [Job(*self.extract_job_information_from_tile(job_element)) for job_element in job_list_elements]
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_list_elements]
 
         for job in job_list:
 
@@ -392,7 +392,7 @@ class AIHawkJobManager:
                     self.write_to_file(job, "success")
                     logger.debug(f"Applied to job: {job.title} at {job.company}")
             except Exception as e:
-                logger.error(f"Failed to apply for {job.title} at {job.company}: {e}")
+                logger.error(f"Failed to apply for {job.title} at {job.company}: {e}",exc_info=True)
                 self.write_to_file(job, "failed", f"Application error: {str(e)}")
                 continue
 
@@ -471,39 +471,52 @@ class AIHawkJobManager:
         self.driver.get(
             f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
 
-    def extract_job_information_from_tile(self, job_tile):
+
+    def job_tile_to_job(self, job_tile) -> Job:
         logger.debug("Extracting job information from tile")
-        job_id, job_title, company, job_location, apply_method, link = "", "", "", "", "", ""
-        
-        # Extract job ID from the URL
-        try:
-            job_id = urllib.parse.parse_qs(urllib.parse.urlparse(link).query).get('currentJobId', [''])[0]
-            logger.debug(f"Job ID extracted: {job_id}")
-        except Exception as e:
-            logger.warning(f"Failed to extract job ID: {e}")
+        job = Job()
 
         try:
-            logger.trace(job_tile.get_attribute('outerHTML'))
-            job_title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
-            
-            link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
-            company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-            logger.debug(f"Job information extracted: {job_title} at {company}")
+            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
+            logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
-            logger.warning("Some job information (title, link, or company) is missing.")
+            logger.warning("Job title is missing.")
         
         try:
-            job_location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
+            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            logger.debug(f"Job link extracted: {job.link}")
+        except NoSuchElementException:
+            logger.warning("Job link is missing.")
+        
+        try:
+            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
+            logger.debug(f"Job company extracted: {job.company}")
+        except NoSuchElementException:
+            logger.warning("Job company is missing.")
+        
+        # Extract job ID from job url
+        try:
+            match = re.search(r'/jobs/view/(\d+)/', job.link)
+            if match:
+                job.id = match.group(1)
+            else:
+                logger.warning(f"Job ID not found in link: {job.link}")
+            logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
+        except Exception as e:
+            logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
+
+        try:
+            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
         try:
-            apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
+            job.apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
         except NoSuchElementException:
-            apply_method = "Applied"
+            job.apply_method = "Applied"
             logger.warning("Apply method not found, assuming 'Applied'.")
 
-        return job_title, company, job_location, link, apply_method
+        return job
 
     def is_blacklisted(self, job_title, company, link, job_location):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
