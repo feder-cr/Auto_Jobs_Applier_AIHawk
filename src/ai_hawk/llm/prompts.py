@@ -270,18 +270,17 @@ Please write the cover letter in a way that directly addresses the job role and 
 
 Only include the necessary information about the cover letter and do not reference the cover letter or use any language to tip off the reader about who is writing the cover letter - it must be from the perspective of the candidate. Do not say things like "Here is the recommended cover letter" or "the above cover letter includes recommended information about the candidate."
 
-You are forbidden from using a resume format for cover letters. You are forbidden from "presenting" the cover letter or ever disclosing that the cover letter is a recommendation, example, or anything that is created by anyone other than the candidate.
+Always ensure to use the correct format for resumes and cover letter exclusively: resume format is for resumes only and cover letter format is for cover letters only.
 
-You are forbidden from hallucinating job experience that the candidate does not have in the coverletter. If there is no direct mention of a particular role, do not include it. Only ever use light embellishment for specific skills that cannot be disproven by looking at the resume.
+Ensure that measurable skills are always represented accurately based on the applicants resume.
 
-You are forbidden from adding a signature. Never, ever add a signature and especially never leave a spot for the candidate's name. Simply end the cover letter with a "Thank you for your time. I look forward to hearing from you soon." and nothing else.
+Sign the letter with the candidate's real name at the end and make sure the cover is 100 percent ready to submit to the hiring manager.
 
 ## Rules:
 - Provide only the text of the cover letter.
 - Do not include any introductions, explanations, or additional information.
 - The letter should be paragraph-format.
 - Write the letter as if you are the candidate.
-- NO template formatting
 
 ## Company Name:
 {company}
