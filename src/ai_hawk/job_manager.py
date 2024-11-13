@@ -4,6 +4,7 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+import re
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -37,6 +38,26 @@ class EnvironmentKeys:
         value = os.getenv(key) == "True"
         logger.debug(f"Read environment key {key} as bool: {value}")
         return value
+
+
+class ApplicationFileManager:
+    def __init__(self, base_dir: str = 'job_applications'):
+        self.base_dir = base_dir
+        
+    def get_application_folder(self, job: Job) -> str:
+        folder_name = f"{job.company} - {job.title}"
+        folder_name = re.sub(r'[<>:"/\\|?*]', '', folder_name)
+        folder_path = os.path.join(self.base_dir, folder_name)
+        os.makedirs(folder_path, exist_ok=True)
+        return folder_path
+        
+    def generate_document_path(self, job: Job, first_name: str, 
+                             last_name: str, doc_type: str) -> str:
+        folder = self.get_application_folder(job)
+        timestamp = int(time.time())
+        filename = f"{first_name}_{last_name}_{job.company}_{timestamp}_{doc_type}.pdf"
+        filename = re.sub(r'[<>:"/\\|?*]', '', filename)
+        return os.path.join(folder, filename)
 
 
 class AIHawkJobManager:

@@ -37,6 +37,25 @@ def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
         """
         return any(item['question'] == question for item in data)
 
+class ApplicationFileManager:
+    def __init__(self):
+        self.base_dir = 'job_applications'
+        
+    def get_application_folder(self, job: Job) -> str:
+        folder_name = f"{job.company} - {job.title}"
+        folder_name = re.sub(r'[<>:"/\\|?*]', '', folder_name)  # Remove invalid chars
+        folder_path = os.path.join(self.base_dir, folder_name)
+        os.makedirs(folder_path, exist_ok=True)
+        return folder_path
+        
+    def generate_document_path(self, job: Job, first_name: str, 
+                             last_name: str, doc_type: str) -> str:
+        folder = self.get_application_folder(job)
+        timestamp = int(time.time())
+        filename = f"{first_name}_{last_name}_{job.company}_{timestamp}_{doc_type}.pdf"
+        filename = re.sub(r'[<>:"/\\|?*]', '', filename)  # Remove invalid chars
+        return os.path.join(folder, filename)
+
 class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
                  gpt_answerer: GPTAnswerer, resume_generator_manager):
@@ -50,6 +69,7 @@ class AIHawkEasyApplier:
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
         self.current_job = None
+        self.file_manager = ApplicationFileManager()
 
         logger.debug("AIHawkEasyApplier initialized successfully")
 
@@ -452,68 +472,55 @@ class AIHawkEasyApplier:
 
         logger.debug("Finished handling upload fields")
 
-    def _create_resume_filepath(self,job:Job,folder_path:str,version:int)->str:
-        return os.path.join(folder_path, f"CV_{job.company}({version}).pdf")
-
-
     def _create_and_upload_resume(self, element: WebElement, job: Job):
         logger.debug("Starting the process of creating and uploading resume.")
-        folder_path = 'generated_cv'
-
+        
         try:
-            if not os.path.exists(folder_path):
-                logger.debug(f"Creating directory at path: {folder_path}")
-            os.makedirs(folder_path, exist_ok=True)
+            # Generate file path using file manager
+            file_path_pdf = self.file_manager.generate_document_path(
+                job=job,
+                first_name=self.resume_generator_manager.resume_object.first_name,
+                last_name=self.resume_generator_manager.resume_object.last_name,
+                doc_type='cv'
+            )
+            logger.debug(f"Generated file path for resume: {file_path_pdf}")
+
+            logger.debug(f"Generating resume for job: {job.title} at {job.company}")
+            resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
+            with open(file_path_pdf, "xb") as f:
+                f.write(base64.b64decode(resume_pdf_base64))
+            logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
+            
+        except HTTPStatusError as e:
+            if e.response.status_code == 429:
+
+                retry_after = e.response.headers.get('retry-after')
+                retry_after_ms = e.response.headers.get('retry-after-ms')
+
+                if retry_after:
+                    wait_time = int(retry_after)
+                    logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
+                elif retry_after_ms:
+                    wait_time = int(retry_after_ms) / 1000.0
+                    logger.warning(f"Rate limit exceeded, waiting {wait_time} milliseconds before retrying...")
+                else:
+                    wait_time = 20
+                    logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
+
+                time.sleep(wait_time)
+            else:
+                logger.error(f"HTTP error: {e}")
+                raise
+
         except Exception as e:
-            logger.error(f"Failed to create directory: {folder_path}. Error: {e}")
-            raise
-
-        while True:
-            try:
-                file_path_pdf = os.path.join(folder_path, f"CV_{job.company}.pdf")
-                repeat_company_count = 0
-                while os.path.isfile(file_path_pdf):
-                    repeat_company_count+=1
-                    file_path_pdf = self._create_resume_filepath(job, folder_path,repeat_company_count)
-                logger.debug(f"Generated file path for resume: {file_path_pdf}")
-
-                logger.debug(f"Generating resume for job: {job.title} at {job.company}")
-                resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
-                with open(file_path_pdf, "xb") as f:
-                    f.write(base64.b64decode(resume_pdf_base64))
-                logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
-
-                break
-            except HTTPStatusError as e:
-                if e.response.status_code == 429:
-
-                    retry_after = e.response.headers.get('retry-after')
-                    retry_after_ms = e.response.headers.get('retry-after-ms')
-
-                    if retry_after:
-                        wait_time = int(retry_after)
-                        logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
-                    elif retry_after_ms:
-                        wait_time = int(retry_after_ms) / 1000.0
-                        logger.warning(f"Rate limit exceeded, waiting {wait_time} milliseconds before retrying...")
-                    else:
-                        wait_time = 20
-                        logger.warning(f"Rate limit exceeded, waiting {wait_time} seconds before retrying...")
-
-                    time.sleep(wait_time)
-                else:
-                    logger.error(f"HTTP error: {e}")
-                    raise
-
-            except Exception as e:
-                logger.error(f"Failed to generate resume: {e}")
-                tb_str = traceback.format_exc()
-                logger.error(f"Traceback: {tb_str}")
-                if "RateLimitError" in str(e):
-                    logger.warning("Rate limit error encountered, retrying...")
-                    time.sleep(20)
-                else:
-                    raise
+            logger.error(f"Failed to generate resume: {e}")
+            tb_str = traceback.format_exc()
+            logger.error(f"Traceback: {tb_str}")
+            if "RateLimitError" in str(e):
+                logger.warning("Rate limit error encountered, retrying...")
+                time.sleep(20)
+            else:
+                raise
 
         file_size = os.path.getsize(file_path_pdf)
         max_file_size = 2 * 1024 * 1024  # 2 MB
@@ -545,74 +552,66 @@ class AIHawkEasyApplier:
 
         cover_letter_text = self.gpt_answerer.answer_question_textual_wide_range("Write a cover letter")
 
-        folder_path = 'generated_cv'
-
         try:
+            # Generate file path using file manager
+            file_path_pdf = self.file_manager.generate_document_path(
+                job=job,
+                first_name=self.resume_generator_manager.resume_object.first_name,
+                last_name=self.resume_generator_manager.resume_object.last_name,
+                doc_type='cover_letter'
+            )
+            logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
 
-            if not os.path.exists(folder_path):
-                logger.debug(f"Creating directory at path: {folder_path}")
-            os.makedirs(folder_path, exist_ok=True)
-        except Exception as e:
-            logger.error(f"Failed to create directory: {folder_path}. Error: {e}")
-            raise
+            c = canvas.Canvas(file_path_pdf, pagesize=A4)
+            page_width, page_height = A4
+            text_object = c.beginText(50, page_height - 50)
+            text_object.setFont("Helvetica", 12)
 
-        while True:
-            try:
-                timestamp = int(time.time())
-                file_path_pdf = os.path.join(folder_path, f"Cover_Letter_{timestamp}.pdf")
-                logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
+            max_width = page_width - 100
+            bottom_margin = 50
+            available_height = page_height - bottom_margin - 50
 
-                c = canvas.Canvas(file_path_pdf, pagesize=A4)
-                page_width, page_height = A4
-                text_object = c.beginText(50, page_height - 50)
-                text_object.setFont("Helvetica", 12)
+            def split_text_by_width(text, font, font_size, max_width):
+                wrapped_lines = []
+                for line in text.splitlines():
 
-                max_width = page_width - 100
-                bottom_margin = 50
-                available_height = page_height - bottom_margin - 50
-
-                def split_text_by_width(text, font, font_size, max_width):
-                    wrapped_lines = []
-                    for line in text.splitlines():
-
-                        if stringWidth(line, font, font_size) > max_width:
-                            words = line.split()
-                            new_line = ""
-                            for word in words:
-                                if stringWidth(new_line + word + " ", font, font_size) <= max_width:
-                                    new_line += word + " "
-                                else:
-                                    wrapped_lines.append(new_line.strip())
-                                    new_line = word + " "
-                            wrapped_lines.append(new_line.strip())
-                        else:
-                            wrapped_lines.append(line)
-                    return wrapped_lines
-
-                lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
-
-                for line in lines:
-                    text_height = text_object.getY()
-                    if text_height > bottom_margin:
-                        text_object.textLine(line)
+                    if stringWidth(line, font, font_size) > max_width:
+                        words = line.split()
+                        new_line = ""
+                        for word in words:
+                            if stringWidth(new_line + word + " ", font, font_size) <= max_width:
+                                new_line += word + " "
+                            else:
+                                wrapped_lines.append(new_line.strip())
+                                new_line = word + " "
+                        wrapped_lines.append(new_line.strip())
                     else:
+                        wrapped_lines.append(line)
+                return wrapped_lines
 
-                        c.drawText(text_object)
-                        c.showPage()
-                        text_object = c.beginText(50, page_height - 50)
-                        text_object.setFont("Helvetica", 12)
-                        text_object.textLine(line)
+            lines = split_text_by_width(cover_letter_text, "Helvetica", 12, max_width)
 
-                c.drawText(text_object)
-                c.save()
-                logger.debug(f"Cover letter successfully generated and saved to: {file_path_pdf}")
+            for line in lines:
+                text_height = text_object.getY()
+                if text_height > bottom_margin:
+                    text_object.textLine(line)
+                else:
 
-                break
-            except Exception as e:
-                logger.error(f"Failed to generate cover letter: {e}")
-                tb_str = traceback.format_exc()
-                logger.error(f"Traceback: {tb_str}")
-                raise
+                    c.drawText(text_object)
+                    c.showPage()
+                    text_object = c.beginText(50, page_height - 50)
+                    text_object.setFont("Helvetica", 12)
+                    text_object.textLine(line)
+
+            c.drawText(text_object)
+            c.save()
+            logger.debug(f"Cover letter successfully generated and saved to: {file_path_pdf}")
+
+        except Exception as e:
+            logger.error(f"Failed to generate cover letter: {e}")
+            tb_str = traceback.format_exc()
+            logger.error(f"Traceback: {tb_str}")
+            raise
 
         file_size = os.path.getsize(file_path_pdf)
         max_file_size = 2 * 1024 * 1024  # 2 MB
