@@ -133,7 +133,7 @@ class FileManager:
 
         output_folder = app_data_folder / 'output'
         output_folder.mkdir(exist_ok=True)
-        return (app_data_folder / 'secrets.yaml', app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
+        return ('/Users/jheg/Documents/Dev/secrets.yaml', app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
 
     @staticmethod
     def file_paths_to_dict(resume_file: Path | None, plain_text_resume_file: Path) -> dict:

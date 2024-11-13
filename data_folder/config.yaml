@@ -1,4 +1,4 @@
-remote: true
+remote: false
 
 experienceLevel:
   internship: false
@@ -12,10 +12,10 @@ jobTypes:
   full-time: true
   contract: false
   part-time: false
-  temporary: true
+  temporary: false
   internship: false
   other: false
-  volunteer: true
+  volunteer: false
 
 date:
   all time: false
@@ -24,29 +24,74 @@ date:
   24 hours: true
 
 positions:
-  - Software engineer
+  - Business developer
+  - Business development manager
+  - Project manager
+  - Strategy manager
+  - Management consultant
+  - Marketing manager
+  - Coordinator
+  - Growth manager
+  - HR manager
+  - Sales
+  - Key Account Manager
+  - PR manager
+  - Brand manager
+  - Commercial Coordinator
+  - E-commerce manager
+  - Commercial project manager
 
 locations:
-  - Germany
+  - Copenhagen 
+  - Copenhagen Municipality, Capital Region of Denmark, Denmark 
+  - Copenhagen Metropolitan Area
 
 apply_once_at_company: true
 
-distance: 100
+distance: 10
 
 company_blacklist:
-  - wayfair
-  - Crossover
+  - Netlight
+  - Volvo Cars
 
 title_blacklist:
-  - word1
-  - word2
+  - Danish speaking
+  - Remote
+  - European Union (Remote)
+  - European Economic Area (Remote)
 
 location_blacklist:
-  - Brazil
+  - Remote
+  - Stockholm
+  - Stockholm County, Sweden (On-site)
+  - Stockholm County, Sweden (Hybrid)
+  - Stockholm County, Sweden (Remote)
+  - Stockholm County, Sweden
+  - Stockholm, Stockholm County, Sweden (Hybrid)
+  - Stockholm, Stockholm County, Sweden (Remote)
+  - Stockholm, Stockholm County, Sweden (On-site)
+  - Stockholm, Stockholm County, Sweden
+  - Sweden (Remote)
+  - Sweden
+  - Sweden (On-site)
+  - Greater Stockholm Metropolitan Area (Hybrid)
+  - Greater Stockholm Metropolitan Area (On-site)
+  - Greater Stockholm Metropolitan Area (Remote)
+  - Greater Stockholm Metropolitan Area
+  - Gothenburg
+  - Göteborg
+  - Malmö
+  - Malmo
+  - Malmoe
+  - EMEA (Remote)
+  - European Union (Remote)
+  - European Economic Area (Remote)
+  - Aarhus
+  - Lund
 
 job_applicants_threshold:
   min_applicants: 0
-  max_applicants: 30
+  max_applicants: 10000
 
 llm_model_type: openai
 llm_model: 'gpt-4o-mini'
