@@ -1,7 +1,6 @@
 import json
 import os
 import random
-from sys import exc_info
 import time
 from itertools import product
 from pathlib import Path
@@ -479,19 +478,31 @@ class AIHawkJobManager:
         job = Job()
 
         try:
-            logger.trace(job_tile.get_attribute('outerHTML'))
             job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
-            
-            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
-            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
-            logger.debug(f"Job information extracted: {job.title} at {job.company}")
+            logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
-            logger.warning("Some job information (title, link, or company) is missing.")
+            logger.warning("Job title is missing.")
+        
+        try:
+            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            logger.debug(f"Job link extracted: {job.link}")
+        except NoSuchElementException:
+            logger.warning("Job link is missing.")
+        
+        try:
+            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
+            logger.debug(f"Job company extracted: {job.company}")
+        except NoSuchElementException:
+            logger.warning("Job company is missing.")
         
         # Extract job ID from job url
         try:
-            job.id = re.search(r'/jobs/view/(\d+)/', job.link).group(1)
-            logger.debug(f"Job ID extracted: {job.id} from url:{job.link}")
+            match = re.search(r'/jobs/view/(\d+)/', job.link)
+            if match:
+                job.id = match.group(1)
+            else:
+                logger.warning(f"Job ID not found in link: {job.link}")
+            logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
         except Exception as e:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
 

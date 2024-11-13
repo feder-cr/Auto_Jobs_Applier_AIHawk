@@ -21,7 +21,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from jobContext import JobContext
 from job_application import JobApplication
-import job_application
+
 from job_application_saver import ApplicationSaver
 import src.utils as utils
 from src.logging import logger
@@ -179,7 +179,8 @@ class AIHawkEasyApplier:
 
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
-    def _find_easy_apply_button(self, job: Any) -> WebElement:
+    def _find_easy_apply_button(self, job_context: JobContext) -> WebElement:
+        job = job_context.job
         logger.debug("Searching for 'Easy Apply' button")
         attempt = 0
 
@@ -200,7 +201,7 @@ class AIHawkEasyApplier:
         ]
 
         while attempt < 2:
-            self.check_for_premium_redirect(job)
+            self.check_for_premium_redirect(job_context)
             self._scroll_page()
 
             for method in search_methods:
@@ -235,7 +236,7 @@ class AIHawkEasyApplier:
                     logger.warning(
                         f"Failed to click 'Easy Apply' button using {method['description']} on attempt {attempt + 1}: {e}")
 
-            self.check_for_premium_redirect(job)
+            self.check_for_premium_redirect(job_context)
 
             if attempt == 0:
                 logger.debug("Refreshing page to retry finding 'Easy Apply' button")
@@ -449,7 +450,7 @@ class AIHawkEasyApplier:
         return is_upload
 
     def _handle_upload_fields(self, element: WebElement, job_context: JobContext) -> None:
-        job = job_context.job
+        
         logger.debug("Handling upload fields")
 
         try:
@@ -483,7 +484,7 @@ class AIHawkEasyApplier:
         logger.debug("Finished handling upload fields")
 
     def _create_and_upload_resume(self, element, job_context : JobContext):
-        job : Job = job_context.job
+        job = job_context.job
         job_application = job_context.job_application
         logger.debug("Starting the process of creating and uploading resume.")
         folder_path = 'generated_cv'
@@ -660,7 +661,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Uploading cover letter from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
             job.cover_letter_path = os.path.abspath(file_path_pdf)
-            job_context.job_application.cv_path = os.path.abspath(file_path_pdf)
+            job_context.job_application.cover_letter_path = os.path.abspath(file_path_pdf)
             time.sleep(2)
             logger.debug(f"Cover letter created and uploaded successfully: {file_path_pdf}")
         except Exception as e:
@@ -733,7 +734,6 @@ class AIHawkEasyApplier:
         return False
 
     def _find_and_handle_textbox_question(self,job_context : JobContext, section: WebElement) -> bool:
-        job = job_context.job
         logger.debug("Searching for text fields in the section.")
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
 
