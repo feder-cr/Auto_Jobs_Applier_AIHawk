@@ -21,7 +21,6 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from jobContext import JobContext
 from job_application import JobApplication
-
 from job_application_saver import ApplicationSaver
 import src.utils as utils
 from src.logging import logger
@@ -180,7 +179,6 @@ class AIHawkEasyApplier:
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
     def _find_easy_apply_button(self, job_context: JobContext) -> WebElement:
-        job = job_context.job
         logger.debug("Searching for 'Easy Apply' button")
         attempt = 0
 
@@ -450,7 +448,6 @@ class AIHawkEasyApplier:
         return is_upload
 
     def _handle_upload_fields(self, element: WebElement, job_context: JobContext) -> None:
-        
         logger.debug("Handling upload fields")
 
         try:

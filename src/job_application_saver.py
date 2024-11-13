@@ -83,8 +83,10 @@ class ApplicationSaver:
                 job_application.job.resume_path,
                 "resume.pdf",
             )
-        logger.debug(f"Saving CV to path: {job_application.cover_letter_path}")
+        logger.debug(f"Saving cover letter to path: {job_application.cover_letter_path}")
         if job_application.cover_letter_path:
             saver.save_file(
-                saver.job_application_files_path, job_application.job.cover_letter_path, "cv.pdf"
+                saver.job_application_files_path,
+                job_application.job.cover_letter_path,
+                "cover_letter.pdf"
             )
