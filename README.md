@@ -69,6 +69,8 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    - Automatic document attachment (resume, cover letter)
 
 3. **AI-Powered Personalization**
+   - Customizable cover letter generation 
+   - Personalized summary textbox auto-fill
    - Dynamic response generation for employer-specific questions
    - Tone and style matching to fit company culture
    - Keyword optimization for improved application relevance
