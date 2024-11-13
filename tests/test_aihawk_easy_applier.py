@@ -61,7 +61,12 @@ def test_find_and_handle_textbox_question_summary(mocker, easy_applier):
     mock_text_field = mock.Mock()
     mock_label = mock.Mock()
     
-    # Set up the mocks
+    # Set up the mocks with proper field attributes
+    mock_text_field.get_attribute.side_effect = lambda attr: {
+        'type': 'text',
+        'id': 'regular_field'
+    }.get(attr)
+    
     mock_section.find_elements.side_effect = lambda by, tag: [mock_text_field] if tag in ['input', 'textarea'] else []
     mock_section.find_element.return_value = mock_label
     mock_label.text = "Please provide a summary"
@@ -91,16 +96,34 @@ def test_find_and_handle_textbox_question_regular(mocker, easy_applier):
     mock_text_field = mock.Mock()
     mock_label = mock.Mock()
     
-    # Set up the mocks
+    # Set up the mocks with proper field attributes
+    mock_text_field.get_attribute.side_effect = lambda attr: {
+        'type': 'text',
+        'id': 'regular_field'
+    }.get(attr)
+    
     mock_section.find_elements.side_effect = lambda by, tag: [mock_text_field] if tag in ['input', 'textarea'] else []
     mock_section.find_element.return_value = mock_label
     mock_label.text = "Regular question"
     
+    # Mock the save_questions_to_json method to prevent JSON serialization issues
+    mocker.patch.object(easy_applier, '_save_questions_to_json')
+    
+    # Mock GPT answerer response
+    easy_applier.gpt_answerer.answer_question_textual_wide_range.return_value = "Test answer"
+    
     # Test the method
     result = easy_applier._find_and_handle_textbox_question(mock_section)
     
-    # Verify that GPT was called with regular prompt
-    easy_applier.gpt_answerer.answer_question_textual_wide_range.assert_called_with("Regular question")
+    # Verify that GPT was called with lowercase question (matching the actual code behavior)
+    easy_applier.gpt_answerer.answer_question_textual_wide_range.assert_called_with("regular question")
+    
+    # Verify that save_questions_to_json was called with correct arguments (using lowercase)
+    easy_applier._save_questions_to_json.assert_called_once_with({
+        'type': 'textbox',
+        'question': "regular question",
+        'answer': "Test answer"
+    })
     
     assert result is True
 
@@ -116,8 +139,18 @@ def test_create_and_upload_cover_letter(mocker, easy_applier, tmp_path):
     mocker.patch('os.makedirs')
     mocker.patch('os.path.getsize', return_value=1024)  # 1KB file size
     
-    # Mock canvas operations
-    mock_canvas = mocker.patch('reportlab.pdfgen.canvas.Canvas')
+    # Mock canvas and text object operations
+    mock_text_object = mock.Mock()
+    mock_text_object.getY.return_value = 700  # Some reasonable height value
+    
+    mock_canvas = mock.Mock()
+    mock_canvas.beginText.return_value = mock_text_object
+    
+    mock_canvas_class = mocker.patch('reportlab.pdfgen.canvas.Canvas')
+    mock_canvas_class.return_value = mock_canvas
+    
+    # Mock string width calculation
+    mocker.patch('reportlab.pdfbase.pdfmetrics.stringWidth', return_value=50)
     
     # Mock GPT response
     easy_applier.gpt_answerer.answer_question_textual_wide_range.return_value = "Test cover letter content"
