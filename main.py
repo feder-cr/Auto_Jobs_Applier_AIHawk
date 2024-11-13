@@ -13,7 +13,7 @@ from typing import Optional
 from src.utils.chrome_utils import chrome_browser_options
 
 from src.job_application_profile import JobApplicationProfile
-from log import logger
+from src.log import logger
 
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr

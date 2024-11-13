@@ -22,7 +22,7 @@ from selenium.webdriver.support import ui
 from job_application import JobApplication
 from job_application_saver import ApplicationSaver
 import src.utils as utils
-from log import logger
+from src.log import logger
 from src.job import Job
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from utils import browser_utils
@@ -338,9 +338,6 @@ class AIHawkEasyApplier:
         
         Returns:
             str: Recruiter link
-        
-        Raises:
-            TimeoutException: If the WebDriver times out while waiting
         """
         logger.debug("Getting job recruiter information")
 

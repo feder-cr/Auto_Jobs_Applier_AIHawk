@@ -1,6 +1,6 @@
 import os
 from selenium import webdriver
-from log import logger
+from src.log import logger
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 

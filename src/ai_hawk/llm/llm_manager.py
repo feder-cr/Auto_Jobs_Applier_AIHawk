@@ -73,7 +73,7 @@ from constants import (
     WORK_PREFERENCES,
 )
 from src.job import Job
-from log import logger
+from src.log import logger
 
 load_dotenv()
 

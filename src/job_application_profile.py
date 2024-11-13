@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import yaml
 
-from log import logger
+from src.log import logger
 
 
 @dataclass
