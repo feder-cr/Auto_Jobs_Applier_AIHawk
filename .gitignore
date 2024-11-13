@@ -1,3 +1,8 @@
+# application files and logs
+/generated_cv
+/data_folder/secrets.yaml
+/log/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -118,9 +123,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
-# GitHub
-.github/
 
 # MacOS
 .DS_Store

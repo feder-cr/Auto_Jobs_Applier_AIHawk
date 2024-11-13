@@ -1,27 +1,29 @@
 remote: true
+hybrid: true
+onsite: true
 
-experienceLevel:
+experience_level:
   internship: false
   entry: true
   associate: true
-  mid-senior level: true
+  mid_senior_level: true
   director: false
   executive: false
 
-jobTypes:
-  full-time: true
+job_types:
+  full_time: true
   contract: false
-  part-time: false
+  part_time: false
   temporary: true
   internship: false
   other: false
   volunteer: true
 
 date:
-  all time: false
+  all_time: false
   month: false
   week: false
-  24 hours: true
+  24_hours: true
 
 positions:
   - Software engineer
