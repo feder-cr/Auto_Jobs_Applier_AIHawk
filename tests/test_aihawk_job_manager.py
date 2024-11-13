@@ -1,3 +1,5 @@
+import json
+import re
 from src.job import Job
 from unittest import mock
 from pathlib import Path
@@ -131,10 +133,17 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     container_mock.find_elements.return_value = job_elements_list
     mocker.patch.object(job_manager.driver, 'find_elements',
                         return_value=[container_mock])
+    
+    job = Job(
+        title="Title",
+        company="Company",
+        location="Location",
+        apply_method="",
+        link="Link"
+    )
 
     # Mock the extract_job_information_from_tile method to return sample job info
-    mocker.patch.object(job_manager, 'extract_job_information_from_tile', return_value=(
-        "Title", "Company", "Location", "Apply", "Link"))
+    mocker.patch.object(job_manager, 'job_tile_to_job', return_value=job)
 
     # Mock other methods like is_blacklisted, is_already_applied_to_job, and is_already_applied_to_company
     mocker.patch.object(job_manager, 'is_blacklisted', return_value=False)
@@ -153,7 +162,19 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     mocker.patch.object(Path, 'exists', return_value=True)
 
     # Mock the open function to prevent actual file writing
-    mock_open = mocker.mock_open()
+    failed_mock_data = [{
+        "company": "TestCompany",
+        "job_title": "Test Data Engineer",
+        "link": "https://www.example.com/jobs/view/1234567890/",
+        "job_recruiter": "",
+        "job_location": "Anywhere (Remote)",
+        "pdf_path": "file:///mocked/path/to/pdf"
+    }]
+
+    # Serialize the dictionary to a JSON string
+    json_read_data = json.dumps(failed_mock_data)
+
+    mock_open = mocker.mock_open(read_data=json_read_data)
     mocker.patch('builtins.open', mock_open)
 
     # Run the apply_jobs method
@@ -162,7 +183,7 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     # Assertions
     assert job_manager.driver.find_elements.call_count == 1
     # Called for each job element
-    assert job_manager.extract_job_information_from_tile.call_count == 2
+    assert job_manager.job_tile_to_job.call_count == 2
     # Called for each job element
     assert job_manager.easy_applier_component.job_apply.call_count == 2
     mock_open.assert_called()  # Ensure that the open function was called

@@ -189,7 +189,7 @@ This file contains sensitive information. Never share or commit this file to ver
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
-### 2. config.yaml
+### 2. work_preferences.yaml
 
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
@@ -262,22 +262,22 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Marketing
     ```
 
-#### 2.1 config.yaml - Customize LLM model endpoint
+#### 2.1 config.py - Customize LLM model endpoint
 
-- `llm_model_type`:
+- `LLM_MODEL_TYPE`:
   - Choose the model type, supported: openai / ollama / claude / gemini
-- `llm_model`:
+- `LLM_MODEL`:
   - Choose the LLM model, currently supported:
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
     - claude: any model
     - gemini: any model
+    - aiml: any model
+      
 - `llm_api_url`:
-  - Link of the API endpoint for the LLM model
-    - openai: <https://api.pawan.krd/cosmosrp/v1>
+  - Link of the API endpoint for the LLM model. (only requried for ollama)
     - ollama: <http://127.0.0.1:11434/>
-    - claude: <https://api.anthropic.com/v1>
-    - gemini: <https://aistudio.google.com/app/apikey>
+      
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml

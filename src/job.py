@@ -2,19 +2,19 @@ from dataclasses import dataclass
 
 from src.log import logger
 
-
 @dataclass
 class Job:
-    title: str
-    company: str
-    location: str
-    link: str
-    apply_method: str
+    id: str = ""
+    title: str = ""
+    company: str = ""
+    location: str = ""
+    link: str = ""
+    apply_method: str = ""
     description: str = ""
     summarize_job_description: str = ""
-    resume_path: str = ""
     recruiter_link: str = ""
-    job_id : str = ""
+    # TODO: to move these properties to JobApplication
+    resume_path: str = ""
     cover_letter_path: str = ""
 
     def set_summarize_job_description(self, summarize_job_description):
