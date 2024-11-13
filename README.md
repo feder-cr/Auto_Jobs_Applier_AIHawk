@@ -169,11 +169,11 @@ This file defines your job search parameters and bot behavior. Each section cont
 
 - `hybrid: [true/false]`
 
-  - Set to `true` to include remote jobs, `false` to exclude them
+  - Set to `true` to include hybrid jobs, `false` to exclude them
 
 - `onsite: [true/false]`
 
-  - Set to `true` to include remote jobs, `false` to exclude them
+  - Set to `true` to include onsite jobs, `false` to exclude them
 
 - `experienceLevel:`
 
