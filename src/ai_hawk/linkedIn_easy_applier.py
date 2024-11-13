@@ -535,7 +535,10 @@ class AIHawkEasyApplier:
     def _create_and_upload_cover_letter(self, element: WebElement, job) -> None:
         logger.debug("Starting the process of creating and uploading cover letter.")
 
-        cover_letter_text = self.gpt_answerer.answer_question_textual_wide_range("Write a cover letter")
+        cover_letter_text = self.gpt_answerer.answer_question_textual_wide_range(
+            f"Write a cover letter for a {job.title} position at {job.company}. "
+            f"Use the following job description to tailor the letter: {job.description[:500]}..."
+        )
 
         folder_path = 'generated_cv'
 
@@ -652,7 +655,6 @@ class AIHawkEasyApplier:
         if self._find_and_handle_date_question(section):
             logger.debug("Handled date question")
             return
-
         if self._find_and_handle_dropdown_question(section):
             logger.debug("Handled dropdown question")
             return
@@ -700,25 +702,31 @@ class AIHawkEasyApplier:
 
             question_type = 'numeric' if is_numeric else 'textbox'
 
-            # Check if it's a cover letter field (case-insensitive)
-            is_cover_letter = 'cover letter' in question_text.lower()
+            # Check if it's a summary field
+            is_summary = 'summary' in question_text.lower()
 
-            # Look for existing answer if it's not a cover letter field
+            # Look for existing answer if it's not a summary field
             existing_answer = None
-            if not is_cover_letter:
+            if not is_summary:
                 for item in self.all_data:
                     if self._sanitize_text(item['question']) == self._sanitize_text(question_text) and item.get('type') == question_type:
                         existing_answer = item['answer']
                         logger.debug(f"Found existing answer: {existing_answer}")
                         break
 
-            if existing_answer and not is_cover_letter:
+            if existing_answer and not is_summary:
                 answer = existing_answer
                 logger.debug(f"Using existing answer: {answer}")
             else:
                 if is_numeric:
                     answer = self.gpt_answerer.answer_question_numeric(question_text)
                     logger.debug(f"Generated numeric answer: {answer}")
+                elif is_summary:
+                    answer = self.gpt_answerer.answer_question_textual_wide_range(
+                        f"Provide a brief 4-5 line summary for the {self.current_job.title} position at {self.current_job.company}. "
+                        f"Focus on key qualifications and experience relevant to: {self.current_job.description[:200]}..."
+                    )
+                    logger.debug(f"Generated summary answer: {answer}")
                 else:
                     answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
                     logger.debug(f"Generated textual answer: {answer}")
@@ -726,10 +734,10 @@ class AIHawkEasyApplier:
             self._enter_text(text_field, answer)
             logger.debug("Entered answer into the textbox.")
 
-            # Save non-cover letter answers
-            if not is_cover_letter and not existing_answer:
+            # Save non-summary answers
+            if not is_summary and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
-                logger.debug("Saved non-cover letter answer to JSON.")
+                logger.debug("Saved non-summary answer to JSON.")
 
             time.sleep(1)
             text_field.send_keys(Keys.ARROW_DOWN)
