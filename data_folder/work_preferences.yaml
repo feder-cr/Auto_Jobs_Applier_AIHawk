@@ -1,23 +1,21 @@
 remote: true
-hybrid: true
-onsite: true
 
 experience_level:
   internship: false
-  entry: true
-  associate: true
+  entry: false
+  associate: false
   mid_senior_level: true
-  director: false
-  executive: false
+  director: true
+  executive: true
 
 job_types:
   full_time: true
-  contract: false
-  part_time: false
-  temporary: true
+  contract: true
+  part_time: true
+  temporary: false
   internship: false
   other: false
-  volunteer: true
+  volunteer: false
 
 date:
   all_time: false
@@ -26,25 +24,109 @@ date:
   24_hours: true
 
 positions:
-  - Software engineer
+  - Development Manager
+  - Engineering Manager
+#  - Principal Engineer
+#  - CTO Office Staff
+  - IT Manager
+  - IT Director
+#  - IT Architect
+#  - Information Technology Manager
+#  - Product Manager
+#  - Product Designer
+  - VP of Engineering
+  - VP of Development
+#  - CTO
+  - Chief Technology Officer
+  - Chief Information Officer
+#  - COO
+  - Chief Operating Officer
 
 locations:
-  - Germany
+#  - United States
+  - San Francisco, CA
+  - San Jose, CA
+  - San Francisco Bay Area
+  - Santa Clara, CA
+  - Mountain View, CA
+  - Palo Alto, CA
+  - Sunnyvale, CA
+  - Cupertino, CA
+  - Palo Alto, CA
+  - South San Francisco, CA
+  - San Mateo, CA
+  - Redwood City, CA
+  - San Bruno, CA
+  - San Carlos, CA
+  - Livermore, CA
+  - Fremont, CA
+  - Newark, CA
+  - Milpitas, CA
+  - San Ramon, CA
+  - Dublin, CA
+  - Pleasanton, CA
+  - Hayward, CA
+  - Union City, CA
+  - San Leandro, CA
+  - San Lorenzo, CA
+  - Cupertino, CA
+#  - Campbell, CA
+#  - Los Gatos, CA
+#  - Saratoga, CA
+#  - Los Altos, CA
+#  - Los Altos Hills, CA
+#  - Los Gatos, CA
+#  - Saratoga, CA
+#  - Sacramento, CA
+#  - Rancho Cordova, CA
+#  - Roseville, CA
+#  - Folsom, CA
+#  - Elk Grove, CA
+#  - Citrus Heights, CA
+#  - Fair Oaks, CA
+#  - Orangevale, CA
+#  - Carmichael, CA
+#  - Antelope, CA
+#  - North Highlands, CA
+#  - Citrus Heights, CA
 
 apply_once_at_company: true
 
 distance: 100
 
 company_blacklist:
+# - Current Employer
   - wayfair
   - Crossover
+  - Dice
+  - TikTok
+  - China Telecom
+  - China Mobile
+  - China Unicom
+  - Tencent
+  - Alibaba
+  - Baidu
+  - Huawei
+  - ByteDance
+  - Hire Resolve - Recruiting Talent in US & EMEA
+  - Augment Jobs
+  - Allen CW Group
 
 title_blacklist:
-  - word1
-  - word2
-
-location_blacklist:
-  - Brazil
+  - Sales
+  - Marketing
+  - Business Development
+  - Recruiting
+  - Talent
+  - Graphic
+  - Art
+  - Fashion
+  - Civil
+  - Human Resources 
+  - Structural
+  - Renewable
+  - Presales
+  - Banking
 
 job_applicants_threshold:
   min_applicants: 0
