@@ -31,6 +31,7 @@ from constants import (
     EXPERIENCE_DETAILS,
     FINISH_REASON,
     GEMINI,
+    GROQ,
     HUGGINGFACE,
     ID,
     INPUT_TOKENS,
@@ -83,6 +84,16 @@ class AIModel(ABC):
     def invoke(self, prompt: str) -> str:
         pass
 
+class GroqAIModel(AIModel):
+    def __init__(self, api_key: str, llm_model: str):
+        from langchain_groq import ChatGroq
+        self.model = ChatGroq(model=llm_model, api_key=api_key,
+                                temperature=0.4)
+
+    def invoke(self, prompt: str) -> BaseMessage:
+        response = self.model.invoke(prompt)
+        logger.debug("Invoking GroqAI API")
+        return response
 
 class OpenAIModel(AIModel):
     def __init__(self, api_key: str, llm_model: str):
@@ -222,6 +233,8 @@ class AIAdapter:
             return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == GEMINI:
             return GeminiModel(api_key, llm_model)
+        elif llm_model_type == GROQ:
+            return GroqAIModel(api_key, llm_model)     
         elif llm_model_type == HUGGINGFACE:
             return HuggingFaceModel(api_key, llm_model)
         elif llm_model_type == PERPLEXITY:
@@ -234,9 +247,8 @@ class AIAdapter:
 
 
 class LLMLogger:
-    def __init__(
-        self, llm: Union[OpenAIModel, AIMLModel, OllamaModel, ClaudeModel, GeminiModel]
-    ):
+
+    def __init__(self, llm: AIModel):
         self.llm = llm
         logger.debug(f"LLMLogger successfully initialized with LLM: {llm}")
 
@@ -348,7 +360,8 @@ class LLMLogger:
 
 
 class LoggerChatModel:
-    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel, GeminiModel]):
+
+    def __init__(self, llm: AIModel):
         self.llm = llm
         logger.debug(f"LoggerChatModel successfully initialized with LLM: {llm}")
 
