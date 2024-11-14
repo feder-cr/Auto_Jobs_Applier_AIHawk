@@ -235,19 +235,26 @@ This file defines your job search parameters and bot behavior. Each section cont
 #### 2.1 config.yaml - Customize LLM model endpoint
 
 - `llm_model_type`:
-  - Choose the model type, supported: openai / ollama / claude / gemini
+  - Choose the model type, supported: openai / ollama / claude / gemini / azure
 - `llm_model`:
   - Choose the LLM model, currently supported:
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
     - claude: any model
     - gemini: any model
+    - azure: leave blank. your model deployment below define the model
 - `llm_api_url`:
   - Link of the API endpoint for the LLM model
     - openai: <https://api.pawan.krd/cosmosrp/v1>
     - ollama: <http://127.0.0.1:11434/>
     - claude: <https://api.anthropic.com/v1>
     - gemini: <https://aistudio.google.com/app/apikey>
+    - azure: find your endpoint url in your model deployment
+- `azure_model_deployment_name`:
+  - The deployment name of your model
+- `azure_api_version`
+  - example: `2024-08-01-preview`
+  - for more api version: <https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation>
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
