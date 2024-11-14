@@ -3,3 +3,20 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: name-tests-test
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+  -   repo: https://github.com/asottile/reorder-python-imports
+      rev: v3.14.0
+      hooks:
+      -   id: reorder-python-imports
+  -   repo: https://github.com/hhatto/autopep8
+      rev: v2.3.1
+      hooks:
+      -   id: autopep8
