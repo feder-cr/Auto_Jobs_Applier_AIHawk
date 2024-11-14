@@ -4,7 +4,8 @@ import os
 import time
 from unittest import mock
 from selenium.webdriver.remote.webelement import WebElement
-from src.utils import ensure_chrome_profile, is_scrollable, scroll_slow, chrome_browser_options
+from src.utils.browser_utils import  is_scrollable, scroll_slow
+from src.utils.chrome_utils import chrome_browser_options, ensure_chrome_profile
 
 # Mocking logging to avoid actual file writing
 @pytest.fixture(autouse=True)
@@ -69,7 +70,7 @@ def test_scroll_slow_element_not_scrollable(mocker):
 
 # Test chrome_browser_options function
 def test_chrome_browser_options(mocker):
-    mocker.patch("src.utils.ensure_chrome_profile")
+    mocker.patch("src.utils.chrome_utils.ensure_chrome_profile")
     mocker.patch("os.path.dirname", return_value="/mocked/path")
     mocker.patch("os.path.basename", return_value="profile_directory")
 
