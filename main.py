@@ -7,6 +7,7 @@ import click
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
+from constants import PLAIN_TEXT_RESUME_YAML, SECRETS_YAML, WORK_PREFERENCES_YAML
 
 from src.webdrivers.browser_factory import BrowserFactory
 from src.job_application_profile import JobApplicationProfile
@@ -56,8 +57,6 @@ class ConfigValidator:
             'distance': int,
             'company_blacklist': list,
             'title_blacklist': list,
-            'llm_model_type': str,
-            'llm_model': str
         }
 
         for key, expected_type in required_keys.items():
@@ -129,7 +128,7 @@ class FileManager:
         if not app_data_folder.exists() or not app_data_folder.is_dir():
             raise FileNotFoundError(f"Data folder not found: {app_data_folder}")
 
-        required_files = ['secrets.yaml', 'config.yaml', 'plain_text_resume.yaml']
+        required_files = [SECRETS_YAML, WORK_PREFERENCES_YAML, PLAIN_TEXT_RESUME_YAML]
         missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
         
         if missing_files:
@@ -137,7 +136,7 @@ class FileManager:
 
         output_folder = app_data_folder / 'output'
         output_folder.mkdir(exist_ok=True)
-        return (app_data_folder / 'secrets.yaml', app_data_folder / 'config.yaml', app_data_folder / 'plain_text_resume.yaml', output_folder)
+        return (app_data_folder / SECRETS_YAML, app_data_folder / WORK_PREFERENCES_YAML, app_data_folder / PLAIN_TEXT_RESUME_YAML, output_folder)
 
     @staticmethod
     def file_paths_to_dict(resume_file: Path | None, plain_text_resume_file: Path) -> dict:
