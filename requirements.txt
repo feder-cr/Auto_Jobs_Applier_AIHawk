@@ -30,3 +30,4 @@ pytest-mock
 pytest-cov
 astroid
 pylint
+pre-commit
