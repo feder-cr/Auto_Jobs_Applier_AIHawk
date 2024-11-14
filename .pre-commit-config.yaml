@@ -3,6 +3,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        types: [python]
       - id: check-case-conflict
       - id: check-docstring-first
       - id: check-merge-conflict
@@ -11,12 +12,19 @@ repos:
       - id: detect-private-key
       - id: name-tests-test
       - id: end-of-file-fixer
+        types: [python]
       - id: requirements-txt-fixer
-  -   repo: https://github.com/asottile/reorder-python-imports
-      rev: v3.14.0
-      hooks:
-      -   id: reorder-python-imports
-  -   repo: https://github.com/hhatto/autopep8
-      rev: v2.3.1
-      hooks:
-      -   id: autopep8
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        exclude: >-
+            (?x)^(
+            .*__init__\.py$
+            )
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
+    hooks:
+      - id: ruff
+        args: [ --fix, '--line-length', '120' ]
