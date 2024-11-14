@@ -1,19 +1,20 @@
 from dataclasses import dataclass
-
 from src.logging import logger
-
 
 @dataclass
 class Job:
-    title: str
-    company: str
-    location: str
-    link: str
-    apply_method: str
+    id: str = ""
+    title: str = ""
+    company: str = ""
+    location: str = ""
+    link: str = ""
+    apply_method: str = ""
     description: str = ""
     summarize_job_description: str = ""
-    pdf_path: str = ""
     recruiter_link: str = ""
+    # TODO: to move these properties to JobApplication
+    resume_path: str = ""
+    cover_letter_path: str = ""
 
     def set_summarize_job_description(self, summarize_job_description):
         logger.debug(f"Setting summarized job description: {summarize_job_description}")
