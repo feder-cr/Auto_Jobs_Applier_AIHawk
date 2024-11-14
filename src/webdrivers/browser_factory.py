@@ -8,10 +8,13 @@ from src.webdrivers.base_browser import BrowserType
 from src.webdrivers.chrome import Chrome
 from src.webdrivers.firefox import Firefox
 
-
 class BrowserFactory:
     """Factory class for creating browser instances"""
     _browser_type: BrowserType = BROWSER_TYPE_CONFIG
+    _browsers = {
+        BrowserType.CHROME: Chrome,
+        BrowserType.FIREFOX: Firefox,
+    }
 
     @classmethod
     def get_browser_type(cls) -> BrowserType:
@@ -27,7 +30,7 @@ class BrowserFactory:
         logger.debug(f"Browser type set to: {browser_type}")
 
     @classmethod
-    def get_driver(cls, browser_type: BrowserType) -> Union[webdriver.Chrome, webdriver.Firefox]:
+    def get_browser(cls) -> Union[webdriver.Chrome, webdriver.Firefox]:
         """
         Create and return a WebDriver instance for the specified browser type
         Args:
@@ -37,11 +40,10 @@ class BrowserFactory:
         Raises:
             RuntimeError: If browser initialization fails
         """
-        if browser_type == BrowserType.CHROME:
-            browser = Chrome()
-        elif browser_type == BrowserType.FIREFOX:
-            browser = Firefox()
-        else:
-            raise ValueError(f"Unsupported browser type: {browser_type}")
+        browser_type = cls._browsers.get(cls._browser_type)
+        if browser_type is None:
+            raise ValueError(f"Unsupported browser type: {cls._browser_type}")
+
+        browser = browser_type()
 
         return browser.create_driver()

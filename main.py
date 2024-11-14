@@ -4,12 +4,10 @@ import sys
 from pathlib import Path
 import yaml
 import click
-from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
 
-from src.webdrivers.base_browser import BrowserType
 from src.webdrivers.browser_factory import BrowserFactory
 from src.job_application_profile import JobApplicationProfile
 from src.logging import logger
@@ -155,12 +153,6 @@ class FileManager:
 
         return result
 
-def init_browser(browser_type: BrowserType = BrowserType.CHROME) -> webdriver.Chrome | webdriver.Firefox:
-    try:
-        return BrowserFactory.get_driver(browser_type)
-    except Exception as e:
-        raise RuntimeError(f"Failed to initialize browser: {str(e)}")
-
 def create_and_run_bot(parameters, llm_api_key):
     try:
         style_manager = StyleManager()
@@ -176,7 +168,7 @@ def create_and_run_bot(parameters, llm_api_key):
         
         job_application_profile_object = JobApplicationProfile(plain_text_resume)
         
-        browser = init_browser(BrowserFactory.get_browser_type())
+        browser = BrowserFactory.get_browser()
         login_component = get_authenticator(driver=browser, platform='linkedin')
         apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
@@ -211,7 +203,6 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         parameters['uploads'] = FileManager.file_paths_to_dict(resume, plain_text_resume_file)
         parameters['outputFileDirectory'] = output_folder
         parameters['collectMode'] = collect
-        # check if the config is not set as well
 
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
