@@ -181,6 +181,10 @@ gantt
 1. Clone the repository
 2. Install dependencies from requirements.txt
 3. Set up necessary API keys and configurations
+4. Set up pre-commit
+```bash
+pre-commit install
+```
 
 ## Testing
 
