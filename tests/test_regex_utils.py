@@ -39,7 +39,7 @@ test_cases = [
 
     # Seen job link test
     ("Marketing Specialist", "DEF Corp", "link14", "USA", True),  # Link has been seen (blacklist)
-    
+
     # Cases that should NOT be blacklisted (expected to pass)
     ("Software Developer", "Tech Corp", "link15", "USA", False),  # Title not blacklisted
     ("Product Engineer", "XYZ Ltd", "link16", "Canada", False),  # Title and location not blacklisted
@@ -47,6 +47,11 @@ test_cases = [
     ("Project Manager", "GHI Inc", "link18", "Argentina", False),  # Location close to blacklist but distinct
     ("Operations Manager", "ABC Technology", "link19", "USA", False)  # Company name similar but not matching
 ]
+
+# Mocking logging to avoid actual file writing
+@pytest.fixture(autouse=True)
+def mock_logger(mocker):
+    mocker.patch("src.log.logger")
 
 @pytest.mark.parametrize("job_title, company, link, job_location, expected_output", test_cases)
 def test_is_blacklisted(job_title, company, link, job_location, expected_output):

@@ -7,8 +7,12 @@ import os
 import pytest
 from ai_hawk.job_manager import AIHawkJobManager
 from selenium.common.exceptions import NoSuchElementException
-from log import logger
 
+
+# Mocking logging to avoid actual file writing
+@pytest.fixture(autouse=True)
+def mock_logger(mocker):
+    mocker.patch("src.log.logger")
 
 @pytest.fixture
 def job_manager(mocker):
@@ -133,7 +137,7 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     container_mock.find_elements.return_value = job_elements_list
     mocker.patch.object(job_manager.driver, 'find_elements',
                         return_value=[container_mock])
-    
+
     job = Job(
         title="Title",
         company="Company",

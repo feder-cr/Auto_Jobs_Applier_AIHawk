@@ -10,7 +10,7 @@ from src.utils.chrome_utils import chrome_browser_options, ensure_chrome_profile
 # Mocking logging to avoid actual file writing
 @pytest.fixture(autouse=True)
 def mock_logger(mocker):
-    mocker.patch("src.logging.logger")
+    mocker.patch("src.log.logger")
 
 # Test ensure_chrome_profile function
 def test_ensure_chrome_profile(mocker):

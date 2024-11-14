@@ -1,4 +1,3 @@
-from src.logging import logger
 import os
 import json
 import shutil
@@ -6,6 +5,7 @@ import shutil
 from dataclasses import asdict
 
 from config import JOB_APPLICATIONS_DIR
+from src.log import logger
 from job import Job
 from job_application import JobApplication
 
