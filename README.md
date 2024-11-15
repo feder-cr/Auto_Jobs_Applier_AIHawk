@@ -19,8 +19,8 @@ Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) |
 
 </div>
 
-**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of Ai Hawk </br>
-As AI Hawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
+**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of AIHawk </br>
+As AIHawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
 
 **Project Maintainers / Leads**: [surapuramakhil](https://github.com/surapuramakhil), [sarob](https://github.com/sarob), [cjbbb](https://github.com/cjbbb)
 
