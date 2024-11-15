@@ -14,19 +14,25 @@ repos:
       - id: end-of-file-fixer
         types: [python]
       - id: requirements-txt-fixer
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
+    hooks:
+      - id: seed-isort-config
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
         name: isort (python)
         exclude: >-
-            (?x)^(
-            .*__init__\.py$
-            )
+          (?x)^(
+          .*__init__\.py$
+          )
+        args: ["--profile=black"]
+        types: [python]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.7.3
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
       - id: ruff-format
-        args: [ '--line-length', '120' ]
+        args: ["--line-length", "120"]
