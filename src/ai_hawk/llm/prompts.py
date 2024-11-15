@@ -315,7 +315,7 @@ How many years of experience do you have with IoT?
 ```
 ## Curriculum
 
-I had a degree in computer science. 
+I had a degree in computer science.
 
 ## Question
 
@@ -347,7 +347,7 @@ How many years of experience do you have with AI?
 {resume_jobs}
 {resume_projects}
 ```
-        
+
 ## Question:
 {question}
 
@@ -401,32 +401,32 @@ The objective is to fix the text of a form input on a web page.
 {question}
 
 ## Input
-{input} 
+{input}
 
 ## Error
-{error}  
+{error}
 
 ## Fixed Input
 """
 
 func_summarize_prompt_template = """
         Following are two texts, one with placeholders and one without, the second text uses information from the first text to fill the placeholders.
-        
+
         ## Rules
         - A placeholder is a string like "[[placeholder]]". E.g. "[[company]]", "[[job_title]]", "[[years_of_experience]]"...
         - The task is to remove the placeholders from the text.
         - If there is no information to fill a placeholder, remove the placeholder, and adapt the text accordingly.
         - No placeholders should remain in the text.
-        
+
         ## Example
         Text with placeholders: "I'm a software engineer engineer with 10 years of experience on [placeholder] and [placeholder]."
         Text without placeholders: "I'm a software engineer with 10 years of experience."
-        
+
         -----
-        
+
         ## Text with placeholders:
         {text_with_placeholders}
-        
+
         ## Text without placeholders:"""
 
 is_relavant_position_template = """
@@ -460,7 +460,7 @@ phrase: {phrase}
 
 determine_section_template = """You are assisting a bot designed to automatically apply for jobs on AIHawk. The bot receives various questions about job applications and needs to determine the most relevant section of the resume to provide an accurate response.
 
-For the following question: '{question}', determine which section of the resume is most relevant. 
+For the following question: '{question}', determine which section of the resume is most relevant.
 Respond with exactly one of the following options:
 - Personal information
 - Self Identification

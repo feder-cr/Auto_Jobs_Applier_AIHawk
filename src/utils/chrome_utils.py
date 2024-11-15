@@ -1,8 +1,11 @@
 import os
+
 from selenium import webdriver
+
 from src.logging import logger
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
+
 
 def ensure_chrome_profile():
     logger.debug(f"Ensuring Chrome profile exists at path: {chromeProfilePath}")
@@ -14,6 +17,7 @@ def ensure_chrome_profile():
         os.makedirs(chromeProfilePath)
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
+
 
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
@@ -48,7 +52,7 @@ def chrome_browser_options():
     if len(chromeProfilePath) > 0:
         initial_path = os.path.dirname(chromeProfilePath)
         profile_dir = os.path.basename(chromeProfilePath)
-        options.add_argument('--user-data-dir=' + initial_path)
+        options.add_argument("--user-data-dir=" + initial_path)
         options.add_argument("--profile-directory=" + profile_dir)
         logger.debug(f"Using Chrome profile directory: {chromeProfilePath}")
     else:
@@ -56,5 +60,3 @@ def chrome_browser_options():
         logger.debug("Using Chrome in incognito mode")
 
     return options
-
-

@@ -29,10 +29,9 @@ class LegalAuthorization:
     legally_allowed_to_work_in_canada: str
     requires_canada_sponsorship: str
     uk_work_authorization: str
-    requires_uk_visa: str 
+    requires_uk_visa: str
     legally_allowed_to_work_in_uk: str
     requires_uk_sponsorship: str
-
 
 
 @dataclass
@@ -82,7 +81,7 @@ class JobApplicationProfile:
         # Process self_identification
         try:
             logger.debug("Processing self_identification")
-            self.self_identification = SelfIdentification(**data['self_identification'])
+            self.self_identification = SelfIdentification(**data["self_identification"])
             logger.debug(f"self_identification processed: {self.self_identification}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in self_identification data.")
@@ -100,7 +99,7 @@ class JobApplicationProfile:
         # Process legal_authorization
         try:
             logger.debug("Processing legal_authorization")
-            self.legal_authorization = LegalAuthorization(**data['legal_authorization'])
+            self.legal_authorization = LegalAuthorization(**data["legal_authorization"])
             logger.debug(f"legal_authorization processed: {self.legal_authorization}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in legal_authorization data.")
@@ -118,7 +117,7 @@ class JobApplicationProfile:
         # Process work_preferences
         try:
             logger.debug("Processing work_preferences")
-            self.work_preferences = WorkPreferences(**data['work_preferences'])
+            self.work_preferences = WorkPreferences(**data["work_preferences"])
             logger.debug(f"Work_preferences processed: {self.work_preferences}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in work_preferences data.")
@@ -136,7 +135,7 @@ class JobApplicationProfile:
         # Process availability
         try:
             logger.debug("Processing availability")
-            self.availability = Availability(**data['availability'])
+            self.availability = Availability(**data["availability"])
             logger.debug(f"Availability processed: {self.availability}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in availability data.")
@@ -154,7 +153,7 @@ class JobApplicationProfile:
         # Process salary_expectations
         try:
             logger.debug("Processing salary_expectations")
-            self.salary_expectations = SalaryExpectations(**data['salary_expectations'])
+            self.salary_expectations = SalaryExpectations(**data["salary_expectations"])
             logger.debug(f"salary_expectations processed: {self.salary_expectations}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in salary_expectations data.")
@@ -177,10 +176,12 @@ class JobApplicationProfile:
         def format_dataclass(obj):
             return "\n".join(f"{field.name}: {getattr(obj, field.name)}" for field in obj.__dataclass_fields__.values())
 
-        formatted_str = (f"Self Identification:\n{format_dataclass(self.self_identification)}\n\n"
-                         f"Legal Authorization:\n{format_dataclass(self.legal_authorization)}\n\n"
-                         f"Work Preferences:\n{format_dataclass(self.work_preferences)}\n\n"
-                         f"Availability: {self.availability.notice_period}\n\n"
-                         f"Salary Expectations: {self.salary_expectations.salary_range_usd}\n\n")
+        formatted_str = (
+            f"Self Identification:\n{format_dataclass(self.self_identification)}\n\n"
+            f"Legal Authorization:\n{format_dataclass(self.legal_authorization)}\n\n"
+            f"Work Preferences:\n{format_dataclass(self.work_preferences)}\n\n"
+            f"Availability: {self.availability.notice_period}\n\n"
+            f"Salary Expectations: {self.salary_expectations.salary_range_usd}\n\n"
+        )
         logger.debug(f"String representation generated: {formatted_str}")
         return formatted_str

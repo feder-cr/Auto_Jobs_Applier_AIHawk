@@ -45,7 +45,6 @@ class AIHawkBotFacade:
         self.state.job_application_profile_set = True
         logger.debug("Job application profile and resume set successfully")
 
-
     def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
         self._ensure_job_profile_and_resume_set()
@@ -67,20 +66,20 @@ class AIHawkBotFacade:
 
     def start_login(self):
         logger.debug("Starting login process")
-        self.state.validate_state(['credentials_set'])
+        self.state.validate_state(["credentials_set"])
         self.login_component.start()
         self.state.logged_in = True
         logger.debug("Login process completed successfully")
 
     def start_apply(self):
         logger.debug("Starting apply process")
-        self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
+        self.state.validate_state(["logged_in", "job_application_profile_set", "gpt_answerer_set", "parameters_set"])
         self.apply_component.start_applying()
         logger.debug("Apply process started successfully")
-        
+
     def start_collect_data(self):
         logger.debug("Starting collecting data process")
-        self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
+        self.state.validate_state(["logged_in", "job_application_profile_set", "gpt_answerer_set", "parameters_set"])
         self.apply_component.start_collecting_data()
         logger.debug("Collecting data process started successfully")
 

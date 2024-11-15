@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from src.logging import logger
+
 
 @dataclass
 class Job:
@@ -35,12 +37,12 @@ class Job:
         logger.debug(f"Formatting job information for job: {self.title} at {self.company}")
         job_information = f"""
         # Job Description
-        ## Job Information 
+        ## Job Information
         - Position: {self.title}
         - At: {self.company}
         - Location: {self.location}
         - Recruiter Profile: {self.recruiter_link or 'Not available'}
-        
+
         ## Description
         {self.description or 'No description provided.'}
         """

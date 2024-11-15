@@ -1,4 +1,3 @@
-
 import random
 import time
 
@@ -9,7 +8,9 @@ def is_scrollable(element):
     scroll_height = element.get_attribute("scrollHeight")
     client_height = element.get_attribute("clientHeight")
     scrollable = int(scroll_height) > int(client_height)
-    logger.debug(f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}")
+    logger.debug(
+        f"Element scrollable check: scrollHeight={scroll_height}, clientHeight={client_height}, scrollable={scrollable}"
+    )
     return scrollable
 
 

@@ -1,10 +1,9 @@
-from attr import dataclass
 from job import Job
 
-class JobApplication:
 
+class JobApplication:
     def __init__(self, job: Job):
-        self.job :Job = job
+        self.job: Job = job
         self.application = []
         self.resume_path = ""
         self.cover_letter_path = ""
@@ -17,4 +16,3 @@ class JobApplication:
 
     def set_cover_letter_path(self, cv_path: str):
         self.cover_letter_path = cv_path
-    

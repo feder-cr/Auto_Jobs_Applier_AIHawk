@@ -1,22 +1,22 @@
-import random
 import time
-
 from abc import ABC, abstractmethod
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoAlertPresentException, TimeoutException, UnexpectedAlertPresentException
+
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.logging import logger
 
+
 def get_authenticator(driver, platform):
-    if platform == 'linkedin':
+    if platform == "linkedin":
         return LinkedInAuthenticator(driver)
     else:
         raise NotImplementedError(f"Platform {platform} not implemented yet.")
 
-class AIHawkAuthenticator(ABC):
 
+class AIHawkAuthenticator(ABC):
     @property
     def home_url(self):
         pass
@@ -52,7 +52,6 @@ class AIHawkAuthenticator(ABC):
             logger.error(f"Could not log in to AIHawk. Element not found: {e}")
         self.handle_security_checks()
 
-
     def prompt_for_credentials(self):
         try:
             logger.debug("Enter credentials...")
@@ -74,9 +73,7 @@ class AIHawkAuthenticator(ABC):
                     break
                 else:
                     # Optionally wait for the password field (or any other element you expect on the login page)
-                    WebDriverWait(self.driver, 10).until(
-                        EC.presence_of_element_located((By.ID, "password"))
-                    )
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "password")))
                     logger.debug("Password field detected, waiting for login completion.")
 
                 time.sleep(check_interval)
@@ -88,34 +85,30 @@ class AIHawkAuthenticator(ABC):
     @abstractmethod
     def handle_security_checks(self):
         pass
-        
-class LinkedInAuthenticator(AIHawkAuthenticator):
 
+
+class LinkedInAuthenticator(AIHawkAuthenticator):
     @property
     def home_url(self):
         return "https://www.linkedin.com"
 
     def navigate_to_login(self):
         return self.driver.get("https://www.linkedin.com/login")
-    
+
     def handle_security_checks(self):
         try:
             logger.debug("Handling security check...")
-            WebDriverWait(self.driver, 10).until(
-                EC.url_contains('https://www.linkedin.com/checkpoint/challengesV2/')
-            )
+            WebDriverWait(self.driver, 10).until(EC.url_contains("https://www.linkedin.com/checkpoint/challengesV2/"))
             logger.warning("Security checkpoint detected. Please complete the challenge.")
-            WebDriverWait(self.driver, 300).until(
-                EC.url_contains('https://www.linkedin.com/feed/')
-            )
+            WebDriverWait(self.driver, 300).until(EC.url_contains("https://www.linkedin.com/feed/"))
             logger.info("Security check completed")
         except TimeoutException:
             logger.error("Security check not completed. Please try again later.")
-    
+
     @property
     def is_logged_in(self):
-        keywords = ['feed', 'mynetwork','jobs','messaging','notifications']
-        return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
+        keywords = ["feed", "mynetwork", "jobs", "messaging", "notifications"]
+        return any(item in self.driver.current_url for item in keywords) and "linkedin.com" in self.driver.current_url
 
     def __init__(self, driver):
         super().__init__(driver)
