@@ -11,10 +11,6 @@ from src.webdrivers.firefox import Firefox
 class BrowserFactory:
     """Factory class for creating browser instances"""
     _browser_type: BrowserType = BROWSER_TYPE_CONFIG
-    _browsers = {
-        BrowserType.CHROME: Chrome,
-        BrowserType.FIREFOX: Firefox,
-    }
 
     @classmethod
     def get_browser_type(cls) -> BrowserType:
@@ -23,8 +19,8 @@ class BrowserFactory:
 
     @classmethod
     def set_browser_type(cls, browser_type: BrowserType) -> None:
-        """Set browser type"""
-        if browser_type not in BrowserType.__members__:
+        # safety check additional to type check.
+        if browser_type not in BrowserType:
             raise ValueError(f"Unsupported browser type: {browser_type}")
         cls._browser_type = browser_type
         logger.debug(f"Browser type set to: {browser_type}")
@@ -40,10 +36,7 @@ class BrowserFactory:
         Raises:
             RuntimeError: If browser initialization fails
         """
-        browser_type = cls._browsers.get(cls._browser_type)
-        if browser_type is None:
-            raise ValueError(f"Unsupported browser type: {cls._browser_type}")
-
+        
         browser = browser_type()
 
         return browser.create_driver()
