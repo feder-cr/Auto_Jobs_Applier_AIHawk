@@ -38,8 +38,6 @@ from constants import (
     JOB_DESCRIPTION,
     LANGUAGES,
     LEGAL_AUTHORIZATION,
-    LLM_API_URL,
-    LLM_MODEL,
     LLM_MODEL_TYPE,
     LOGPROBS,
     MODEL,
@@ -74,6 +72,7 @@ from constants import (
 )
 from src.job import Job
 from src.logging import logger
+import config as cfg
 
 load_dotenv()
 
@@ -187,10 +186,10 @@ class AIAdapter:
         self.model = self._create_model(config, api_key)
 
     def _create_model(self, config: dict, api_key: str) -> AIModel:
-        llm_model_type = config[LLM_MODEL_TYPE]
-        llm_model = config[LLM_MODEL]
+        llm_model_type = cfg.LLM_MODEL_TYPE
+        llm_model = cfg.LLM_MODEL
 
-        llm_api_url = config.get(LLM_API_URL, "")
+        llm_api_url = cfg.LLM_API_URL
 
         logger.debug(f"Using {llm_model_type} with {llm_model}")
 
@@ -504,6 +503,9 @@ class GPTAnswerer:
         logger.debug(f"Setting job application profile: {job_application_profile}")
         self.job_application_profile = job_application_profile
 
+    def _clean_llm_output(self, output: str) -> str:
+        return output.replace("*", "").replace("#", "").strip()
+    
     def summarize_job_description(self, text: str) -> str:
         logger.debug(f"Summarizing job description: {text}")
         prompts.summarize_prompt_template = self._preprocess_template_string(
@@ -511,7 +513,8 @@ class GPTAnswerer:
         )
         prompt = ChatPromptTemplate.from_template(prompts.summarize_prompt_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({TEXT: text})
+        raw_output = chain.invoke({TEXT: text})
+        output = self._clean_llm_output(raw_output)
         logger.debug(f"Summary generated: {output}")
         return output
 
@@ -556,7 +559,8 @@ class GPTAnswerer:
 
         prompt = ChatPromptTemplate.from_template(prompts.determine_section_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke({QUESTION: question})
+        raw_output = chain.invoke({QUESTION: question})
+        output = self._clean_llm_output(raw_output)
 
         match = re.search(
             r"(Personal information|Self Identification|Legal Authorization|Work Preferences|Education "
@@ -572,13 +576,14 @@ class GPTAnswerer:
 
         if section_name == "cover_letter":
             chain = chains.get(section_name)
-            output = chain.invoke(
+            raw_output = chain.invoke(
                 {
                     RESUME: self.resume,
                     JOB_DESCRIPTION: self.job_description,
                     COMPANY: self.job.company,
                 }
             )
+            output = self._clean_llm_output(raw_output)
             logger.debug(f"Cover letter generated: {output}")
             return output
         resume_section = getattr(self.resume, section_name, None) or getattr(
@@ -595,9 +600,10 @@ class GPTAnswerer:
         if chain is None:
             logger.error(f"Chain not defined for section '{section_name}'")
             raise ValueError(f"Chain not defined for section '{section_name}'")
-        output = chain.invoke(
+        raw_output = chain.invoke(
             {RESUME_SECTION: resume_section, QUESTION: question}
         )
+        output = self._clean_llm_output(raw_output)
         logger.debug(f"Question answered: {output}")
         return output
 
@@ -610,7 +616,7 @@ class GPTAnswerer:
         )
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output_str = chain.invoke(
+        raw_output_str = chain.invoke(
             {
                 RESUME_EDUCATIONS: self.resume.education_details,
                 RESUME_JOBS: self.resume.experience_details,
@@ -618,6 +624,7 @@ class GPTAnswerer:
                 QUESTION: question,
             }
         )
+        output_str = self._clean_llm_output(raw_output_str)
         logger.debug(f"Raw output for numeric question: {output_str}")
         try:
             output = self.extract_number_from_string(output_str)
@@ -644,7 +651,7 @@ class GPTAnswerer:
         func_template = self._preprocess_template_string(prompts.options_template)
         prompt = ChatPromptTemplate.from_template(func_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output_str = chain.invoke(
+        raw_output_str = chain.invoke(
             {
                 RESUME: self.resume,
                 JOB_APPLICATION_PROFILE: self.job_application_profile,
@@ -652,6 +659,7 @@ class GPTAnswerer:
                 OPTIONS: options,
             }
         )
+        output_str = self._clean_llm_output(raw_output_str)
         logger.debug(f"Raw output for options question: {output_str}")
         best_option = self.find_best_match(output_str, options)
         logger.debug(f"Best option determined: {best_option}")
@@ -665,7 +673,8 @@ class GPTAnswerer:
             prompts.resume_or_cover_letter_template
         )
         chain = prompt | self.llm_cheap | StrOutputParser()
-        response = chain.invoke({PHRASE: phrase})
+        raw_response = chain.invoke({PHRASE: phrase})
+        response = self._clean_llm_output(raw_response)
         logger.debug(f"Response for resume_or_cover: {response}")
         if "resume" in response:
             return "resume"
@@ -678,12 +687,13 @@ class GPTAnswerer:
         logger.info("Checking if job is suitable")
         prompt = ChatPromptTemplate.from_template(prompts.is_relavant_position_template)
         chain = prompt | self.llm_cheap | StrOutputParser()
-        output = chain.invoke(
+        raw_output = chain.invoke(
             {
                 RESUME: self.resume,
                 JOB_DESCRIPTION: self.job_description,
             }
-        ).replace("*", "")
+        )
+        output = self._clean_llm_output(raw_output)
         logger.debug(f"Job suitability output: {output}")
         score = re.search(r"Score: (\d+)", output).group(1)
         reasoning = re.search(r"Reasoning: (.+)", output, re.DOTALL).group(1)
