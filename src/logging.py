@@ -17,6 +17,7 @@ def remove_default_loggers():
     if os.path.exists("log/app.log"):
         os.remove("log/app.log")
 
+
 def init_loguru_logger():
     """Initialize and configure loguru logger."""
 

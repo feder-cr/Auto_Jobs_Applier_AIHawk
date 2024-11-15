@@ -4,6 +4,7 @@ from src.logging import logger
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
+
 def ensure_chrome_profile():
     logger.debug(f"Ensuring Chrome profile exists at path: {chromeProfilePath}")
     profile_dir = os.path.dirname(chromeProfilePath)
@@ -14,6 +15,7 @@ def ensure_chrome_profile():
         os.makedirs(chromeProfilePath)
         logger.debug(f"Created Chrome profile directory: {chromeProfilePath}")
     return chromeProfilePath
+
 
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
@@ -56,5 +58,3 @@ def chrome_browser_options():
         logger.debug("Using Chrome in incognito mode")
 
     return options
-
-

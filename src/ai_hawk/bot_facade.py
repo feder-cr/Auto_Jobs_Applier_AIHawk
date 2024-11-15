@@ -43,8 +43,20 @@ class AIHawkBotFacade:
         self.job_application_profile = job_application_profile
         self.resume = resume
         self.state.job_application_profile_set = True
+
+        # Pass job_application_profile to apply_component
+        self.apply_component.set_job_application_profile(job_application_profile)
+
         logger.debug("Job application profile and resume set successfully")
 
+    def set_secrets(self, email, password):
+        logger.debug("Setting secrets: email and password")
+        self._validate_non_empty(email, "Email")
+        self._validate_non_empty(password, "Password")
+        self.email = email
+        self.password = password
+        self.state.credentials_set = True
+        logger.debug("Secrets set successfully")
 
     def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
@@ -61,7 +73,6 @@ class AIHawkBotFacade:
         self._validate_non_empty(parameters, "Parameters")
         self.parameters = parameters
         self.apply_component.set_parameters(parameters)
-        self.state.credentials_set = True
         self.state.parameters_set = True
         logger.debug("Parameters set successfully")
 
@@ -77,12 +88,12 @@ class AIHawkBotFacade:
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
         self.apply_component.start_applying()
         logger.debug("Apply process started successfully")
-        
+
     def start_collect_data(self):
-        logger.debug("Starting collecting data process")
+        logger.debug("Starting data collection process")
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
         self.apply_component.start_collecting_data()
-        logger.debug("Collecting data process started successfully")
+        logger.debug("Data collection process started successfully")
 
     def _validate_non_empty(self, value, name):
         logger.debug(f"Validating that {name} is not empty")
