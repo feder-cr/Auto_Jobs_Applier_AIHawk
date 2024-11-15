@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import yaml
 
-from loguru import logger
+from src.logging import logger
 
 
 @dataclass
@@ -44,10 +44,9 @@ class LegalAuthorization:
     legally_allowed_to_work_in_canada: str
     requires_canada_sponsorship: str
     uk_work_authorization: str
-    requires_uk_visa: str 
+    requires_uk_visa: str
     legally_allowed_to_work_in_uk: str
     requires_uk_sponsorship: str
-
 
 
 @dataclass
@@ -80,6 +79,18 @@ class JobApplicationProfile:
     salary_expectations: SalaryExpectations
 
     def __init__(self, yaml_str: str):
+        """
+        Initializes the JobApplicationProfile with data parsed from a YAML string.
+
+        Args:
+            yaml_str (str): The YAML string containing the profile data.
+
+        Raises:
+            ValueError: If there is an error parsing the YAML string.
+            TypeError: If the YAML data is not a dictionary.
+            KeyError: If required fields are missing in the YAML data.
+            RuntimeError: If an unexpected error occurs during initialization.
+        """
         logger.debug("Initializing JobApplicationProfile with provided YAML string")
         try:
             data = yaml.safe_load(yaml_str)
@@ -99,14 +110,13 @@ class JobApplicationProfile:
         try:
             logger.debug("Processing personal_information")
             self.personal_information = PersonalInformation(**data['personal_information'])
-            logger.debug("personal_information processed: %s", self.personal_information)
+            logger.debug(f"personal_information processed: {self.personal_information}")
         except KeyError as e:
-            logger.error("Required field %s is missing in personal_information data.", e)
+            logger.error(f"Required field {e} is missing in personal_information data.")
             raise KeyError(f"Required field {e} is missing in personal_information data.") from e
         except TypeError as e:
-            logger.error("Error in personal_information data: %s", e)
+            logger.error(f"Error in personal_information data: {e}")
             raise TypeError(f"Error in personal_information data: {e}") from e
-
 
         # Process self_identification
         try:
@@ -148,7 +158,7 @@ class JobApplicationProfile:
         try:
             logger.debug("Processing work_preferences")
             self.work_preferences = WorkPreferences(**data['work_preferences'])
-            logger.debug(f"Work_preferences processed: {self.work_preferences}")
+            logger.debug(f"work_preferences processed: {self.work_preferences}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in work_preferences data.")
             raise KeyError(f"Required field {e} is missing in work_preferences data.") from e
@@ -166,7 +176,7 @@ class JobApplicationProfile:
         try:
             logger.debug("Processing availability")
             self.availability = Availability(**data['availability'])
-            logger.debug(f"Availability processed: {self.availability}")
+            logger.debug(f"availability processed: {self.availability}")
         except KeyError as e:
             logger.error(f"Required field {e} is missing in availability data.")
             raise KeyError(f"Required field {e} is missing in availability data.") from e
@@ -201,11 +211,24 @@ class JobApplicationProfile:
         logger.debug("JobApplicationProfile initialization completed successfully.")
 
     def __str__(self):
+        """
+        Returns a string representation of the JobApplicationProfile.
+
+        Returns:
+            str: The formatted string representation of the profile.
+        """
         logger.debug("Generating string representation of JobApplicationProfile")
-        return "\n\n".join([
-            f"Self Identification:\n{self.self_identification}",
-            f"Legal Authorization:\n{self.legal_authorization}",
-            f"Work Preferences:\n{self.work_preferences}",
-            f"Availability: {self.availability.notice_period}",
-            f"Salary Expectations: {self.salary_expectations.salary_range_usd}"
-        ])
+
+        def format_dataclass(obj):
+            return "\n".join(f"{field.name}: {getattr(obj, field.name)}" for field in obj.__dataclass_fields__.values())
+
+        formatted_str = (
+            f"Personal Information:\n{format_dataclass(self.personal_information)}\n\n"
+            f"Self Identification:\n{format_dataclass(self.self_identification)}\n\n"
+            f"Legal Authorization:\n{format_dataclass(self.legal_authorization)}\n\n"
+            f"Work Preferences:\n{format_dataclass(self.work_preferences)}\n\n"
+            f"Availability:\n{format_dataclass(self.availability)}\n\n"
+            f"Salary Expectations:\n{format_dataclass(self.salary_expectations)}\n"
+        )
+        logger.debug(f"String representation generated: {formatted_str}")
+        return formatted_str

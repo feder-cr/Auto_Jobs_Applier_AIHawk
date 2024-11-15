@@ -1,3 +1,7 @@
+# application files and logs
+/generated_cv
+/log/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,6 +9,7 @@ __pycache__/
 
 # C extensions
 *.so
+
 
 # Distribution / packaging
 .Python
@@ -27,13 +32,16 @@ share/python-wheels/
 *.egg
 MANIFEST
 chrome_profile/*
-data_folder/*
+data_folder/output/*
 answers.json
 # PyInstaller
 # Usually these files are written by a python script from a template
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+.venv
+.pytest_cache
+virtual
 
 # Installer logs
 pip-log.txt
@@ -115,9 +123,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# GitHub
-.github/
-
 # MacOS
 .DS_Store
 
@@ -156,5 +161,4 @@ venv.bak/
 # Mono Auto Generated Files
 mono_crash.*
 
-/generated_cv
-data_folder/secrets.yaml
+job_applications/

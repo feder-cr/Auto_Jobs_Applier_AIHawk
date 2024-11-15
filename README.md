@@ -1,50 +1,34 @@
+<a name="top"></a>
 <div align="center">
 <img src="./assets/AIHawk.png">
 
 <!-- At first glance, the branding and messaging clearly conveys what to expect -->
 
-
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
- 
-  [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:federico.elia.majo@gmail.com)
 
-  # Auto_Jobs_Applier_AIHawk
+# Auto_Jobs_Applier_AIHawk
+
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
-  #### 🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.
+**🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
 
+Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/mMZcMTH9K6) (for Open Source contributors)
 
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity)
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
 
-<br />
-
-<!-- Message Clarity -->
-## 🚀 Join the AIHawk Community 🚀 
-
-Connect with like-minded individuals and get the most out of AIHawk.
-
-💡 **Get support:** Ask questions, troubleshoot issues, and find solutions.
-
-🗣️ **Share knowledge:** Share your experiences, tips, and best practices.
-
-🤝 **Network:** Connect with other professionals and explore new opportunities.
-
-🔔 **Stay updated:** Get the latest news and updates on AIHawk.
-
-<!-- Strong Call to Action -->
-### Join Now 👇
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
-)](https://t.me/AIhawkCommunity)
-
-<!-- 🚀 **Join Our Telegram Community!** 🚀
-
-Join our **Telegram community** for:
-- **Support with AIHawk software**
-- **Share your experiences** with AIhawk and learn from others
-- **Job search tips** and **resume advice**
-- **Idea exchange** and resources for your projects
-
-<-- **[Join now!](https://t.me/AIhawkCommunity)** -->
 </div>
+
+**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of Ai Hawk </br>
+As AI Hawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
+
+**Project Maintainers / Leads**: [surapuramakhil](https://github.com/surapuramakhil), [sarob](https://github.com/sarob), [cjbbb](https://github.com/cjbbb)
+
+We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and buidling better version of this product.
+
+reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/mMZcMTH9K6). [Special thanks](#special-thanks) 
+
+Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk a powerful tool for job seekers worldwide.
 
 ## Table of Contents
 
@@ -107,7 +91,8 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 
 ## Installation
 
-**Confirmed succesfull runs on the following:**
+**Confirmed successful runs on the following:**
+
 - Operating Systems:
   - Windows 10
   - Ubuntu 22
@@ -115,6 +100,8 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
   - 3.10
   - 3.11.9(64b)
   - 3.12.5(64b)
+
+### Option 1: Using Python Virtual Environment 
 
 1. **Download and Install Python:**
 
@@ -128,6 +115,7 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
 
 3. **Clone the repository:**
+
    ```bash
    git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
    
@@ -135,6 +123,7 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    ```
 
 4. **Activate virtual environment:**
+
    ```bash
    python3 -m venv virtual
    ```
@@ -144,41 +133,54 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    ```
 
    or for Windows-based machines -
+
    ```bash
    .\virtual\Scripts\activate
    ```
 
 5. **Install the required packages:**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-6. **Copy example files in data_folder for configuration:**
+### Option 2: Using Conda 
+
+1. **Install Conda:**
+   - Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html)
+   - Or install Anaconda from the [Anaconda website](https://www.anaconda.com/download)
+
+2. **Create and activate conda environment:**
    ```bash
-   cp data_folder_example/*.yaml data_folder/
+   # Create new environment
+   conda create -n aihawk python=3.11
+
+   # Activate environment
+   conda activate aihawk
    ```
+
+3. **Clone the repository:**
+   ```bash
+   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+   cd Auto_Jobs_Applier_AIHawk
+   ```
+
+4. **Install dependencies:**
+   ```bash
+   # Install from requirements.txt
+   pip install -r requirements.txt
+   ```
+ 
 
 ## Configuration
 
-
-### 0. Data Folder
-
-The `data_folder` directory contains all the files necessary for the bot to operate. This folder should be structured as follows:
-  
-  ```bash
-  data_folder/
-  ├── config.yaml
-  ├── plain_text_resume.yaml
-  └── secrets.yaml
-  ```
-  Examples of each file are provided in the `data_folder_example` directory.
 ### 1. secrets.yaml
 
 This file contains sensitive information. Never share or commit this file to version control.
 
 - `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key]`
   - Replace with your OpenAI API key for GPT integration
-  - To obtain an API key, follow the tutorial at: https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327
+  - To obtain an API key, follow the tutorial at: <https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327>
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
   - According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
     `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
@@ -187,27 +189,36 @@ This file contains sensitive information. Never share or commit this file to ver
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
-
-### 2. config.yaml
+### 2. work_preferences.yaml
 
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
 - `remote: [true/false]`
+
   - Set to `true` to include remote jobs, `false` to exclude them
 
-- `experienceLevel:`
+- `hybrid: [true/false]`
+
+  - Set to `true` to include hybrid jobs, `false` to exclude them
+
+- `onsite: [true/false]`
+
+  - Set to `true` to include onsite jobs, `false` to exclude them
+
+- `experience_level:`
+
   - Set desired experience levels to `true`, others to `false`
 
-- `jobTypes:`
+- `job_types:`
   - Set desired job types to `true`, others to `false`
 
 - `date:`
   - Choose one time range for job postings by setting it to `true`, others to `false`
 
-
 - `positions:`
   - List job titles you're interested in, one per line
   - Example:
+
     ```yaml
     positions:
       - Software Developer
@@ -217,11 +228,13 @@ This file defines your job search parameters and bot behavior. Each section cont
 - `locations:`
   - List locations you want to search in, one per line
   - Example:
+
     ```yaml
     locations:
       - Italy
       - London
     ```
+
 - `apply_once_at_company: [True/False]`
   - Set to `True` to apply only once per company, `False` to allow multiple applications per company
 
@@ -232,6 +245,7 @@ This file defines your job search parameters and bot behavior. Each section cont
 - `companyBlacklist:`
   - List companies you want to exclude from your search, one per line
   - Example:
+
     ```yaml
     companyBlacklist:
       - Company X
@@ -241,28 +255,30 @@ This file defines your job search parameters and bot behavior. Each section cont
 - `titleBlacklist:`
   - List keywords in job titles you want to avoid, one per line
   - Example:
+
     ```yaml
     titleBlacklist:
       - Sales
       - Marketing
     ```
-#### 2.1 config.yaml - Customize LLM model endpoint
 
-- `llm_model_type`:
+#### 2.1 config.py - Customize LLM model endpoint
+
+- `LLM_MODEL_TYPE`:
   - Choose the model type, supported: openai / ollama / claude / gemini
-- `llm_model`: 
-  - Choose the LLM model, currently supported: 
+- `LLM_MODEL`:
+  - Choose the LLM model, currently supported:
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
-    - claude: any model 
+    - claude: any model
     - gemini: any model
-- `llm_api_url`: 
+- `LLM_API_URL`:
   - Link of the API endpoint for the LLM model
-    - openai: https://api.pawan.krd/cosmosrp/v1
-    - ollama: http://127.0.0.1:11434/
-    - claude: https://api.anthropic.com/v1
-    - gemini: no api_url
- - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
+    - openai: <https://api.pawan.krd/cosmosrp/v1>
+    - ollama: <http://127.0.0.1:11434/>
+    - claude: <https://api.anthropic.com/v1>
+    - gemini: <https://aistudio.google.com/app/apikey>
+- Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
 
@@ -278,12 +294,14 @@ Each section has specific fields to fill out:
     - **country**: The country where you currently reside.
     - **city**: The city where you currently live.
     - **address**: Your full address, including street and number.
+    - **zip_code**: Your postal/ZIP code.
     - **phone_prefix**: The international dialing code for your phone number (e.g., +1 for the USA, +44 for the UK).
     - **phone**: Your phone number without the international prefix.
     - **email**: Your primary email address.
     - **github**: URL to your GitHub profile, if applicable.
     - **linkedin**: URL to your LinkedIn profile, if applicable.
   - Example
+
   ```yaml
   personal_information:
     name: "Jane"
@@ -292,6 +310,7 @@ Each section has specific fields to fill out:
     country: "USA"
     city: "New York"
     address: "123 Main St"
+    zip_code: "520123"
     phone_prefix: "+1"
     phone: "5551234567"
     email: "jane.doe@example.com"
@@ -310,6 +329,7 @@ Each section has specific fields to fill out:
     - **exam**: A list of courses or subjects taken along with their respective grades.
 
   - Example:
+
   ```yaml
   education_details:
     - education_level: "Bachelor's Degree"
@@ -330,13 +350,14 @@ Each section has specific fields to fill out:
   - This section details your work experience, including job roles, companies, and key responsibilities.
     - **position**: Your job title or role.
     - **company**: The name of the company or organization where you worked.
-    - **employment_period**: The timeframe during which you were employed in the role (e.g., MM/YYYY - MM/YYYY).
+    - **employment_period**: The timeframe during which you were employed in the role, using the format MM/YYYY - MM/YYYY.
     - **location**: The city and country where the company is located.
     - **industry**: The industry or field in which the company operates.
-    - **key_responsibilities**: A list of major responsibilities or duties you had in the role.
-    - **skills_acquired**: Skills or expertise gained through this role.
+    - **key_responsibilities**: A list of major responsibilities or duties you had in the role, e.g. responsibility: "Developed web applications using React and Node.js".
+    - **skills_acquired**: Skills or expertise gained through this role, e.g. "React".
 
   - Example:
+
   ```yaml
   experience_details:
     - position: "Software Developer"
@@ -345,9 +366,9 @@ Each section has specific fields to fill out:
       location: "San Francisco, CA"
       industry: "Technology"
       key_responsibilities:
-        - "Developed web applications using React and Node.js"
-        - "Collaborated with cross-functional teams to design and implement new features"
-        - "Troubleshot and resolved complex software issues"
+        - responsibility: "Developed web applications using React and Node.js"
+        - responsibility: "Collaborated with cross-functional teams to design and implement new features"
+        - responsibility: "Troubleshot and resolved complex software issues"
       skills_acquired:
         - "React"
         - "Node.js"
@@ -360,7 +381,8 @@ Each section has specific fields to fill out:
     - **description**: A brief summary of what the project involves or its purpose.
     - **link**: URL to the project, if available (e.g., GitHub repository, website).
 
-   - Example:
+  - Example:
+
     ```yaml
     projects:
       - name: "Weather App"
@@ -377,6 +399,7 @@ Each section has specific fields to fill out:
     - **description**: A brief explanation of the achievement and its significance.
 
   - Example:
+
   ```yaml
   achievements:
     - name: "Employee of the Month"
@@ -387,10 +410,11 @@ Each section has specific fields to fill out:
 
 - `certifications:`
   - Include any professional certifications you have earned.
-      - name: "PMP"  
+    - name: "PMP"  
       description: "Certification for project management professionals, issued by the Project Management Institute (PMI)"
 
   - Example:
+
   ```yaml
   certifications:
     - "Certified Scrum Master"
@@ -403,6 +427,7 @@ Each section has specific fields to fill out:
     - **proficiency**: Your level of proficiency (e.g., Native, Fluent, Intermediate).
 
   - Example:
+
   ```yaml
   languages:
     - language: "English"
@@ -417,6 +442,7 @@ Each section has specific fields to fill out:
     - **interest**: A list of interests or hobbies.
 
   - Example:
+
   ```yaml
   interests:
     - "Machine Learning"
@@ -431,6 +457,7 @@ Each section has specific fields to fill out:
     - **notice_period**: The amount of time required before you can start a new role (e.g., "2 weeks", "1 month").
 
   - Example:
+
   ```yaml
   availability:
     notice_period: "2 weeks"
@@ -441,6 +468,7 @@ Each section has specific fields to fill out:
     - **salary_range_usd**: The salary range you are expecting, expressed in USD.
 
   - Example:
+
   ```yaml
   salary_expectations:
     salary_range_usd: "80000 - 100000"
@@ -455,6 +483,7 @@ Each section has specific fields to fill out:
     - **ethnicity**: Your ethnicity.
 
   - Example:
+
   ```yaml
   self_identification:
     gender: "Female"
@@ -483,8 +512,8 @@ Each section has specific fields to fill out:
     - **legally_allowed_to_work_in_uk**: Whether you are legally allowed to work in the United Kingdom (Yes/No).
     - **requires_uk_sponsorship**: Whether you require sponsorship to work in the United Kingdom (Yes/No).
 
-
   - Example:
+
      ```yaml
     legal_authorization:
     eu_work_authorization: "Yes"
@@ -503,7 +532,7 @@ Each section has specific fields to fill out:
     requires_uk_visa: "No"
     legally_allowed_to_work_in_uk: "Yes"
     requires_uk_sponsorship: "No"
-     ```
+    ```
 
 - `work_preferences:`
   - Specify your preferences for work arrangements and conditions.
@@ -515,6 +544,7 @@ Each section has specific fields to fill out:
     - **willing_to_undergo_background_checks**: Whether you are willing to undergo background checks (Yes/No).
 
   - Example:
+
   ```yaml
   work_preferences:
     remote_work: "Yes"
@@ -539,7 +569,7 @@ Inside this folder, you'll find example versions of the key files:
 
 These files are already populated with fictitious but realistic data. They show you the correct format and type of information to enter in each file.
 
-#### Usage
+#### Using the data_folder_example
 
 Using this folder as a guide can be particularly helpful for:
 
@@ -547,16 +577,26 @@ Using this folder as a guide can be particularly helpful for:
 2. Seeing examples of valid data for each field
 3. Having a reference point while filling out your personal files
 
-
 ## Usage
+
 0. **Account language**
    To ensure the bot works, your account language must be set to English.
-   
-2. **Data Folder:**
+
+1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
    - `config.yaml`
    - `plain_text_resume.yaml`
+
+2. **Output Folder:**
+    Contains the output of the bot.
+    - `data.json` results of the --collect mode
+    - `failed.json` failed applications
+    - `open_ai_calls.json` all the calls made to the LLM model
+    - `skipped.json` applications that were skipped
+    - `success.json` successful applications
+
+    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
 
 3. **Run the Bot:**
 
@@ -564,26 +604,36 @@ Using this folder as a guide can be particularly helpful for:
 
 - **Dynamic Resume Generation:**
   If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
+
    ```bash
    python main.py
    ```
+
 - **Using a Specific Resume:**
   If you want to use a specific PDF resume for all applications, place your resume PDF in the `data_folder` directory and run the bot with the `--resume` option:
+
   ```bash
   python main.py --resume /path/to/your/resume.pdf
   ```
 
+- **Using the colled mode:**
+  If you want to collect job data only to perform any type of data analytics you can use the bot with the `--collect` option. This will store in output/data.json file all data found from linkedin jobs offers.
 
-### Troubleshooting Common Issues
+  ```bash
+  python main.py --collect
+  ```
+
+### Troubleshooting
 
 #### 1. OpenAI API Rate Limit Errors
 
 **Error Message:**
 
-openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: <https://platform.openai.com/docs/guides/error-codes/api-errors>.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
 
 **Solution:**
-- Check your OpenAI API billing settings at https://platform.openai.com/account/billing
+
+- Check your OpenAI API billing settings at <https://platform.openai.com/account/billing>
 - Ensure you have added a valid payment method to your OpenAI account
 - Note that ChatGPT Plus subscription is different from API access
 - If you've recently added funds or upgraded, wait 12-24 hours for changes to take effect
@@ -596,6 +646,7 @@ openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded you
 Exception: No clickable 'Easy Apply' button found
 
 **Solution:**
+
 - Ensure that you're logged properly
 - Check if the job listings you're targeting actually have the "Easy Apply" option
 - Verify that your search parameters in the `config.yaml` file are correct and returning jobs with the "Easy Apply" button
@@ -606,6 +657,7 @@ Exception: No clickable 'Easy Apply' button found
 **Issue:** Bot provides inaccurate data for experience, CTC, and notice period
 
 **Solution:**
+
 - Update prompts for professional experience specificity
 - Add fields in `config.yaml` for current CTC, expected CTC, and notice period
 - Modify bot logic to use these new config fields
@@ -617,6 +669,7 @@ Exception: No clickable 'Easy Apply' button found
 yaml.scanner.ScannerError: while scanning a simple key
 
 **Solution:**
+
 - Copy example `config.yaml` and modify gradually
 - Ensure proper YAML indentation and spacing
 - Use a YAML validator tool
@@ -627,6 +680,7 @@ yaml.scanner.ScannerError: while scanning a simple key
 **Issue:** Bot searches for jobs but continues scrolling without applying
 
 **Solution:**
+
 - Check for security checks or CAPTCHAs
 - Verify `config.yaml` job search parameters
 - Ensure your account profile meets job requirements
@@ -641,61 +695,70 @@ yaml.scanner.ScannerError: while scanning a simple key
 
 For further assistance, please create an issue on the [GitHub repository](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues) with detailed information about your problem, including error messages and your configuration (with sensitive information removed).
 
-**Answer Editor and Cleaner**
+## Documentation
 
-See ANSWERS_UTILS.md for more information on the Answer Editor and Cleaner.
+### For Users
 
-## Setup Documents
+- Ollama & Gemini Setup
+  - To install and configure **Ollama** and **Gemini**, [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+  - Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-### Ollama & Gemini Setup
+- Editing YAML Files
+  - For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
+  - [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-To install and configure **Ollama** and **Gemini**, please refer to the following documents:
+- Auto-start AIHawk
+  - To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
+  - [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-- [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
+- Video Tutorial
+  - [How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
-Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
-
-
-### Editing YAML Files
-For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
-
-- [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
-
-### Auto-start AIHawk
-To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
-
-- [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
-
-Navigate to the docs/ directory and download the PDF guides you need.
-
-Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
-
-### Additional Resources
-
-- [Video Tutorial: How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
 - [OpenAI API Documentation](https://platform.openai.com/docs/)
+
+### For Developers
+
+- [Contribution Guidelines](CONTRIBUTING.md)
+
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
+- [Workflow diagrams](docs/workflow_diagrams.md)
 
-If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
+- If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
   I'll be more than happy to assist you!
+
+- Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features make it into the main branch.
 
 ## Conclusion
 
 Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, Auto_Jobs_Applier_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
 
-## Contributors
+## Star History
 
-- [feder-cr](https://github.com/feder-cr) - Creator and Lead Developer
+[![Star History Chart](https://api.star-history.com/svg?repos=feder-cr/Auto_Jobs_Applier_AIHawk&type=Date)](https://star-history.com/#feder-cr/Auto_Jobs_Applier_AIHawk&Date)
 
-Auto_Jobs_Applier_AIHawk is still in beta, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk an even more powerful tool for job seekers worldwide.
+If you like the project please star ⭐ the repository!
 
+## Special Thanks
+[![Contributors](https://img.shields.io/github/contributors/feder-cr/Auto_Jobs_Applier_AIHawk)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/graphs/contributors)
+
+<a href="https://github.com/AIHawk-co/Auto_Jobs_Applier/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=AIHawk-co/Auto_Jobs_Applier" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the  MIT + Commons Clause License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-This tool, Auto_Jobs_Applier_AIHawk, is intended for educational purposes only. The creator assumes no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
 
+This tool, Auto_Jobs_Applier_AIHawk, is intended for use at your own risk. The creators / maintainers / contributors assume no responsibility for any consequences arising from its use. Users are advised to comply with the terms of service of relevant platforms and adhere to all applicable laws, regulations, and ethical guidelines. The use of automated tools for job applications may carry risks, including potential impacts on user accounts. Proceed with caution and at your own discretion.
+
+[Back to top 🚀](#top)
