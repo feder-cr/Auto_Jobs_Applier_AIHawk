@@ -101,8 +101,6 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
   - 3.11.9(64b)
   - 3.12.5(64b)
 
-### Option 1: Using Python Virtual Environment 
-
 1. **Download and Install Python:**
 
    Ensure you have the last Python version  installed. If not, download and install it from Python's official website. For detailed instructions, refer to the tutorials:
@@ -144,34 +142,6 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
-### Option 2: Using Conda 
-
-1. **Install Conda:**
-   - Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html)
-   - Or install Anaconda from the [Anaconda website](https://www.anaconda.com/download)
-
-2. **Create and activate conda environment:**
-   ```bash
-   # Create new environment
-   conda create -n aihawk python=3.11
-
-   # Activate environment
-   conda activate aihawk
-   ```
-
-3. **Clone the repository:**
-   ```bash
-   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
-   cd Auto_Jobs_Applier_AIHawk
-   ```
-
-4. **Install dependencies:**
-   ```bash
-   # Install from requirements.txt
-   pip install -r requirements.txt
-   ```
- 
-
 ## Configuration
 
 ### 1. secrets.yaml
@@ -189,7 +159,7 @@ This file contains sensitive information. Never share or commit this file to ver
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
-### 2. work_preferences.yaml
+### 2. config.yaml
 
 This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
 
@@ -199,17 +169,17 @@ This file defines your job search parameters and bot behavior. Each section cont
 
 - `hybrid: [true/false]`
 
-  - Set to `true` to include hybrid jobs, `false` to exclude them
+  - Set to `true` to include remote jobs, `false` to exclude them
 
 - `onsite: [true/false]`
 
-  - Set to `true` to include onsite jobs, `false` to exclude them
+  - Set to `true` to include remote jobs, `false` to exclude them
 
-- `experience_level:`
+- `experienceLevel:`
 
   - Set desired experience levels to `true`, others to `false`
 
-- `job_types:`
+- `jobTypes:`
   - Set desired job types to `true`, others to `false`
 
 - `date:`
@@ -262,17 +232,17 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Marketing
     ```
 
-#### 2.1 config.py - Customize LLM model endpoint
+#### 2.1 config.yaml - Customize LLM model endpoint
 
-- `LLM_MODEL_TYPE`:
+- `llm_model_type`:
   - Choose the model type, supported: openai / ollama / claude / gemini
-- `LLM_MODEL`:
+- `llm_model`:
   - Choose the LLM model, currently supported:
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
     - claude: any model
     - gemini: any model
-- `LLM_API_URL`:
+- `llm_api_url`:
   - Link of the API endpoint for the LLM model
     - openai: <https://api.pawan.krd/cosmosrp/v1>
     - ollama: <http://127.0.0.1:11434/>
