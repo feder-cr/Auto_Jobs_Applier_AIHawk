@@ -8,7 +8,7 @@
 - [Branch Rules](#branch-rules)
 - [Version Control](#version-control)
 - [Release Process](#release-process)
-- [Roles](#roles) 
+- [Roles](#roles)
 - [Pull Request Process](#pull-request-process)
 - [Code Style Guidelines](#code-style-guidelines)
 - [Development Setup](#development-setup)
@@ -169,18 +169,28 @@ gantt
 
 ## Code Style Guidelines
 
-- Follow PEP 8 standards for Python code
+- Follow PEP 8 standards for Python code using ruff-format
+- Do not allow lines over 120 characters unless necessary
 - Include docstrings for new functions and classes
 - Add comments for complex logic
 - Maintain consistent naming conventions
 - Security best practices
 - Any performance considerations
+- Keep all imports at the top of files
+- Use ruff or pylint for linting and do not ignore errors or warnings in your changes
+- Use `raise` sparingly and never raise base exceptions and errors
+- Use pre-commit to make better commits
 
 ## Development Setup
 
 1. Clone the repository
 2. Install dependencies from requirements.txt
 3. Set up necessary API keys and configurations
+4. Set up pre-commit
+
+```bash
+pre-commit install
+```
 
 ## Testing
 
