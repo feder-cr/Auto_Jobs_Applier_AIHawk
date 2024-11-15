@@ -28,10 +28,10 @@ date:
 positions:
   - Software engineer
 
-# One or more keywords to look for in the job description, for example, "chromium browser"
+# One or more keywords to look for in the job description, for example, "chromium browser". This field is optional.
 # Only use this field to find jobs that require specific technologies, products, or skills that is not mentioned in the job title.
 # Warning: Any jobs without matching keywords in the job description will be skipped.
-job_description_keywords:
+job_description_keywords_whitelist:
 
 locations:
   - Germany

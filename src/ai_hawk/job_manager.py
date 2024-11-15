@@ -60,7 +60,7 @@ class AIHawkJobManager:
         self.apply_once_at_company = parameters.get('apply_once_at_company', False)
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
-        self.job_description_keywords = parameters.get('job_description_keywords', []) or []
+        self.job_description_keywords_whitelist = parameters.get('job_description_keywords_whitelist', []) or []
 
         job_applicants_threshold = parameters.get('job_applicants_threshold', {})
         self.min_applicants = job_applicants_threshold.get('min_applicants', 0)
@@ -383,12 +383,12 @@ class AIHawkJobManager:
                 continue
             
             # Add the new keyword check
-            if hasattr(self, 'job_description_keywords') and self.job_description_keywords:
+            if hasattr(self, 'job_description_keywords_whitelist') and self.job_description_keywords_whitelist:
                 try:
                     # Navigate to the job's page
                     self.driver.get(job.link)
                     
-                    if not self._check_job_description_keywords():
+                    if not self._check_job_description_keywords_whitelist():
                         logger.debug(f"Job description keywords not found for {job.title} at {job.company}")
                         self.write_to_file(job, "skipped")
                         continue
@@ -561,14 +561,14 @@ class AIHawkJobManager:
                 
         return False
 
-    def _check_job_description_keywords(self):
+    def _check_job_description_keywords_whitelist(self):
         """
         Check if job description contains any of the specified keywords.
         
         Returns:
             bool: True if any keyword is found in description, False otherwise
         """
-        logger.debug(f"Checking job description for keywords: {self.job_description_keywords}")
+        logger.debug(f"Checking job description for keywords: {self.job_description_keywords_whitelist}")
         try:
             # Wait for job description to load
             description_element = WebDriverWait(self.driver, 10).until(
@@ -590,7 +590,7 @@ class AIHawkJobManager:
             description_text = description_element.text.lower()
             
             # Check if any keyword exists in the description
-            for keyword in self.job_description_keywords:
+            for keyword in self.job_description_keywords_whitelist:
                 if keyword.lower() in description_text:
                     logger.debug(f"Found keyword '{keyword}' in job description")
                     return True
