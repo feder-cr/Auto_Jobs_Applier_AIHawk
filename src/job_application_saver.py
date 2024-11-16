@@ -3,10 +3,9 @@ import os
 import shutil
 from dataclasses import asdict
 
-from job import Job
-from job_application import JobApplication
-
 from config import JOB_APPLICATIONS_DIR
+from src.job import Job
+from src.job_application import JobApplication
 from src.logging import logger
 
 # Base directory where all applications will be saved

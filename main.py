@@ -5,10 +5,6 @@ from typing import Optional
 
 import click
 import yaml
-from ai_hawk.authenticator import get_authenticator
-from ai_hawk.bot_facade import AIHawkBotFacade
-from ai_hawk.job_manager import AIHawkJobManager
-from ai_hawk.llm.llm_manager import GPTAnswerer
 from lib_resume_builder_AIHawk import (
     FacadeManager,
     Resume,
@@ -21,6 +17,10 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
 from constants import PLAIN_TEXT_RESUME_YAML, SECRETS_YAML, WORK_PREFERENCES_YAML
+from src.ai_hawk.authenticator import get_authenticator
+from src.ai_hawk.bot_facade import AIHawkBotFacade
+from src.ai_hawk.job_manager import AIHawkJobManager
+from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from src.job_application_profile import JobApplicationProfile
 from src.logging import logger
 from src.utils.chrome_utils import chrome_browser_options

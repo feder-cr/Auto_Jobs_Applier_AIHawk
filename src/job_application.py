@@ -1,4 +1,4 @@
-from job import Job
+from src.job import Job
 
 
 class JobApplication:

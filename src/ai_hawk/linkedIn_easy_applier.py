@@ -7,11 +7,7 @@ import time
 import traceback
 from typing import Any, List, Optional, Tuple
 
-import utils.time_utils
 from httpx import HTTPStatusError
-from job_application import JobApplication
-from job_application_saver import ApplicationSaver
-from jobContext import JobContext
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
@@ -22,12 +18,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from utils import browser_utils
 
-import src.utils as utils
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from src.job import Job
+from src.job_application import JobApplication
+from src.job_application_saver import ApplicationSaver
+from src.job_context import JobContext
 from src.logging import logger
+from src.utils import browser_utils, time_utils
 
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
@@ -133,7 +131,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        utils.time_utils.medium_sleep()
+        time_utils.medium_sleep()
         self.check_for_premium_redirect(job_context)
 
         try:
@@ -332,13 +330,13 @@ class AIHawkEasyApplier:
         if "submit application" in button_text:
             logger.debug("Submit button found, submitting application")
             self._unfollow_company()
-            utils.time_utils.short_sleep()
+            time_utils.short_sleep()
             next_button.click()
-            utils.time_utils.short_sleep()
+            time_utils.short_sleep()
             return True
-        utils.time_utils.short_sleep()
+        time_utils.short_sleep()
         next_button.click()
-        utils.time_utils.medium_sleep()
+        time_utils.medium_sleep()
         self._check_for_errors()
 
     def _unfollow_company(self) -> None:
@@ -362,9 +360,9 @@ class AIHawkEasyApplier:
         logger.debug("Discarding application")
         try:
             self.driver.find_element(By.CLASS_NAME, "artdeco-modal__dismiss").click()
-            utils.time_utils.medium_sleep()
+            time_utils.medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, "artdeco-modal__confirm-dialog-btn")[0].click()
-            utils.time_utils.medium_sleep()
+            time_utils.medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard application: {e}")
 
@@ -372,9 +370,9 @@ class AIHawkEasyApplier:
         logger.debug("Application not completed. Saving job to My Jobs, In Progess section")
         try:
             self.driver.find_element(By.CLASS_NAME, "artdeco-modal__dismiss").click()
-            utils.time_utils.medium_sleep()
+            time_utils.medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, "artdeco-modal__confirm-dialog-btn")[1].click()
-            utils.time_utils.medium_sleep()
+            time_utils.medium_sleep()
         except Exception as e:
             logger.error(f"Failed to save application process: {e}")
 

@@ -8,7 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
-import ai_hawk.llm.prompts as prompts
 import httpx
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage
@@ -20,6 +19,7 @@ from Levenshtein import distance
 from loguru import logger
 
 import config as cfg
+import src.ai_hawk.llm.prompts as prompts
 from config import JOB_SUITABILITY_SCORE
 from constants import (
     AIML,

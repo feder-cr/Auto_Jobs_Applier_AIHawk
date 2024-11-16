@@ -7,18 +7,18 @@ import urllib.parse
 from itertools import product
 from pathlib import Path
 
-import utils.browser_utils as browser_utils
-import utils.time_utils
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from inputimeout import TimeoutOccurred, inputimeout
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
+import src.utils.browser_utils as browser_utils
+import src.utils.time_utils
 from config import (
     JOB_MAX_APPLICATIONS,
     JOB_MIN_APPLICATIONS,
     MINIMUM_WAIT_TIME_IN_SECONDS,
 )
+from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from src.job import Job
 from src.logging import logger
 from src.regex_utils import generate_regex_patterns_for_blacklisting
@@ -104,7 +104,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     logger.info(f"Going to job page {job_page_number}", color="yellow")
                     self.next_job_page(position, location_url, job_page_number)
-                    utils.time_utils.medium_sleep()
+                    src.utils.time_utils.medium_sleep()
                     logger.info("Starting the collecting process for this page", color="yellow")
                     self.read_jobs()
                     logger.info("Collecting data on this page has been completed!", color="yellow")
@@ -154,7 +154,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     logger.debug(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    utils.time_utils.medium_sleep()
+                    src.utils.time_utils.medium_sleep()
                     logger.debug("Starting the application process for this page...")
 
                     try:
