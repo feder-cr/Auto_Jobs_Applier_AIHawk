@@ -1,5 +1,5 @@
 # In this file, you can set the configurations of the app.
-import constants  # Do not import individual constants - this adds tech debt
+import constants
 
 # config related to logging must have prefix LOG_
 LOG_LEVEL = constants.DEBUG
