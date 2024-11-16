@@ -1,16 +1,16 @@
 import os
+
 from loguru import logger
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
-from src.webdrivers.base_browser import Browser, BrowserType
+from src.webdrivers.base_browser import Browser
 
-chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
 
 class Chrome(Browser):
     """Chrome browser implementation"""
-    browser_type: BrowserType = BrowserType.CHROME
+    browser_type: str = "chrome"
 
     def create_options(self) -> webdriver.ChromeOptions:
         """Create Chrome-specific options"""

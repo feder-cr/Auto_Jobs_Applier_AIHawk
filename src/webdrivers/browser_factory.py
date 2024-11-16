@@ -4,14 +4,12 @@ from selenium import webdriver
 from loguru import logger
 
 from config import BROWSER_TYPE_CONFIG
-from src.webdrivers.base_browser import BrowserType
-from src.webdrivers.chrome import Chrome
-from src.webdrivers.firefox import Firefox
+from src.webdrivers.browser_type import BrowserType
+
 
 class BrowserFactory:
     """Factory class for creating browser instances"""
     _browser_type: BrowserType = BROWSER_TYPE_CONFIG
-
     @classmethod
     def get_browser_type(cls) -> BrowserType:
         """Get current browser type"""
@@ -19,6 +17,7 @@ class BrowserFactory:
 
     @classmethod
     def set_browser_type(cls, browser_type: BrowserType) -> None:
+        """Set browser type"""
         # safety check additional to type check.
         if browser_type not in BrowserType:
             raise ValueError(f"Unsupported browser type: {browser_type}")
@@ -36,7 +35,9 @@ class BrowserFactory:
         Raises:
             RuntimeError: If browser initialization fails
         """
-        
-        browser = browser_type()
+        if cls._browser_type not in BrowserType:
+            raise ValueError("Unsupported browser type: {cls._browser_type}")
+
+        browser = cls._browser_type.value()
 
         return browser.create_driver()

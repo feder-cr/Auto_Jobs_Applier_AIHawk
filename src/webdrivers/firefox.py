@@ -1,17 +1,14 @@
-import os
-
 from loguru import logger
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.firefox import GeckoDriverManager
 
-from src.webdrivers.base_browser import Browser, BrowserType
+from src.webdrivers.base_browser import Browser
 
-firefoxProfilePath = os.path.join(os.getcwd(), "firefox_profile", "linkedin_profile")
 
 class Firefox(Browser):
     """Firefox browser implementation"""
-    browser_type: BrowserType = BrowserType.FIREFOX
+    browser_type: str = "firefox"
 
     def create_options(self) -> webdriver.FirefoxOptions:
         """Create Firefox-specific options"""

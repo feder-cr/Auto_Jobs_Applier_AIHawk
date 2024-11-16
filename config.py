@@ -1,7 +1,7 @@
 # In this file, you can set the configurations of the app.
 
 from constants import DEBUG, LLM_MODEL, OPENAI
-from src.webdrivers.base_browser import BrowserType
+from src.webdrivers.browser_type import BrowserType
 
 #config related to logging must have prefix LOG_
 LOG_LEVEL = DEBUG

@@ -5,7 +5,8 @@ import time
 from unittest import mock
 from selenium.webdriver.remote.webelement import WebElement
 from src.utils.browser_utils import  is_scrollable, scroll_slow
-from src.webdrivers.base_browser import BrowserType, BrowserProfile
+from src.webdrivers.base_browser import BrowserProfile
+from src.webdrivers.browser_type import BrowserType
 from src.webdrivers.chrome import Chrome
 from src.webdrivers.firefox import Firefox
 
@@ -20,8 +21,8 @@ def test_ensure_browser_profiles(mocker):
     mocker.patch("os.makedirs")  # Mock making directories
 
     # Call the function
-    chrome_profile_path = BrowserProfile(BrowserType.CHROME).ensure_profile_exists()
-    firefox_profile_path = BrowserProfile(BrowserType.FIREFOX).ensure_profile_exists()
+    chrome_profile_path = BrowserProfile(BrowserType.CHROME.name).ensure_profile_exists()
+    firefox_profile_path = BrowserProfile(BrowserType.FIREFOX.name).ensure_profile_exists()
 
     # Verify that os.makedirs was called twice to create the directory
     assert chrome_profile_path.endswith("linkedin_profile")
