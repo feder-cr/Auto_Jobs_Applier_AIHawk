@@ -9,17 +9,10 @@ LOG_TO_CONSOLE = True
 
 MINIMUM_WAIT_TIME_IN_SECONDS = 60
 
-# Recommendations for max applicants based on the time filter
-MAX_APPLICATIONS_DAY = 50
-MAX_APPLICATIONS_WEEK = 150
-MAX_APPLICATIONS_MONTH = 400
-MAX_APPLICATIONS_ALLTIME = 600
-MAX_APPLICATIONS_CUSTOM = 5  # Change based on needs
-
 JOB_APPLICATIONS_DIR = "job_applications"
 JOB_SUITABILITY_SCORE = 7
 
-JOB_MAX_APPLICATIONS = MAX_APPLICATIONS_DAY  # Change based on "date" in work preferences or use custom
+JOB_MAX_APPLICATIONS = 5
 JOB_MIN_APPLICATIONS = 0
 
 LLM_MODEL_TYPE = constants.OPENAI
