@@ -30,6 +30,6 @@ repos:
     rev: v0.7.3
     hooks:
       - id: ruff
-        args: [--fix, "--extend-ignore", "E402"]
+        args: [--fix]
       - id: ruff-format
         args: ["--line-length", "120"]
