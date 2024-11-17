@@ -4,8 +4,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from loguru import logger
-
+from src.logging import logger
 
 # An interface that defines different extraction strategies for the linkedin jobs page.
 class Extractor(ABC):

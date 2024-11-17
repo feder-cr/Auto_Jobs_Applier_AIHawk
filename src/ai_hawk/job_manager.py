@@ -10,7 +10,6 @@ from pathlib import Path
 from inputimeout import TimeoutOccurred, inputimeout
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from utils import printyellow
 
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
 from src import utils
@@ -41,7 +40,7 @@ class AIHawkJobManager:
     def __init__(self, driver):
         logger.debug("Initializing AIHawkJobManager")
         self.driver = driver
-        self.set_old_answers = set()
+        self.set_old_answers = []
         self.easy_applier_component = None
         self.job_application_profile = None
         self.seen_jobs = []
@@ -194,7 +193,7 @@ class AIHawkJobManager:
                             logger.error(f"Error while trying to click the search button: {e}")
 
                         if not jobs:
-                            printyellow("No more jobs found on this page. Exiting loop.")
+                            logger.info("No more jobs found on this page. Exiting loop.")
                             break
 
                     try:
@@ -230,7 +229,6 @@ class AIHawkJobManager:
         try:
             no_jobs_elements = self.driver.find_elements(By.CLASS_NAME, 'jobs-search-no-results-banner')
             if no_jobs_elements:
-                printyellow("No matching jobs found on this page.")
                 logger.debug("No matching jobs found on this page, skipping.")
                 return []
         except NoSuchElementException:
@@ -306,7 +304,6 @@ class AIHawkJobManager:
             try:
                 # Check if job meets applicant count criteria
                 if not self.check_applicant_count(job):
-                    printyellow(f"Skipping {job.title} at {job.company} due to applicant count criteria.")
                     logger.debug(f"Skipping {job.title} at {job.company} based on applicant count.")
                     reason = "applicant_count_not_in_threshold"
                     self.write_to_file(job, "skipped", reason=reason)

@@ -3,17 +3,27 @@ import sys
 from datetime import datetime
 from pathlib import Path
 import yaml
-from loguru import logger
 from lib_resume_builder_AIHawk import StyleManager, ResumeGenerator, Resume, FacadeManager
 from lib_resume_builder_AIHawk.config import global_config
 from marshmallow.utils import timestamp
 from main import ConfigValidator
+from src.logging import logger
 
-# Configure logging with loguru
-logger.remove()  # Remove any default loguru handlers
-logger.add(sys.stdout, format="{time} - {name} - {level} - {message}", level="DEBUG")
+def test_pdf_base64(secrets_file='data_folder/secrets.yaml', predefined_style=None):
+    """
+    Test the generation of a resume and selection of a style.
 
-def test_pdf_base64(secrets_file='data_folder/secrets.yaml'):
+    Parameters:
+    - secrets_file: Path to the secrets.yaml file.
+    - predefined_style: Optional. Predefined style to use. If None, the user will be prompted to select a style.
+
+    Available styles:
+    - Cloyola Grey
+    - Modern Blue
+    - Modern Grey
+    - Default
+    - Clean Blue
+    """
     try:
         logger.info("Script started")
         logger.info("Starting test for pdf_base64")
@@ -30,7 +40,7 @@ def test_pdf_base64(secrets_file='data_folder/secrets.yaml'):
         style_manager = StyleManager()
         resume_generator = ResumeGenerator()
 
-        # Read resume data from YAML file
+        # Create a dummy resume object
         resume_yaml_path = Path('data_folder/plain_text_resume.yaml')
         logger.debug(f"Resume file path: {resume_yaml_path}")
         if not resume_yaml_path.exists():
@@ -41,11 +51,9 @@ def test_pdf_base64(secrets_file='data_folder/secrets.yaml'):
             plain_text_resume = file.read()
             logger.debug(f"Resume file content preview: {plain_text_resume[:200]}")
 
-        # Create a Resume object
-        logger.debug("Creating Resume object")
         resume_object = Resume(plain_text_resume)
 
-        # Read secrets
+        # Validate secrets
         logger.debug(f"Reading secrets from file: {secrets_file_path}")
         email, password, api_key = ConfigValidator.validate_secrets(secrets_file_path)
         logger.debug(f"Email: {email}")
@@ -55,7 +63,7 @@ def test_pdf_base64(secrets_file='data_folder/secrets.yaml'):
         log_path.mkdir(exist_ok=True)
         logger.debug(f"Logs will be saved to directory: {log_path}")
 
-        # Initialize FacadeManager with required parameters
+        # Initialize FacadeManager
         logger.debug("Initializing FacadeManager")
         facade_manager = FacadeManager(api_key, style_manager, resume_generator, resume_object, log_path)
         logger.debug("FacadeManager initialized")
@@ -68,17 +76,41 @@ def test_pdf_base64(secrets_file='data_folder/secrets.yaml'):
         facade_manager.style_manager.set_styles_directory(styles_directory)
         logger.debug(f"Styles directory set: {styles_directory}")
 
-        # Select the first available style
+        # Get available styles
         logger.debug("Getting available styles")
-        styles = facade_manager.style_manager.get_styles()
+        styles = style_manager.get_styles()
         logger.debug(f"Available styles: {list(styles.keys())}")
         if not styles:
             logger.error("No styles found in the styles directory")
             return
-        first_style = next(iter(styles))
-        facade_manager.selected_style = first_style
+
+        # Print available styles for reference
+        print("Available styles (for manual selection in PyCharm or input during execution):")
+        for idx, style_name in enumerate(styles.keys(), 1):
+            print(f"{idx}. {style_name}")
+
+        # If a predefined style is provided, validate it
+        selected_style = None
+        if predefined_style:
+            if predefined_style in styles:
+                selected_style = predefined_style
+                logger.info(f"Predefined style selected: {selected_style}")
+            else:
+                logger.error(f"Predefined style '{predefined_style}' is not available.")
+                return
+
+        # If no predefined style, prompt the user to select one
+        while not selected_style:
+            user_input = input("Please enter the name of the style you'd like to use: ").strip()
+            if user_input in styles.keys():
+                selected_style = user_input
+            else:
+                print(f"Invalid style name '{user_input}'. Please choose from the list.")
+
+        facade_manager.selected_style = selected_style
         logger.info(f"Selected style: {facade_manager.selected_style}")
 
+        # Test job description text
         job_description_text = """
 We are looking for Senior Cloud DevOps (Development and Operations) professionals to join our growing Oracle Analytics Applications Cloud team in Oracle Romania, (Oracle Europe Union Sovereign Cloud). This role would be responsible for ensuring the smooth operation of our critical cloud infrastructure in Oracle EUSC, cloud deployments, DevOps tooling, monitoring, incident management across multiple production and preproduction environments, CI/CD, process improvements, and more.
 
@@ -156,7 +188,7 @@ Oracle is an Equal Employment Opportunity Employer*. All qualified applicants wi
         # Define file path for saving
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir = Path(__file__).parent.resolve()
-        output_pdf_path = output_dir / f'output_resume_{current_time}.pdf'
+        output_pdf_path = output_dir / f'output_resume_{selected_style}_{current_time}.pdf'
         logger.debug(f"File will be saved to: {output_pdf_path}")
 
         # Save PDF data to file
@@ -174,4 +206,6 @@ Oracle is an Equal Employment Opportunity Employer*. All qualified applicants wi
         logger.exception(f"An error occurred during the test: {e}")
 
 if __name__ == '__main__':
+    # You can set a predefined style here for quick manual testing
+    # test_pdf_base64(predefined_style="Modern Blue")
     test_pdf_base64()
