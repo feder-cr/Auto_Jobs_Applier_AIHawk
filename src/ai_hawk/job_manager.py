@@ -577,15 +577,34 @@ class AIHawkJobManager:
 
     def is_blacklisted(self, job_title, company, link, job_location):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
+
+
         title_blacklisted = any(
-            re.search(pattern, job_title, re.IGNORECASE) for pattern in self.title_blacklist_patterns)
+            re.search(pattern, job_title)
+            for pattern in self.title_blacklist_patterns
+        )
+        logger.debug(f"Title blacklist status: {title_blacklisted}")
+
+
         company_blacklisted = any(
-            re.search(pattern, company, re.IGNORECASE) for pattern in self.company_blacklist_patterns)
+            re.search(pattern, company)
+            for pattern in self.company_blacklist_patterns
+        )
+        logger.debug(f"Company blacklist status: {company_blacklisted}")
+
+
         location_blacklisted = any(
-            re.search(pattern, job_location, re.IGNORECASE) for pattern in self.location_blacklist_patterns)
+            re.search(pattern, job_location)
+            for pattern in self.location_blacklist_patterns
+        )
+        logger.debug(f"Location blacklist status: {location_blacklisted}")
+
         link_seen = link in self.seen_jobs
+        logger.debug(f"Link seen status: {link_seen}")
+
         is_blacklisted = title_blacklisted or company_blacklisted or location_blacklisted or link_seen
         logger.debug(f"Job blacklisted status: {is_blacklisted}")
+
         return is_blacklisted
 
     def is_already_applied_to_job(self, job_title, company, link):

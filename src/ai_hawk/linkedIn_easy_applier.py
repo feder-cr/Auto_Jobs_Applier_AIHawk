@@ -588,6 +588,8 @@ class AIHawkEasyApplier:
         logger.debug("Upload fields processing completed")
 
     def _create_and_upload_resume(self, element, job_context: JobContext):
+        job = job_context.job
+        job_application = job_context.job_application
         logger.debug("Starting the process of creating and uploading a resume.")
         folder_path = 'generated_cv'
 
@@ -612,8 +614,8 @@ class AIHawkEasyApplier:
                     "CV",
                     candidate_first_name,
                     candidate_last_name,
-                    job_context.job.company,
-                    job_context.job.title
+                    job.company,
+                    job.title
                 ]
 
                 sanitized_parts = []
@@ -624,22 +626,52 @@ class AIHawkEasyApplier:
                     sanitized_parts.append(sanitized_part)
                     remaining_length -= len(sanitized_part)
 
-                sanitized_parts.append(str(timestamp))
+                # Add timestamp to the end of the filename for uniqueness
+                sanitized_parts_with_timestamp = sanitized_parts + [str(timestamp)]
+                file_name_with_timestamp = '_'.join(sanitized_parts_with_timestamp) + '.pdf'
+                file_path_with_timestamp = os.path.join(folder_path, file_name_with_timestamp)
+                logger.debug(f"Generated resume file path with timestamp: {file_path_with_timestamp}")
 
-                file_name_with_timestamp = '_'.join(sanitized_parts) + '.pdf'
-                file_path_pdf = os.path.join(folder_path, file_name_with_timestamp)
-                logger.debug(f"Generated file path for resume: {file_path_pdf}")
+                # Filename without timestamp for upload
+                file_name_without_timestamp = '_'.join(sanitized_parts) + '.pdf'
+                file_path_without_timestamp = os.path.join(folder_path, file_name_without_timestamp)
+                logger.debug(f"Resume file path without timestamp: {file_path_without_timestamp}")
 
-                sanitized_parts_without_timestamp = sanitized_parts[:-1]
-                file_name_without_timestamp = '_'.join(sanitized_parts_without_timestamp) + '.pdf'
+                logger.debug(f"Generating resume for the job: {job.title} at {job.company}")
+                resume_pdf_data = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
 
-                logger.debug(f"Generating resume for job: {job_context.job.title} at {job_context.job.company}")
-                resume_pdf_base64 = self.resume_generator_manager.pdf_base64(
-                    job_description_text=job_context.job.description)
-                with open(file_path_pdf, "xb") as f:
-                    f.write(base64.b64decode(resume_pdf_base64))
-                logger.debug(f"Resume successfully generated and saved at: {file_path_pdf}")
+                # Determine data type and handle accordingly
+                if isinstance(resume_pdf_data, str):
+                    try:
+                        pdf_data = base64.b64decode(resume_pdf_data)
+                        logger.debug("Resume data decoded from base64 string.")
+                    except Exception as e:
+                        logger.error(f"Error decoding resume data from base64: {e}")
+                        raise
+                elif isinstance(resume_pdf_data, bytes):
+                    pdf_data = resume_pdf_data
+                    logger.debug("Binary resume data received.")
+                else:
+                    logger.error(f"Unexpected resume data type: {type(resume_pdf_data)}")
+                    raise TypeError(f"Expected data of type str or bytes, got {type(resume_pdf_data)}")
+
+                # Write data to a file with timestamp
+                with open(file_path_with_timestamp, "wb") as f:
+                    f.write(pdf_data)
+                logger.debug(f"Resume successfully generated and saved at: {file_path_with_timestamp}")
+
+                # Copy file without timestamp for upload
+                shutil.copyfile(file_path_with_timestamp, file_path_without_timestamp)
+                logger.debug(f"Copied resume for upload without timestamp: {file_path_without_timestamp}")
+
+                # Check file size
+                file_size = os.path.getsize(file_path_with_timestamp)
+                if file_size < 1024:
+                    logger.error(f"Resume file is too small: {file_size} bytes. Data might be corrupted.")
+                    raise ValueError("The generated resume file is too small and might be corrupted.")
+
                 break
+
             except HTTPStatusError as e:
                 if e.response.status_code == 429:
                     retry_after = e.response.headers.get('retry-after')
@@ -659,6 +691,7 @@ class AIHawkEasyApplier:
                 else:
                     logger.error(f"HTTP error: {e}")
                     raise
+
             except Exception as e:
                 logger.error(f"Failed to generate resume: {e}")
                 tb_str = traceback.format_exc()
@@ -669,41 +702,38 @@ class AIHawkEasyApplier:
                 else:
                     raise
 
-        file_size = os.path.getsize(file_path_pdf)
-        max_file_size = 2 * 1024 * 1024
+        # Check maximum file size
+        max_file_size = 2 * 1024 * 1024  # 2 MB
         logger.debug(f"Resume file size: {file_size} bytes")
         if file_size > max_file_size:
             logger.error(f"Resume file size exceeds 2 MB: {file_size} bytes")
             raise ValueError("Resume file size exceeds the maximum limit of 2 MB.")
 
         allowed_extensions = {'.pdf', '.doc', '.docx'}
-        file_extension = os.path.splitext(file_path_pdf)[1].lower()
+        file_extension = os.path.splitext(file_path_with_timestamp)[1].lower()
         logger.debug(f"Resume file extension: {file_extension}")
         if file_extension not in allowed_extensions:
             logger.error(f"Invalid resume file format: {file_extension}")
             raise ValueError("Unsupported resume file format. Only PDF, DOC, and DOCX are allowed.")
 
         try:
-            logger.debug(f"Uploading resume from path: {file_path_pdf}")
-
-            temp_file_path = os.path.join(folder_path, file_name_without_timestamp)
-
-            shutil.copyfile(file_path_pdf, temp_file_path)
-            logger.debug(f"Copied resume to temporary path: {temp_file_path}")
-
-            element.send_keys(os.path.abspath(temp_file_path))
-            job_context.job.resume_path = os.path.abspath(file_path_pdf)
-            job_context.job_application.resume_path = os.path.abspath(file_path_pdf)
+            logger.debug(f"Uploading resume from path: {file_path_without_timestamp}")
+            element.send_keys(os.path.abspath(file_path_without_timestamp))
+            job.resume_path = os.path.abspath(file_path_with_timestamp)
+            job_application.resume_path = os.path.abspath(file_path_with_timestamp)
             time.sleep(2)
-            logger.debug(f"Resume successfully created and uploaded: {temp_file_path}")
-
-            os.remove(temp_file_path)
-            logger.debug(f"Temporary file removed: {temp_file_path}")
-
+            logger.debug(f"Resume successfully uploaded: {file_path_without_timestamp}")
         except Exception as e:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to upload resume: {tb_str}")
-            raise Exception(f"Failed to upload: \nTraceback:\n{tb_str}")
+            raise Exception(f"Failed to upload resume: \nTraceback:\n{tb_str}")
+        finally:
+            # Remove temporary file without timestamp
+            try:
+                os.remove(file_path_without_timestamp)
+                logger.debug(f"Deleted temporary resume file without timestamp: {file_path_without_timestamp}")
+            except Exception as e:
+                logger.warning(f"Failed to delete temporary file: {file_path_without_timestamp}. Error: {e}")
 
     def _create_and_upload_cover_letter(self, element: WebElement, job_context: JobContext) -> None:
         logger.debug("Starting the process of creating and uploading a cover letter.")
@@ -745,16 +775,18 @@ class AIHawkEasyApplier:
                     sanitized_parts.append(sanitized_part)
                     remaining_length -= len(sanitized_part)
 
-                sanitized_parts.append(str(timestamp))
+                # Add timestamp to the end of the filename for uniqueness
+                sanitized_parts_with_timestamp = sanitized_parts + [str(timestamp)]
+                file_name_with_timestamp = '_'.join(sanitized_parts_with_timestamp) + '.pdf'
+                file_path_with_timestamp = os.path.join(folder_path, file_name_with_timestamp)
+                logger.debug(f"Generated cover letter file path with timestamp: {file_path_with_timestamp}")
 
-                file_name_with_timestamp = '_'.join(sanitized_parts) + '.pdf'
-                file_path_pdf = os.path.join(folder_path, file_name_with_timestamp)
-                logger.debug(f"Generated file path for cover letter: {file_path_pdf}")
+                # Filename without timestamp for upload
+                file_name_without_timestamp = '_'.join(sanitized_parts) + '.pdf'
+                file_path_without_timestamp = os.path.join(folder_path, file_name_without_timestamp)
+                logger.debug(f"Cover letter file path without timestamp: {file_path_without_timestamp}")
 
-                sanitized_parts_without_timestamp = sanitized_parts[:-1]
-                file_name_without_timestamp = '_'.join(sanitized_parts_without_timestamp) + '.pdf'
-
-                logger.debug(f"Generating cover letter for job: {job_context.job.title} at {job_context.job.company}")
+                logger.debug(f"Generating cover letter for the job: {job_context.job.title} at {job_context.job.company}")
 
                 styles = getSampleStyleSheet()
                 paragraph_style = ParagraphStyle(
@@ -770,7 +802,7 @@ class AIHawkEasyApplier:
                 story = [Paragraph(para, paragraph_style) for para in formatted_paragraphs]
 
                 doc = SimpleDocTemplate(
-                    file_path_pdf,
+                    file_path_with_timestamp,
                     pagesize=A4,
                     rightMargin=20,
                     leftMargin=20,
@@ -779,8 +811,18 @@ class AIHawkEasyApplier:
                 )
 
                 doc.build(story)
+                logger.debug(f"Cover letter successfully generated and saved at: {file_path_with_timestamp}")
 
-                logger.debug(f"Cover letter successfully generated and saved at: {file_path_pdf}")
+                # Copy file without timestamp for upload
+                shutil.copyfile(file_path_with_timestamp, file_path_without_timestamp)
+                logger.debug(f"Copied cover letter for upload without timestamp: {file_path_without_timestamp}")
+
+                # Check file size
+                file_size = os.path.getsize(file_path_with_timestamp)
+                if file_size < 1024:
+                    logger.error(f"Cover letter file is too small: {file_size} bytes. Data might be corrupted.")
+                    raise ValueError("The generated cover letter file is too small and might be corrupted.")
+
                 break
             except Exception as e:
                 logger.error(f"Failed to generate cover letter: {e}")
@@ -788,41 +830,40 @@ class AIHawkEasyApplier:
                 logger.error(f"Traceback: {tb_str}")
                 raise
 
-        file_size = os.path.getsize(file_path_pdf)
-        max_file_size = 2 * 1024 * 1024
+        # Check maximum file size
+        max_file_size = 2 * 1024 * 1024  # 2 MB
         logger.debug(f"Cover letter file size: {file_size} bytes")
         if file_size > max_file_size:
             logger.error(f"Cover letter file size exceeds 2 MB: {file_size} bytes")
             raise ValueError("Cover letter file size exceeds the maximum limit of 2 MB.")
 
+        # Check file extension
         allowed_extensions = {'.pdf', '.doc', '.docx'}
-        file_extension = os.path.splitext(file_path_pdf)[1].lower()
+        file_extension = os.path.splitext(file_path_with_timestamp)[1].lower()
         logger.debug(f"Cover letter file extension: {file_extension}")
         if file_extension not in allowed_extensions:
             logger.error(f"Invalid cover letter file format: {file_extension}")
             raise ValueError("Unsupported cover letter file format. Only PDF, DOC, and DOCX are allowed.")
 
+        # Upload cover letter
         try:
-            logger.debug(f"Uploading cover letter from path: {file_path_pdf}")
-
-            temp_file_path = os.path.join(folder_path, file_name_without_timestamp)
-
-            shutil.copyfile(file_path_pdf, temp_file_path)
-            logger.debug(f"Copied cover letter to temporary path: {temp_file_path}")
-
-            element.send_keys(os.path.abspath(temp_file_path))
-            job_context.job.cover_letter_path = os.path.abspath(file_path_pdf)
-            job_context.job_application.cover_letter_path = os.path.abspath(file_path_pdf)
+            logger.debug(f"Uploading cover letter from path: {file_path_without_timestamp}")
+            element.send_keys(os.path.abspath(file_path_without_timestamp))
+            job_context.job.cover_letter_path = os.path.abspath(file_path_with_timestamp)
+            job_context.job_application.cover_letter_path = os.path.abspath(file_path_with_timestamp)
             time.sleep(2)
-            logger.debug(f"Cover letter created and uploaded successfully: {temp_file_path}")
-
-            os.remove(temp_file_path)
-            logger.debug(f"Temporary file removed: {temp_file_path}")
-
+            logger.debug(f"Cover letter successfully uploaded: {file_path_without_timestamp}")
         except Exception as e:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to upload cover letter: {tb_str}")
-            raise Exception(f"Failed to upload: \nTraceback:\n{tb_str}")
+            raise Exception(f"Failed to upload cover letter: \nTraceback:\n{tb_str}")
+        finally:
+            # Remove temporary file without timestamp
+            try:
+                os.remove(file_path_without_timestamp)
+                logger.debug(f"Deleted temporary cover letter file without timestamp: {file_path_without_timestamp}")
+            except Exception as e:
+                logger.warning(f"Failed to delete temporary file: {file_path_without_timestamp}. Error: {e}")
 
     def _fill_additional_questions(self) -> None:
         logger.debug("Filling additional questions")
@@ -966,16 +1007,16 @@ class AIHawkEasyApplier:
         """
         logger.debug(f"Checking if field is correctly filled for question: '{question_text}'")
 
-        
+
         if not current_value:
             logger.debug("Field is empty.")
             return False
 
-        
+
         expected_answer = self._get_existing_answer(question_text)
 
         if expected_answer:
-            
+
             if current_value.strip().lower() == expected_answer.strip().lower():
                 logger.debug("Current value matches the expected answer.")
                 return True
@@ -983,20 +1024,20 @@ class AIHawkEasyApplier:
                 logger.debug("Current value does not match the expected answer.")
                 return False
         else:
-            
+
             logger.debug("Expected answer not found. Querying the model for a potential answer.")
             generated_answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
 
             if generated_answer:
                 logger.debug(f"Generated answer from model: {generated_answer}")
-                
+
                 self._save_questions_to_json({
                     'type': 'textbox',
                     'question': question_text,
                     'answer': generated_answer
                 })
 
-                
+
                 if current_value.strip().lower() == generated_answer.strip().lower():
                     logger.debug("Current value matches the generated answer.")
                     return True
@@ -1004,7 +1045,7 @@ class AIHawkEasyApplier:
                     logger.debug("Current value does not match the generated answer.")
                     return False
             else:
-                
+
                 logger.debug("Model did not provide an answer. Assuming current value is incorrect.")
                 return False
 
