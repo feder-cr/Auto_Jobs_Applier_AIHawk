@@ -960,13 +960,22 @@ class AIHawkEasyApplier:
         return False
 
     def _is_field_filled_correctly(self, current_value: str, question_text: str) -> bool:
+        """
+        Checks if the field is correctly filled for a given question. If no existing
+        answer is found, queries the model for a potential answer.
+        """
         logger.debug(f"Checking if field is correctly filled for question: '{question_text}'")
+
+        
         if not current_value:
             logger.debug("Field is empty.")
             return False
 
+        
         expected_answer = self._get_existing_answer(question_text)
+
         if expected_answer:
+            
             if current_value.strip().lower() == expected_answer.strip().lower():
                 logger.debug("Current value matches the expected answer.")
                 return True
@@ -974,8 +983,30 @@ class AIHawkEasyApplier:
                 logger.debug("Current value does not match the expected answer.")
                 return False
         else:
-            logger.debug("Expected answer not found. Assuming current value is acceptable.")
-            return True
+            
+            logger.debug("Expected answer not found. Querying the model for a potential answer.")
+            generated_answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
+
+            if generated_answer:
+                logger.debug(f"Generated answer from model: {generated_answer}")
+                
+                self._save_questions_to_json({
+                    'type': 'textbox',
+                    'question': question_text,
+                    'answer': generated_answer
+                })
+
+                
+                if current_value.strip().lower() == generated_answer.strip().lower():
+                    logger.debug("Current value matches the generated answer.")
+                    return True
+                else:
+                    logger.debug("Current value does not match the generated answer.")
+                    return False
+            else:
+                
+                logger.debug("Model did not provide an answer. Assuming current value is incorrect.")
+                return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
         field_type = field.get_attribute('type').lower()

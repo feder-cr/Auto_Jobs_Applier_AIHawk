@@ -1,6 +1,8 @@
-remote: true
-hybrid: true
-onsite: true
+sort_by: date  # Sorting by date ('date') or by relevance ('relevance')
+
+hybrid: true     # Include hybrid jobs
+on_site: true    # Include on-site jobs
+remote: true     # Include remote jobs
 
 experience_level:
   internship: false
@@ -42,7 +44,18 @@ company_blacklist:
 title_blacklist:
   - word1
   - word2
+  - C++
+  - C#
+  - .NET
+
 
 location_blacklist:
   - Brazil
 
+job_applicants_threshold:
+  min_applicants: 0
+  max_applicants: 100
+
+llm_model_type: openai
+llm_model: gpt-4o-mini
+llm_api_url: https://api.openai.com/v1

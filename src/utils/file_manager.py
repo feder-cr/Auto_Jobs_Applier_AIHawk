@@ -1,3 +1,4 @@
+import yaml
 from pathlib import Path
 from typing import Optional
 from constants import SECRETS_YAML, WORK_PREFERENCES_YAML, PLAIN_TEXT_RESUME_YAML
@@ -32,9 +33,7 @@ class FileManager:
         )
 
     @staticmethod
-    def file_paths_to_dict(
-            resume_file: Optional[Path], plain_text_resume_file: Path
-    ) -> dict:
+    def file_paths_to_dict(resume_file: Optional[Path], plain_text_resume_file: Path) -> dict:
         """
         Returns a dictionary containing paths to the resume and plain text resume files.
         """
@@ -51,3 +50,41 @@ class FileManager:
             result["resume"] = resume_file
 
         return result
+
+    @staticmethod
+    def read_secrets(secrets_path: Path) -> dict:
+        """
+        Reads and validates the secrets file (YAML format) and ensures required keys are present.
+
+        Args:
+            secrets_path (Path): Path to the secrets YAML file.
+
+        Returns:
+            dict: Dictionary containing the secrets.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the file is not a valid YAML file or required keys are missing.
+        """
+        if not secrets_path.exists():
+            raise FileNotFoundError(f"Secrets file not found: {secrets_path}")
+
+        try:
+            with open(secrets_path, "r", encoding="utf-8") as file:
+                secrets_data = yaml.safe_load(file)
+
+                # Ensure the secrets contain the required key for API
+                required_keys = ["llm_api_key"]
+                missing_keys = [key for key in required_keys if key not in secrets_data]
+                if missing_keys:
+                    raise ValueError(
+                        f"Missing required keys in secrets file: {', '.join(missing_keys)}"
+                    )
+
+                # Handle optional keys with default behavior
+                secrets_data["email"] = secrets_data.get("email", None)
+                secrets_data["password"] = secrets_data.get("password", None)
+
+                return secrets_data
+        except yaml.YAMLError as exc:
+            raise ValueError(f"Error parsing secrets file {secrets_path}: {exc}")

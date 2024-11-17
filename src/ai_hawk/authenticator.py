@@ -9,11 +9,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.logging import logger
+from src.utils.file_manager import FileManager
 
 
-def get_authenticator(driver, platform, bot_facade=None):
+def get_authenticator(driver, platform, config=None):
     if platform == 'linkedin':
-        return LinkedInAuthenticator(driver, bot_facade=bot_facade)
+        return LinkedInAuthenticator(driver, config=config)
     else:
         raise NotImplementedError(f"Platform {platform} not implemented yet.")
 
@@ -61,10 +62,9 @@ class AIHawkAuthenticator(ABC):
         pass
 
     @property
-    @abstractmethod
     def is_logged_in(self):
-        """Checks if the user is logged in."""
-        pass
+        keywords = ['feed', 'mynetwork', 'jobs', 'messaging', 'notifications']
+        return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
 
     @abstractmethod
     def handle_security_checks(self):
@@ -96,9 +96,6 @@ class AIHawkAuthenticator(ABC):
             self.handle_login()
 
     def handle_login(self):
-        """
-        Handles the login process by navigating to the login page and entering credentials.
-        """
         try:
             logger.info("Navigating to the login page...")
             self.navigate_to_login()
@@ -129,58 +126,64 @@ class AIHawkAuthenticator(ABC):
 
 
 class LinkedInAuthenticator(AIHawkAuthenticator):
-    """
-    Handles the authentication process for LinkedIn using Selenium WebDriver.
-    """
+    def __init__(self, driver, config=None):
+        """
+        Initialize the LinkedInAuthenticator.
+        Optionally takes a config dictionary with email and password.
+        """
+        super().__init__(driver)
+        self.config = config or {}
 
-    def __init__(self, driver, bot_facade=None):
-        super().__init__(driver, bot_facade)
-        self.prompt_for_credentials = None
+        # Use email and password from config if available
+        self.email = config.get('email', '') if config else ''
+        self.password = config.get('password', '') if config else ''
 
     @property
     def home_url(self):
-        return "https://www.linkedin.com/feed"
+        return "https://www.linkedin.com"
 
     def navigate_to_login(self):
         self.driver.get("https://www.linkedin.com/login")
 
     @property
     def is_logged_in(self):
+        keywords = ['feed', 'mynetwork', 'jobs', 'messaging', 'notifications']
+        return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
+
+
+    def prompt_for_credentials(self):
         """
-        Checks if the user is already logged in to LinkedIn.
-
-        Returns:
-            bool: True if the user is logged in, False otherwise.
+        Automatically enters email and password if provided in config.
+        Otherwise, prompts user for manual login.
         """
-        try:
-            logger.debug("Checking if user is logged in...")
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'share-box-feed-entry__trigger'))
-            )
+        if self.email and self.password:
+            try:
+                logger.debug("Auto-filling credentials from config.")
+                email_input = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.ID, "username"))
+                )
+                password_input = self.driver.find_element(By.ID, "password")
 
-            buttons = self.driver.find_elements(By.CLASS_NAME, 'share-box-feed-entry__trigger')
-            logger.debug(f"Found {len(buttons)} 'Start a post' buttons")
+                email_input.clear()
+                email_input.send_keys(self.email)
+                password_input.clear()
+                password_input.send_keys(self.password)
 
-            if any(button.text.strip().lower() == 'start a post' for button in buttons):
-                logger.info("Found 'Start a post' button indicating user is logged in.")
-                return True
+                login_button = self.driver.find_element(By.XPATH, "//button[@type='submit']")
+                login_button.click()
 
-            profile_img_elements = self.driver.find_elements(By.XPATH, "//img[contains(@alt, 'Photo of')]")
-            if profile_img_elements:
-                logger.info("Profile image found. Assuming user is logged in.")
-                return True
-
-            logger.info("Did not find 'Start a post' button or profile image. User might not be logged in.")
-            return False
-
-        except TimeoutException:
-            logger.error("Page elements took too long to load or were not found.")
-            return False
+                logger.info("Credentials submitted, waiting for login completion.")
+                WebDriverWait(self.driver, 30).until(EC.url_contains('/feed/'))
+                logger.info("Login successful!")
+            except (NoSuchElementException, TimeoutException) as e:
+                logger.error(f"Error during auto-login: {e}")
+                logger.info("Falling back to manual login.")
+                super().prompt_for_credentials()
+        else:
+            logger.info("No email or password provided in config. Manual login required.")
+            super().prompt_for_credentials()
 
     def handle_security_checks(self):
-        """
-        Handles the security checkpoint that may appear after login.
-        """
         try:
             logger.debug("Handling security check...")
             WebDriverWait(self.driver, 10).until(
@@ -190,16 +193,17 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
             WebDriverWait(self.driver, 300).until(
                 EC.url_contains('https://www.linkedin.com/feed/')
             )
-            logger.info("Security check completed")
+            logger.info("Security check completed.")
         except TimeoutException:
             logger.error("Security check not completed. Please try again later.")
 
     def enter_credentials(self):
-        """
-        Enters the email and password into the login form.
-        """
+        if not self.email or not self.password:
+            logger.info("No email or password provided. User must log in manually.")
+            return
+
         try:
-            logger.debug("Starting the process to enter credentials...")
+            logger.debug("Entering credentials...")
 
             # Wait for the email input field to be present
             logger.debug("Waiting for the email input field to be present...")
@@ -208,40 +212,14 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
             )
             logger.debug("Email input field found. Clearing and entering email now.")
             email_field.clear()
-            email_field.click()
-            logger.debug(f"Attempting to enter email: {self.email}")
             email_field.send_keys(self.email)
-            logger.debug("Email entered successfully. Verifying value in the field...")
 
-            # Verify the value in the email field
-            entered_email = email_field.get_attribute("value")
-            if entered_email != self.email:
-                logger.warning(f"Email was not correctly entered. Retrying...")
-                email_field.clear()
-                email_field.send_keys(self.email)
-
-            logger.debug(f"Email field final value: {entered_email}")
-
-            # Wait for the password input field to be present
-            logger.debug("Waiting for the password input field to be present...")
             password_field = WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "password"))
             )
             logger.debug("Password input field found. Clearing and entering password now.")
             password_field.clear()
-            password_field.click()
-            logger.debug(f"Attempting to enter password: {'*' * len(self.password)}")
             password_field.send_keys(self.password)
-            logger.debug("Password entered successfully. Verifying value in the field...")
-
-            # Verify the value in the password field
-            entered_password = password_field.get_attribute("value")
-            if entered_password != self.password:
-                logger.warning(f"Password was not correctly entered. Retrying...")
-                password_field.clear()
-                password_field.send_keys(self.password)
-
-            logger.debug(f"Password field final value: {'*' * len(entered_password)}")
 
         except TimeoutException:
             logger.error("Login form not found within the timeout period. Aborting login.")
@@ -254,9 +232,6 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
             raise
 
     def submit_login_form(self):
-        """
-        Submits the login form by clicking the submit button.
-        """
         try:
             logger.debug("Submitting login form...")
             login_button = self.driver.find_element(By.XPATH, '//button[@type="submit"]')
@@ -264,4 +239,18 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
             logger.debug("Login form submitted.")
         except NoSuchElementException:
             logger.error("Login button not found. Please verify the page structure.")
-            print("Login button not found. Please verify the page structure.")
+
+    def handle_security_checks(self):
+        try:
+            logger.debug("Handling security check...")
+            WebDriverWait(self.driver, 10).until(
+                EC.url_contains('https://www.linkedin.com/checkpoint/challengesV2/')
+            )
+            logger.warning("Security checkpoint detected. Please complete the challenge.")
+            WebDriverWait(self.driver, 300).until(
+                EC.url_contains('https://www.linkedin.com/feed/')
+            )
+            logger.info("Security check completed.")
+        except TimeoutException:
+            logger.error("Security check not completed. Please try again later.")
+

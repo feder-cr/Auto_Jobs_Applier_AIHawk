@@ -17,7 +17,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue, ChatPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
-import ai_hawk.llm.prompts as prompts
 from config import JOB_SUITABILITY_SCORE
 from constants import (
     AVAILABILITY,
@@ -67,8 +66,9 @@ from constants import (
     TOTAL_COST,
     TOTAL_TOKENS,
     USAGE_METADATA,
-    WORK_PREFERENCES,
+    WORK_PREFERENCES, PERSONAL_INFORMATION,
 )
+from src.ai_hawk.llm import prompts
 from src.job import Job
 from src.logging import logger
 import config as cfg

@@ -8,7 +8,6 @@ class AIHawkBotState:
 
     def reset(self):
         logger.debug("Resetting AIHawkBotState")
-        self.credentials_set = False
         self.api_key_set = False
         self.job_application_profile_set = False
         self.gpt_answerer_set = False
@@ -32,8 +31,6 @@ class AIHawkBotFacade:
         self.state = AIHawkBotState()
         self.job_application_profile = None
         self.resume = None
-        self.email = None
-        self.password = None
         self.parameters = None
 
     def set_job_application_profile_and_resume(self, job_application_profile, resume):
@@ -49,14 +46,6 @@ class AIHawkBotFacade:
 
         logger.debug("Job application profile and resume set successfully")
 
-    def set_secrets(self, email, password):
-        logger.debug("Setting secrets: email and password")
-        self._validate_non_empty(email, "Email")
-        self._validate_non_empty(password, "Password")
-        self.email = email
-        self.password = password
-        self.state.credentials_set = True
-        logger.debug("Secrets set successfully")
 
     def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
@@ -78,7 +67,6 @@ class AIHawkBotFacade:
 
     def start_login(self):
         logger.debug("Starting login process")
-        self.state.validate_state(['credentials_set'])
         self.login_component.start()
         self.state.logged_in = True
         logger.debug("Login process completed successfully")
@@ -86,7 +74,7 @@ class AIHawkBotFacade:
     def start_apply(self):
         logger.debug("Starting apply process")
         self.state.validate_state(['logged_in', 'job_application_profile_set', 'gpt_answerer_set', 'parameters_set'])
-        self.apply_component.start_applying()
+        self.apply_component.start_applying(self.parameters.get('utils'))
         logger.debug("Apply process started successfully")
 
     def start_collect_data(self):

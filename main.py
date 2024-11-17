@@ -195,32 +195,25 @@ class ConfigValidator:
 
     @staticmethod
     def validate_secrets(secrets_yaml_path: Path) -> tuple:
-        """
-        Validates the secrets file to ensure required keys are present and valid.
-        """
         secrets = ConfigValidator.validate_yaml_file(secrets_yaml_path)
-        mandatory_secrets = ["email", "password", "llm_api_key"]
+        if 'llm_api_key' not in secrets:
+            raise ConfigError(
+                f"Missing secret 'llm_api_key' in file {secrets_yaml_path}"
+            )
 
-        for secret in mandatory_secrets:
-            if secret not in secrets:
-                raise ConfigError(
-                    f"Missing secret '{secret}' in file {secrets_yaml_path}"
-                )
+        email = secrets.get("email", "")
+        password = secrets.get("password", "")
+        llm_api_key = secrets["llm_api_key"]
 
-        if not ConfigValidator.validate_email(secrets["email"]):
+        if email and not ConfigValidator.validate_email(email):
             raise ConfigError(
                 f"Invalid email format in secrets file {secrets_yaml_path}."
             )
-        if not secrets["password"]:
+        if email and not password:
             raise ConfigError(
-                f"Password cannot be empty in secrets file {secrets_yaml_path}."
+                f"Password cannot be empty if email is provided in secrets file {secrets_yaml_path}."
             )
-        if not secrets["llm_api_key"]:
-            raise ConfigError(
-                f"llm_api_key cannot be empty in secrets file {secrets_yaml_path}."
-            )
-        return secrets["email"], str(secrets["password"]), secrets["llm_api_key"]
-
+        return email, password, llm_api_key
 
 
 
@@ -276,8 +269,13 @@ def create_and_run_bot(parameters, llm_api_key):
         logger.info("Initializing the browser...")
         browser = init_browser()
 
-        # Initialize login component
-        login_component = get_authenticator(driver=browser, platform="linkedin")
+        # Initialize login component with email and password
+        logger.info("Initializing login component...")
+        login_component = get_authenticator(
+            driver=browser,
+            platform="linkedin",
+            config={'email': parameters.get('email', ''), 'password': parameters.get('password', '')}
+        )
 
         # Initialize job application component
         apply_component = AIHawkJobManager(browser)
@@ -328,6 +326,7 @@ def create_and_run_bot(parameters, llm_api_key):
     is_flag=True,
     help="Only collects job information into data.json file",
 )
+
 def main(collect: bool = False, resume: Optional[Path] = None):
     """
     Main function to execute the bot. Parses command-line options and starts the bot.
@@ -342,13 +341,15 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         ) = FileManager.validate_data_folder(data_folder)
 
         parameters = ConfigValidator.validate_config(config_file)
-        _, _, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
+        email, password, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
 
         parameters["uploads"] = FileManager.file_paths_to_dict(
             resume, plain_text_resume_file
         )
         parameters["outputFileDirectory"] = output_folder
         parameters["collectMode"] = collect
+        parameters["email"] = email
+        parameters["password"] = password
 
         create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import json
 import os
 from pathlib import Path
@@ -19,7 +19,11 @@ def index():
         else:
             with open(JSON_FILE, 'r') as f:
                 data = json.load(f)
-                print(data)
+
+        # Ensure data is sorted alphabetically by question
+        if isinstance(data, list):
+            data.sort(key=lambda item: item['question'].lower())
+
         return render_template('index.html', data=data if isinstance(data, list) else [])
 
 def update():
@@ -37,6 +41,9 @@ def update():
             else:
                 item['answer'] = request.form.get(f'answer_{i}', item['answer'])
             updated_data.append(item)
+
+    # Sort updated data alphabetically by question
+    updated_data.sort(key=lambda item: item['question'].lower())
 
     with open(JSON_FILE, 'w') as f:
         json.dump(updated_data, f, indent=2)

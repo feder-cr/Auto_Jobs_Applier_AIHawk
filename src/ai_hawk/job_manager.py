@@ -10,6 +10,7 @@ from pathlib import Path
 from inputimeout import TimeoutOccurred, inputimeout
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from utils import printyellow
 
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
 from src import utils
@@ -18,7 +19,7 @@ from src.extractors.extraction_chains import EXTRACTORS
 from src.job import Job
 from src.logging import logger
 from src.regex_utils import generate_regex_patterns_for_blacklisting
-from src.utils import browser_utils
+from src.utils import browser_utils, time_utils
 
 
 class EnvironmentKeys:
@@ -106,10 +107,8 @@ class AIHawkJobManager:
                 timeout_duration=60)
             if user_input == 'y':
                 logger.debug("User chose to skip waiting.")
-                utils.printyellow("User skipped waiting.")
             else:
                 logger.debug(f"Sleeping for {time_left:.0f} seconds as user chose not to skip.")
-                utils.printyellow(f"Sleeping for {time_left:.0f} seconds.")
                 time.sleep(time_left)
 
     def start_collecting_data(self):
@@ -150,7 +149,7 @@ class AIHawkJobManager:
                 logger.error(f"Error during data collection: {e}")
                 continue
 
-    def start_applying(self):
+    def start_applying(self, utils):
         logger.debug("Starting job application process")
         self.easy_applier_component = AIHawkEasyApplier(
             self.driver,
@@ -177,7 +176,7 @@ class AIHawkJobManager:
                     job_page_number += 1
                     logger.debug(f"Going to job page {job_page_number}")
                     self.next_job_page(position, location_url, job_page_number)
-                    utils.time_utils.medium_sleep()
+                    time_utils.medium_sleep()
                     logger.debug("Starting the application process for this page...")
 
                     jobs = self.get_jobs_from_page()
@@ -195,7 +194,7 @@ class AIHawkJobManager:
                             logger.error(f"Error while trying to click the search button: {e}")
 
                         if not jobs:
-                            utils.printyellow("No more jobs found on this page. Exiting loop.")
+                            printyellow("No more jobs found on this page. Exiting loop.")
                             break
 
                     try:
@@ -216,7 +215,6 @@ class AIHawkJobManager:
                         page_sleep += 1
             except Exception as e:
                 logger.error(f"Unexpected error during job search: {e}")
-                utils.printred(f"Unexpected error: {e}")
                 continue
 
             time_left = minimum_page_time - time.time()
@@ -232,7 +230,7 @@ class AIHawkJobManager:
         try:
             no_jobs_elements = self.driver.find_elements(By.CLASS_NAME, 'jobs-search-no-results-banner')
             if no_jobs_elements:
-                utils.printyellow("No matching jobs found on this page.")
+                printyellow("No matching jobs found on this page.")
                 logger.debug("No matching jobs found on this page, skipping.")
                 return []
         except NoSuchElementException:
@@ -308,7 +306,7 @@ class AIHawkJobManager:
             try:
                 # Check if job meets applicant count criteria
                 if not self.check_applicant_count(job):
-                    utils.printyellow(f"Skipping {job.title} at {job.company} due to applicant count criteria.")
+                    printyellow(f"Skipping {job.title} at {job.company} due to applicant count criteria.")
                     logger.debug(f"Skipping {job.title} at {job.company} based on applicant count.")
                     reason = "applicant_count_not_in_threshold"
                     self.write_to_file(job, "skipped", reason=reason)
