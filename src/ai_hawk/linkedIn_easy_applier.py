@@ -19,6 +19,8 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+import config
+import constants
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from src.job import Job
 from src.job_application import JobApplication
@@ -483,7 +485,7 @@ class AIHawkEasyApplier:
                     job_context.job.resume_path = str(self.resume_path.resolve())
                     job_context.job_application.resume_path = str(self.resume_path.resolve())
                     logger.debug(f"Resume uploaded from path: {self.resume_path.resolve()}")
-                else:
+                elif config.LLM_MODEL_TYPE is constants.OPENAI:
                     logger.debug("Resume path not found or invalid, generating new resume")
                     self._create_and_upload_resume(element, job_context)
             elif "cover" in output:
