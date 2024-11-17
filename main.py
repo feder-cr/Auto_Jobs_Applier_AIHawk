@@ -28,9 +28,6 @@ from src.utils.chrome_utils import chrome_browser_options
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr
 
-# Add the src directory to the Python path
-sys.path.append(str(Path(__file__).resolve().parent / "src"))
-
 
 class ConfigError(Exception):
     pass
