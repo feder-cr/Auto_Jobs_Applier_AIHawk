@@ -1,29 +1,29 @@
-import os
 import re
 import sys
 from pathlib import Path
-import yaml
-import click
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import WebDriverException
 from typing import Optional
-from constants import PLAIN_TEXT_RESUME_YAML, SECRETS_YAML, WORK_PREFERENCES_YAML
+
+import click
+import yaml
 from lib_resume_builder_AIHawk import (
     Resume,
     FacadeManager,
     ResumeGenerator,
     StyleManager,
 )
+from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 from src.ai_hawk.authenticator import get_authenticator
 from src.ai_hawk.bot_facade import AIHawkBotFacade
 from src.ai_hawk.job_manager import AIHawkJobManager
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
-from src.utils.chrome_utils import chrome_browser_options
 from src.job_application_profile import JobApplicationProfile
 from src.logging import logger
+from src.utils.chrome_utils import chrome_browser_options
+from src.utils.file_manager import FileManager
 
 # Suppress stderr only during specific operations
 original_stderr = sys.stderr
@@ -81,10 +81,11 @@ class ConfigValidator:
             "distance": int,
             "company_blacklist": list,
             "title_blacklist": list,
-            "llm_model_type": str,
-            "llm_model": str,
         }
 
+        errors = []
+
+        # Validate required keys and their types
         for key, expected_type in required_keys.items():
             if key not in parameters:
                 if key in [
@@ -95,10 +96,9 @@ class ConfigValidator:
                     parameters[key] = []
                     logger.debug(f"Optional key '{key}' missing, set to empty list.")
                 else:
-                    logger.error(f"Missing key '{key}' in config file.")
-                    raise ConfigError(
-                        f"Missing or invalid key '{key}' in config file {config_yaml_path}"
-                    )
+                    error_msg = f"Missing key '{key}' in config file."
+                    errors.append(error_msg)
+                    logger.error(error_msg)
             elif not isinstance(parameters[key], expected_type):
                 if (
                     key in ["company_blacklist", "title_blacklist", "location_blacklist"]
@@ -107,12 +107,12 @@ class ConfigValidator:
                     parameters[key] = []
                     logger.debug(f"Key '{key}' was None, set to empty list.")
                 else:
-                    logger.error(
-                        f"Invalid type for key '{key}' in config file. Expected {expected_type}, but got {type(parameters[key])}."
+                    error_msg = (
+                        f"Invalid type for key '{key}' in config file. Expected "
+                        f"{expected_type}, but got {type(parameters[key])}."
                     )
-                    raise ConfigError(
-                        f"Invalid type for key '{key}' in config file {config_yaml_path}. Expected {expected_type}, but got {type(parameters[key])}."
-                    )
+                    errors.append(error_msg)
+                    logger.error(error_msg)
 
         # Validate experience levels
         experience_levels = [
@@ -125,12 +125,11 @@ class ConfigValidator:
         ]
         for level in experience_levels:
             if not isinstance(parameters["experience_level"].get(level), bool):
-                logger.error(
+                error_msg = (
                     f"Invalid value for experience level '{level}'. Expected a boolean (True/False)."
                 )
-                raise ConfigError(
-                    f"Experience level '{level}' must be a boolean in config file {config_yaml_path}"
-                )
+                errors.append(error_msg)
+                logger.error(error_msg)
 
         # Validate job types
         job_types = [
@@ -144,58 +143,52 @@ class ConfigValidator:
         ]
         for job_type in job_types:
             if not isinstance(parameters["job_types"].get(job_type), bool):
-                logger.error(
+                error_msg = (
                     f"Invalid value for job type '{job_type}'. Expected a boolean (True/False)."
                 )
-                raise ConfigError(
-                    f"Job type '{job_type}' must be a boolean in config file {config_yaml_path}"
-                )
+                errors.append(error_msg)
+                logger.error(error_msg)
 
         # Validate date filters
         date_filters = ["all_time", "month", "week", "24_hours"]
         for date_filter in date_filters:
             if not isinstance(parameters["date"].get(date_filter), bool):
-                logger.error(
+                error_msg = (
                     f"Invalid value for date filter '{date_filter}'. Expected a boolean (True/False)."
                 )
-                raise ConfigError(
-                    f"Date filter '{date_filter}' must be a boolean in config file {config_yaml_path}"
-                )
+                errors.append(error_msg)
+                logger.error(error_msg)
 
         # Validate positions and locations
         if not all(isinstance(pos, str) for pos in parameters["positions"]):
-            logger.error(
-                f"Invalid value in 'positions'. All entries must be strings."
-            )
-            raise ConfigError(
-                f"'positions' must be a list of strings in config file {config_yaml_path}"
-            )
+            error_msg = f"Invalid value in 'positions'. All entries must be strings."
+            errors.append(error_msg)
+            logger.error(error_msg)
+
         if not all(isinstance(loc, str) for loc in parameters["locations"]):
-            logger.error(
-                f"Invalid value in 'locations'. All entries must be strings."
-            )
-            raise ConfigError(
-                f"'locations' must be a list of strings in config file {config_yaml_path}"
-            )
+            error_msg = f"Invalid value in 'locations'. All entries must be strings."
+            errors.append(error_msg)
+            logger.error(error_msg)
 
         # Validate distance
         approved_distances = {0, 5, 10, 25, 50, 100}
         if parameters["distance"] not in approved_distances:
-            logger.error(
+            error_msg = (
                 f"Invalid distance value '{parameters['distance']}'. Must be one of {approved_distances}."
             )
-            raise ConfigError(
-                f"Invalid distance value in config file {config_yaml_path}. Must be one of: {approved_distances}"
-            )
+            errors.append(error_msg)
+            logger.error(error_msg)
 
         # Ensure blacklists are lists
         for blacklist in ["company_blacklist", "title_blacklist", "location_blacklist"]:
             if not isinstance(parameters.get(blacklist), list):
-                raise ConfigError(
-                    f"'{blacklist}' must be a list in config file {config_yaml_path}"
-                )
-            if parameters[blacklist] is None:
-                parameters[blacklist] = []
+                error_msg = f"'{blacklist}' must be a list in config file {config_yaml_path}"
+                errors.append(error_msg)
+                logger.error(error_msg)
+
+        # Raise a single ConfigError with all collected errors
+        if errors:
+            raise ConfigError("Configuration validation failed with the following errors:\n" + "\n".join(errors))
 
         logger.info("Configuration validated successfully.")
         return parameters
@@ -229,49 +222,6 @@ class ConfigValidator:
         return secrets["email"], str(secrets["password"]), secrets["llm_api_key"]
 
 
-class FileManager:
-    """Class for handling file operations related to the application."""
-
-    @staticmethod
-    def validate_data_folder(app_data_folder: Path) -> tuple:
-        """
-        Validates that the required files exist in the data folder.
-        """
-        if not app_data_folder.exists() or not app_data_folder.is_dir():
-            raise FileNotFoundError(f"Data folder not found: {app_data_folder}")
-
-        required_files = [SECRETS_YAML, WORK_PREFERENCES_YAML, PLAIN_TEXT_RESUME_YAML]
-        missing_files = [file for file in required_files if not (app_data_folder / file).exists()]
-        
-        if missing_files:
-            raise FileNotFoundError(
-                f"Missing files in the data folder: {', '.join(missing_files)}"
-            )
-
-        output_folder = app_data_folder / "output"
-        output_folder.mkdir(exist_ok=True)
-        return (app_data_folder / SECRETS_YAML, app_data_folder / WORK_PREFERENCES_YAML, app_data_folder / PLAIN_TEXT_RESUME_YAML, output_folder,)
-
-    @staticmethod
-    def file_paths_to_dict(
-        resume_file: Optional[Path], plain_text_resume_file: Path
-    ) -> dict:
-        """
-        Returns a dictionary containing paths to the resume and plain text resume files.
-        """
-        if not plain_text_resume_file.exists():
-            raise FileNotFoundError(
-                f"Plain text resume file not found: {plain_text_resume_file}"
-            )
-
-        result = {"plainTextResume": plain_text_resume_file}
-
-        if resume_file:
-            if not resume_file.exists():
-                raise FileNotFoundError(f"Resume file not found: {resume_file}")
-            result["resume"] = resume_file
-
-        return result
 
 
 def init_browser() -> webdriver.Chrome:
@@ -284,7 +234,7 @@ def init_browser() -> webdriver.Chrome:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
 
 
-def create_and_run_bot(email, password, parameters, llm_api_key):
+def create_and_run_bot(parameters, llm_api_key):
     """
     Initializes and runs the AIHawk bot with the provided parameters.
     """
@@ -338,8 +288,7 @@ def create_and_run_bot(email, password, parameters, llm_api_key):
         # Create AIHawkBotFacade object
         bot = AIHawkBotFacade(login_component, apply_component)
 
-        # Set secrets, job application profile, resume, and parameters
-        bot.set_secrets(email, password)
+        # Set job application profile, resume, and parameters
         bot.set_job_application_profile_and_resume(
             job_application_profile_object, resume_object
         )
@@ -349,7 +298,7 @@ def create_and_run_bot(email, password, parameters, llm_api_key):
         bot.set_parameters(parameters)
 
         # Start login process
-        logger.info("Starting bot login process...")
+        logger.info("Prompting user for login...")
         bot.start_login()
 
         # Determine operation mode
@@ -393,7 +342,7 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         ) = FileManager.validate_data_folder(data_folder)
 
         parameters = ConfigValidator.validate_config(config_file)
-        email, password, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
+        _, _, llm_api_key = ConfigValidator.validate_secrets(secrets_file)
 
         parameters["uploads"] = FileManager.file_paths_to_dict(
             resume, plain_text_resume_file
@@ -401,7 +350,7 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         parameters["outputFileDirectory"] = output_folder
         parameters["collectMode"] = collect
 
-        create_and_run_bot(email, password, parameters, llm_api_key)
+        create_and_run_bot(parameters, llm_api_key)
     except ConfigError as ce:
         logger.error(f"Configuration error: {str(ce)}")
         logger.error(

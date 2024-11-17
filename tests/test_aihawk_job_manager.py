@@ -1,11 +1,12 @@
 import json
 import re
+
+from src.ai_hawk.job_manager import AIHawkJobManager
 from src.job import Job
 from unittest import mock
 from pathlib import Path
 import os
 import pytest
-from ai_hawk.job_manager import AIHawkJobManager
 from selenium.common.exceptions import NoSuchElementException
 from src.logging import logger
 

@@ -11,15 +11,14 @@ from inputimeout import TimeoutOccurred, inputimeout
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-import utils.browser_utils as browser_utils
-import utils.time_utils
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier, ApplicationLimitReachedException
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
+from src import utils
+from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier, ApplicationLimitReachedException
 from src.extractors.extraction_chains import EXTRACTORS
 from src.job import Job
 from src.logging import logger
 from src.regex_utils import generate_regex_patterns_for_blacklisting
-from utils import utils
+from src.utils import browser_utils
 
 
 class EnvironmentKeys:
@@ -41,7 +40,7 @@ class AIHawkJobManager:
     def __init__(self, driver):
         logger.debug("Initializing AIHawkJobManager")
         self.driver = driver
-        self.set_old_answers = []
+        self.set_old_answers = set()
         self.easy_applier_component = None
         self.job_application_profile = None
         self.seen_jobs = []

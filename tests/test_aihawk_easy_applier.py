@@ -1,8 +1,9 @@
 import pytest
 from unittest import mock
 
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 
+from src import job_application_profile
+from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 
 
 @pytest.fixture
@@ -31,7 +32,8 @@ def easy_applier(mock_driver, mock_gpt_answerer, mock_resume_generator_manager):
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],
         gpt_answerer=mock_gpt_answerer,
-        resume_generator_manager=mock_resume_generator_manager
+        resume_generator_manager=mock_resume_generator_manager,
+        job_application_profile=job_application_profile
     )
 
 
@@ -45,7 +47,8 @@ def test_initialization(mocker, easy_applier):
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],
         gpt_answerer=mocker.Mock(),
-        resume_generator_manager=mocker.Mock()
+        resume_generator_manager=mocker.Mock(),
+        job_application_profile=job_application_profile
     )
 
     assert easy_applier.resume_path == "/path/to/resume"

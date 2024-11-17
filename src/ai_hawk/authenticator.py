@@ -133,6 +133,10 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
     Handles the authentication process for LinkedIn using Selenium WebDriver.
     """
 
+    def __init__(self, driver, bot_facade=None):
+        super().__init__(driver, bot_facade)
+        self.prompt_for_credentials = None
+
     @property
     def home_url(self):
         return "https://www.linkedin.com/feed"
