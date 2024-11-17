@@ -1,7 +1,6 @@
 import logging.handlers
 import os
 import sys
-import time
 import logging
 from loguru import logger
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
@@ -41,6 +40,7 @@ def init_loguru_logger():
             format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
             backtrace=True,
             diagnose=True,
+            encoding="utf-8",  # Ensure UTF-8 encoding for the log file
         )
 
     # Add console logger if LOG_TO_CONSOLE is True
@@ -51,6 +51,8 @@ def init_loguru_logger():
             format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
             backtrace=True,
             diagnose=True,
+            colorize=True,  # Enable color output for console
+            encoding="utf-8",  # Ensure UTF-8 encoding for console output
         )
 
 
@@ -65,7 +67,7 @@ def init_selenium_logger():
 
     # Create file handler for selenium logger
     file_handler = logging.handlers.TimedRotatingFileHandler(
-        log_file, when="D", interval=1, backupCount=5
+        log_file, when="D", interval=1, backupCount=5, encoding="utf-8"  # Ensure UTF-8 encoding for selenium log file
     )
     file_handler.setLevel(LOG_SELENIUM_LEVEL)
 
