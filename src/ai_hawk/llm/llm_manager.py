@@ -695,8 +695,14 @@ class GPTAnswerer:
         )
         output = self._clean_llm_output(raw_output)
         logger.debug(f"Job suitability output: {output}")
-        score = re.search(r"Score: (\d+)", output).group(1)
-        reasoning = re.search(r"Reasoning: (.+)", output, re.DOTALL).group(1)
+
+        try:
+            score = re.search(r"Score:\s*(\d+)", output, re.IGNORECASE).group(1)
+            reasoning = re.search(r"Reasoning:\s*(.+)", output, re.IGNORECASE | re.DOTALL).group(1)
+        except AttributeError:
+            logger.warning("Failed to extract score or reasoning from LLM. Proceeding with application, but job may or may not be suitable.")
+            return True
+
         logger.info(f"Job suitability score: {score}")
         if int(score) < JOB_SUITABILITY_SCORE:
             logger.debug(f"Job is not suitable: {reasoning}")
