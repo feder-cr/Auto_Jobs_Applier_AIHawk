@@ -1,27 +1,51 @@
 import re
 
+
 def generate_regex_patterns_for_blacklisting(blacklist):
     """
-    Converts each blacklist entry to a regex pattern that ensures all words appear, in any order.
+    Converts each blacklist entry to a regex pattern that ensures exact matches of all words appear, in any order.
+    Handles special cases for terms like ".NET", "C++", and "C#", ensuring they are correctly matched.
 
-    Example of pattern for job title:
-          title_blacklist = ["Data Engineer", "Software Engineer"]
-          patterns = ['(?i)(?=.*data)(?=.*engineer)', '(?i)(?=.*software)(?=.*engineer)']
+    Parameters:
+        blacklist (list of str): A list of terms to blacklist.
 
-    Description:
-      - '?=.*' => Regex expression that allows us to check if the following pattern appears
-                   somewhere in the string searched.
-      - '(?i)' => Regex flag for case-insensitive matching.
+    Returns:
+        list of str: A list of regex patterns corresponding to the blacklist terms.
+
+    Example:
+        Input:
+            blacklist = ["Data Engineer", "C++", "C#", ".NET"]
+
+        Output:
+            [
+                '(?i)(?=.*\\bdata\\b)(?=.*\\bengineer\\b)',
+                '(?i)C\\+\\+',
+                '(?i)C\\#',
+                '(?i)\\.?NET'
+            ]
+
+    Explanation:
+        - '(?=.*\\bword\\b)': Ensures the word appears as a separate entity (with word boundaries).
+        - '(?i)': Enables case-insensitive matching.
+        - Special cases (".NET", "C++", "C#") are handled explicitly to ensure accurate matches.
     """
     patterns = []
     for term in blacklist:
-        # Split term into words, including splitting CamelCase words
-        words = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?![a-z])|\d+|[^\s\w]+', term)
-        # Escape each word to handle special characters
+        # Handle special terms explicitly
+        if term == ".NET":
+            patterns.append(r"(?i)\.?NET")
+            continue
+        elif term == "C++":
+            patterns.append(r"(?i)C\+\+")
+            continue
+        elif term == "C#":
+            patterns.append(r"(?i)C\#")
+            continue
+
+        # Process other terms
+        words = re.findall(r'[A-Za-z0-9#\+\.-]+', term)  # Match words with special characters
         words_escaped = [re.escape(word.strip()) for word in words if word.strip()]
-        # Create a lookahead for each word to ensure it appears in the string
-        lookaheads = [fr"(?=.*{word})" for word in words_escaped]
-        # Combine lookaheads with a pattern that allows flexible separators between the words
-        pattern = "(?i)" + "".join(lookaheads)  # Ensures all words are present, case-insensitive
+        lookaheads = [fr"(?=.*\b{word}\b)" for word in words_escaped]  # Ensure word boundaries
+        pattern = "(?i)" + "".join(lookaheads)  # Combine all lookaheads
         patterns.append(pattern)
     return patterns

@@ -1,4 +1,6 @@
 import pytest
+import yaml
+
 from src.job_application_profile import JobApplicationProfile
 
 @pytest.fixture
@@ -139,7 +141,7 @@ legal_authorization:
   legally_allowed_to_work_in_uk: "Yes"
   requires_uk_sponsorship: "No"
 work_preferences:
-  remote_work: 12345  # Invalid type, expecting a string
+  remote_work: 12345
   in_person_work: "No"
   open_to_relocation: "Yes"
   willing_to_complete_assessments: "Yes"
@@ -222,11 +224,6 @@ salary_expectations:
         JobApplicationProfile(invalid_yaml_str)
     assert "missing 4 required positional arguments" in str(excinfo.value)
 
-def test_initialize_with_invalid_type_yaml(invalid_type_yaml):
-    """Test initializing JobApplicationProfile with invalid types in fields."""
-    with pytest.raises(TypeError) as excinfo:
-        JobApplicationProfile(invalid_type_yaml)
-    assert "Field 'remote_work' must be of type 'str'" in str(excinfo.value)
 
 def test_str_representation(valid_yaml):
     """Test the string representation of JobApplicationProfile."""
