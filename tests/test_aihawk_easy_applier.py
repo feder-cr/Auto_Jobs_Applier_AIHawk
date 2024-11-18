@@ -82,20 +82,26 @@ def test_apply_to_job_failure(mocker, easy_applier):
 
 def test_check_for_premium_redirect_no_redirect(mocker, easy_applier):
     """Test that check_for_premium_redirect works when there's no redirect."""
-    mock_job = mock.Mock()
+    mock_job = mocker.Mock()
     easy_applier.driver.current_url = "https://www.linkedin.com/jobs/view/1234"
+
+    # Mock _is_survey_page to return False
+    mocker.patch.object(easy_applier, '_is_survey_page', return_value=False)
 
     easy_applier.check_for_premium_redirect(mock_job)
     easy_applier.driver.get.assert_not_called()
 
 
 def test_check_for_premium_redirect_with_redirect(mocker, easy_applier):
-    """Test that check_for_premium_redirect handles linkedin Premium redirects."""
-    mock_job = mock.Mock()
+    """Test that check_for_premium_redirect handles LinkedIn Premium redirects."""
+    mock_job = mocker.Mock()
     easy_applier.driver.current_url = "https://www.linkedin.com/premium"
     mock_job.link = "https://www.linkedin.com/jobs/view/1234"
 
-    with pytest.raises(Exception, match="Redirected to linkedIn Premium page and failed to return after 3 attempts. Job application aborted."):
+    # Mock _is_survey_page to return False
+    mocker.patch.object(easy_applier, '_is_survey_page', return_value=False)
+
+    with pytest.raises(Exception, match="Redirected to LinkedIn Premium or survey page and unable to return after 3 attempts. Application aborted."):
         easy_applier.check_for_premium_redirect(mock_job)
 
     # Verify that it attempted to return to the job page 3 times
