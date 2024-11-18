@@ -1,5 +1,3 @@
-from attr import dataclass
-
 from src.job import Job
 
 

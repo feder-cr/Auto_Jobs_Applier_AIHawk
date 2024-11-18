@@ -20,7 +20,6 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-import src.utils as utils
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from src.job import Job
 from src.jobContext import JobContext
@@ -28,6 +27,7 @@ from src.job_application import JobApplication
 from src.job_application_saver import ApplicationSaver
 from src.logging import logger
 from src.utils import browser_utils
+from src.utils.time_utils import medium_sleep
 
 
 class ApplicationLimitReachedException(Exception):
@@ -165,7 +165,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to navigate to job link: {job.link}, error: {str(e)}")
             raise
 
-        utils.time_utils.medium_sleep()
+        medium_sleep()
         self.check_for_premium_redirect(job)
 
         try:
@@ -480,9 +480,9 @@ class AIHawkEasyApplier:
         logger.debug("Discarding the application")
         try:
             self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__dismiss').click()
-            time.sleep(random.uniform(3, 5))
+            medium_sleep()
             self.driver.find_elements(By.CLASS_NAME, 'artdeco-modal__confirm-dialog-btn')[0].click()
-            time.sleep(random.uniform(3, 5))
+            medium_sleep()
         except Exception as e:
             logger.warning(f"Failed to discard the application: {e}")
 
@@ -937,7 +937,9 @@ class AIHawkEasyApplier:
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
         logger.debug("Searching for text fields in the section.")
-        text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
+        text_fields = section.find_elements(By.TAG_NAME, 'input') + \
+                      section.find_elements(By.TAG_NAME, 'textarea') + \
+                      section.find_elements(By.XPATH, ".//div[contains(@class, 'artdeco-text-input')]//input")
 
         if text_fields:
             text_field = text_fields[0]
@@ -948,7 +950,7 @@ class AIHawkEasyApplier:
                 question_text = section.text.lower().strip()
             logger.debug(f"Found text field with label: {question_text}")
 
-            current_value = text_field.get_attribute('value').strip()
+            current_value = text_field.get_attribute('value').strip() if text_field.get_attribute('value') else ""
             logger.debug(f"Current field value: '{current_value}'")
 
             if self._is_field_filled_correctly(current_value, question_text):
@@ -980,13 +982,15 @@ class AIHawkEasyApplier:
 
             if is_numeric:
                 answer = self.gpt_answerer.answer_question_numeric(question_text)
-                question_type = 'numeric'
-                logger.debug(f"Generated numeric answer: {answer}")
+                if not answer.isdigit() or not (0 <= int(answer) <= 99):
+                    logger.warning(f"Generated numeric answer '{answer}' is out of valid range (0-99). Adjusting...")
+                    answer = "0" if int(answer) < 0 else "99" if int(answer) > 99 else answer
+                logger.debug(f"Validated numeric answer: {answer}")
             else:
                 answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
-                question_type = 'textbox'
                 logger.debug(f"Generated textual answer: {answer}")
 
+            question_type = 'numeric' if is_numeric else 'textbox'
             self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
             self._enter_text(text_field, answer)
             logger.debug("New answer entered into text field and saved to JSON.")
@@ -995,6 +999,14 @@ class AIHawkEasyApplier:
             text_field.send_keys(Keys.ARROW_DOWN)
             text_field.send_keys(Keys.ENTER)
             logger.debug("First option from dropdown selected.")
+
+            error_message_element = section.find_elements(By.CLASS_NAME, 'artdeco-inline-feedback__message')
+            if error_message_element:
+                error_text = error_message_element[0].text.strip()
+                logger.error(f"Error after entering value: {error_text}")
+                raise ValueError(f"Field validation failed with error: {error_text}")
+
+
             return True
 
         logger.debug("No text fields found in the section.")

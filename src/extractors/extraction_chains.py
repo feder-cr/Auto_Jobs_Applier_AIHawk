@@ -6,7 +6,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from src.logging import logger
 
-# An interface that defines different extraction strategies for the linkedin jobs page.
+# An interface that defines different extraction strategies for the LinkedIn jobs page.
 class Extractor(ABC):
     @abstractmethod
     def get_job_list(self, driver) -> list[Job]:

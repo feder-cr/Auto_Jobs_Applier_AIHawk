@@ -19,6 +19,7 @@ from src.job import Job
 from src.logging import logger
 from src.regex_utils import generate_regex_patterns_for_blacklisting
 from src.utils import browser_utils, time_utils
+from src.utils.time_utils import medium_sleep
 
 
 class EnvironmentKeys:
@@ -352,7 +353,7 @@ class AIHawkJobManager:
                     logger.info(f"Waiting for {time_to_wait / 60} minutes before checking again.")
                     time.sleep(time_to_wait)
                     self.driver.refresh()
-                    time.sleep(random.uniform(3, 5))
+                    medium_sleep()
                     try:
                         # Check if the limit has been lifted
                         if not self.easy_applier_component.is_application_limit_reached():

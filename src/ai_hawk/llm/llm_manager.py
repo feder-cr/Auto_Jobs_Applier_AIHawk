@@ -9,14 +9,15 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import httpx
-from dotenv import load_dotenv
 from Levenshtein import distance
+from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage
 from langchain_core.messages.ai import AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue, ChatPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 
+import config as cfg
 from config import JOB_SUITABILITY_SCORE
 from constants import (
     AVAILABILITY,
@@ -37,7 +38,6 @@ from constants import (
     JOB_DESCRIPTION,
     LANGUAGES,
     LEGAL_AUTHORIZATION,
-    LLM_MODEL_TYPE,
     LOGPROBS,
     MODEL,
     MODEL_NAME,
@@ -71,7 +71,6 @@ from constants import (
 from src.ai_hawk.llm import prompts
 from src.job import Job
 from src.logging import logger
-import config as cfg
 
 load_dotenv()
 
@@ -250,6 +249,7 @@ class LLMLogger:
             prompts = prompts.text
             logger.debug(f"Prompts converted to text: {prompts}")
         elif isinstance(prompts, ChatPromptValue):
+            logger.debug("Prompts are of type ChatPromptValue")
             prompts = prompts.to_dict() if hasattr(prompts, 'to_dict') else repr(prompts)
             logger.debug(f"Prompts converted to dictionary: {prompts}")
         elif isinstance(prompts, Dict):
@@ -264,6 +264,7 @@ class LLMLogger:
                 logger.error(f"Error converting prompts to dictionary: {str(e)}")
                 raise
         else:
+            logger.debug("Prompts are of unknown type, converting to string with repr()")
             prompts = repr(prompts)
             logger.debug(f"Prompts converted to string: {prompts}")
 
@@ -693,3 +694,26 @@ class GPTAnswerer:
         is_suitable = score >= JOB_SUITABILITY_SCORE
         logger.info(f"Job is {'suitable' if is_suitable else 'not suitable'}")
         return is_suitable
+
+    def answer_question_date(self, question: str) -> datetime:
+        logger.debug("Answering date question: %s", question)
+
+        date_prompt_template = """
+        You are assisting a bot designed to automatically apply for jobs on LinkedIn. The bot needs to provide a date based on the following question: '{question}'.
+
+        Provide a valid date in the format 'YYYY-MM-DD'. Do not include any other text or comments.
+        """
+        prompt = ChatPromptTemplate.from_template(date_prompt_template)
+        chain = prompt | self.llm_cheap | StrOutputParser()
+
+        output_str = chain.invoke({"question": question})
+        logger.debug(f"Model's date response: {output_str}")
+
+        try:
+            answer_date = datetime.strptime(output_str.strip(), "%Y-%m-%d")
+            logger.debug(f"Parsed date: {answer_date}")
+            return answer_date
+        except ValueError as e:
+            logger.error(f"Failed to parse date from model's response: {e}")
+            raise ValueError("Model returned an invalid date format.")
+

@@ -1,15 +1,12 @@
-import random
-import time
-
 from abc import ABC, abstractmethod
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoAlertPresentException, \
-    UnexpectedAlertPresentException
+
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.logging import logger
-from src.utils.file_manager import FileManager
+from src.utils.time_utils import medium_sleep
 
 
 def get_authenticator(driver, platform, config=None):
@@ -105,8 +102,9 @@ class AIHawkAuthenticator(ABC):
         except NoSuchElementException as e:
             logger.error(f"Could not log in. Element not found: {e}")
             raise
-        time.sleep(random.uniform(3, 5))
+        medium_sleep()
         self.handle_security_checks()
+
 
     def wait_for_page_load(self, timeout=10):
         """
@@ -123,6 +121,7 @@ class AIHawkAuthenticator(ABC):
             logger.debug("Page load completed.")
         except TimeoutException:
             logger.error("Page load timed out.")
+
 
 
 class LinkedInAuthenticator(AIHawkAuthenticator):
@@ -150,39 +149,6 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
         keywords = ['feed', 'mynetwork', 'jobs', 'messaging', 'notifications']
         return any(item in self.driver.current_url for item in keywords) and 'linkedin.com' in self.driver.current_url
 
-
-    def prompt_for_credentials(self):
-        """
-        Automatically enters email and password if provided in config.
-        Otherwise, prompts user for manual login.
-        """
-        if self.email and self.password:
-            try:
-                logger.debug("Auto-filling credentials from config.")
-                email_input = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.ID, "username"))
-                )
-                password_input = self.driver.find_element(By.ID, "password")
-
-                email_input.clear()
-                email_input.send_keys(self.email)
-                password_input.clear()
-                password_input.send_keys(self.password)
-
-                login_button = self.driver.find_element(By.XPATH, "//button[@type='submit']")
-                login_button.click()
-
-                logger.info("Credentials submitted, waiting for login completion.")
-                WebDriverWait(self.driver, 30).until(EC.url_contains('/feed/'))
-                logger.info("Login successful!")
-            except (NoSuchElementException, TimeoutException) as e:
-                logger.error(f"Error during auto-login: {e}")
-                logger.info("Falling back to manual login.")
-                super().prompt_for_credentials()
-        else:
-            logger.info("No email or password provided in config. Manual login required.")
-            super().prompt_for_credentials()
-
     def handle_security_checks(self):
         try:
             logger.debug("Handling security check...")
@@ -199,7 +165,11 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
 
     def enter_credentials(self):
         if not self.email or not self.password:
-            logger.info("No email or password provided. User must log in manually.")
+            logger.info("No email or password provided. Please log in manually.")
+
+            WebDriverWait(self.driver, 300).until(
+                lambda d: self.is_logged_in
+            )
             return
 
         try:
@@ -239,18 +209,3 @@ class LinkedInAuthenticator(AIHawkAuthenticator):
             logger.debug("Login form submitted.")
         except NoSuchElementException:
             logger.error("Login button not found. Please verify the page structure.")
-
-    def handle_security_checks(self):
-        try:
-            logger.debug("Handling security check...")
-            WebDriverWait(self.driver, 10).until(
-                EC.url_contains('https://www.linkedin.com/checkpoint/challengesV2/')
-            )
-            logger.warning("Security checkpoint detected. Please complete the challenge.")
-            WebDriverWait(self.driver, 300).until(
-                EC.url_contains('https://www.linkedin.com/feed/')
-            )
-            logger.info("Security check completed.")
-        except TimeoutException:
-            logger.error("Security check not completed. Please try again later.")
-
