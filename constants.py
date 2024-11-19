@@ -1,3 +1,9 @@
+# constants used in application
+SECRETS_YAML = "secrets.yaml"
+WORK_PREFERENCES_YAML = "work_preferences.yaml"
+PLAIN_TEXT_RESUME_YAML = "plain_text_resume.yaml"
+
+
 # String constants used in the application
 DEBUG = "DEBUG"
 INFO = "INFO"
@@ -58,7 +64,10 @@ LLM_MODEL_TYPE = "llm_model_type"
 LLM_API_URL = "llm_api_url"
 LLM_MODEL = "llm_model"
 OPENAI = "openai"
+AIML="aiml"
 CLAUDE = "claude"
 OLLAMA = "ollama"
 GEMINI = "gemini"
+GROQ = "groq"
 HUGGINGFACE = "huggingface"
+PERPLEXITY = "perplexity"
