@@ -107,13 +107,15 @@ class AIHawkEasyApplier:
         """
         logger.debug(f"Applying to job: {job}")
         try:
-            self.job_apply(job)
-            logger.info(f"Successfully applied to job: {job.title}")
+            if self.job_apply(job):
+                logger.info(f"Successfully applied to job: {job.title}")
+            else:
+                logger.info(f"Failed to apply to job: {job.title}")
         except Exception as e:
             logger.error(f"Failed to apply to job: {job.title}, error: {str(e)}")
             raise e
 
-    def job_apply(self, job: Job):
+    def job_apply(self, job: Job) -> bool:
         logger.debug(f"Starting job application for job: {job}")
         job_context = JobContext()
         job_context.job = job
@@ -157,7 +159,7 @@ class AIHawkEasyApplier:
             
             # Todo: add this job to skip list with it's reason
             if not self.gpt_answerer.is_job_suitable():
-                return
+                return False
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
@@ -168,6 +170,7 @@ class AIHawkEasyApplier:
             self._fill_application_form(job_context)
             logger.debug(f"Job application process completed successfully for job: {job}")
 
+            return True
         except Exception as e:
 
             tb_str = traceback.format_exc()

@@ -4,7 +4,6 @@ import random
 import time
 from itertools import product
 from pathlib import Path
-from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -388,9 +387,12 @@ class AIHawkJobManager:
                 continue
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
-                    self.easy_applier_component.job_apply(job)
-                    self.write_to_file(job, "success")
-                    logger.debug(f"Applied to job: {job.title} at {job.company}")
+                    if self.easy_applier_component.job_apply(job):
+                        self.write_to_file(job, "success")
+                        logger.debug(f"Applied to job: {job.title} at {job.company}")
+                    else:
+                        self.write_to_file(job, "failed", "LLM scored your profile and found the role unsuitable for you.")
+                        logger.debug(f"Failed to apply for {job.title} at {job.company}")
             except Exception as e:
                 logger.error(f"Failed to apply for {job.title} at {job.company}: {e}",exc_info=True)
                 self.write_to_file(job, "failed", f"Application error: {str(e)}")
