@@ -53,6 +53,3 @@ job_applicants_threshold:
 llm_model_type: openai
 llm_model: "gpt-4o-mini"
 # llm_api_url: 'https://api.pawan.krd/cosmosrp/v1'
-# azure config
-azure_model_deployment_name: "gpt-4o-mini"
-azure_api_version: "2024-08-01-preview"
