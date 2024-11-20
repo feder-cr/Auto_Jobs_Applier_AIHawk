@@ -232,16 +232,11 @@ class AIAdapter:
     def _create_model(self, config: dict, api_key: str) -> AIModel:
         llm_model_type = cfg.LLM_MODEL_TYPE
         llm_model = cfg.LLM_MODEL
-
-<<<<<<< HEAD
-        llm_api_url = config.get('llm_api_url', "")
+        llm_api_url = cfg.LLM_API_URL
         
         # Azure specific config
-        azure_model_deployment_name = config.get('azure_model_deployment_name', "")
-        azure_api_version = config.get('azure_api_version', "")
-=======
-        llm_api_url = cfg.LLM_API_URL
->>>>>>> release/v4.1.0
+        azure_model_deployment_name = cfg.AZURE_MODEL_DEPLOYMENT_NAME
+        azure_api_version = cfg.AZURE_API_VERSION
 
         logger.debug(f"Using {llm_model_type} with {llm_model}")
 
@@ -255,19 +250,16 @@ class AIAdapter:
             return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == GEMINI:
             return GeminiModel(api_key, llm_model)
-<<<<<<< HEAD
         elif llm_model_type == "huggingface":
             return HuggingFaceModel(api_key, llm_model)
         elif llm_model_type == "azure":
             return AzureModel(api_key, azure_model_deployment_name, azure_api_version, llm_api_url)        
-=======
         elif llm_model_type == GROQ:
             return GroqAIModel(api_key, llm_model)     
         elif llm_model_type == HUGGINGFACE:
             return HuggingFaceModel(api_key, llm_model)
         elif llm_model_type == PERPLEXITY:
             return PerplexityModel(api_key, llm_model)
->>>>>>> release/v4.1.0
         else:
             raise ValueError(f"Unsupported model type: {llm_model_type}")
 

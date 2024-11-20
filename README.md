@@ -300,6 +300,12 @@ This file defines your job search parameters and bot behavior. Each section cont
         -   claude: <https://api.anthropic.com/v1>
         -   gemini: <https://aistudio.google.com/app/apikey>
         -   groq: <https://api.groq.com/v1>
+        -   azure: find your endpoint url in your model deployment
+-   `azure_model_deployment_name`:
+    -   The deployment name of your model
+-   `azure_api_version`
+    -   example: `2024-08-01-preview`
+    -   for more api version: <https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation>
 -   Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
 
 ### 3. plain_text_resume.yaml

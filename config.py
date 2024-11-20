@@ -20,3 +20,7 @@ LLM_MODEL_TYPE = 'openai'
 LLM_MODEL = 'gpt-4o-mini'
 # Only required for OLLAMA models
 LLM_API_URL = ''
+
+# azure config
+AZURE_MODEL_DEPLOYMENT_NAME = 'gpt-4o-mini'
+AZURE_API_VERSION = '2024-08-01-preview'
