@@ -696,7 +696,11 @@ class GPTAnswerer:
         output = self._clean_llm_output(raw_output)
         logger.debug(f"Job suitability output: {output}")
         score = re.search(r"Score: (\d+)", output).group(1)
-        reasoning = re.search(r"Reasoning: (.+)", output, re.DOTALL).group(1)
+        reasoning_match = re.search(r"Reasoning:\s*(.+)", output, re.DOTALL)
+        if reasoning_match:
+            reasoning = reasoning_match.group(1)
+        else:
+            reasoning = ""
         logger.info(f"Job suitability score: {score}")
         if int(score) < JOB_SUITABILITY_SCORE:
             logger.debug(f"Job is not suitable: {reasoning}")
