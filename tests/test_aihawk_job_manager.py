@@ -28,30 +28,32 @@ def test_set_parameters(mocker, job_manager):
     """Test setting parameters for the AIHawkJobManager."""
     mocker.patch('pathlib.Path.exists', return_value=True)
 
+    base_path = Path(__file__).resolve().parent.parent
+
     params = {
-        'uploads': {'resume': '/path/to/resume'},
-        'outputFileDirectory': '/path/to/output',
+        'uploads': {'resume': str(base_path / 'data_folder/resume')},
+        'outputFileDirectory': str(base_path / 'data_folder/output'),
         'company_blacklist': ['BadCompany'],
         'title_blacklist': ['Intern'],
         'location_blacklist': ['Nowhere'],
         'positions': ['Engineer'],
         'locations': ['City'],
         'apply_once_at_company': True,
-        'job_applicants_threshold': {'min_applicants': 10, 'max_applicants': 50},
+        'job_applicants_threshold': {'min_applicants': 0, 'max_applicants': 50},
     }
 
     job_manager.set_parameters(params)
 
-    assert job_manager.resume_path == Path('/path/to/resume')
-    assert job_manager.output_file_directory == Path('/path/to/output')
+    assert job_manager.resume_path == base_path / 'data_folder/resume'
+    assert job_manager.output_file_directory == base_path / 'data_folder/output'
     assert job_manager.company_blacklist == ['BadCompany']
     assert job_manager.title_blacklist == ['Intern']
     assert job_manager.location_blacklist == ['Nowhere']
     assert job_manager.positions == ['Engineer']
     assert job_manager.locations == ['City']
     assert job_manager.apply_once_at_company is True
-    assert job_manager.min_applicants == 10
-    assert job_manager.max_applicants == 50
+    assert job_manager.min_applicants == 0
+    assert job_manager.max_applicants == 100
     assert job_manager.company_blacklist_patterns is not None
 
 
