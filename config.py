@@ -1,4 +1,5 @@
 # In this file, you can set the configurations of the app.
+from pathlib import Path
 
 from constants import DEBUG, LLM_MODEL, OPENAI
 
@@ -9,12 +10,14 @@ LOG_TO_FILE = True
 LOG_TO_CONSOLE = True
 
 MINIMUM_WAIT_TIME_IN_SECONDS = 60
+BASE_DIR = Path(__file__).resolve().parent
+OUTPUT_FILE_DIRECTORY = BASE_DIR / 'data_folder' / 'output'
 
 JOB_APPLICATIONS_DIR = "job_applications"
 JOB_SUITABILITY_SCORE = 7
 
-JOB_MAX_APPLICATIONS = 5
-JOB_MIN_APPLICATIONS = 1
+JOB_MAX_APPLICATIONS = 100
+JOB_MIN_APPLICATIONS = 0
 
 LLM_MODEL_TYPE = 'openai'
 LLM_MODEL = 'gpt-4o-mini'

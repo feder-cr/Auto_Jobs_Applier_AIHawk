@@ -19,6 +19,15 @@ class PersonalInformation:
     github: str
     linkedin: str
 
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        for field_name, field_type in self.__annotations__.items():
+            value = getattr(self, field_name)
+            if not isinstance(value, str):
+                raise TypeError(f"Field '{field_name}' must be of type 'str', got '{type(value).__name__}'")
+
 
 @dataclass
 class SelfIdentification:
@@ -27,6 +36,15 @@ class SelfIdentification:
     veteran: str
     disability: str
     ethnicity: str
+
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        for field_name, field_type in self.__annotations__.items():
+            value = getattr(self, field_name)
+            if not isinstance(value, str):
+                raise TypeError(f"Field '{field_name}' must be of type 'str', got '{type(value).__name__}'")
 
 
 @dataclass
@@ -48,6 +66,15 @@ class LegalAuthorization:
     legally_allowed_to_work_in_uk: str
     requires_uk_sponsorship: str
 
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        for field_name, field_type in self.__annotations__.items():
+            value = getattr(self, field_name)
+            if not isinstance(value, str):
+                raise TypeError(f"Field '{field_name}' must be of type 'str', got '{type(value).__name__}'")
+
 
 @dataclass
 class WorkPreferences:
@@ -58,15 +85,38 @@ class WorkPreferences:
     willing_to_undergo_drug_tests: str
     willing_to_undergo_background_checks: str
 
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        for field_name, field_type in self.__annotations__.items():
+            value = getattr(self, field_name)
+            if not isinstance(value, str):
+                raise TypeError(f"Field '{field_name}' must be of type 'str', got '{type(value).__name__}'")
+
 
 @dataclass
 class Availability:
     notice_period: str
 
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        if not isinstance(self.notice_period, str):
+            raise TypeError(f"Field 'notice_period' must be of type 'str', got '{type(self.notice_period).__name__}'")
+
 
 @dataclass
 class SalaryExpectations:
     salary_range_usd: str
+
+    def __post_init__(self):
+        self._validate_types()
+
+    def _validate_types(self):
+        if not isinstance(self.salary_range_usd, str):
+            raise TypeError(f"Field 'salary_range_usd' must be of type 'str', got '{type(self.salary_range_usd).__name__}'")
 
 
 @dataclass
@@ -81,15 +131,6 @@ class JobApplicationProfile:
     def __init__(self, yaml_str: str):
         """
         Initializes the JobApplicationProfile with data parsed from a YAML string.
-
-        Args:
-            yaml_str (str): The YAML string containing the profile data.
-
-        Raises:
-            ValueError: If there is an error parsing the YAML string.
-            TypeError: If the YAML data is not a dictionary.
-            KeyError: If required fields are missing in the YAML data.
-            RuntimeError: If an unexpected error occurs during initialization.
         """
         logger.debug("Initializing JobApplicationProfile with provided YAML string")
         try:
@@ -213,9 +254,6 @@ class JobApplicationProfile:
     def __str__(self):
         """
         Returns a string representation of the JobApplicationProfile.
-
-        Returns:
-            str: The formatted string representation of the profile.
         """
         logger.debug("Generating string representation of JobApplicationProfile")
 

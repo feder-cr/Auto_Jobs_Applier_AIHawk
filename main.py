@@ -337,7 +337,7 @@ def main(collect: bool = False, resume: Optional[Path] = None):
             secrets_file,
             config_file,
             plain_text_resume_file,
-            output_folder,
+            OUTPUT_FILE_DIRECTORY,
         ) = FileManager.validate_data_folder(data_folder)
 
         parameters = ConfigValidator.validate_config(config_file)
@@ -346,7 +346,6 @@ def main(collect: bool = False, resume: Optional[Path] = None):
         parameters["uploads"] = FileManager.file_paths_to_dict(
             resume, plain_text_resume_file
         )
-        parameters["outputFileDirectory"] = output_folder
         parameters["collectMode"] = collect
         parameters["email"] = email
         parameters["password"] = password

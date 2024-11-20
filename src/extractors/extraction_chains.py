@@ -47,7 +47,6 @@ class Extractor1(Extractor):
         logger.debug("Extracting job information from tile")
         job_title, company, job_location, apply_method, link = "", "", "", "", ""
         try:
-            print(job_tile.get_attribute("outerHTML"))
             job_title = (
                 job_tile.find_element(By.CLASS_NAME, "job-card-list__title")
                 .find_element(By.TAG_NAME, "strong")
@@ -103,7 +102,7 @@ class Extractor2(Extractor):
                 "li.ember-view.jobs-search-results__list-item.occludable-update.p0.relative.scaffold-layout__list-item",
             )
 
-            print(f"Number of job elements found: {len(job_list_elements)}")
+            logger.debug(f"Number of job elements found: {len(job_list_elements)}")
 
             if not job_list_elements:
                 raise Exception("No job elements found on page")
@@ -137,7 +136,7 @@ class Extractor2(Extractor):
                 By.CSS_SELECTOR, ".job-card-container__apply-method"
             ).text
         except NoSuchElementException as e:
-            print(f"Error extracting job information: {str(e)}")
+            logger.error(f"Error extracting job information: {str(e)}")
 
         return job_title, company, job_location, link, apply_method
 

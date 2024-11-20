@@ -20,6 +20,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from config import OUTPUT_FILE_DIRECTORY
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
 from src.job import Job
 from src.jobContext import JobContext
@@ -27,6 +28,7 @@ from src.job_application import JobApplication
 from src.job_application_saver import ApplicationSaver
 from src.logging import logger
 from src.utils import browser_utils
+from src.utils.file_manager import FileManager
 from src.utils.time_utils import medium_sleep
 
 
@@ -171,6 +173,7 @@ class AIHawkEasyApplier:
         try:
             if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Application submitted')]"):
                 logger.info(f"Application already submitted for job: {job}. Skipping.")
+                FileManager.write_to_file(job, "skipped", OUTPUT_FILE_DIRECTORY, reason="already_applied")
                 return
             else:
                 logger.debug("No signs of previous application found. Proceeding.")
@@ -198,6 +201,20 @@ class AIHawkEasyApplier:
 
             self.handle_safety_reminder_modal(self.driver)
 
+            # Add job to skip list if not suitable
+            if not self.gpt_answerer.is_job_suitable():
+                reasoning = "Job does not meet suitability criteria."  # Default reason
+                try:
+                    prompt_output = self.gpt_answerer.last_prompt_output
+                    reasoning_match = re.search(r"Reasoning: (.+)", prompt_output, re.DOTALL)
+                    if reasoning_match:
+                        reasoning = reasoning_match.group(1).strip()
+                except Exception as e:
+                    logger.warning(f"Failed to extract detailed reasoning for skipping job: {e}")
+
+                FileManager.write_to_file(job, "skipped",OUTPUT_FILE_DIRECTORY, reason=reasoning)
+                return
+
             logger.debug("Attempting to click the 'Easy Apply' button")
             actions = ActionChains(self.driver)
             actions.move_to_element(easy_apply_button).click().perform()
@@ -219,10 +236,17 @@ class AIHawkEasyApplier:
             tb_str = traceback.format_exc()
             logger.error(f"Failed to apply for job: {job}. Error traceback: {tb_str}")
 
+            # Write the failure to the file
+            logger.debug("Recording failed application to file.")
+            FileManager.write_to_file(job, "failed", OUTPUT_FILE_DIRECTORY, reason=str(e))
+
+            # Cancel the application due to the error
             logger.debug("Cancelling application due to an error")
             self._discard_application()
 
             raise Exception(f"Application failed! Original exception:\nTraceback:\n{tb_str}")
+
+
 
     def _find_easy_apply_button(self, job: Job) -> WebElement:
         """Finds the 'Easy Apply' button on the job page using various search methods."""
@@ -442,6 +466,9 @@ class AIHawkEasyApplier:
 
         if 'submit application' in button_text:
             logger.debug("'Submit' button found, submitting the application")
+            scrollable_element = self.driver.find_element(By.CLASS_NAME, 'artdeco-modal__content')
+            browser_utils.scroll_slow(driver=self.driver, scrollable_element=scrollable_element, step=300,
+                                      reverse=False)
             self._unfollow_company()
             time.sleep(random.uniform(1.5, 2.5))
             next_button.click()
@@ -937,9 +964,7 @@ class AIHawkEasyApplier:
 
     def _find_and_handle_textbox_question(self, section: WebElement) -> bool:
         logger.debug("Searching for text fields in the section.")
-        text_fields = section.find_elements(By.TAG_NAME, 'input') + \
-                      section.find_elements(By.TAG_NAME, 'textarea') + \
-                      section.find_elements(By.XPATH, ".//div[contains(@class, 'artdeco-text-input')]//input")
+        text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
 
         if text_fields:
             text_field = text_fields[0]
@@ -950,11 +975,12 @@ class AIHawkEasyApplier:
                 question_text = section.text.lower().strip()
             logger.debug(f"Found text field with label: {question_text}")
 
-            current_value = text_field.get_attribute('value').strip() if text_field.get_attribute('value') else ""
-            logger.debug(f"Current field value: '{current_value}'")
+            # Get current value
+            current_value = text_field.get_attribute('value').strip()
+            logger.debug(f"Current value of the field: '{current_value}'")
 
             if self._is_field_filled_correctly(current_value, question_text):
-                logger.debug("Field is already correctly filled. Skipping input.")
+                logger.debug("Field is already filled correctly. Skipping input.")
                 return True
 
             try:
@@ -1062,10 +1088,17 @@ class AIHawkEasyApplier:
                 return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
+        """
+        Determines if a given field is numeric based on its attributes.
+        """
         field_type = field.get_attribute('type').lower()
         field_id = field.get_attribute("id").lower()
-        is_numeric = 'numeric' in field_id or field_type == 'number' or ('text' == field_type and 'numeric' in field_id)
-        logger.debug(f"Field type: {field_type}, Field ID: {field_id}, Is numeric: {is_numeric}")
+        aria_describedby = field.get_attribute("aria-describedby").lower() if field.get_attribute(
+            "aria-describedby") else ""
+
+        is_numeric = 'numeric' in field_id or 'numeric' in aria_describedby or field_type in {'number', 'text'} and 'numeric' in field_id
+        logger.debug(
+            f"Field type: {field_type}, Field ID: {field_id}, Aria-Describedby: {aria_describedby}, Is numeric: {is_numeric}")
         return is_numeric
 
     def _enter_text(self, element: WebElement, text: str) -> None:
@@ -1172,23 +1205,30 @@ class AIHawkEasyApplier:
 
     def _find_and_handle_dropdown_question(self, section: WebElement) -> bool:
         try:
-            question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+            question_element = None
+            try:
+                question_element = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+            except NoSuchElementException:
+                logger.debug("jobs-easy-apply-form-element not found, attempting alternative methods")
 
-            dropdowns = question.find_elements(By.TAG_NAME, 'select')
+            dropdowns = section.find_elements(By.TAG_NAME, 'select')
             if not dropdowns:
                 dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
 
             if dropdowns:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
-                options = [option.text for option in select.options if option.text != "Select an option"]
+                options = [option.text for option in select.options if option.text.strip() and option.text != "Select an option"]
+                logger.debug(f"Dropdown options found: {options}")
 
-                logger.debug(f"Dropdown options: {options}")
-
+                question_text = ""
                 try:
-                    question_text = question.find_element(By.TAG_NAME, 'label').text.lower().strip()
+                    if question_element:
+                        question_text = question_element.find_element(By.TAG_NAME, 'label').get_attribute("textContent").lower().strip()
+                    else:
+                        question_text = section.find_element(By.CSS_SELECTOR, '[data-test-text-entity-list-form-title]').get_attribute("textContent").lower().strip()
                 except NoSuchElementException:
-                    logger.warning("Label not found, attempting to extract question text from other elements")
+                    logger.warning("Label not found; attempting to extract text from section")
                     question_text = section.text.lower().strip()
 
                 logger.debug(f"Processing dropdown question: {question_text}")
@@ -1201,7 +1241,8 @@ class AIHawkEasyApplier:
                     existing_answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                     logger.debug(f"Model provided answer: {existing_answer}")
                     self._save_questions_to_json(
-                        {'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
+                        {'type': 'dropdown', 'question': question_text, 'answer': existing_answer}
+                    )
 
                 if existing_answer in options:
                     logger.debug(f"Updating selection to: {existing_answer}")
@@ -1361,13 +1402,13 @@ class AIHawkEasyApplier:
             )
             dismiss_button.click()
             logger.info("Modal window successfully closed.")
-            time.sleep(random.uniform(10, 20))
+            medium_sleep()
         except TimeoutException:
             logger.warning("'Dismiss' button not found. The modal window might already be closed.")
-            time.sleep(random.uniform(10, 20))
+            medium_sleep()
         except Exception as e:
             logger.error(f"Failed to close the modal window: {str(e)}. Continuing without interruption.")
-            time.sleep(random.uniform(10, 20))
+            medium_sleep()
 
     def _sanitize_filename(self, text: str, max_length: int) -> str:
         sanitized_text = re.sub(r'[<>:"/\\|?*]', '', text)

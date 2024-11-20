@@ -74,6 +74,10 @@ from src.logging import logger
 
 load_dotenv()
 
+MODEL_COSTS = {
+    "gpt-4o-mini": {"prompt_price_per_token": 0.00000015, "completion_price_per_token": 0.0000006},
+}
+
 
 class AIModel(ABC):
     @abstractmethod
@@ -237,6 +241,12 @@ class LLMLogger:
 
     @staticmethod
     def log_request(prompts, parsed_reply: Dict[str, Dict]):
+        """
+        Logs a request to a JSON file with details about the model, prompts, replies, and token usage.
+
+        :param prompts: Prompts sent to the model.
+        :param parsed_reply: Parsed response from the model.
+        """
         logger.debug("Starting log_request method")
         logger.debug(f"Prompts received: {prompts}")
         logger.debug(f"Parsed reply received: {parsed_reply}")
@@ -244,6 +254,14 @@ class LLMLogger:
         calls_log = os.path.join(Path("data_folder/output"), "open_ai_calls.json")
         logger.debug(f"Logging path determined: {calls_log}")
 
+        # Determine the model name from the parsed reply
+        raw_model_name = parsed_reply.get(RESPONSE_METADATA, {}).get(MODEL_NAME, "").lower()
+        logger.debug(f"Raw model name: {raw_model_name}")
+
+        model_name = next((key for key in MODEL_COSTS if key in raw_model_name), None)
+        logger.debug(f"Resolved model name: {model_name}")
+
+        # Handle prompts based on their type
         if isinstance(prompts, StringPromptValue):
             logger.debug("Prompts are of type StringPromptValue")
             prompts = prompts.text
@@ -271,30 +289,37 @@ class LLMLogger:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.debug(f"Current time obtained: {current_time}")
 
+        # Extract token usage from the parsed reply
         token_usage = parsed_reply.get(USAGE_METADATA, {})
         output_tokens = token_usage.get(OUTPUT_TOKENS, 0)
         input_tokens = token_usage.get(INPUT_TOKENS, 0)
         total_tokens = token_usage.get(TOTAL_TOKENS, 0)
-        logger.debug(
-            f"Token usage - Input: {input_tokens}, Output: {output_tokens}, Total: {total_tokens}"
-        )
+        logger.debug(f"Token usage - Input: {input_tokens}, Output: {output_tokens}, Total: {total_tokens}")
 
-        model_name = parsed_reply.get(RESPONSE_METADATA, {}).get(MODEL_NAME, "")
-        logger.debug(f"Model name: {model_name}")
+        # Default costs (GPT-4o-mini)
+        default_costs = {"prompt_price_per_token": 0.00000015, "completion_price_per_token": 0.0000006}
 
+        # Get costs for the model or fallback to defaults
+        if model_name:
+            prompt_price_per_token = MODEL_COSTS[model_name].get("prompt_price_per_token", default_costs["prompt_price_per_token"])
+            completion_price_per_token = MODEL_COSTS[model_name].get("completion_price_per_token", default_costs["completion_price_per_token"])
+            logger.debug(f"Using costs for model '{model_name}': prompt {prompt_price_per_token}, completion {completion_price_per_token}")
+        else:
+            prompt_price_per_token = default_costs["prompt_price_per_token"]
+            completion_price_per_token = default_costs["completion_price_per_token"]
+            logger.debug(f"Using default costs: prompt {prompt_price_per_token}, completion {completion_price_per_token}")
+
+        # Calculate total cost
         try:
-            prompt_price_per_token = 0.00000015
-            completion_price_per_token = 0.0000006
-            total_cost = (input_tokens * prompt_price_per_token) + (
-                    output_tokens * completion_price_per_token
-            )
+            total_cost = (input_tokens * prompt_price_per_token) + (output_tokens * completion_price_per_token)
             logger.debug(f"Total cost calculated: {total_cost}")
         except Exception as e:
             logger.error(f"Error calculating total cost: {str(e)}")
             total_cost = 0
 
+        # Create log entry
         log_entry = {
-            MODEL: model_name,
+            MODEL: raw_model_name,
             TIME: current_time,
             PROMPTS: prompts,
             REPLIES: parsed_reply.get(CONTENT, ""),
@@ -305,6 +330,7 @@ class LLMLogger:
         }
         logger.debug(f"Log entry created: {log_entry}")
 
+        # Write log entry to file
         try:
             with open(calls_log, "a", encoding="utf-8") as f:
                 json_string = json.dumps(log_entry, ensure_ascii=False, indent=4)
@@ -445,6 +471,7 @@ class GPTAnswerer:
         self.resume = None
         self.job = None
         self.job_application_profile = None
+        self.last_prompt_output = None
 
     @property
     def job_description(self):
@@ -676,6 +703,7 @@ class GPTAnswerer:
                 JOB_DESCRIPTION: self.job_description,
             }
         )
+        self.last_prompt_output = raw_output
         output = self._clean_llm_output(raw_output)
         logger.debug(f"Job suitability output: {output}")
         score_match = re.search(r"Score: (\d+)", output)

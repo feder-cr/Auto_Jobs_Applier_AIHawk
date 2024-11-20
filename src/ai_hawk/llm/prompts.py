@@ -260,7 +260,16 @@ Please write the cover letter in a way that directly addresses the job role and 
 ## Rules:
 - Provide only the text of the cover letter.
 - Do not include any introductions, explanations, or additional information.
-- The letter should be formatted into paragraph.
+- Use paragraphs to separate key points for clarity.
+- Ensure that each paragraph is separated by a double line break (`\n\n`) for readability.
+- Highlight key skills, achievements, and percentages using bold text (<b> and </b>).
+
+## Formatting rules:
+- The letter should contain 2-3 paragraphs for brevity.
+- Use `<b>` and `</b>` to bold key qualifications, skills, and experiences.
+- Separate each paragraph with a double line break (`\n\n`) for better readability.
+- The letter should not include greetings or signatures.
+
 
 ## Company Name:
 {company}
@@ -280,68 +289,65 @@ Read the following resume carefully and answer the specific questions regarding 
 
 1. **Related and Inferred Experience:**
    - **Similar Technologies:** If experience with a specific technology is not explicitly stated, but the candidate has experience with similar or related technologies, provide a plausible number of years reflecting this related experience. For instance, if the candidate has experience with Python and projects involving technologies similar to Java, estimate a reasonable number of years for Java.
-   - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Complex and advanced projects often indicate deeper expertise.
+   - **Projects and Studies:** Examine the candidate’s projects and studies to infer skills not explicitly mentioned. Advanced and complex projects often indicate deeper expertise.
 
-2. **Indirect Experience and Academic Background:**
+2. **Addressing Non-Relevant Questions:**
+   - **Mismatch Between Question and Numeric Expectation:** If a question logically does not require a numerical response (e.g., "Are you available to start immediately? If not, what's your current notice period?"), but the system requires a numeric answer, **provide a meaningful placeholder value**:
+     - For example, return "1" to indicate immediate availability.
+     - If the question involves notice periods, return a plausible default numeric value such as "2" (for 2 weeks).
+     - Ensure the value adheres to any constraints mentioned in the question (e.g., "larger than 0.0").
+
+3. **Indirect Experience and Academic Background:**
    - **Type of University and Studies:** Consider the type of university and course followed.
    - **Exam Grades:** Consider exam grades achieved. High grades in relevant subjects can indicate stronger proficiency and understanding.
-   - **Relevant thesis:** Consider the thesis of the candidate has worked. Advanced projects suggest deeper skills.
+   - **Relevant Thesis:** If the candidate has worked on a thesis, advanced projects suggest deeper skills.
    - **Roles and Responsibilities:** Evaluate the roles and responsibilities held to estimate experience with specific technologies or skills.
 
-
-3. **Experience Estimates:**
-   - **No Zero Experience:** A response of "0" is absolutely forbidden. If direct experience cannot be confirmed, provide a minimum of "2" years based on inferred or related experience.
-   - **For Low Experience (up to 5 years):** Estimate experience based on inferred bacherol, skills and projects, always providing at least "2" years when relevant.
+4. **Experience Estimates for Quantitative Questions:**
+   - **No Zero Experience:** A response of "0" is prohibited unless explicitly indicated in the question. If direct experience cannot be confirmed, provide at least "2" years based on inferred or related experience.
+   - **For Low Experience (up to 5 years):** Base your estimate on inferred bachelor’s education, skills, and projects, always providing at least "2" years when relevant.
    - **For High Experience:** For high levels of experience, provide a number based on clear evidence from the resume. Avoid making inferences for high experience levels unless the evidence is strong.
 
-4. **Rules:**
-   - Answer the question directly with a number, avoiding "0" entirely.
+5. **Rules for Ambiguous Questions:**
+   - For questions that explicitly ask for years of experience, respond with a plausible number based on resume content.
+   - For questions where the numeric expectation is unclear but required by the system:
+     - Provide a sensible placeholder or default numeric value relevant to the context.
+     - Avoid forcing unrelated answers; instead, focus on satisfying the system’s requirement in a logical manner.
 
-## Example 1
-```
-## Curriculum
+**Example 1 (Relevant Numeric Question):**
+Resume:
+- I had a degree in computer science.
+- I have worked 3 years with MQTT protocol.
 
-I had a degree in computer science. I have worked  years with  MQTT protocol.
-
-## Question
-
+Question:
 How many years of experience do you have with IoT?
 
-## Answer
-
+Answer:
 4
-```
-## Example 1
-```
-## Curriculum
 
-I had a degree in computer science. 
+**Example 2 (Mismatch with Numeric Expectation):**
+Resume:
+- I am a software engineer with a bachelor’s degree in computer science.
+- 5 years of experience in Swift and Python.
 
-## Question
+Question:
+Are you available to start immediately? If not, what's your current notice period?
 
-How many years of experience do you have with Bash?
+Answer:
+1
 
-## Answer
+**Example 3 (Ambiguous Context):**
+Resume:
+- I have a background in data engineering.
+- Worked on distributed systems and ETL pipelines for over 6 years.
 
+Question:
+How many years of experience do you have with cloud computing?
+
+Answer:
 2
-```
 
-## Example 2
-```
-## Curriculum
-
-I am a software engineer with 5 years of experience in Swift and Python. I have worked on an AI project.
-
-## Question
-
-How many years of experience do you have with AI?
-
-## Answer
-
-2
-```
-
-## Resume:
+Resume:
 ```
 {resume_educations}
 {resume_jobs}
@@ -355,6 +361,8 @@ How many years of experience do you have with AI?
 
 When responding, consider all available information, including projects, work experience, and academic background, to provide an accurate and well-reasoned answer. Make every effort to infer relevant experience and avoid defaulting to 0 if any related experience can be estimated.
 Do not output anything else in the response other than the answer.
+
+When responding, carefully consider all available information, including projects, work experience, and academic background. If a numeric answer is required despite the question’s non-numeric nature, provide a meaningful default value such as "1" or "2" in line with logical assumptions. Always ensure the response meets any constraints in the question.
 """
 
 options_template = """The following is a resume and an answered question about the resume, the answer is one of the options.
@@ -430,23 +438,79 @@ func_summarize_prompt_template = """
         ## Text without placeholders:"""
 
 is_relavant_position_template = """
-   Evaluate whether the provided resume meets the requirements outlined in the job description. Determine if the candidate is suitable for the job based on the information provided.
+Evaluate whether the provided resume meets the requirements outlined in the job description. 
+Assess the candidate's suitability for the role based on the given information, including partial matches where applicable.
 
-Job Description: {job_description}
+Job Description:
+{job_description}
 
-Resume: {resume}
+Resume:
+{resume}
 
 Instructions:
-1. Extract the key requirements from the job description, identifying hard requirements (must-haves) and soft requirements (nice-to-haves).
-2. Identify the relevant qualifications from the resume.
-3. Compare the qualifications against the requirements, ensuring all hard requirements are met. Allow for a 1-year experience gap if applicable, as experience is usually a hard requirement.
-4. Provide a suitability score from 1 to 10. where 1 indicates the candidate does not meet any requirements and 10 indicates the candidate meets all requirements.
-5. Provide a brief reasoning for the score, highlighting which requirements are met and which are not.
+
+1. Extract Key Requirements:
+   - Divide the requirements into:
+     - Hard Requirements (must-haves): Mandatory skills, technologies, experience, certifications, and knowledge.
+     - Soft Requirements (nice-to-haves): Desired skills, tools, methodologies, and personal qualities.
+   - If the job description uses generalized terms (e.g., "experience with cloud platforms") and the resume includes an equivalent experience (e.g., Azure instead of AWS), consider the requirement fulfilled.
+   - Do not assume the presence of tools or experience that are not explicitly mentioned in the resume.
+
+2. Analyze Resume:
+   - Map the candidate's skills and experience against the job requirements.
+   - Full Match: When the specified skills or experience align with the job requirements, even through equivalent tools.
+   - Partial Match: When the skills cover part of the requirement. For instance:
+     - The job description requires "experience with orchestrators," and the resume mentions only Airflow.
+   - Adjacent Experience: Evaluate transferable skills and similar experiences that align with the job requirements.
+
+3. Adjust for Context:
+   - Generalized Requirements: If the job description uses broad terms like "cloud platform" or "orchestrator," and the candidate's experience includes Azure, AWS, GCP, or Airflow, consider the requirement fulfilled.
+   - Specific Requirements: If specific tools are mentioned (e.g., "AWS"), alternative experience (e.g., Azure) may partially fulfill the requirement unless the job description explicitly states a preference.
+   - Experience Gap: Allow a one-year gap in experience if other qualifications are strong and meet the hard requirements.
+
+4. Suitability Score Criteria:
+   - 10: Full alignment with all hard and soft requirements, including equivalent substitutions.
+   - 8-9: All hard requirements fulfilled, with partial fulfillment of soft requirements.
+   - 6-7: Most hard requirements fulfilled; soft requirements partially fulfilled or adjacent skills are strong.
+   - 4-5: Several hard requirements unfulfilled; soft requirements largely absent.
+   - 2-3: Minimal fulfillment of hard requirements; no relevant soft requirements.
+   - 1: No alignment with job requirements.
+
+5. Provide Reasoning:
+   - Explain which requirements are fully met, partially met, or unmet.
+   - Highlight how transferable skills or alternative experiences were considered.
+   - Clearly state how the score was derived.
 
 Output Format (Strictly follow this format):
 Score: [numerical score]
-Reasoning: [brief explanation]
+Reasoning: [brief explanation of matches, gaps, and considerations for alternative qualifications].
 Do not output anything else in the response other than the score and reasoning.
+
+Universal Principles:
+1. Generalized Requirements:
+   - Broadly stated requirements (e.g., "cloud platform") are fulfilled by equivalent experience with Azure, AWS, GCP, etc.
+
+2. Specific Requirements:
+   - If specific tools are mentioned (e.g., "AWS"), alternative experience (e.g., Azure) counts as partial fulfillment unless explicitly stated otherwise.
+
+3. Transferable Skills:
+   - Skills with similar principles (e.g., Airflow and Prefect for orchestrators) are considered relevant.
+
+4. Weighting Partial Matches:
+   - Generalized Requirements: Considered fulfilled by equivalent tools or experience.
+   - Specific Tools: Fulfillment is proportional to their interchangeability in context.
+
+5. Context Overlap:
+   - Adjacent roles (e.g., Data Engineer vs. Big Data Architect) are relevant if the tasks and skills overlap.
+
+Example:
+Job Description: Requires experience with orchestrators, cloud platforms (AWS/GCP), Spark optimization skills, and big data experience.
+
+Resume: Mentions Airflow, Azure, Spark, but lacks GCP experience.
+
+Output:
+Score: 8
+Reasoning: Candidate meets the hard requirements for orchestrators (Airflow) and big data (Spark). The cloud experience (Azure) is equivalent to AWS/GCP since no explicit preference was stated in the job description. However, GCP experience is missing, which partially fulfills the cloud platform requirement.
 """
 
 resume_or_cover_letter_template = """

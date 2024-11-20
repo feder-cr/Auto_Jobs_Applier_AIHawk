@@ -11,7 +11,7 @@ from inputimeout import TimeoutOccurred, inputimeout
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
+from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS, OUTPUT_FILE_DIRECTORY
 from src import utils
 from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier, ApplicationLimitReachedException
 from src.extractors.extraction_chains import EXTRACTORS
@@ -20,6 +20,7 @@ from src.logging import logger
 from src.regex_utils import generate_regex_patterns_for_blacklisting
 from src.utils import browser_utils, time_utils
 from src.utils.time_utils import medium_sleep
+from src.utils.file_manager import FileManager
 
 
 class EnvironmentKeys:
@@ -58,10 +59,8 @@ class AIHawkJobManager:
         self.base_search_url = self.get_base_search_url(parameters)
         self.seen_jobs = []
 
-        # Set applicant count thresholds
-        job_applicants_threshold = parameters.get('job_applicants_threshold', {})
-        self.min_applicants = job_applicants_threshold.get('min_applicants', JOB_MIN_APPLICATIONS)
-        self.max_applicants = job_applicants_threshold.get('max_applicants', JOB_MAX_APPLICATIONS)
+        self.min_applicants = JOB_MIN_APPLICATIONS
+        self.max_applicants = JOB_MAX_APPLICATIONS
 
         # Generate regex patterns from blacklist lists
         self.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.title_blacklist)
@@ -70,7 +69,7 @@ class AIHawkJobManager:
 
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
-        self.output_file_directory = Path(parameters['outputFileDirectory'])
+        self.output_file_directory = OUTPUT_FILE_DIRECTORY
         self.env_config = EnvironmentKeys()
         self.parameters = parameters
         logger.debug("Parameters set successfully")
@@ -159,6 +158,7 @@ class AIHawkJobManager:
             self.resume_generator_manager,
             job_application_profile=self.job_application_profile
         )
+
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)
         page_sleep = 0
@@ -274,12 +274,12 @@ class AIHawkJobManager:
         for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
-                self.write_to_file(job, "skipped")
+                self.save_job_to_file(job, "skipped")
                 continue
             try:
-                self.write_to_file(job, 'data')
+                self.save_job_to_file(job, 'data')
             except Exception as e:
-                self.write_to_file(job, "failed")
+                self.save_job_to_file(job, "failed")
                 continue
 
     def apply_jobs(self):
@@ -307,7 +307,7 @@ class AIHawkJobManager:
                 if not self.check_applicant_count(job):
                     logger.debug(f"Skipping {job.title} at {job.company} based on applicant count.")
                     reason = "applicant_count_not_in_threshold"
-                    self.write_to_file(job, "skipped", reason=reason)
+                    self.save_job_to_file(job, "skipped", reason=reason)
                     job_index += 1
                     continue
 
@@ -315,34 +315,34 @@ class AIHawkJobManager:
                 if self.is_blacklisted(job.title, job.company, job.link, job.location):
                     logger.debug(f"Job blacklisted: {job.title} at {job.company}")
                     reason = "blacklisted"
-                    self.write_to_file(job, "skipped", reason=reason)
+                    self.save_job_to_file(job, "skipped", reason=reason)
                     job_index += 1
                     continue
 
                 # Check if job has already been applied to
                 if self.is_already_applied_to_job(job.title, job.company, job.link):
                     reason = "already_applied_to_job"
-                    self.write_to_file(job, "skipped", reason=reason)
+                    self.save_job_to_file(job, "skipped", reason=reason)
                     job_index += 1
                     continue
 
                 # Check if company has already been applied to (if `apply_once_at_company` is True)
                 if self.is_already_applied_to_company(job.company):
                     reason = "already_applied_to_company"
-                    self.write_to_file(job, "skipped", reason=reason)
+                    self.save_job_to_file(job, "skipped", reason=reason)
                     job_index += 1
                     continue
 
                 # Apply to the job if the application method is Easy Apply
                 if job.apply_method == "Easy Apply":
                     self.easy_applier_component.apply_to_job(job)
-                    self.write_to_file(job, "success")
+                    self.save_job_to_file(job, "success")
                     logger.debug(f"Successfully applied to job: {job.title} at {job.company}")
                     job_index += 1  # Move to the next job
                 else:
                     logger.info(f"Skipping job {job.title} at {job.company}, apply_method: {job.apply_method}")
                     reason = f"apply_method_not_easy_apply ({job.apply_method})"
-                    self.write_to_file(job, "skipped", reason=reason)
+                    self.save_job_to_file(job, "skipped", reason=reason)
                     job_index += 1  # Move to the next job
 
             except ApplicationLimitReachedException as e:
@@ -370,7 +370,7 @@ class AIHawkJobManager:
 
             except Exception as e:
                 logger.error(f"Unexpected error during job application for {job.title} at {job.company}: {e}")
-                self.write_to_file(job, "failed")
+                self.save_job_to_file(job, "failed")
                 job_index += 1  # Move to the next job
                 continue
 
@@ -426,47 +426,6 @@ class AIHawkJobManager:
             logger.error(f"Unexpected error during applicant count check for {job.title} at {job.company}: {e}")
             return True
 
-    def write_to_file(self, job, file_name, reason=None, applicants_count=None):
-        logger.debug(f"Writing job application result to file: {file_name}")
-        pdf_path = Path(job.resume_path).resolve().as_uri() if job.resume_path else None
-        data = {
-            "company": job.company or "N/A",
-            "job_title": job.title or "N/A",
-            "link": job.link or "N/A",
-            "job_recruiter": job.recruiter_link or "N/A",
-            "job_location": job.location or "N/A",
-            "pdf_path": pdf_path or "N/A",
-            "reason": reason or "N/A"
-        }
-
-        if applicants_count is not None:
-            data["applicants_count"] = applicants_count
-
-        file_path = self.output_file_directory / f"{file_name}.json"
-        temp_file_path = file_path.with_suffix('.tmp')
-
-        try:
-            if not file_path.exists():
-                with open(temp_file_path, 'w', encoding='utf-8') as f:
-                    json.dump([data], f, indent=4)
-                temp_file_path.rename(file_path)
-                logger.debug(f"Job data written to new file: {file_path}")
-            else:
-                with open(file_path, 'r+', encoding='utf-8') as f:
-                    try:
-                        existing_data = json.load(f)
-                    except json.JSONDecodeError:
-                        logger.error(f"JSON decode error in file: {file_path}. Creating a backup.")
-                        file_path.rename(file_path.with_suffix('.bak'))
-                        existing_data = []
-
-                    existing_data.append(data)
-                    f.seek(0)
-                    json.dump(existing_data, f, indent=4)
-                    f.truncate()
-                    logger.debug(f"Job data appended to existing file: {file_path}")
-        except Exception as e:
-            logger.error(f"Failed to write data to file {file_path}: {e}")
 
     def get_base_search_url(self, parameters):
         """
@@ -653,3 +612,12 @@ class AIHawkJobManager:
                 return True
 
         return False
+
+    def save_job_to_file(self, job, file_name, reason=None, applicants_count=None):
+        FileManager.write_to_file(
+            job=job,
+            file_name=file_name,
+            output_file_directory=self.output_file_directory,
+            reason=reason,
+            applicants_count=applicants_count
+        )
