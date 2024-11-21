@@ -22,6 +22,7 @@ import ai_hawk.llm.prompts as prompts
 from config import JOB_SUITABILITY_SCORE
 from constants import (
     AVAILABILITY,
+    AZURE,
     CERTIFICATIONS,
     CLAUDE,
     COMPANY,
@@ -250,9 +251,7 @@ class AIAdapter:
             return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == GEMINI:
             return GeminiModel(api_key, llm_model)
-        elif llm_model_type == "huggingface":
-            return HuggingFaceModel(api_key, llm_model)
-        elif llm_model_type == "azure":
+        elif llm_model_type == AZURE:
             return AzureModel(api_key, azure_model_deployment_name, azure_api_version, llm_api_url)        
         elif llm_model_type == GROQ:
             return GroqAIModel(api_key, llm_model)     

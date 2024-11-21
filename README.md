@@ -284,7 +284,7 @@ This file defines your job search parameters and bot behavior. Each section cont
 #### 2.1 config.py - Customize LLM model endpoint
 
 -   `LLM_MODEL_TYPE`:
-    -   Choose the model type, supported: openai / ollama / claude / gemini / groq
+    -   Choose the model type, supported: openai / ollama / claude / gemini / groq / azure
 -   `LLM_MODEL`:
     -   Choose the LLM model, currently supported:
         -   openai: gpt-4o
