@@ -5,6 +5,7 @@ import time
 from itertools import product
 from pathlib import Path
 from turtle import color
+from datetime import datetime
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -406,7 +407,8 @@ class AIHawkJobManager:
             "link": job.link,
             "job_recruiter": job.recruiter_link,
             "job_location": job.location,
-            "pdf_path": pdf_path
+            "pdf_path": pdf_path,
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
         if reason:
