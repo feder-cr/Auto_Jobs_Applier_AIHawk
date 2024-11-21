@@ -8,7 +8,7 @@ langchain==0.2.11
 langchain-anthropic
 langchain-huggingface
 langchain-community==0.2.10
-langchain-core===0.2.36
+langchain-core==0.2.36
 langchain-google-genai==1.0.10
 langchain-ollama==0.1.3
 langchain-openai==0.1.17
