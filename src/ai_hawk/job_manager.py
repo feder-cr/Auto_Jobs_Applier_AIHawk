@@ -401,6 +401,7 @@ class AIHawkJobManager:
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = {
             "company": job.company,
             "job_title": job.title,
@@ -408,7 +409,7 @@ class AIHawkJobManager:
             "job_recruiter": job.recruiter_link,
             "job_location": job.location,
             "pdf_path": pdf_path,
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "time": current_time
         }
         
         if reason:
