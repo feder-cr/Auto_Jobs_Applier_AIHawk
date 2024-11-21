@@ -188,17 +188,19 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 
 This file contains sensitive information. Never share or commit this file to version control.
 
--   `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key or Groq API key]`
-    -   Replace with your OpenAI API key for GPT integration
-    -   To obtain an API key, follow the tutorial at: <https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327>
-    -   Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
-    -   According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
-        `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
-        `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
-        OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
-        You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
-    -   For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
-    -   For obtaining Groq API key visit [Groq API](https://api.groq.com/v1)
+
+- `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key or Groq API key or AI/ML API key]`
+  - Replace with your OpenAI API key for GPT integration
+  - To obtain an API key, follow the tutorial at: <https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327>
+  - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
+  - According to the [OpenAI community](https://community.openai.com/t/usage-tier-free-to-tier-1/919150) and our users' reports, right after setting up the OpenAI account and purchasing the required credits, users still have a `Free` account type. This prevents them from having unlimited access to OpenAI models and allows only 200 requests per day. This might cause runtime errors such as:  
+    `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
+    `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
+    OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
+    You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
+  - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
+  - For obtaining Groq API key visit [Groq API](https://api.groq.com/v1)
+  - For obtaining AI/ML API key visite [AI/ML API](https://aimlapi.com/app/)
 
 ### 2. work_preferences.yaml
 
@@ -478,7 +480,6 @@ Each section has specific fields to fill out:
     ```
 
 -   `interests:`
-
     -   Mention your professional or personal interests that may be relevant to your career.
 
         -   **interest**: A list of interests or hobbies.
@@ -776,7 +777,9 @@ For further assistance, please create an issue on the [GitHub repository](https:
     -   [How to set up Auto_Jobs_Applier_AIHawk](https://youtu.be/gdW9wogHEUM)
     -   Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
--   [OpenAI API Documentation](https://platform.openai.com/docs/)
+- [OpenAI API Documentation](https://platform.openai.com/docs/)
+  
+- [AI/ML API Documentation](https://docs.aimlapi.com/)
 
 ### For Developers
 
