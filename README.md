@@ -722,7 +722,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ### For Developers
 
-- [Contribution Guidelines](CONTRIBUTING.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
 
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
