@@ -6,6 +6,7 @@ jsonschema==4.23.0
 jsonschema-specifications==2023.12.1
 langchain==0.2.11
 langchain-anthropic
+langchain-groq==0.1.9
 langchain-huggingface
 langchain-community==0.2.10
 langchain-core==0.2.36
