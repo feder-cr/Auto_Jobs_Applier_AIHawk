@@ -50,7 +50,10 @@ class AIHawkEasyApplier:
         self.all_data = self._load_questions_from_json()
         self.questions_answers_map = {self._sanitize_text(item['question']): item for item in self.all_data}
         self.current_job = None
+        self.file_manager = FileManager()
+
         logger.debug("AIHawkEasyApplier initialized successfully")
+
 
     def _load_questions_from_json(self) -> List[dict]:
         """Loads previously saved questions and answers from a JSON file."""
@@ -119,10 +122,24 @@ class AIHawkEasyApplier:
             logger.error(f"Error saving data to JSON file: {tb_str}")
             raise Exception(f"Error saving data to JSON file: \nTraceback:\n{tb_str}")
 
-    def _sanitize_text(self, text: str) -> str:
+    def _sanitize_text(self, text) -> str:
+        """
+        Sanitizes input text by removing unwanted characters. Handles non-string inputs gracefully.
+
+        Args:
+            text: The input to sanitize. Can be of any type.
+
+        Returns:
+            str: Sanitized text, or the sanitized string representation of non-string inputs.
+        """
+        if not isinstance(text, str):
+            logger.warning(f"Non-string input provided to _sanitize_text: {type(text).__name__}. Converting to string.")
+            text = str(text) if text is not None else ""
+
         sanitized_text = text.lower().strip().replace('"', '').replace('\\', '')
         sanitized_text = re.sub(r'[\x00-\x1F\x7F]', '', sanitized_text)
         sanitized_text = sanitized_text.replace('\n', ' ').replace('\r', '').rstrip(',')
+
         logger.debug(f"Sanitized text: {sanitized_text}")
         return sanitized_text
 
@@ -173,7 +190,7 @@ class AIHawkEasyApplier:
         try:
             if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Application submitted')]"):
                 logger.info(f"Application already submitted for job: {job}. Skipping.")
-                FileManager.write_to_file(job, "skipped", OUTPUT_FILE_DIRECTORY, reason="already_applied")
+                self.file_manager.write_to_file(job, "skipped", OUTPUT_FILE_DIRECTORY, reason="already_applied")
                 return
             else:
                 logger.debug("No signs of previous application found. Proceeding.")
@@ -212,7 +229,7 @@ class AIHawkEasyApplier:
                 except Exception as e:
                     logger.warning(f"Failed to extract detailed reasoning for skipping job: {e}")
 
-                FileManager.write_to_file(job, "skipped",OUTPUT_FILE_DIRECTORY, reason=reasoning)
+                self.file_manager.write_to_file(job, "skipped", OUTPUT_FILE_DIRECTORY, reason=reasoning)
                 return
 
             logger.debug("Attempting to click the 'Easy Apply' button")
@@ -238,7 +255,7 @@ class AIHawkEasyApplier:
 
             # Write the failure to the file
             logger.debug("Recording failed application to file.")
-            FileManager.write_to_file(job, "failed", OUTPUT_FILE_DIRECTORY, reason=str(e))
+            self.file_manager.write_to_file(job, "failed", OUTPUT_FILE_DIRECTORY, reason=str(e))
 
             # Cancel the application due to the error
             logger.debug("Cancelling application due to an error")
@@ -452,6 +469,9 @@ class AIHawkEasyApplier:
                 self.fill_up(job_context)
                 form_filled = self._next_or_submit()
                 if form_filled:
+                    sanitized_job_title = self._sanitize_text(job_context.job_application.title)
+                    job_context.job_application.title = sanitized_job_title
+
                     ApplicationSaver.save(job_context.job_application)
                     logger.debug("Application form successfully submitted")
                     return
@@ -639,15 +659,17 @@ class AIHawkEasyApplier:
 
                 base_name_parts = [
                     "CV",
-                    candidate_first_name,
-                    candidate_last_name,
-                    job.company,
-                    job.title
+                    FileManager.apply_abbreviations(candidate_first_name or ""),
+                    FileManager.apply_abbreviations(candidate_last_name or ""),
+                    FileManager.apply_abbreviations(job.company or ""),
+                    FileManager.apply_abbreviations(job.title or "")
                 ]
 
                 sanitized_parts = []
                 remaining_length = max_filename_length - len(base_name_parts) + 1 + len(str(timestamp))
                 for part in base_name_parts:
+                    if not part:  #   
+                        continue
                     part_max_length = max(1, remaining_length // len(base_name_parts))
                     sanitized_part = self._sanitize_filename(part, part_max_length)
                     sanitized_parts.append(sanitized_part)
@@ -1038,22 +1060,29 @@ class AIHawkEasyApplier:
         logger.debug("No text fields found in the section.")
         return False
 
-    def _is_field_filled_correctly(self, current_value: str, question_text: str) -> bool:
+    def _is_field_filled_correctly(self, current_value, question_text: str) -> bool:
         """
         Checks if the field is correctly filled for a given question. If no existing
         answer is found, queries the model for a potential answer.
         """
         logger.debug(f"Checking if field is correctly filled for question: '{question_text}'")
 
-
         if not current_value:
             logger.debug("Field is empty.")
             return False
 
+        # Ensure current_value is a string
+        if not isinstance(current_value, str):
+            logger.warning(f"Expected string for current_value, got {type(current_value).__name__}. Converting to string.")
+            current_value = str(current_value)
 
         expected_answer = self._get_existing_answer(question_text)
 
         if expected_answer:
+            # Ensure expected_answer is a string
+            if not isinstance(expected_answer, str):
+                logger.warning(f"Expected string for expected_answer, got {type(expected_answer).__name__}. Converting to string.")
+                expected_answer = str(expected_answer)
 
             if current_value.strip().lower() == expected_answer.strip().lower():
                 logger.debug("Current value matches the expected answer.")
@@ -1062,19 +1091,22 @@ class AIHawkEasyApplier:
                 logger.debug("Current value does not match the expected answer.")
                 return False
         else:
-
             logger.debug("Expected answer not found. Querying the model for a potential answer.")
             generated_answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
 
             if generated_answer:
                 logger.debug(f"Generated answer from model: {generated_answer}")
 
+                # Ensure generated_answer is a string
+                if not isinstance(generated_answer, str):
+                    logger.warning(f"Expected string for generated_answer, got {type(generated_answer).__name__}. Converting to string.")
+                    generated_answer = str(generated_answer)
+
                 self._save_questions_to_json({
                     'type': 'textbox',
                     'question': question_text,
                     'answer': generated_answer
                 })
-
 
                 if current_value.strip().lower() == generated_answer.strip().lower():
                     logger.debug("Current value matches the generated answer.")
@@ -1083,7 +1115,6 @@ class AIHawkEasyApplier:
                     logger.debug("Current value does not match the generated answer.")
                     return False
             else:
-
                 logger.debug("Model did not provide an answer. Assuming current value is incorrect.")
                 return False
 

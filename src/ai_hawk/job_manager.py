@@ -8,8 +8,9 @@ from itertools import product
 from pathlib import Path
 
 from inputimeout import TimeoutOccurred, inputimeout
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS, OUTPUT_FILE_DIRECTORY
 from src import utils
@@ -21,7 +22,7 @@ from src.regex_utils import generate_regex_patterns_for_blacklisting
 from src.utils import browser_utils, time_utils
 from src.utils.time_utils import medium_sleep
 from src.utils.file_manager import FileManager
-
+from selenium.webdriver.support import expected_conditions as EC
 
 class EnvironmentKeys:
     def __init__(self):
@@ -42,6 +43,7 @@ class AIHawkJobManager:
     def __init__(self, driver):
         logger.debug("Initializing AIHawkJobManager")
         self.driver = driver
+        self.file_manager = FileManager()
         self.set_old_answers = []
         self.easy_applier_component = None
         self.job_application_profile = None
@@ -167,55 +169,39 @@ class AIHawkJobManager:
 
         for position, location in searches:
             location_url = "&location=" + location
-            job_page_number = -1
+            job_page_number = 0  # Start from page 0
             logger.debug(f"Starting the search for {position} in {location}.")
 
-            try:
-                while True:
+            while True:  # Continue until no jobs are found
+                page_sleep += 1
+                logger.debug(f"Going to job page {job_page_number}")
+                self.next_job_page(position, location_url, job_page_number)
+                time_utils.medium_sleep()
+                logger.debug("Starting the application process for this page...")
+
+                jobs = self.get_jobs_from_page()
+                if not jobs:
+                    logger.info("No more jobs found on this page. Exiting loop.")
+                    break
+
+                try:
+                    self.apply_jobs()
+                except Exception as e:
+                    logger.error(f"Error during job application: {e}")
+                    continue
+
+                logger.debug("Applying to jobs on this page has been completed!")
+
+                time_left = minimum_page_time - time.time()
+                self.wait_or_skip(time_left)
+                minimum_page_time = time.time() + minimum_time
+
+                if page_sleep % 5 == 0:
+                    sleep_time = random.randint(5, 34)
+                    self.wait_or_skip(sleep_time)
                     page_sleep += 1
-                    job_page_number += 1
-                    logger.debug(f"Going to job page {job_page_number}")
-                    self.next_job_page(position, location_url, job_page_number)
-                    time_utils.medium_sleep()
-                    logger.debug("Starting the application process for this page...")
 
-                    jobs = self.get_jobs_from_page()
-                    if not jobs:
-                        # Attempt to find and click the search button
-                        try:
-                            search_button = self.driver.find_element(By.CLASS_NAME, "jobs-search-box__submit-button")
-                            search_button.click()
-                            logger.debug("Clicked the search button to reload jobs.")
-                            time.sleep(random.uniform(1.5, 3.5))
-                            jobs = self.get_jobs_from_page()
-                        except NoSuchElementException:
-                            logger.warning("Search button not found.")
-                        except Exception as e:
-                            logger.error(f"Error while trying to click the search button: {e}")
-
-                        if not jobs:
-                            logger.info("No more jobs found on this page. Exiting loop.")
-                            break
-
-                    try:
-                        self.apply_jobs()
-                    except Exception as e:
-                        logger.error(f"Error during job application: {e}")
-                        continue
-
-                    logger.debug("Applying to jobs on this page has been completed!")
-
-                    time_left = minimum_page_time - time.time()
-                    self.wait_or_skip(time_left)
-                    minimum_page_time = time.time() + minimum_time
-
-                    if page_sleep % 5 == 0:
-                        sleep_time = random.randint(5, 34)
-                        self.wait_or_skip(sleep_time)
-                        page_sleep += 1
-            except Exception as e:
-                logger.error(f"Unexpected error during job search: {e}")
-                continue
+                job_page_number += 1  # Increment the page number
 
             time_left = minimum_page_time - time.time()
             self.wait_or_skip(time_left)
@@ -228,15 +214,18 @@ class AIHawkJobManager:
 
     def get_jobs_from_page(self):
         try:
-            no_jobs_elements = self.driver.find_elements(By.CLASS_NAME, 'jobs-search-no-results-banner')
-            if no_jobs_elements:
-                logger.debug("No matching jobs found on this page, skipping.")
-                return []
-        except NoSuchElementException:
-            pass
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'jobs-search-no-results-banner'))
+            )
+            logger.debug("No matching jobs found on this page, skipping.")
+            return []
+        except TimeoutException:
+            logger.debug("No 'no-results' banner found. Proceeding with job extraction.")
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            job_results = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "jobs-search-results-list"))
+            )
             browser_utils.scroll_slow(self.driver, job_results)
             browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
@@ -248,8 +237,8 @@ class AIHawkJobManager:
 
             return job_list_elements
 
-        except NoSuchElementException:
-            logger.debug("No job results found on the page.")
+        except TimeoutException:
+            logger.debug("No job results list found on the page.")
             return []
         except Exception as e:
             logger.error(f"Error while fetching job elements: {e}")
@@ -284,94 +273,100 @@ class AIHawkJobManager:
 
     def apply_jobs(self):
         job_list = []
+        skipped_jobs = self.load_skipped_jobs()  #    
+        skipped_links = {job["link"] for job in skipped_jobs}  #     
 
-        # Attempt to get job listings with each extractor in the EXTRACTORS list
+        #          EXTRACTORS
         for extractor in EXTRACTORS:
             job_list = extractor.get_job_list(self.driver)
             if job_list:
                 logger.debug(f"Jobs extracted using {extractor.__class__.__name__}")
                 break
         else:
-            # If no extractor returned a job list, log and exit the function
             logger.warning("No job listings were found by any extractor.")
             return
 
-        # Process each job in the extracted job list
         job_index = 0
         while job_index < len(job_list):
             job = job_list[job_index]
+
+            # :    
+            if job.link in skipped_links:
+                logger.debug(f"Skipping previously skipped job: {job.title} at {job.company}")
+                job_index += 1
+                continue
+
             logger.debug(f"Starting applicant count search for job: {job.title} at {job.company}")
 
             try:
-                # Check if job meets applicant count criteria
                 if not self.check_applicant_count(job):
                     logger.debug(f"Skipping {job.title} at {job.company} based on applicant count.")
                     reason = "applicant_count_not_in_threshold"
                     self.save_job_to_file(job, "skipped", reason=reason)
+                    skipped_links.add(job.link)  #    
                     job_index += 1
                     continue
 
-                # Check if job or company is blacklisted
                 if self.is_blacklisted(job.title, job.company, job.link, job.location):
                     logger.debug(f"Job blacklisted: {job.title} at {job.company}")
                     reason = "blacklisted"
                     self.save_job_to_file(job, "skipped", reason=reason)
+                    skipped_links.add(job.link)  #    
                     job_index += 1
                     continue
 
-                # Check if job has already been applied to
                 if self.is_already_applied_to_job(job.title, job.company, job.link):
                     reason = "already_applied_to_job"
                     self.save_job_to_file(job, "skipped", reason=reason)
+                    skipped_links.add(job.link)  #    
                     job_index += 1
                     continue
 
-                # Check if company has already been applied to (if `apply_once_at_company` is True)
                 if self.is_already_applied_to_company(job.company):
                     reason = "already_applied_to_company"
                     self.save_job_to_file(job, "skipped", reason=reason)
+                    skipped_links.add(job.link)  #    
                     job_index += 1
                     continue
 
-                # Apply to the job if the application method is Easy Apply
                 if job.apply_method == "Easy Apply":
                     self.easy_applier_component.apply_to_job(job)
                     self.save_job_to_file(job, "success")
                     logger.debug(f"Successfully applied to job: {job.title} at {job.company}")
-                    job_index += 1  # Move to the next job
+                    job_index += 1
                 else:
                     logger.info(f"Skipping job {job.title} at {job.company}, apply_method: {job.apply_method}")
                     reason = f"apply_method_not_easy_apply ({job.apply_method})"
                     self.save_job_to_file(job, "skipped", reason=reason)
-                    job_index += 1  # Move to the next job
+                    skipped_links.add(job.link)  #    
+                    job_index += 1
 
             except ApplicationLimitReachedException as e:
                 logger.warning(str(e))
-                # Periodically check if the limit has been lifted
                 while True:
-                    time_to_wait = 2 * 60 * 60  # Wait 2 hours
+                    time_to_wait = 2 * 60 * 60
                     logger.info(f"Waiting for {time_to_wait / 60} minutes before checking again.")
                     time.sleep(time_to_wait)
                     self.driver.refresh()
                     medium_sleep()
                     try:
-                        # Check if the limit has been lifted
                         if not self.easy_applier_component.is_application_limit_reached():
                             logger.info("Application limit has been lifted. Resuming applications.")
-                            break  # Exit the inner loop and continue applying
+                            break
                         else:
                             logger.info("Application limit is still in effect. Waiting again.")
-                            continue  # Repeat the waiting loop
+                            continue
                     except Exception as check_exception:
                         logger.error(f"Error while checking for application limit: {check_exception}")
-                        continue  # Continue waiting and checking
+                        continue
 
-                continue  # Continue with the current job after the limit is lifted
+                continue
 
             except Exception as e:
                 logger.error(f"Unexpected error during job application for {job.title} at {job.company}: {e}")
                 self.save_job_to_file(job, "failed")
-                job_index += 1  # Move to the next job
+                skipped_links.add(job.link)  #    
+                job_index += 1
                 continue
 
     def check_applicant_count(self, job) -> bool:
@@ -447,10 +442,10 @@ class AIHawkJobManager:
             url_parts.append(f"f_E={','.join(experience_levels)}")
 
         # Distance
-        url_parts.append(f"distance={parameters.get('distance', 25)}")
+        url_parts.append(f"distance={parameters.get('distance', 100)}")
 
         # Job types
-        job_types = [key[0].upper() for key, value in parameters.get('jobTypes', {}).items() if value]
+        job_types = [key[0].upper() for key, value in parameters.get('job_types', {}).items() if value]
         if job_types:
             url_parts.append(f"f_JT={','.join(job_types)}")
 
@@ -479,7 +474,11 @@ class AIHawkJobManager:
             url_parts.append(f"f_WT={','.join(workplace_type)}")
 
         # Easy Apply filter
-        url_parts.append("f_LF=f_AL")
+        url_parts.append("f_AL=true")
+
+        # Add refresh parameter
+        url_parts.append("refresh=true")
+
 
         # Sort by parameter
         sort_by = parameters.get('sort_by', 'date')
@@ -497,7 +496,7 @@ class AIHawkJobManager:
         logger.debug(f"Navigating to next job page: {position} in {location}, page {job_page}")
         encoded_position = urllib.parse.quote(position)
         start = job_page * 25
-        search_url = f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={start}"
+        search_url = f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&origin=JOB_SEARCH_PAGE_JOB_FILTER&start={start}"
         self.driver.get(search_url)
 
     def extract_job_information_from_tile(self, job_tile):
@@ -614,10 +613,45 @@ class AIHawkJobManager:
         return False
 
     def save_job_to_file(self, job, file_name, reason=None, applicants_count=None):
-        FileManager.write_to_file(
-            job=job,
-            file_name=file_name,
-            output_file_directory=self.output_file_directory,
-            reason=reason,
-            applicants_count=applicants_count
-        )
+        """
+        Saves job application data to a file using the FileManager.
+
+        Args:
+            job: The job object containing details about the job application.
+            file_name: The name of the file where data should be saved.
+            reason: Optional reason for saving this job.
+            applicants_count: Optional count of applicants for this job.
+        """
+        try:
+            self.file_manager.write_to_file(
+                job=job,
+                file_name=file_name,
+                output_file_directory=self.output_file_directory,
+                reason=reason,
+                applicants_count=applicants_count
+            )
+            logger.debug(f"Job application for {job.title} successfully saved to file.")
+        except Exception as e:
+            logger.error(f"Failed to save job application for {job.title}: {e}")
+
+    def get_last_page(self):
+        try:
+            pagination_buttons = self.driver.find_elements(By.CLASS_NAME, "jobs-search-pagination__indicator-button")
+            if pagination_buttons:
+                last_page = max(int(button.text) for button in pagination_buttons if button.text.isdigit())
+                return last_page
+        except Exception as e:
+            logger.error(f"Error while getting last page: {e}")
+        return None
+
+    def load_skipped_jobs(self, skipped_jobs_file="skipped_jobs.json"):
+        try:
+            with open(skipped_jobs_file, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except FileNotFoundError:
+            logger.warning(f"Skipped jobs file '{skipped_jobs_file}' not found. Starting with an empty list.")
+            return []
+        except Exception as e:
+            logger.error(f"Error loading skipped jobs file: {e}")
+            return []
+

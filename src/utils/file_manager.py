@@ -1,9 +1,8 @@
 import json
 from pathlib import Path
 from typing import Optional
-
 import yaml
-
+from config import ABBREVIATIONS
 from constants import SECRETS_YAML, WORK_PREFERENCES_YAML, PLAIN_TEXT_RESUME_YAML
 from src.logging import logger
 
@@ -11,8 +10,10 @@ from src.logging import logger
 class FileManager:
     """Class for handling file operations related to the application."""
 
-    @staticmethod
-    def validate_data_folder(app_data_folder: Path) -> tuple:
+    def __init__(self):
+        self._json_cache = {}
+
+    def validate_data_folder(self, app_data_folder: Path) -> tuple:
         """
         Validates that the required files exist in the data folder.
         """
@@ -36,8 +37,29 @@ class FileManager:
             output_folder,
         )
 
-    @staticmethod
-    def file_paths_to_dict(resume_file: Optional[Path], plain_text_resume_file: Path) -> dict:
+    def open_file(self, file_path: Path, mode: str = "r", encoding: Optional[str] = "utf-8"):
+        """
+        Opens a file and manages its file object in the FileManager.
+
+        Args:
+            file_path (Path): The path of the file to open.
+            mode (str): The mode to open the file in.
+            encoding (Optional[str]): Encoding to use.
+
+        Returns:
+            file object: Opened file object.
+        """
+        if file_path not in self._json_cache:
+            self._json_cache[file_path] = open(file_path, mode, encoding=encoding)
+        return self._json_cache[file_path]
+
+    def close_all_files(self):
+        """Closes all managed file objects."""
+        for file_obj in self._json_cache.values():
+            file_obj.close()
+        self._json_cache.clear()
+
+    def get_file_paths(self, resume_file: Optional[Path], plain_text_resume_file: Path) -> dict:
         """
         Returns a dictionary containing paths to the resume and plain text resume files.
         """
@@ -46,17 +68,16 @@ class FileManager:
                 f"Plain text resume file not found: {plain_text_resume_file}"
             )
 
-        result = {"plainTextResume": plain_text_resume_file}
+        paths = {"plain_text_resume": plain_text_resume_file}
 
         if resume_file:
             if not resume_file.exists():
                 raise FileNotFoundError(f"Resume file not found: {resume_file}")
-            result["resume"] = resume_file
+            paths["resume"] = resume_file
 
-        return result
+        return paths
 
-    @staticmethod
-    def read_secrets(secrets_path: Path) -> dict:
+    def read_secrets(self, secrets_path: Path) -> dict:
         """
         Reads and validates the secrets file (YAML format) and ensures required keys are present.
 
@@ -93,8 +114,7 @@ class FileManager:
         except yaml.YAMLError as exc:
             raise ValueError(f"Error parsing secrets file {secrets_path}: {exc}")
 
-    @staticmethod
-    def write_to_file(job, file_name, output_file_directory, reason=None, applicants_count=None):
+    def write_to_file(self, job, file_name, output_file_directory, reason=None, applicants_count=None):
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.resume_path).resolve().as_uri() if job.resume_path else None
         data = {
@@ -104,34 +124,46 @@ class FileManager:
             "job_recruiter": job.recruiter_link or "N/A",
             "job_location": job.location or "N/A",
             "pdf_path": pdf_path or "N/A",
-            "reason": reason or "N/A"
+            "reason": reason or "N/A",
         }
 
         if applicants_count is not None:
             data["applicants_count"] = applicants_count
 
         file_path = output_file_directory / f"{file_name}.json"
-        temp_file_path = file_path.with_suffix('.tmp')
 
         try:
-            if not file_path.exists():
-                with open(temp_file_path, 'w', encoding='utf-8') as f:
-                    json.dump([data], f, indent=4)
-                temp_file_path.rename(file_path)
-                logger.debug(f"Job data written to new file: {file_path}")
+            if file_path in self._json_cache:
+                existing_data = json.load(self._json_cache[file_path])
             else:
-                with open(file_path, 'r+', encoding='utf-8') as f:
-                    try:
+                if file_path.exists():
+                    with open(file_path, "r", encoding="utf-8") as f:
                         existing_data = json.load(f)
-                    except json.JSONDecodeError:
-                        logger.error(f"JSON decode error in file: {file_path}. Creating a backup.")
-                        file_path.rename(file_path.with_suffix('.bak'))
-                        existing_data = []
+                else:
+                    existing_data = []
 
-                    existing_data.append(data)
-                    f.seek(0)
-                    json.dump(existing_data, f, indent=4)
-                    f.truncate()
-                    logger.debug(f"Job data appended to existing file: {file_path}")
+            existing_data.append(data)
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(existing_data, f, indent=4)
+                logger.debug(f"Job data updated in file: {file_path}")
+
         except Exception as e:
             logger.error(f"Failed to write data to file {file_path}: {e}")
+
+    @staticmethod
+    def apply_abbreviations(text):
+        """
+        Replaces words in the given text based on the ABBREVIATIONS dictionary.
+        If a word is not found in the dictionary, it remains unchanged.
+
+        Args:
+            text (str): The input text to process.
+
+        Returns:
+            str: The text with abbreviations applied.
+        """
+        for full, abbrev in ABBREVIATIONS.items():
+            if full in text:
+                text = text.replace(full, abbrev)
+        return text
