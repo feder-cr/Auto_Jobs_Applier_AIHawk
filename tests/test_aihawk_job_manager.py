@@ -114,25 +114,25 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     # Mock no_jobs_element to simulate the absence of "No matching jobs found" banner
     no_jobs_element = mocker.Mock()
     no_jobs_element.text = ""  # Empty text means "No matching jobs found" is not present
-    mocker.patch.object(job_manager.driver, 'find_element',
-                        return_value=no_jobs_element)
 
     # Mock the page_source to simulate what the page looks like when jobs are present
     mocker.patch.object(job_manager.driver, 'page_source',
                         return_value="some job content")
 
-    # Mock the outer find_elements (scaffold-layout__list-container)
+    # Mock the outer find_element
     container_mock = mocker.Mock()
 
     # Mock the inner find_elements to return job list items
     job_element_mock = mocker.Mock()
     # Simulating two job items
-    job_elements_list = [job_element_mock, job_element_mock]
+    job_list = [job_element_mock, job_element_mock]
 
     # Return the container mock, which itself returns the job elements list
-    container_mock.find_elements.return_value = job_elements_list
-    mocker.patch.object(job_manager.driver, 'find_elements',
-                        return_value=[container_mock])
+    container_mock.find_elements.return_value = job_list
+    mocker.patch.object(job_manager.driver, 'find_element', side_effect=[
+        no_jobs_element,
+        container_mock
+    ])
     
     job = Job(
         title="Title",
@@ -181,7 +181,8 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     job_manager.apply_jobs()
 
     # Assertions
-    assert job_manager.driver.find_elements.call_count == 1
+    assert container_mock.find_elements.call_count == 1
+    assert job_manager.driver.find_element.call_count == 2
     # Called for each job element
     assert job_manager.job_tile_to_job.call_count == 2
     # Called for each job element
