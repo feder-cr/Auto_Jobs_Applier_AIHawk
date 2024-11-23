@@ -755,7 +755,12 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-This project is licensed under the  MIT + Commons Clause License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL License. Documentation is licensed under CC BY - see the [AGPL LICENSE](LICENSE) and [CC BY LICENSE](docs/LICENSE) files for details.
+
+The AGPL License requires that any derivative work must also be open source and distributed under the same license.
+
+The CC BY License permits others to distribute, remix, adapt, and build upon your work, even for commercial purposes, as long as they credit you for the original creation. 
+ 
 
 ## Disclaimer
 
