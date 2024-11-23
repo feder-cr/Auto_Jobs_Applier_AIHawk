@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 from flask_bootstrap import Bootstrap
+from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -26,6 +27,15 @@ def index():
 
         return render_template('index.html', data=data if isinstance(data, list) else [])
 
+easy_applier = AIHawkEasyApplier(
+    driver=None,
+    resume_dir=None,
+    set_old_answers=[],
+    gpt_answerer=None,
+    resume_generator_manager=None,
+    job_application_profile=None
+)
+
 def update():
     if not JSON_FILE.exists():
         data = []
@@ -37,9 +47,9 @@ def update():
     for i, item in enumerate(data):
         if f'delete_{i}' not in request.form:
             if item['type'] == 'radio':
-                item['answer'] = request.form.get(f'answer_{i}_radio', item['answer'])
+                item['answer'] = easy_applier._sanitize_text(request.form.get(f'answer_{i}_radio', item['answer']))
             else:
-                item['answer'] = request.form.get(f'answer_{i}', item['answer'])
+                item['answer'] = easy_applier._sanitize_text(request.form.get(f'answer_{i}', item['answer']))
             updated_data.append(item)
 
     # Sort updated data alphabetically by question

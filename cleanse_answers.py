@@ -1,23 +1,16 @@
 import json
 import re
 
-def sanitize_text(text: str) -> str:
-    # Remove duplicates by splitting and rejoining
-    text = text.rstrip()
-    text = re.sub(r'\s+', ' ', text)
-    text = text.replace('?', '').replace('"', '').replace('\\', '')
-    words = text.lower().split()
-    unique_words = []
-    for word in words:
-        if word not in unique_words:
-            unique_words.append(word)
-    text = ' '.join(unique_words)
-    
-    # Remove common suffixes
-    text = re.sub(r'\s*\(?required\)?', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'(\s*\(?yes\/no\)?|\s*\(?yes\)?|\s*\(?no\)?|\?)$', '', text, flags=re.IGNORECASE)
-    sanitized_text = re.sub(r'[^[:ascii:]]','', text)
-    return sanitized_text
+from src.ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
+
+easy_applier = AIHawkEasyApplier(
+    driver=None,
+    resume_dir=None,
+    set_old_answers=[],
+    gpt_answerer=None,
+    resume_generator_manager=None,
+    job_application_profile=None
+)
 
 def cleanse_answers_json(input_file: str, output_file: str):
     with open(input_file, 'r') as f:
@@ -27,7 +20,7 @@ def cleanse_answers_json(input_file: str, output_file: str):
     seen_questions = set()
 
     for item in data:
-        sanitized_question = sanitize_text(item['question'])
+        sanitized_question = easy_applier._sanitize_text(item['question'])
         if sanitized_question not in seen_questions:
             seen_questions.add(sanitized_question)
             cleansed_item = {
