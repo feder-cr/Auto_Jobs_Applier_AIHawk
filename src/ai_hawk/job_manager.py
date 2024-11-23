@@ -252,7 +252,7 @@ class AIHawkJobManager:
             pass
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            job_results = self.driver.find_element(By.CLASS_NAME, "scaffold-layout__list-detail-container")
             browser_utils.scroll_slow(self.driver, job_results)
             browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
