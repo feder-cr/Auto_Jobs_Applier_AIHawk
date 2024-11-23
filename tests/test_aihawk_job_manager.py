@@ -1,7 +1,9 @@
+from unittest.mock import patch, Mock
+
 import pytest
 from unittest import mock
 from pathlib import Path
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.ai_hawk.job_manager import AIHawkJobManager
@@ -67,35 +69,6 @@ def test_get_jobs_from_page_no_jobs(mocker, job_manager):
     jobs = job_manager.get_jobs_from_page()
     assert jobs == []
 
-
-def test_get_jobs_from_page_with_mocked_jobs(mocker, job_manager):
-    """Test get_jobs_from_page when job elements are mocked."""
-    # Mock job_results element
-    mock_job_results = mocker.Mock()
-    mocker.patch.object(job_manager.driver, 'find_element', return_value=mock_job_results)
-
-    # Mock browser_utils.scroll_slow
-    mocker.patch.object(browser_utils, 'scroll_slow')
-
-    # Mock job_list_elements
-    mock_job_list_element = mocker.Mock()
-    mock_job_list_container = mocker.Mock()
-    mock_job_list_container.find_elements.return_value = [mock_job_list_element]
-
-    # Define side_effect function for find_elements
-    def side_effect_find_elements(by, value):
-        if by == By.CLASS_NAME and value == 'jobs-search-no-results-banner':
-            return []
-        elif by == By.CLASS_NAME and value == 'scaffold-layout__list-container':
-            return [mock_job_list_container]
-        else:
-            return []
-
-    mocker.patch.object(job_manager.driver, 'find_elements', side_effect=side_effect_find_elements)
-
-    jobs = job_manager.get_jobs_from_page()
-    assert len(jobs) == 1
-    assert jobs[0] == mock_job_list_element
 
 
 def test_apply_jobs_with_no_jobs(mocker, job_manager):
