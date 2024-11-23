@@ -253,17 +253,17 @@ class AIHawkJobManager:
             pass
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            browser_utils.scroll_slow(self.driver, job_results)
-            browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+            jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+            browser_utils.scroll_slow(self.driver, jobs_container)
+            browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-                0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-            if not job_list_elements:
+            job_list = self.driver.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+
+            if not job_list:
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
-            return job_list_elements
+            return job_list
 
         except NoSuchElementException:
             logger.debug("No job results found on the page.")
@@ -281,13 +281,14 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
         
-        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-        browser_utils.scroll_slow(self.driver, job_results)
-        browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
-        if not job_list_elements:
-            raise Exception("No job class elements found on page")
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_list_elements] 
+        jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+        browser_utils.scroll_slow(self.driver, jobs_container)
+        browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
+
+        job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+        if not job_list:
+            raise Exception("No job elements found on page")
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_list] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
@@ -308,14 +309,14 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
 
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-            0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+        job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
 
-        if not job_list_elements:
+        if not job_list:
             logger.debug("No job class elements found on page, skipping")
             return
 
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_list_elements]
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_list]
 
         for job in job_list:
 
@@ -490,9 +491,9 @@ class AIHawkJobManager:
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
-        
+
         try:
-            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
+            job.company = job_tile.find_element(By.XPATH, './/span[contains(normalize-space(), " · ")]').text.split(' · ')[0].strip()
             logger.debug(f"Job company extracted: {job.company}")
         except NoSuchElementException:
             logger.warning("Job company is missing.")
@@ -509,12 +510,12 @@ class AIHawkJobManager:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
 
         try:
-            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
+            job.location = job_tile.find_element(By.XPATH, './/span[contains(normalize-space(), " · ")]').text.split(' · ')[-1].strip()
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
         try:
-            job.apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
+            job.apply_method = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'job-card-container__job-insight-text') and normalize-space() = 'Easy Apply']").text
         except NoSuchElementException:
             job.apply_method = "Applied"
             logger.warning("Apply method not found, assuming 'Applied'.")
