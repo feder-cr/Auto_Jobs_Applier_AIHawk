@@ -244,7 +244,6 @@ class AIHawkJobManager:
     def get_jobs_from_page(self, scroll=False):
 
         try:
-
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
                 logger.debug("No matching jobs found on this page, skipping.")
@@ -262,11 +261,8 @@ class AIHawkJobManager:
 
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
-            jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
-            browser_utils.scroll_slow(self.driver, jobs_container)
-            browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
-            job_list = self.driver.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+            job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
 
             if not job_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -310,19 +306,7 @@ class AIHawkJobManager:
                 continue
 
     def apply_jobs(self):
-        try:
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                logger.debug("No matching jobs found on this page, skipping")
-                return
-        except NoSuchElementException:
-            pass
-
-        job_list_elements = self.get_jobs_from_page()
-
-        if not job_list:
-            logger.debug("No job class elements found on page, skipping")
-            return
+        job_list = self.get_jobs_from_page()
 
         job_list = [self.job_tile_to_job(job_element) for job_element in job_list]
 
@@ -521,7 +505,7 @@ class AIHawkJobManager:
             logger.warning("Job location is missing.")
         
         try:
-            job.apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
+            job.apply_method = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'job-card-container__job-insight-text') and normalize-space() = 'Easy Apply']").text
         except NoSuchElementException as e:
             job.apply_method = "Applied"
             logger.warning(f'Apply method not found, assuming \'Applied\'. {e} {traceback.format_exc()}')
