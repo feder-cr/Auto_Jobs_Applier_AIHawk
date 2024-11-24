@@ -129,10 +129,10 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     # Simulating two job items
     job_elements_list = [job_element_mock, job_element_mock]
 
-    # Return the container mock, which itself returns the job elements list
-    container_mock.find_elements.return_value = job_elements_list
     mocker.patch.object(job_manager.driver, 'find_elements',
                         return_value=[container_mock])
+    
+    mocker.patch.object(job_manager, 'get_jobs_from_page', return_value=job_elements_list)
     
     job = Job(
         title="Title",
@@ -181,7 +181,7 @@ def test_apply_jobs_with_jobs(mocker, job_manager):
     job_manager.apply_jobs()
 
     # Assertions
-    assert job_manager.driver.find_elements.call_count == 1
+    assert job_manager.get_jobs_from_page.call_count == 1
     # Called for each job element
     assert job_manager.job_tile_to_job.call_count == 2
     # Called for each job element
