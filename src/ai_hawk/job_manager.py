@@ -253,7 +253,7 @@ class AIHawkJobManager:
             pass
 
         try:
-            jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+            jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
             browser_utils.scroll_slow(self.driver, jobs_container)
             browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
@@ -281,7 +281,7 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
         
-        jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+        jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
         browser_utils.scroll_slow(self.driver, jobs_container)
         browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
@@ -309,7 +309,7 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
 
-        jobs_container = self.driver.find_element(By.XPATH, '//*[@id="main"]/div/div[2]/div[1]/div')
+        jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
         job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
 
         if not job_list:
