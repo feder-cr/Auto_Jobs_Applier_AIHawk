@@ -376,7 +376,7 @@ class AIHawkEasyApplier:
                 EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-content'))
             )
 
-            pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
+            pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'ph5')
             for element in pb4_elements:
                 self._process_form_element(element, job_context)
         except Exception as e:
@@ -497,14 +497,18 @@ class AIHawkEasyApplier:
         while True:
             try:
                 timestamp = int(time.time())
-                file_path_pdf = os.path.join(folder_path, f"CV_{timestamp}.pdf")
-                logger.debug(f"Generated file path for resume: {file_path_pdf}")
+                file_path_pdf = os.path.join(folder_path, f"CV.pdf")
+                file_path_pdf_timestamp = os.path.join(folder_path, f"CV_{timestamp}.pdf")
+                logger.debug(f"Generated file path for resume: {file_path_pdf_timestamp}")
 
                 logger.debug(f"Generating resume for job: {job.title} at {job.company}")
                 resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
-                with open(file_path_pdf, "xb") as f:
+                with open(file_path_pdf, "wb") as f:
                     f.write(base64.b64decode(resume_pdf_base64))
-                logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
+
+                with open(file_path_pdf_timestamp, "xb") as f:
+                    f.write(base64.b64decode(resume_pdf_base64))
+                logger.debug(f"Resume successfully generated and saved to: {file_path_pdf_timestamp}")
 
                 break
             except HTTPStatusError as e:

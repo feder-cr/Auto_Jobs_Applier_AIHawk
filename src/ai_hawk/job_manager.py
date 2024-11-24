@@ -252,7 +252,9 @@ class AIHawkJobManager:
             pass
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+            logger.debug("Try job_results")
+            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list__subtitle")
+            logger.debug("Succes job_results")
             browser_utils.scroll_slow(self.driver, job_results)
             browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
 
@@ -280,7 +282,7 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
         
-        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
+        job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list__subtitle")
         browser_utils.scroll_slow(self.driver, job_results)
         browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
         job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
@@ -489,7 +491,7 @@ class AIHawkJobManager:
             logger.warning("Job link is missing.")
         
         try:
-            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
+            job.company = job_tile.find_element(By.CLASS_NAME, 'artdeco-entity-lockup__subtitle').text
             logger.debug(f"Job company extracted: {job.company}")
         except NoSuchElementException:
             logger.warning("Job company is missing.")
