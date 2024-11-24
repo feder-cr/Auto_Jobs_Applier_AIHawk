@@ -4,6 +4,7 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+import traceback
 from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
@@ -13,6 +14,7 @@ from selenium.webdriver.common.by import By
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
+import job
 from src.job import Job
 from src.logging import logger
 
@@ -155,7 +157,7 @@ class AIHawkJobManager:
                     logger.debug("Starting the application process for this page...")
 
                     try:
-                        jobs = self.get_jobs_from_page()
+                        jobs = self.get_jobs_from_page(scroll=True)
                         if not jobs:
                             logger.debug("No more jobs found on this page. Exiting loop.")
                             break
@@ -166,7 +168,7 @@ class AIHawkJobManager:
                     try:
                         self.apply_jobs()
                     except Exception as e:
-                        logger.error(f"Error during job application: {e}")
+                        logger.error(f"Error during job application: {e} {traceback.format_exc()}")
                         continue
 
                     logger.debug("Applying to jobs on this page has been completed!")
@@ -239,7 +241,7 @@ class AIHawkJobManager:
                     time.sleep(sleep_time)
                 page_sleep += 1
 
-    def get_jobs_from_page(self):
+    def get_jobs_from_page(self, scroll=False):
 
         try:
 
@@ -252,24 +254,30 @@ class AIHawkJobManager:
             pass
 
         try:
-            job_results = self.driver.find_element(By.CLASS_NAME, "jobs-search-results-list")
-            browser_utils.scroll_slow(self.driver, job_results)
-            browser_utils.scroll_slow(self.driver, job_results, step=300, reverse=True)
+            # XPath query to find the ul tag with class scaffold-layout__list-container
+            job_results_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
+            job_results = self.driver.find_element(By.XPATH, job_results_xpath_query)
 
-            job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-                0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+            if scroll:
+                job_results_scrolableElament = job_results.find_element(By.XPATH,"..")
+                logger.warning(f'is scrollable: {browser_utils.is_scrollable(job_results_scrolableElament)}')
+
+                browser_utils.scroll_slow(self.driver, job_results_scrolableElament)
+                browser_utils.scroll_slow(self.driver, job_results_scrolableElament, step=300, reverse=True)
+
+            job_list_elements = job_results.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
             if not job_list_elements:
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
             return job_list_elements
 
-        except NoSuchElementException:
-            logger.debug("No job results found on the page.")
+        except NoSuchElementException as e:
+            logger.warning(f'No job results found on the page. \n expection: {traceback.format_exc()}')
             return []
 
         except Exception as e:
-            logger.error(f"Error while fetching job elements: {e}")
+            logger.error(f"Error while fetching job elements: {e} {traceback.format_exc()}")
             return []
 
     def read_jobs(self):
@@ -307,8 +315,7 @@ class AIHawkJobManager:
         except NoSuchElementException:
             pass
 
-        job_list_elements = self.driver.find_elements(By.CLASS_NAME, 'scaffold-layout__list-container')[
-            0].find_elements(By.CLASS_NAME, 'jobs-search-results__list-item')
+        job_list_elements = self.get_jobs_from_page()
 
         if not job_list_elements:
             logger.debug("No job class elements found on page, skipping")
@@ -489,10 +496,10 @@ class AIHawkJobManager:
             logger.warning("Job link is missing.")
         
         try:
-            job.company = job_tile.find_element(By.CLASS_NAME, 'job-card-container__primary-description').text
+            job.company = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span").text
             logger.debug(f"Job company extracted: {job.company}")
-        except NoSuchElementException:
-            logger.warning("Job company is missing.")
+        except NoSuchElementException as e:
+            logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
         
         # Extract job ID from job url
         try:
@@ -512,9 +519,9 @@ class AIHawkJobManager:
         
         try:
             job.apply_method = job_tile.find_element(By.CLASS_NAME, 'job-card-container__apply-method').text
-        except NoSuchElementException:
+        except NoSuchElementException as e:
             job.apply_method = "Applied"
-            logger.warning("Apply method not found, assuming 'Applied'.")
+            logger.warning(f'Apply method not found, assuming \'Applied\'. {e} {traceback.format_exc()}')
 
         return job
 
