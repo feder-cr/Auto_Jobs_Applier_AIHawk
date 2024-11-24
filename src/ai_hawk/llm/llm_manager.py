@@ -16,7 +16,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompt_values import StringPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from Levenshtein import distance
-from loguru import logger
 
 import ai_hawk.llm.prompts as prompts
 from config import JOB_SUITABILITY_SCORE
@@ -31,7 +30,6 @@ from constants import (
     EXPERIENCE_DETAILS,
     FINISH_REASON,
     GEMINI,
-    GROQ,
     HUGGINGFACE,
     ID,
     INPUT_TOKENS,
@@ -40,6 +38,7 @@ from constants import (
     JOB_DESCRIPTION,
     LANGUAGES,
     LEGAL_AUTHORIZATION,
+    LLM_MODEL_TYPE,
     LOGPROBS,
     MODEL,
     MODEL_NAME,
@@ -70,9 +69,9 @@ from constants import (
     TOTAL_TOKENS,
     USAGE_METADATA,
     WORK_PREFERENCES,
-    AIML,
 )
 from src.job import Job
+from src.logging import logger
 import config as cfg
 
 load_dotenv()
@@ -83,16 +82,6 @@ class AIModel(ABC):
     def invoke(self, prompt: str) -> str:
         pass
 
-class GroqAIModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str):
-        from langchain_groq import ChatGroq
-        self.model = ChatGroq(model=llm_model, api_key=api_key,
-                                temperature=0.4)
-
-    def invoke(self, prompt: str) -> BaseMessage:
-        response = self.model.invoke(prompt)
-        logger.debug("Invoking GroqAI API")
-        return response
 
 class OpenAIModel(AIModel):
     def __init__(self, api_key: str, llm_model: str):
@@ -104,24 +93,6 @@ class OpenAIModel(AIModel):
 
     def invoke(self, prompt: str) -> BaseMessage:
         logger.debug("Invoking OpenAI API")
-        response = self.model.invoke(prompt)
-        return response
-
-
-class AIMLModel(AIModel):
-    def __init__(self, api_key: str, llm_model: str):
-        from langchain_openai import ChatOpenAI
-
-        self.base_url = "https://api.aimlapi.com/v2"
-        self.model = ChatOpenAI(
-            model_name=llm_model,
-            openai_api_key=api_key,
-            temperature=0.7,
-            base_url=self.base_url,
-        )
-
-    def invoke(self, prompt: str) -> BaseMessage:
-        logger.debug("Invoking AIML API")
         response = self.model.invoke(prompt)
         return response
 
@@ -224,16 +195,12 @@ class AIAdapter:
 
         if llm_model_type == OPENAI:
             return OpenAIModel(api_key, llm_model)
-        elif llm_model_type == AIML:
-            return AIMLModel(api_key, llm_model)
         elif llm_model_type == CLAUDE:
             return ClaudeModel(api_key, llm_model)
         elif llm_model_type == OLLAMA:
             return OllamaModel(llm_model, llm_api_url)
         elif llm_model_type == GEMINI:
             return GeminiModel(api_key, llm_model)
-        elif llm_model_type == GROQ:
-            return GroqAIModel(api_key, llm_model)     
         elif llm_model_type == HUGGINGFACE:
             return HuggingFaceModel(api_key, llm_model)
         elif llm_model_type == PERPLEXITY:
@@ -246,8 +213,7 @@ class AIAdapter:
 
 
 class LLMLogger:
-
-    def __init__(self, llm: AIModel):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel, GeminiModel]):
         self.llm = llm
         logger.debug(f"LLMLogger successfully initialized with LLM: {llm}")
 
@@ -359,8 +325,7 @@ class LLMLogger:
 
 
 class LoggerChatModel:
-
-    def __init__(self, llm: AIModel):
+    def __init__(self, llm: Union[OpenAIModel, OllamaModel, ClaudeModel, GeminiModel]):
         self.llm = llm
         logger.debug(f"LoggerChatModel successfully initialized with LLM: {llm}")
 

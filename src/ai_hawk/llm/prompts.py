@@ -262,16 +262,16 @@ Please write the cover letter in a way that directly addresses the job role and 
 - Do not include any introductions, explanations, or additional information.
 - The letter should be formatted into paragraph.
 
-## My resume:
-```
-{resume}
-```
-
 ## Company Name:
 {company}
+
 ## Job Description:
 ```
 {job_description}
+```
+## My resume:
+```
+{resume}
 ```
 """
 
@@ -432,9 +432,9 @@ func_summarize_prompt_template = """
 is_relavant_position_template = """
    Evaluate whether the provided resume meets the requirements outlined in the job description. Determine if the candidate is suitable for the job based on the information provided.
 
-Resume: {resume}
-
 Job Description: {job_description}
+
+Resume: {resume}
 
 Instructions:
 1. Extract the key requirements from the job description, identifying hard requirements (must-haves) and soft requirements (nice-to-haves).

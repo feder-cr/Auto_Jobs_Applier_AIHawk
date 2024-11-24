@@ -4,8 +4,8 @@ import random
 import time
 from itertools import product
 from pathlib import Path
+import traceback
 from turtle import color
-from datetime import datetime
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
+import job
 from src.job import Job
 from src.logging import logger
 
@@ -156,7 +157,7 @@ class AIHawkJobManager:
                     logger.debug("Starting the application process for this page...")
 
                     try:
-                        jobs = self.get_jobs_from_page()
+                        jobs = self.get_jobs_from_page(scroll=True)
                         if not jobs:
                             logger.debug("No more jobs found on this page. Exiting loop.")
                             break
@@ -167,7 +168,7 @@ class AIHawkJobManager:
                     try:
                         self.apply_jobs()
                     except Exception as e:
-                        logger.error(f"Error during job application: {e}")
+                        logger.error(f"Error during job application: {e} {traceback.format_exc()}")
                         continue
 
                     logger.debug("Applying to jobs on this page has been completed!")
@@ -240,10 +241,9 @@ class AIHawkJobManager:
                     time.sleep(sleep_time)
                 page_sleep += 1
 
-    def get_jobs_from_page(self):
+    def get_jobs_from_page(self, scroll=False):
 
         try:
-
             no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
             if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
                 logger.debug("No matching jobs found on this page, skipping.")
@@ -254,10 +254,15 @@ class AIHawkJobManager:
 
         try:
             jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
-            browser_utils.scroll_slow(self.driver, jobs_container)
-            browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
-            job_list = self.driver.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+            if scroll:
+                jobs_container_scrolableElement = jobs_container.find_element(By.XPATH,"..")
+                logger.warning(f'is scrollable: {browser_utils.is_scrollable(jobs_container_scrolableElement)}')
+
+                browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
+                browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
+
+            job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
 
             if not job_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -265,12 +270,12 @@ class AIHawkJobManager:
 
             return job_list
 
-        except NoSuchElementException:
-            logger.debug("No job results found on the page.")
+        except NoSuchElementException as e:
+            logger.warning(f'No job results found on the page. \n expection: {traceback.format_exc()}')
             return []
 
         except Exception as e:
-            logger.error(f"Error while fetching job elements: {e}")
+            logger.error(f"Error while fetching job elements: {e} {traceback.format_exc()}")
             return []
 
     def read_jobs(self):
@@ -301,20 +306,7 @@ class AIHawkJobManager:
                 continue
 
     def apply_jobs(self):
-        try:
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                logger.debug("No matching jobs found on this page, skipping")
-                return
-        except NoSuchElementException:
-            pass
-
-        jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
-        job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
-
-        if not job_list:
-            logger.debug("No job class elements found on page, skipping")
-            return
+        job_list = self.get_jobs_from_page()
 
         job_list = [self.job_tile_to_job(job_element) for job_element in job_list]
 
@@ -402,15 +394,13 @@ class AIHawkJobManager:
         logger.debug(f"Writing job application result to file: {file_name}")
         pdf_path = Path(job.resume_path).resolve()
         pdf_path = pdf_path.as_uri()
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data = {
             "company": job.company,
             "job_title": job.title,
             "link": job.link,
             "job_recruiter": job.recruiter_link,
             "job_location": job.location,
-            "pdf_path": pdf_path,
-            "time": current_time
+            "pdf_path": pdf_path
         }
         
         if reason:
@@ -495,8 +485,8 @@ class AIHawkJobManager:
         try:
             job.company = job_tile.find_element(By.XPATH, './/span[contains(normalize-space(), " · ")]').text.split(' · ')[0].strip()
             logger.debug(f"Job company extracted: {job.company}")
-        except NoSuchElementException:
-            logger.warning("Job company is missing.")
+        except NoSuchElementException as e:
+            logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
         
         # Extract job ID from job url
         try:
@@ -516,9 +506,9 @@ class AIHawkJobManager:
         
         try:
             job.apply_method = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'job-card-container__job-insight-text') and normalize-space() = 'Easy Apply']").text
-        except NoSuchElementException:
+        except NoSuchElementException as e:
             job.apply_method = "Applied"
-            logger.warning("Apply method not found, assuming 'Applied'.")
+            logger.warning(f'Apply method not found, assuming \'Applied\'. {e} {traceback.format_exc()}')
 
         return job
 
