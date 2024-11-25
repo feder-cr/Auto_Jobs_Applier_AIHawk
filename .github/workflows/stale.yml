@@ -1,0 +1,42 @@
+name: Mark and Close Stale Issues
+
+on:
+  # Schedule the workflow to run periodically (e.g., daily at 1:30 AM UTC)
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Run Stale Action
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 10 # Days of inactivity before marking an issue as stale
+          days-before-issue-close: 5 # Days after being marked stale before closing the issue
+          stale-issue-label: "stale" # Label to apply to stale issues
+          exempt-issue-labels: "pinned,important" # Labels to exclude from being marked as stale
+          exempt-issue-assignees: true # Exempt issues with assignees from being marked as stale
+          stale-issue-message: "This issue has been marked as stale due to inactivity. Please comment or update if this is still relevant."
+          close-issue-message: "This issue was closed due to prolonged inactivity."
+          days-before-pr-stale: 10 # Days of inactivity before marking a PR as stale
+          days-before-pr-close: 2 # Days after being marked stale before closing the PR
+          stale-pr-label: "stale" # Label to apply to stale PRs
+          exempt-pr-labels: "pinned,important" # Labels to exclude from being marked as stale
+          stale-pr-message: >
+            "This pull request has been marked as stale due to inactivity. 
+            To keep it open, you can:
+            - Show progress by updating the PR with new commits.
+            - Continue the conversation by adding comments or requesting clarification on any blockers.
+            - Resolve pending feedback by replying to unresolved comments or implementing suggested changes.
+            - Indicate readiness for review by explicitly requesting a review from maintainers or reviewers.
+            If no action is taken within 7 days, this pull request will be closed."
+          close-pr-message: "This PR was closed due to prolonged inactivity."
+          remove-stale-when-updated: true # Remove the stale label if there is new activity
+          operations-per-run: 20 # Number of issues to process per run (default is 30)
