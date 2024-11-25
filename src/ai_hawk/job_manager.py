@@ -4,7 +4,6 @@ import random
 import time
 from itertools import product
 from pathlib import Path
-from turtle import color
 from datetime import datetime
 
 from inputimeout import inputimeout, TimeoutOccurred
@@ -14,6 +13,7 @@ from selenium.webdriver.common.by import By
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
+from src.custom_exception import JobNotSuitableException
 from src.job import Job
 from src.logging import logger
 
@@ -409,12 +409,13 @@ class AIHawkJobManager:
             
             try:
                 if job.apply_method not in {"Continue", "Applied", "Apply"}:
-                    if self.easy_applier_component.job_apply(job):
-                        self.write_to_file(job, "success")
-                        logger.debug(f"Applied to job: {job.title} at {job.company}")
-                    else:
-                        self.write_to_file(job, "failed", "LLM scored your profile and found the role unsuitable for you.")
-                        logger.debug(f"Failed to apply for {job.title} at {job.company}")
+                    self.easy_applier_component.job_apply(job)
+                    self.write_to_file(job, "success")
+                    logger.debug(f"Applied to job: {job.title} at {job.company}")
+            except JobNotSuitableException as e:
+                logger.debug(f"Job not suitable for application: {job.title} at {job.company}")
+                self.write_to_file(job, "skipped", str(e))
+                continue
             except Exception as e:
                 logger.error(f"Failed to apply for {job.title} at {job.company}: {e}",exc_info=True)
                 self.write_to_file(job, "failed", f"Application error: {str(e)}")
