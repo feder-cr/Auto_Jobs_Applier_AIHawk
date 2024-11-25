@@ -72,8 +72,8 @@ def test_get_jobs_from_page_no_jobs(mocker, job_manager):
 def test_get_jobs_from_page_with_jobs(mocker, job_manager):
     """Test get_jobs_from_page when job elements are found."""
     # Mock no_jobs_element to simulate the absence of "No matching jobs found" banner
-    no_jobs_element = mocker.Mock()
-    no_jobs_element.text = ""  # Empty text means "No matching jobs found" is not present
+    no_jobs_element_mock = mocker.Mock()
+    no_jobs_element_mock.text = ""  # Empty text means "No matching jobs found" is not present
 
     # Mock the driver to simulate the page source
     mocker.patch.object(job_manager.driver, 'page_source', return_value="")
@@ -89,7 +89,7 @@ def test_get_jobs_from_page_with_jobs(mocker, job_manager):
     # Return the container mock, which itself returns the job elements list
     container_mock.find_elements.return_value = job_elements_list
     mocker.patch.object(job_manager.driver, 'find_element', side_effect=[
-        no_jobs_element,
+        no_jobs_element_mock,
         container_mock
     ])
 

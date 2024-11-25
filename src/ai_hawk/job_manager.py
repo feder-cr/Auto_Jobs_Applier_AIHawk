@@ -253,7 +253,9 @@ class AIHawkJobManager:
             pass
 
         try:
-            jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
+            # XPath query to find the ul tag with class scaffold-layout__list-container
+            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
+            jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
 
             if scroll:
                 jobs_container_scrolableElement = jobs_container.find_element(By.XPATH,"..")
@@ -262,7 +264,7 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -279,20 +281,8 @@ class AIHawkJobManager:
             return []
 
     def read_jobs(self):
-        try:
-            no_jobs_element = self.driver.find_element(By.CLASS_NAME, 'jobs-search-two-pane__no-results-banner--expand')
-            if 'No matching jobs found' in no_jobs_element.text or 'unfortunately, things aren' in self.driver.page_source.lower():
-                raise Exception("No more jobs on this page")
-        except NoSuchElementException:
-            pass
-        
-        jobs_container = self.driver.find_element(By.CLASS_NAME, 'scaffold-layout__list-container')
-        browser_utils.scroll_slow(self.driver, jobs_container)
-        browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
-        job_element_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
-        if not job_element_list:
-            raise Exception("No job elements found on page")
+        job_element_list = self.get_jobs_from_page()
         job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
@@ -483,7 +473,7 @@ class AIHawkJobManager:
             logger.warning("Job link is missing.")
 
         try:
-            job.company = job_tile.find_element(By.XPATH, './/span[contains(normalize-space(), " · ")]').text.split(' · ')[0].strip()
+            job.company = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span").text
             logger.debug(f"Job company extracted: {job.company}")
         except NoSuchElementException as e:
             logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
@@ -500,15 +490,21 @@ class AIHawkJobManager:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
 
         try:
-            job.location = job_tile.find_element(By.XPATH, './/span[contains(normalize-space(), " · ")]').text.split(' · ')[-1].strip()
+            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
+
         try:
-            job.apply_method = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'job-card-container__job-insight-text') and normalize-space() = 'Easy Apply']").text
+            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__apply-method')]").text
         except NoSuchElementException as e:
-            job.apply_method = "Applied"
-            logger.warning(f'Apply method not found, assuming \'Applied\'. {e} {traceback.format_exc()}')
+            try:
+                # Fetching state when apply method is not found
+                job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-job-state')]").text
+                job.apply_method = "Applied"
+                logger.warning(f'Apply method not found, state {job_state}. {e} {traceback.format_exc()}')
+            except NoSuchElementException as e:
+                logger.warning(f'Apply method and state not found. {e} {traceback.format_exc()}')
 
         return job
 
