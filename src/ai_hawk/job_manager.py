@@ -254,8 +254,9 @@ class AIHawkJobManager:
 
         try:
             # XPath query to find the ul tag with class scaffold-layout__list-container
-            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
-            jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
+            jobs_xpath_query = "//div[contains(@class, 'scaffold-layout__list')]"
+            jobs_div_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
+            jobs_container = jobs_div_container.find_element(By.TAG_NAME, "ul")
 
             if scroll:
                 jobs_container_scrolableElement = jobs_container.find_element(By.XPATH,"..")
