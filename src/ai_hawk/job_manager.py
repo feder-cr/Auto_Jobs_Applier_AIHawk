@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
-import job
+
 from src.job import Job
 from src.logging import logger
 
