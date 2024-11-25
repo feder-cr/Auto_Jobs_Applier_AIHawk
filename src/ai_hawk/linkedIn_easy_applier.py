@@ -376,8 +376,8 @@ class AIHawkEasyApplier:
                 EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-content'))
             )
 
-            pb4_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'pb4')
-            for element in pb4_elements:
+            input_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
+            for element in input_elements:
                 self._process_form_element(element, job_context)
         except Exception as e:
             logger.error(f"Failed to find form elements: {e}")
