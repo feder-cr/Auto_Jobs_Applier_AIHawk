@@ -262,13 +262,13 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+            job_element_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
 
-            if not job_list:
+            if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
-            return job_list
+            return job_element_list
 
         except NoSuchElementException as e:
             logger.warning(f'No job results found on the page. \n expection: {traceback.format_exc()}')
@@ -290,10 +290,10 @@ class AIHawkJobManager:
         browser_utils.scroll_slow(self.driver, jobs_container)
         browser_utils.scroll_slow(self.driver, jobs_container, step=300, reverse=True)
 
-        job_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
-        if not job_list:
+        job_element_list = jobs_container.find_elements(By.CSS_SELECTOR, 'div[data-job-id]')
+        if not job_element_list:
             raise Exception("No job elements found on page")
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_list] 
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list] 
         for job in job_list:            
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
@@ -306,9 +306,9 @@ class AIHawkJobManager:
                 continue
 
     def apply_jobs(self):
-        job_list = self.get_jobs_from_page()
+        job_element_list = self.get_jobs_from_page()
 
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_list]
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list]
 
         for job in job_list:
 
