@@ -178,7 +178,7 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
 
 This file contains sensitive information. Never share or commit this file to version control.
 
-- `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key]`
+- `llm_api_key: [Your OpenAI or Ollama API key or Gemini API key or Groq API key or AI/ML API key]`
   - Replace with your OpenAI API key for GPT integration
   - To obtain an API key, follow the tutorial at: <https://medium.com/@lorenzozar/how-to-get-your-own-openai-api-key-f4d44e60c327>
   - Note: You need to add credit to your OpenAI account to use the API. You can add credit by visiting the [OpenAI billing dashboard](https://platform.openai.com/account/billing).
@@ -188,6 +188,8 @@ This file contains sensitive information. Never share or commit this file to ver
     OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
+  - For obtaining Groq API key visit [Groq API](https://api.groq.com/v1)
+  - For obtaining AI/ML API key visite [AI/ML API](https://aimlapi.com/app/)
 
 ### 2. work_preferences.yaml
 
@@ -276,19 +278,23 @@ This file defines your job search parameters and bot behavior. Each section cont
 #### 2.1 config.py - Customize LLM model endpoint
 
 - `LLM_MODEL_TYPE`:
-  - Choose the model type, supported: openai / ollama / claude / gemini
+  - Choose the model type, supported: openai / ollama / claude / gemini / groq / aiml
 - `LLM_MODEL`:
   - Choose the LLM model, currently supported:
     - openai: gpt-4o
     - ollama: llama2, mistral:v0.3
     - claude: any model
     - gemini: any model
-- `LLM_API_URL`:
-  - Link of the API endpoint for the LLM model
-    - openai: <https://api.pawan.krd/cosmosrp/v1>
+    - groq: llama3-groq-70b-8192-tool-use-preview, llama3-groq-8b-8192-tool-use-preview, llama-3.1-70b-versatile, llama-3.1-8b-instant, llama-3.2-3b-preview, llama3-70b-8192, llama3-8b-8192, mixtral-8x7b-32768
+    - aiml: any model
+      
+- `llm_api_url`:
+  - Link of the API endpoint for the LLM model. (only requried for ollama)
     - ollama: <http://127.0.0.1:11434/>
     - claude: <https://api.anthropic.com/v1>
     - gemini: <https://aistudio.google.com/app/apikey>
+    - groq: <https://api.groq.com/v1>
+    - aiml: <https://api.aimlapi.com/v2>
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
 ### 3. plain_text_resume.yaml
@@ -730,10 +736,12 @@ For further assistance, please create an issue on the [GitHub repository](https:
   - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
 - [OpenAI API Documentation](https://platform.openai.com/docs/)
+  
+- [AI/ML API Documentation](https://docs.aimlapi.com/)
 
 ### For Developers
 
-- [Contribution Guidelines](CONTRIBUTING.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
 
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
@@ -766,7 +774,12 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-This project is licensed under the  MIT + Commons Clause License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL License. Documentation is licensed under CC BY - see the [AGPL LICENSE](LICENSE) and [CC BY LICENSE](docs/LICENSE) files for details.
+
+The AGPL License requires that any derivative work must also be open source and distributed under the same license.
+
+The CC BY License permits others to distribute, remix, adapt, and build upon your work, even for commercial purposes, as long as they credit you for the original creation. 
+ 
 
 ## Disclaimer
 
