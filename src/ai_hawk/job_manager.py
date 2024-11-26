@@ -270,7 +270,7 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
+            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'scaffold-layout__list-item') and contains(@class, 'ember-view')]")
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -482,13 +482,13 @@ class AIHawkJobManager:
         job = Job()
 
         try:
-            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
+            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title--link').find_element(By.TAG_NAME, 'strong').text
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
         
         try:
-            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title--link').get_attribute('href').split('?')[0]
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
@@ -511,7 +511,7 @@ class AIHawkJobManager:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
 
         try:
-            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
+            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-wrapper').text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
