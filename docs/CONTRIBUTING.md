@@ -2,19 +2,20 @@
 
 ## Table of Contents
 
-- [Issue Labels](#issue-labels)
-- [Bug Reports](#bug-reports)
-- [Feature Requests](#feature-requests)
-- [Branch Rules](#branch-rules)
-- [Version Control](#version-control)
-- [Release Process](#release-process)
-- [Roles](#roles) 
-- [Pull Request Process](#pull-request-process)
-- [Code Style Guidelines](#code-style-guidelines)
-- [Development Setup](#development-setup)
-- [Testing](#testing)
-- [Communication](#communication)
-- [Development Diagrams](./docs/development_diagrams.md)
+- [Contributing to Auto\_Jobs\_Applier\_AIHawk](#contributing-to-auto_jobs_applier_aihawk)
+  - [Table of Contents](#table-of-contents)
+  - [Issue Labels](#issue-labels)
+  - [Bug Reports](#bug-reports)
+  - [Feature Requests](#feature-requests)
+  - [Branch Rules](#branch-rules)
+  - [Version Control](#version-control)
+  - [Release Process](#release-process)
+  - [Pull Request Process](#pull-request-process)
+  - [Merging Pull Requests](#merging-pull-requests)
+  - [Code Style Guidelines](#code-style-guidelines)
+  - [Development Setup](#development-setup)
+  - [Testing](#testing)
+  - [Communication](#communication)
 
 Thank you for your interest in contributing to Auto_Jobs_Applier_AIHawk. This document provides guidelines for contributing to the project.
 
@@ -113,42 +114,6 @@ gantt
     Planning release/v4.2.0      :2025-02-03, 2d
     Publish release/v4.1.0     :milestone, m4, 2025-02-03, 1d
 ```
-
-## Roles
-
-### Organization Owner
-
-- Has full access to all repositories
-- Controls organization-wide settings and permissions
-- Can set base permissions for all members
-- Manages repository settings and collaborator access
-
-### Release Manager
-
-- Creates and manages release branch from develop
-- Coordinates release cycles and versioning
-- Merges release into main
-
-### Maintainer
-
-- Reviews and approves develop, feature PRs
-- Triage issues, bugs, PRs
-- Manages feature, bugfix PRs merge into develop
-- Leads feature development, bug prioritization
-- Manages README, CONTRIBUTING, and other documentation
-
-### Moderator
-
-- Moderates Telegram, Discord channels
-- Manages project wiki
-- Contributes to README, CONTRIBUTING, and other documentation
-
-### Contributor
-
-- Creates feature branches from develop
-- Implements new features, bug fixes, and other changes
-- creates PRs on features
-- Collaborates with other developers on features
 
 ## Pull Request Process
 

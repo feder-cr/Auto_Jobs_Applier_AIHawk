@@ -225,6 +225,17 @@ This file defines your job search parameters and bot behavior. Each section cont
       - Data Scientist
     ```
 
+- `keywords_whitelist:`
+  - List keywords to look for in the job description, for example, "chromium browser". This field is optional.
+  - Only use this field to find jobs that require specific technologies, products, or skills that is not mentioned in the job title.
+  - Warning: Any jobs without matching keywords in the job description will be skipped.
+  - Example:
+
+    ```yaml
+    keywords_whitelist:
+      - chromium browser
+    ```
+
 - `locations:`
   - List locations you want to search in, one per line
   - Example:
@@ -722,7 +733,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ### For Developers
 
-- [Contribution Guidelines](CONTRIBUTING.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
 
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
