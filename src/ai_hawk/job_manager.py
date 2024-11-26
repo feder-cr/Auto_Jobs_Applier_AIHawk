@@ -241,6 +241,14 @@ class AIHawkJobManager:
                     time.sleep(sleep_time)
                 page_sleep += 1
 
+    """
+    find by CSS selector might not be working due to several reasons:
+        Dynamic Styles: The styles you are trying to match might be applied dynamically via JavaScript after the page has loaded. This means that the elements might not have the styles when the CSS selector is evaluated.
+        Specificity and Inheritance: The styles might be inherited or overridden by other styles, making the exact match difficult.
+        Incorrect Selector: The selector might not be correctly targeting the elements due to slight mismatches in the style properties or values.
+        Timing Issues: The elements might not be present in the DOM when the selector is evaluated, especially if the page content is loaded asynchronously.
+    """
+
     def get_jobs_from_page(self, scroll=False):
 
         try:
@@ -253,9 +261,17 @@ class AIHawkJobManager:
             pass
 
         try:
-            # XPath query to find the ul tag with class scaffold-layout__list-container
-            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
-            jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
+            find_jobs_container_js_script = """
+                return Array.from(document.querySelectorAll('ul')).filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.display === 'flex' && 
+                        style.flexDirection === 'column' && 
+                        style.position === 'static' &&
+                        style.gridArea !== 'auto';
+                });
+            """
+
+            jobs_container = self.driver.execute_script(find_jobs_container_js_script)[0] # as it result in a list of size 1
 
             if scroll:
                 jobs_container_scrolableElement = jobs_container.find_element(By.XPATH,"..")
@@ -264,7 +280,14 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
+            # JavaScript to find li elements inside jobs_container with the specified CSS properties
+            find_job_elements_js_script = """
+                return Array.from(arguments[0].querySelectorAll('li')).filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.position === 'relative';
+                });
+            """
+            job_element_list = self.driver.execute_script(find_job_elements_js_script, jobs_container)
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -463,14 +486,14 @@ class AIHawkJobManager:
         try:
             job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
             logger.debug(f"Job title extracted: {job.title}")
-        except NoSuchElementException:
-            logger.warning("Job title is missing.")
+        except NoSuchElementException as e:
+            logger.warning(f'Job title is missing. {e} {traceback.format_exc()}')
         
         try:
             job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
             logger.debug(f"Job link extracted: {job.link}")
-        except NoSuchElementException:
-            logger.warning("Job link is missing.")
+        except NoSuchElementException as e:
+            logger.warning(f'Job link is missing. {e} {traceback.format_exc()}')
 
         try:
             job.company = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span").text
