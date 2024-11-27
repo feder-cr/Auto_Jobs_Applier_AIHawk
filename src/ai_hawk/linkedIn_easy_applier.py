@@ -390,6 +390,7 @@ class AIHawkEasyApplier:
                 ".//div[contains(@class, 'fb-dash-form-element')]"
             )
             logger.debug(f"Found {len(input_elements)} form elements")
+            
 
             for index, element in enumerate(input_elements, start=1):
                 try:
@@ -414,7 +415,7 @@ class AIHawkEasyApplier:
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job_context)
         else:
-            self._fill_additional_questions(job_context)
+            self._fill_additional_questions(element,job_context)
 
     def _handle_dropdown_fields(self, element: WebElement) -> None:
         logger.debug("Handling dropdown fields")
@@ -693,15 +694,9 @@ class AIHawkEasyApplier:
             logger.error(f"Cover letter upload failed: {tb_str}")
             raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
 
-    def _fill_additional_questions(self, job_context : JobContext) -> None:
+    def _fill_additional_questions(self, element: WebElement, job_context : JobContext) -> None:
         logger.debug("Filling additional questions")
-        form_sections = self.driver.find_elements(
-            By.XPATH,
-            ".//div[contains(@class, 'fb-dash-form-element')]"
-        )
-
-        for section in form_sections:
-            self._process_form_section(job_context,section)
+        self._process_form_section(job_context,element)
 
     def _process_form_section(self,job_context : JobContext, section: WebElement) -> None:
         logger.debug("Processing form section")
@@ -748,7 +743,7 @@ class AIHawkEasyApplier:
             for radio in radios: 
                 label = section.find_element(By.CSS_SELECTOR, f"label[for='{radio.get_attribute('id')}']")
                 options.append(label.text.strip().lower())
-            
+
             logger.debug(f"Found radio options: {options}")
 
             question_text = section.text.lower()
