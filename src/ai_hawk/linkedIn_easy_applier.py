@@ -385,20 +385,7 @@ class AIHawkEasyApplier:
                 )
             )
 
-            input_elements = easy_apply_content.find_elements(
-                By.XPATH,
-                ".//div[contains(@class, 'fb-dash-form-element')]"
-            )
-            logger.debug(f"Found {len(input_elements)} form elements")
-            
-
-            for index, element in enumerate(input_elements, start=1):
-                try:
-                    logger.debug(f"Processing form element {index}/{len(input_elements)}: {element}")
-                    self._process_form_element(element, job_context)
-                except Exception as element_error:
-                    logger.error(f"Error processing form element {index}: {element_error}")
-                    logger.debug(traceback.format_exc())
+            self._process_form_element(easy_apply_content, job_context)
 
         except TimeoutException as timeout_error:
             logger.error("Timeout while waiting for the easy apply modal content to load.")
@@ -414,8 +401,17 @@ class AIHawkEasyApplier:
         logger.debug("Processing form element")
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job_context)
-        else:
+        elif self._is_filled(element):
             self._fill_additional_questions(element,job_context)
+        else:
+            logger.debug("Element is not filled")
+
+    def _is_filled(self, element: WebElement) -> bool:
+        is_filled = bool(element.find_elements(
+            By.XPATH, ".//div[contains(@class, 'fb-dash-form-element')]"
+        ))
+        logger.debug(f"Element is filled: {is_filled}")
+        return is_filled
 
     def _handle_dropdown_fields(self, element: WebElement) -> None:
         logger.debug("Handling dropdown fields")
@@ -479,8 +475,9 @@ class AIHawkEasyApplier:
         logger.debug("Handling upload fields")
 
         try:
-            show_more_button = self.driver.find_element(By.XPATH,
-                                                        "//button[contains(@aria-label, 'Show more resumes')]")
+            show_more_button = self.driver.find_element(
+                By.XPATH, "//button[contains(@aria-label, 'Show') and contains(@aria-label, 'resumes')]"
+            )
             show_more_button.click()
             logger.debug("Clicked 'Show more resumes' button")
         except NoSuchElementException:
@@ -694,9 +691,25 @@ class AIHawkEasyApplier:
             logger.error(f"Cover letter upload failed: {tb_str}")
             raise Exception(f"Upload failed: \nTraceback:\n{tb_str}")
 
-    def _fill_additional_questions(self, element: WebElement, job_context : JobContext) -> None:
+    def _fill_additional_questions(self, element: WebElement, job_context: JobContext) -> None:
         logger.debug("Filling additional questions")
-        self._process_form_section(job_context,element)
+        try: 
+            input_elements = element.find_elements(
+                By.XPATH, ".//div[contains(@class, 'fb-dash-form-element')]"
+            )
+            logger.debug(f"Found {len(input_elements)} form elements")
+
+            for index, section in enumerate(input_elements, start=1):
+                try:
+                    logger.debug(
+                        f"Processing form element {index}/{len(input_elements)}: {section}"
+                    )
+                    self._process_form_section( job_context,section)
+                except Exception as section_error:
+                    logger.error(f"Error processing form element {index}: {section_error}")
+                    logger.debug(traceback.format_exc())
+        except Exception as e: 
+            logger.error(f"Error processing additional question element: {e}") 
 
     def _process_form_section(self,job_context : JobContext, section: WebElement) -> None:
         logger.debug("Processing form section")
