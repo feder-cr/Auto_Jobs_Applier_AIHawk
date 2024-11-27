@@ -253,8 +253,10 @@ class AIHawkJobManager:
             pass
 
         try:
-            # XPath query to find the ul tag with class scaffold-layout__list-container
-            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
+            # XPath query to find the ul tag with class scaffold-layout__list
+            jobs_xpath_query = (
+                "//div[contains(@class, 'scaffold-layout__list-detail-container')]//ul"
+            )
             jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
 
             if scroll:
@@ -264,7 +266,10 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
+            job_element_list = jobs_container.find_elements(
+                By.XPATH,
+                ".//li[contains(@class, 'scaffold-layout__list-item') and contains(@class, 'ember-view')]",
+            )
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -303,7 +308,7 @@ class AIHawkJobManager:
         for job in job_list:
 
             logger.debug(f"Starting applicant for job: {job.title} at {job.company}")
-            #TODO fix apply threshold
+            # TODO fix apply threshold
             """
                 # Initialize applicants_count as None
                 applicants_count = None
@@ -355,7 +360,6 @@ class AIHawkJobManager:
 
             # Continue with the job application process regardless of the applicants count check
             """
-        
 
             if self.is_previously_failed_to_apply(job.link):
                 logger.debug(f"Previously failed to apply for {job.title} at {job.company}, skipping...")
@@ -392,10 +396,10 @@ class AIHawkJobManager:
             "job_location": job.location,
             "pdf_path": pdf_path
         }
-        
+
         if reason:
             data["reason"] = reason
-            
+
         file_path = self.output_file_directory / f"{file_name}.json"
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -455,29 +459,45 @@ class AIHawkJobManager:
         self.driver.get(
             f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
 
-
     def job_tile_to_job(self, job_tile) -> Job:
         logger.debug("Extracting job information from tile")
         job = Job()
 
+        # Extract job Title
         try:
-            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
+            title_element = job_tile.find_element(
+                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__title')]//a"
+            )
+            job.title = title_element.text.strip()
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
-        
+
+        # Extract job Link
         try:
-            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            job.link = title_element.get_attribute("href").split("?")[0]
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
 
+        # Extract Company Name
         try:
-            job.company = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span").text
+            job.company = job_tile.find_element(
+                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
+            ).text.strip()
             logger.debug(f"Job company extracted: {job.company}")
         except NoSuchElementException as e:
-            logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
-        
+            logger.warning(f"Job company is missing. {e} {traceback.format_exc()}")
+
+        # Extract job Location
+        try:
+            job.location = job_tile.find_element(
+                By.XPATH, ".//ul[contains(@class, 'job-card-container__metadata-wrapper')]//li"
+            ).text.strip()
+            logger.debug(f"Job location extracted: {job.location}")
+        except NoSuchElementException:
+            logger.warning("Job location is missing.")
+
         # Extract job ID from job url
         try:
             match = re.search(r'/jobs/view/(\d+)/', job.link)
@@ -489,14 +509,9 @@ class AIHawkJobManager:
         except Exception as e:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
 
+        # Extract job State
         try:
-            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
-        except NoSuchElementException:
-            logger.warning("Job location is missing.")
-        
-
-        try:
-            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__apply-method')]").text
+            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-item')]").text
         except NoSuchElementException as e:
             try:
                 # Fetching state when apply method is not found
@@ -559,10 +574,10 @@ class AIHawkJobManager:
             except json.JSONDecodeError:
                 logger.error(f"JSON decode error in file: {file_path}")
                 return False
-            
+
         for data in existing_data:
             data_link = data['link']
             if data_link == link:
                 return True
-                
+
         return False
