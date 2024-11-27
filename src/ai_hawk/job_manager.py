@@ -5,6 +5,7 @@ import time
 from itertools import product
 from pathlib import Path
 import traceback
+from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
@@ -431,8 +432,7 @@ class AIHawkJobManager:
         if working_type_filter:
             url_parts.append(f"f_WT={'%2C'.join(working_type_filter)}")
 
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
-                             v]
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
         url_parts.append(f"distance={parameters['distance']}")
@@ -497,6 +497,17 @@ class AIHawkJobManager:
         except NoSuchElementException:
             logger.warning("Job location is missing.")
 
+        # Extract job State
+        try:
+            job_state = job_tile.find_element(
+                By.XPATH,
+                ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-item')]",
+            ).text
+            logger.debug(f"Job state extracted: {job_state}")
+            job.apply_method = job_state
+        except NoSuchElementException as e:
+            logger.warning(f"Apply method and state not found. {e} {traceback.format_exc()}")
+                
         # Extract job ID from job url
         try:
             match = re.search(r'/jobs/view/(\d+)/', job.link)
@@ -507,18 +518,6 @@ class AIHawkJobManager:
             logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
         except Exception as e:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
-
-        # Extract job State
-        try:
-            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-item')]").text
-        except NoSuchElementException as e:
-            try:
-                # Fetching state when apply method is not found
-                job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-job-state')]").text
-                job.apply_method = "Applied"
-                logger.warning(f'Apply method not found, state {job_state}. {e} {traceback.format_exc()}')
-            except NoSuchElementException as e:
-                logger.warning(f'Apply method and state not found. {e} {traceback.format_exc()}')
 
         return job
 

@@ -178,7 +178,7 @@ class AIHawkEasyApplier:
             raise Exception(f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}")
 
     def _find_easy_apply_button(self, job_context: JobContext) -> WebElement:
-        logger.debug("Searching for 'Easy Apply' or 'Continue' button")
+        logger.debug("Searching for 'Easy Apply' button")
         attempt = 0
 
         search_methods = [
@@ -194,15 +194,7 @@ class AIHawkEasyApplier:
             {
                 "description": "button text search",
                 "xpath": '//button[contains(text(), "Easy Apply") or contains(text(), "Apply now")]',
-            },
-            {
-                "description": "find 'Continue' button using text",
-                "xpath": '//button[.//span[text()="Continue"]]',
-            },
-            {
-                "description": "find 'Continue' button using aria-label",
-                "xpath": '//button[contains(@aria-label, "Continue applying")]',
-            },
+            }
         ]
 
         while attempt < 2:
