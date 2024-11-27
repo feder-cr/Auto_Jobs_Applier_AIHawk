@@ -334,7 +334,8 @@ class AIHawkEasyApplier:
         try:
             logger.debug("Unfollowing company")
             follow_checkbox = self.driver.find_element(
-                By.XPATH, "//label[contains(.,'to stay up to date with their page.')]")
+                By.XPATH, "//label[contains(text(), 'stay up to date')]"
+            )
             follow_checkbox.click()
         except Exception as e:
             logger.debug(f"Failed to unfollow company: {e}")
@@ -708,6 +709,9 @@ class AIHawkEasyApplier:
         if self._handle_terms_of_service(job_context,section):
             logger.debug("Handled terms of service")
             return
+        if self._find_and_handle_radio_question(job_context, section):
+            logger.debug("Handled radio question")
+            return
         if self._find_and_handle_textbox_question(job_context, section):
             logger.debug("Handled textbox question")
             return
@@ -717,9 +721,7 @@ class AIHawkEasyApplier:
         if self._find_and_handle_dropdown_question(job_context, section):
             logger.debug("Handled dropdown question")
             return
-        if self._find_and_handle_radio_question(job_context, section):
-            logger.debug("Handled radio question")
-            return
+ 
 
     def _handle_terms_of_service(self,job_context: JobContext, element: WebElement) -> bool:
         checkbox = element.find_elements(By.TAG_NAME, 'label')
