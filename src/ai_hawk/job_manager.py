@@ -19,7 +19,7 @@ from src.job import Job
 from src.logging import logger
 
 import urllib.parse
-from src.regex_utils import generate_regex_patterns_for_blacklisting
+from src.regex_utils import look_ahead_patterns
 import re
 
 import utils.browser_utils as browser_utils
@@ -69,9 +69,9 @@ class AIHawkJobManager:
         self.max_applicants = JOB_MAX_APPLICATIONS
 
         # Generate regex patterns from blacklist lists
-        self.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.title_blacklist)
-        self.company_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.company_blacklist)
-        self.location_blacklist_patterns = generate_regex_patterns_for_blacklisting(self.location_blacklist)
+        self.title_blacklist_patterns = look_ahead_patterns(self.title_blacklist)
+        self.company_blacklist_patterns = look_ahead_patterns(self.company_blacklist)
+        self.location_blacklist_patterns = look_ahead_patterns(self.location_blacklist)
 
         resume_path = parameters.get('uploads', {}).get('resume', None)
         self.resume_path = Path(resume_path) if resume_path and Path(resume_path).exists() else None
