@@ -267,7 +267,6 @@ class AIHawkJobManager:
 
             job_element_list = jobs_container.find_elements(
                 By.XPATH,
-                # ".//li[contains(@class, 'scaffold-layout__list-item') and contains(@class, 'ember-view')]", ## working
                 """
                 .//li[contains(@class, 'scaffold-layout__list-item') 
                 and contains(@class, 'ember-view') 
@@ -369,7 +368,7 @@ class AIHawkJobManager:
 
             if self.is_previously_failed_to_apply(job.link):
                 logger.debug(f"Previously failed to apply for {job.title} at {job.company}, skipping...")
-                # continue
+                continue
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.debug(f"Job blacklisted: {job.title} at {job.company} in {job.location}")
                 self.write_to_file(job, "skipped", "Job blacklisted")
