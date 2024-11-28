@@ -474,7 +474,6 @@ class AIHawkJobManager:
                 By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__title')]//a"
             )
             job.title = title_element.text.strip()
-            # job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title--link').find_element(By.TAG_NAME, 'strong').text.strip()
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
