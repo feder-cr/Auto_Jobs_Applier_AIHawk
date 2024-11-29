@@ -5,7 +5,6 @@ import time
 from itertools import product
 from pathlib import Path
 import traceback
-from turtle import color
 
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
