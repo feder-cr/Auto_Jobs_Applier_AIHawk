@@ -1,5 +1,5 @@
 import os
-from selenium import webdriver
+import undetected_chromedriver as uc
 from src.logging import logger
 
 chromeProfilePath = os.path.join(os.getcwd(), "chrome_profile", "linkedin_profile")
@@ -18,7 +18,7 @@ def ensure_chrome_profile():
 def chrome_browser_options():
     logger.debug("Setting Chrome browser options")
     ensure_chrome_profile()
-    options = webdriver.ChromeOptions()
+    options = uc.ChromeOptions()
     options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -37,7 +37,6 @@ def chrome_browser_options():
     options.add_argument("--disable-plugins")
     options.add_argument("--disable-animations")
     options.add_argument("--disable-cache")
-    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
 
     prefs = {
         "profile.default_content_setting_values.images": 2,
@@ -57,4 +56,9 @@ def chrome_browser_options():
 
     return options
 
-
+def init_browser() -> uc.Chrome:
+    try:
+        options = chrome_browser_options()
+        return uc.Chrome(options=options)
+    except Exception as e:
+        raise RuntimeError(f"Failed to initialize browser: {str(e)}")

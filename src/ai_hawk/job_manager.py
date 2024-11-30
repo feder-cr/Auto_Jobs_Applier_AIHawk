@@ -10,7 +10,7 @@ from turtle import color
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-
+from src.ai_hawk.llm.llm_manager import GPTAnswerer
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
@@ -82,6 +82,10 @@ class AIHawkJobManager:
     def set_gpt_answerer(self, gpt_answerer):
         logger.debug("Setting GPT answerer")
         self.gpt_answerer = gpt_answerer
+        
+    def set_gpt_parser(self, gpt_parser):
+        logger.debug("Setting GPT parser")
+        self.gpt_parser = gpt_parser
 
     def set_resume_generator_manager(self, resume_generator_manager):
         logger.debug("Setting resume generator manager")
@@ -168,7 +172,7 @@ class AIHawkJobManager:
                     try:
                         self.apply_jobs()
                     except Exception as e:
-                        logger.error(f"Error during job application: {e} {traceback.format_exc()}")
+                        logger.error(f"Error during job application: {e}")
                         continue
 
                     logger.debug("Applying to jobs on this page has been completed!")
@@ -481,18 +485,15 @@ class AIHawkJobManager:
         # Extract company name and location
         try:
             # contains both with a delimter '·'
-            company_location = job_tile.find_element(
-                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
-            ).text
-            company, location = company_location.split('·')
+            company, location = self.gpt_parser.extract_company_and_title(job_tile.get_attribute("outerHTML"))
             job.company = company.strip()
             logger.debug(f"Job company extracted: {job.company}")
             job.location = location.strip()
             logger.debug(f"Job location extracted: {job.location}")
-        except ValueError:
+        except ValueError as e:
             logger.warning(f"Could not find the company and location. {e} {traceback.format.exc()}")
 
-        except NoSuchElementException:
+        except NoSuchElementException as e:
             logger.warning(f"Job comapy and location are missing. {e} {traceback.format.exc()}")
 
         # Extract job State
