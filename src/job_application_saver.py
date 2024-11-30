@@ -25,7 +25,7 @@ class ApplicationSaver:
         job = self.job_application.job
 
         # Create a unique directory name using the application ID and company name
-        dir_name = self._sanitize_filename("{job.id} - {job.company} {job.title}")
+        dir_name = self._sanitize_filename(f"{job.id} - {job.company} {job.title}")
         dir_path = os.path.join(BASE_DIR, dir_name)
 
         # Create the directory if it doesn't exist
