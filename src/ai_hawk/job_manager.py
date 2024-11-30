@@ -490,7 +490,7 @@ class AIHawkJobManager:
             job.location = location.strip()
             logger.debug(f"Job location extracted: {job.location}")
         except ValueError:
-            logger.debug(f"Could not find the company and location, trying original method...")
+            logger.warning(f"Could not find the company and location. {e} {traceback.format.exc()}")
 
         except NoSuchElementException:
             logger.warning(f"Job comapy and location are missing. {e} {traceback.format.exc()}")
