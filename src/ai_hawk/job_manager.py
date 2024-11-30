@@ -464,38 +464,32 @@ class AIHawkJobManager:
 
         # Extract job Title
         try:
-            title_element = job_tile.find_element(
-                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__title')]//a"
-            )
-            job.title = title_element.text.strip()
+            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title--link').find_element(By.TAG_NAME, 'strong').text.strip()
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
 
         # Extract job Link
         try:
-            job.link = title_element.get_attribute("href").split("?")[0]
+            job.link = (
+                job_tile.find_element(By.CLASS_NAME, "job-card-list__title")
+                .get_attribute("href")
+                .split("?")[0]
+            )
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
 
-        # Extract Company Name
+        # Extract Company Name and Job Location
         try:
-            job.company = job_tile.find_element(
-                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
-            ).text.strip()
+            full_text = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]").text
+            company, location = full_text.split('.')
+            job.company = company.strip()
             logger.debug(f"Job company extracted: {job.company}")
-        except NoSuchElementException as e:
-            logger.warning(f"Job company is missing. {e} {traceback.format_exc()}")
-
-        # Extract job Location
-        try:
-            job.location = job_tile.find_element(
-                By.XPATH, ".//ul[contains(@class, 'job-card-container__metadata-wrapper')]//li"
-            ).text.strip()
+            job.location = location.strip()
             logger.debug(f"Job location extracted: {job.location}")
-        except NoSuchElementException:
-            logger.warning("Job location is missing.")
+        except NoSuchElementException as e:
+            logger.warning(f"Job company and location are missing. {e} {traceback.format_exc()}")
 
         # Extract job State
         try:
@@ -507,7 +501,7 @@ class AIHawkJobManager:
             job.apply_method = job_state
         except NoSuchElementException as e:
             logger.warning(f"Apply method and state not found. {e} {traceback.format_exc()}")
-                
+
         # Extract job ID from job url
         try:
             match = re.search(r'/jobs/view/(\d+)/', job.link)
