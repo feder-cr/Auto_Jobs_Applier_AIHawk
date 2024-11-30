@@ -616,7 +616,7 @@ Using this folder as a guide can be particularly helpful for:
   python main.py --resume /path/to/your/resume.pdf
   ```
 
-- **Using the colled mode:**
+- **Using the collect mode:**
   If you want to collect job data only to perform any type of data analytics you can use the bot with the `--collect` option. This will store in output/data.json file all data found from linkedin jobs offers.
 
   ```bash
