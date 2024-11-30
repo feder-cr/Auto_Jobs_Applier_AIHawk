@@ -395,7 +395,7 @@ class AIHawkEasyApplier:
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job_context)
         elif self._is_filled(element):
-            self._fill_additional_questions(element,job_context)
+            self._fill_additional_questions(element, job_context)
         else:
             logger.debug("Element is not filled")
 
@@ -697,16 +697,16 @@ class AIHawkEasyApplier:
                     logger.debug(
                         f"Processing form element {index}/{len(input_elements)}: {section}"
                     )
-                    self._process_form_section( job_context,section)
+                    self._process_form_section(job_context, section)
                 except Exception as section_error:
                     logger.error(f"Error processing form element {index}: {section_error}")
                     logger.debug(traceback.format_exc())
         except Exception as e:
             logger.error(f"Error processing additional question element: {e}")
 
-    def _process_form_section(self,job_context : JobContext, section: WebElement) -> None:
+    def _process_form_section(self, job_context : JobContext, section: WebElement) -> None:
         logger.debug("Processing form section")
-        if self._handle_terms_of_service(job_context,section):
+        if self._handle_terms_of_service(job_context, section):
             logger.debug("Handled terms of service")
             return
         if self._find_and_handle_radio_question(job_context, section):
@@ -906,7 +906,6 @@ class AIHawkEasyApplier:
 
                 logger.debug(f"Dropdown options found: {options}")
 
-                question_text = question.text.lower()
                 logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
                 current_selection = select.first_selected_option.text
