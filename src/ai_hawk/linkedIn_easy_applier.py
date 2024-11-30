@@ -588,11 +588,6 @@ class AIHawkEasyApplier:
             self._handle_textbox_question(job_context, section)
             logger.debug("Handled textbox question")
             return
-        
-        if self.job_application_page.is_date_question(section):
-            self._handle_date_question(job_context, section)
-            logger.debug("Handled date question")
-            return
 
         if self._find_and_handle_dropdown_question(job_context, section):
             logger.debug("Handled dropdown question")
@@ -694,45 +689,6 @@ class AIHawkEasyApplier:
         )
 
         return
-
-    def _handle_date_question(
-        self, job_context: JobContext, section: WebElement
-    ) -> bool:
-        job_application = job_context.job_application
-        date_fields = section.find_elements(By.CLASS_NAME, "artdeco-datepicker__input ")
-        if date_fields:
-            date_field = date_fields[0]
-            question_text = section.text.lower()
-            answer_date = self.gpt_answerer.answer_question_date()
-            answer_text = answer_date.strftime("%Y-%m-%d")
-
-            existing_answer = None
-            current_question_sanitized = self._sanitize_text(question_text)
-            for item in self.all_data:
-                if (
-                    current_question_sanitized in item["question"]
-                    and item["type"] == "date"
-                ):
-                    existing_answer = item
-                    break
-
-            if existing_answer:
-                self._enter_text(date_field, existing_answer["answer"])
-                logger.debug("Entered existing date answer")
-                job_application.save_application_data(existing_answer)
-                return True
-
-            self._save_questions_to_json(
-                {"type": "date", "question": question_text, "answer": answer_text}
-            )
-            self.all_data = self._load_questions_from_json()
-            job_application.save_application_data(
-                {"type": "date", "question": question_text, "answer": answer_text}
-            )
-            self._enter_text(date_field, answer_text)
-            logger.debug("Entered new date answer")
-            return True
-        return False
 
     def _find_and_handle_dropdown_question(
         self, job_context: JobContext, section: WebElement
