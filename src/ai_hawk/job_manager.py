@@ -288,8 +288,8 @@ class AIHawkJobManager:
     def read_jobs(self):
 
         job_element_list = self.get_jobs_from_page()
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list] 
-        for job in job_list:            
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list]
+        for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
@@ -483,7 +483,7 @@ class AIHawkJobManager:
         try:
             job.company = job_tile.find_element(
                 By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
-            ).text.strip()
+            ).text.split('·')[0].strip()
             logger.debug(f"Job company extracted: {job.company}")
         except NoSuchElementException as e:
             logger.warning(f"Job company is missing. {e} {traceback.format_exc()}")
@@ -491,8 +491,8 @@ class AIHawkJobManager:
         # Extract job Location
         try:
             job.location = job_tile.find_element(
-                By.XPATH, ".//ul[contains(@class, 'job-card-container__metadata-wrapper')]//li"
-            ).text.strip()
+                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
+            ).text.split('·')[1].strip()
             logger.debug(f"Job location extracted: {job.location}")
         except NoSuchElementException:
             logger.warning("Job location is missing.")
@@ -507,7 +507,7 @@ class AIHawkJobManager:
             job.apply_method = job_state
         except NoSuchElementException as e:
             logger.warning(f"Apply method and state not found. {e} {traceback.format_exc()}")
-                
+
         # Extract job ID from job url
         try:
             match = re.search(r'/jobs/view/(\d+)/', job.link)

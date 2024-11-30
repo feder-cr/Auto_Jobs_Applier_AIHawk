@@ -32,11 +32,11 @@ import utils.time_utils
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
         """
         Check if a question already exists in the data list.
-        
+
         Args:
             question: The question text to search for
             data: List of question dictionaries to search through
-            
+
         Returns:
             bool: True if question exists, False otherwise
         """
@@ -334,7 +334,7 @@ class AIHawkEasyApplier:
         try:
             logger.debug("Unfollowing company")
             follow_checkbox = self.driver.find_element(
-                By.XPATH, "//label[contains(text(), 'stay up to date')]"
+                By.XPATH, "//label[@for='follow-company-checkbox']"
             )
             follow_checkbox.click()
         except Exception as e:
@@ -436,7 +436,7 @@ class AIHawkEasyApplier:
         logger.debug(f"Detected question text: {question_text}")
 
         existing_answer = None
-        current_question_sanitized = self._sanitize_text(question_text) 
+        current_question_sanitized = self._sanitize_text(question_text)
         for item in self.all_data:
             if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                 existing_answer = item['answer']
@@ -686,7 +686,7 @@ class AIHawkEasyApplier:
 
     def _fill_additional_questions(self, element: WebElement, job_context: JobContext) -> None:
         logger.debug("Filling additional questions")
-        try: 
+        try:
             input_elements = element.find_elements(
                 By.XPATH, ".//div[contains(@class, 'fb-dash-form-element')]"
             )
@@ -701,8 +701,8 @@ class AIHawkEasyApplier:
                 except Exception as section_error:
                     logger.error(f"Error processing form element {index}: {section_error}")
                     logger.debug(traceback.format_exc())
-        except Exception as e: 
-            logger.error(f"Error processing additional question element: {e}") 
+        except Exception as e:
+            logger.error(f"Error processing additional question element: {e}")
 
     def _process_form_section(self,job_context : JobContext, section: WebElement) -> None:
         logger.debug("Processing form section")
@@ -721,7 +721,7 @@ class AIHawkEasyApplier:
         if self._find_and_handle_dropdown_question(job_context, section):
             logger.debug("Handled dropdown question")
             return
- 
+
 
     def _handle_terms_of_service(self,job_context: JobContext, element: WebElement) -> bool:
         checkbox = element.find_elements(By.TAG_NAME, 'label')
@@ -747,7 +747,7 @@ class AIHawkEasyApplier:
             logger.debug(f"Question label found: {question.text}")
 
             options = []
-            for radio in radios: 
+            for radio in radios:
                 label = section.find_element(By.CSS_SELECTOR, f"label[for='{radio.get_attribute('id')}']")
                 options.append(label.text.strip().lower())
 
@@ -808,7 +808,7 @@ class AIHawkEasyApplier:
             # Look for existing answer if it's not a cover letter field
             existing_answer = None
             if not is_cover_letter:
-                current_question_sanitized = self._sanitize_text(question_text) 
+                current_question_sanitized = self._sanitize_text(question_text)
                 for item in self.all_data:
                     if item['question'] == current_question_sanitized and item.get('type') == question_type:
                         existing_answer = item['answer']
@@ -856,7 +856,7 @@ class AIHawkEasyApplier:
             answer_text = answer_date.strftime("%Y-%m-%d")
 
             existing_answer = None
-            current_question_sanitized = self._sanitize_text(question_text) 
+            current_question_sanitized = self._sanitize_text(question_text)
             for item in self.all_data:
                 if current_question_sanitized in item['question'] and item['type'] == 'date':
                     existing_answer = item
@@ -876,10 +876,24 @@ class AIHawkEasyApplier:
             return True
         return False
 
-    def _find_and_handle_dropdown_question(self,job_context : JobContext, section: WebElement) -> bool:
+    def _find_and_handle_dropdown_question(self, job_context : JobContext, section: WebElement) -> bool:
         job_application = job_context.job_application
+        # in the event that there is one question, the question is outside the subsection, so we need to find the
+        # parents' text
+
         try:
-            question = section.find_element(By.CLASS_NAME, 'fb-dash-form-element__label')
+            try:
+                question = section.find_element(By.CLASS_NAME, 'fb-dash-form-element__label')
+                question_text = question.text.lower()
+            except NoSuchElementException:
+                logger.debug(f"Unable to find subsection question, trying parent class...")
+                # parent = hash, grandparent = hash + span texts
+                grand_parent = section.find_element(By.XPATH, "../..")
+                # find the elements with texts
+                question = grand_parent.find_elements(By.TAG_NAME, "span")
+                # combine the texts
+                question = '\n'.join([question.text for question in question])
+                question_text = question.lower()
 
             dropdowns = section.find_elements(By.TAG_NAME, "select")
             if not dropdowns:
@@ -892,14 +906,14 @@ class AIHawkEasyApplier:
 
                 logger.debug(f"Dropdown options found: {options}")
 
-                question_text = question.text.lower() 
+                question_text = question.text.lower()
                 logger.debug(f"Processing dropdown or combobox question: {question_text}")
 
                 current_selection = select.first_selected_option.text
                 logger.debug(f"Current selection: {current_selection}")
 
                 existing_answer = None
-                current_question_sanitized = self._sanitize_text(question_text) 
+                current_question_sanitized = self._sanitize_text(question_text)
                 for item in self.all_data:
                     if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
                         existing_answer = item['answer']
@@ -948,9 +962,9 @@ class AIHawkEasyApplier:
     def _select_radio(self, radios: List[WebElement], answer: str) -> None:
         logger.debug(f"Selecting radio option: {answer}")
         for radio in radios:
-            try: 
-                radio_id = radio.get_attribute('id') 
-                label = radio.find_element(By.XPATH, f"//label[@for='{radio_id}']") 
+            try:
+                radio_id = radio.get_attribute('id')
+                label = radio.find_element(By.XPATH, f"//label[@for='{radio_id}']")
                 if answer in label.text.lower():
                     label.click()
                     logger.debug(f"Clicked radio option: {label.text}")

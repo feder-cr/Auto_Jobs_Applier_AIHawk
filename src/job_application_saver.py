@@ -1,6 +1,7 @@
 from src.logging import logger
 import os
 import json
+import re
 import shutil
 
 from dataclasses import asdict
@@ -24,13 +25,18 @@ class ApplicationSaver:
         job = self.job_application.job
 
         # Create a unique directory name using the application ID and company name
-        dir_name = f"{job.id} - {job.company} {job.title}"
+        dir_name = self._sanitize_filename("{job.id} - {job.company} {job.title}")
         dir_path = os.path.join(BASE_DIR, dir_name)
 
         # Create the directory if it doesn't exist
         os.makedirs(dir_path, exist_ok=True)
         self.job_application_files_path = dir_path
         return dir_path
+
+    @staticmethod
+    def _sanitize_filename(filename):
+        # Remove invalid characters
+        return re.sub(r'[<>:"/\\|?*\n]', '_', filename)
 
     # Function to save the job application details as a JSON file
     def save_application_details(self):
