@@ -46,12 +46,13 @@ class AIHawkBotFacade:
         logger.debug("Job application profile and resume set successfully")
 
 
-    def set_gpt_answerer_and_resume_generator(self, gpt_answerer_component, resume_generator_manager):
+    def set_gpt_answerer_and_resume_generator(self, gpt_parser_component, gpt_answerer_component, resume_generator_manager):
         logger.debug("Setting GPT answerer and resume generator")
         self._ensure_job_profile_and_resume_set()
         gpt_answerer_component.set_job_application_profile(self.job_application_profile)
         gpt_answerer_component.set_resume(self.resume)
         self.apply_component.set_gpt_answerer(gpt_answerer_component)
+        self.apply_component.set_gpt_parser(gpt_parser_component)
         self.apply_component.set_resume_generator_manager(resume_generator_manager)
         self.state.gpt_answerer_set = True
         logger.debug("GPT answerer and resume generator set successfully")

@@ -10,7 +10,7 @@ from turtle import color
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-
+from src.ai_hawk.llm.llm_manager import GPTAnswerer
 
 from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
@@ -82,6 +82,10 @@ class AIHawkJobManager:
     def set_gpt_answerer(self, gpt_answerer):
         logger.debug("Setting GPT answerer")
         self.gpt_answerer = gpt_answerer
+        
+    def set_gpt_parser(self, gpt_parser):
+        logger.debug("Setting GPT parser")
+        self.gpt_parser = gpt_parser
 
     def set_resume_generator_manager(self, resume_generator_manager):
         logger.debug("Setting resume generator manager")
@@ -168,7 +172,7 @@ class AIHawkJobManager:
                     try:
                         self.apply_jobs()
                     except Exception as e:
-                        logger.error(f"Error during job application: {e} {traceback.format_exc()}")
+                        logger.error(f"Error during job application: {e}")
                         continue
 
                     logger.debug("Applying to jobs on this page has been completed!")
@@ -253,8 +257,10 @@ class AIHawkJobManager:
             pass
 
         try:
-            # XPath query to find the ul tag with class scaffold-layout__list-container
-            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
+            # XPath query to find the ul tag with class scaffold-layout__list
+            jobs_xpath_query = (
+                "//div[contains(@class, 'scaffold-layout__list-detail-container')]//ul"
+            )
             jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
 
             if scroll:
@@ -264,7 +270,10 @@ class AIHawkJobManager:
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
                 browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
+            job_element_list = jobs_container.find_elements(
+                By.XPATH,
+                ".//li[contains(@class, 'scaffold-layout__list-item') and contains(@class, 'ember-view')]",
+            )
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
@@ -283,8 +292,8 @@ class AIHawkJobManager:
     def read_jobs(self):
 
         job_element_list = self.get_jobs_from_page()
-        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list] 
-        for job in job_list:            
+        job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list]
+        for job in job_list:
             if self.is_blacklisted(job.title, job.company, job.link, job.location):
                 logger.info(f"Blacklisted {job.title} at {job.company} in {job.location}, skipping...")
                 self.write_to_file(job, "skipped")
@@ -301,9 +310,8 @@ class AIHawkJobManager:
         job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list]
 
         for job in job_list:
-
             logger.debug(f"Starting applicant for job: {job.title} at {job.company}")
-            #TODO fix apply threshold
+            # TODO fix apply threshold
             """
                 # Initialize applicants_count as None
                 applicants_count = None
@@ -355,7 +363,6 @@ class AIHawkJobManager:
 
             # Continue with the job application process regardless of the applicants count check
             """
-        
 
             if self.is_previously_failed_to_apply(job.link):
                 logger.debug(f"Previously failed to apply for {job.title} at {job.company}, skipping...")
@@ -392,10 +399,10 @@ class AIHawkJobManager:
             "job_location": job.location,
             "pdf_path": pdf_path
         }
-        
+
         if reason:
             data["reason"] = reason
-            
+
         file_path = self.output_file_directory / f"{file_name}.json"
         if not file_path.exists():
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -428,8 +435,7 @@ class AIHawkJobManager:
         if working_type_filter:
             url_parts.append(f"f_WT={'%2C'.join(working_type_filter)}")
 
-        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if
-                             v]
+        experience_levels = [str(i + 1) for i, (level, v) in enumerate(parameters.get('experience_level', {}).items()) if v]
         if experience_levels:
             url_parts.append(f"f_E={','.join(experience_levels)}")
         url_parts.append(f"distance={parameters['distance']}")
@@ -455,29 +461,52 @@ class AIHawkJobManager:
         self.driver.get(
             f"https://www.linkedin.com/jobs/search/{self.base_search_url}&keywords={encoded_position}{location}&start={job_page * 25}")
 
-
     def job_tile_to_job(self, job_tile) -> Job:
         logger.debug("Extracting job information from tile")
         job = Job()
 
+        # Extract job Title
         try:
-            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
+            title_element = job_tile.find_element(
+                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__title')]//a"
+            )
+            job.title = title_element.text.strip()
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
-        
+
+        # Extract job Link
         try:
-            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            job.link = title_element.get_attribute("href").split("?")[0]
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
 
+        # Extract company name and location
         try:
-            job.company = job_tile.find_element(By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span").text
+            # contains both with a delimter '·'
+            company, location = self.gpt_parser.extract_company_and_title(job_tile.get_attribute("outerHTML"))
+            job.company = company.strip()
             logger.debug(f"Job company extracted: {job.company}")
+            job.location = location.strip()
+            logger.debug(f"Job location extracted: {job.location}")
+        except ValueError as e:
+            logger.warning(f"Could not find the company and location. {e} {traceback.format.exc()}")
+
         except NoSuchElementException as e:
-            logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
-        
+            logger.warning(f"Job comapy and location are missing. {e} {traceback.format.exc()}")
+
+        # Extract job State
+        try:
+            job_state = job_tile.find_element(
+                By.XPATH,
+                ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-item')]",
+            ).text
+            logger.debug(f"Job state extracted: {job_state}")
+            job.apply_method = job_state
+        except NoSuchElementException as e:
+            logger.warning(f"Apply method and state not found. {e} {traceback.format_exc()}")
+
         # Extract job ID from job url
         try:
             match = re.search(r'/jobs/view/(\d+)/', job.link)
@@ -488,23 +517,6 @@ class AIHawkJobManager:
             logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
         except Exception as e:
             logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
-
-        try:
-            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
-        except NoSuchElementException:
-            logger.warning("Job location is missing.")
-        
-
-        try:
-            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__apply-method')]").text
-        except NoSuchElementException as e:
-            try:
-                # Fetching state when apply method is not found
-                job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-job-state')]").text
-                job.apply_method = "Applied"
-                logger.warning(f'Apply method not found, state {job_state}. {e} {traceback.format_exc()}')
-            except NoSuchElementException as e:
-                logger.warning(f'Apply method and state not found. {e} {traceback.format_exc()}')
 
         return job
 
@@ -559,10 +571,10 @@ class AIHawkJobManager:
             except json.JSONDecodeError:
                 logger.error(f"JSON decode error in file: {file_path}")
                 return False
-            
+
         for data in existing_data:
             data_link = data['link']
             if data_link == link:
                 return True
-                
+
         return False

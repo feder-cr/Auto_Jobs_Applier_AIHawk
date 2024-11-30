@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
 
+
 import httpx
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage
@@ -461,7 +462,7 @@ class LoggerChatModel:
 class GPTAnswerer:
     def __init__(self, config, llm_api_key):
         self.ai_adapter = AIAdapter(config, llm_api_key)
-        self.llm_cheap = LoggerChatModel(self.ai_adapter)
+        self.llm = LoggerChatModel(self.ai_adapter)
 
     @property
     def job_description(self):
@@ -505,14 +506,14 @@ class GPTAnswerer:
 
     def _clean_llm_output(self, output: str) -> str:
         return output.replace("*", "").replace("#", "").strip()
-    
+
     def summarize_job_description(self, text: str) -> str:
         logger.debug(f"Summarizing job description: {text}")
         prompts.summarize_prompt_template = self._preprocess_template_string(
             prompts.summarize_prompt_template
         )
         prompt = ChatPromptTemplate.from_template(prompts.summarize_prompt_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_output = chain.invoke({TEXT: text})
         output = self._clean_llm_output(raw_output)
         logger.debug(f"Summary generated: {output}")
@@ -521,7 +522,7 @@ class GPTAnswerer:
     def _create_chain(self, template: str):
         logger.debug(f"Creating chain with template: {template}")
         prompt = ChatPromptTemplate.from_template(template)
-        return prompt | self.llm_cheap | StrOutputParser()
+        return prompt | self.llm | StrOutputParser()
 
     def answer_question_textual_wide_range(self, question: str) -> str:
         logger.debug(f"Answering textual question: {question}")
@@ -558,7 +559,7 @@ class GPTAnswerer:
         }
 
         prompt = ChatPromptTemplate.from_template(prompts.determine_section_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_output = chain.invoke({QUESTION: question})
         output = self._clean_llm_output(raw_output)
 
@@ -615,7 +616,7 @@ class GPTAnswerer:
             prompts.numeric_question_template
         )
         prompt = ChatPromptTemplate.from_template(func_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_output_str = chain.invoke(
             {
                 RESUME_EDUCATIONS: self.resume.education_details,
@@ -650,7 +651,7 @@ class GPTAnswerer:
         logger.debug(f"Answering question from options: {question}")
         func_template = self._preprocess_template_string(prompts.options_template)
         prompt = ChatPromptTemplate.from_template(func_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_output_str = chain.invoke(
             {
                 RESUME: self.resume,
@@ -672,7 +673,7 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(
             prompts.resume_or_cover_letter_template
         )
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_response = chain.invoke({PHRASE: phrase})
         response = self._clean_llm_output(raw_response)
         logger.debug(f"Response for resume_or_cover: {response}")
@@ -686,7 +687,7 @@ class GPTAnswerer:
     def is_job_suitable(self):
         logger.info("Checking if job is suitable")
         prompt = ChatPromptTemplate.from_template(prompts.is_relavant_position_template)
-        chain = prompt | self.llm_cheap | StrOutputParser()
+        chain = prompt | self.llm | StrOutputParser()
         raw_output = chain.invoke(
             {
                 RESUME: self.resume,
@@ -707,3 +708,70 @@ class GPTAnswerer:
         if int(score) < JOB_SUITABILITY_SCORE:
             logger.debug(f"Job is not suitable: {reasoning}")
         return int(score) >= JOB_SUITABILITY_SCORE
+
+
+
+class GPTParser:
+    def __init__(self, config, llm_api_key):
+        self.ai_adapter = AIAdapter(config, llm_api_key)
+        self.llm = LoggerChatModel(self.ai_adapter)
+
+    @staticmethod
+    def _clean_llm_output(output: str) -> str:
+        return output.replace("*", "").replace("#", "").strip()
+
+    @staticmethod
+    def _preprocess_template_string(template: str) -> str:
+        return textwrap.dedent(template)
+
+    def extract_company_and_title(self, html_content: str) -> dict:
+        """
+        Uses AI to extract the company name and job title from HTML code.
+
+        Args:
+            html_content (str): The HTML code to analyze.
+
+        Returns:
+            dict: A dictionary with 'company' and 'title' as keys.
+        """
+        logger.debug("Extracting company and title from HTML content.")
+
+        # AI prompt template
+        extract_prompt_template = """
+        You are an AI assistant extracting information from HTML code.
+        Extract the company name and job title from the following HTML code:
+
+        {html_content}
+
+        Provide the response in JSON format with keys "company" and "title", Provide only the exact JSON without any explanations or additional text and also without ```json ```
+
+        """
+
+        # Preprocess the template
+        extract_prompt_template = self._preprocess_template_string(extract_prompt_template)
+
+        # Create the prompt
+        prompt = ChatPromptTemplate.from_template(extract_prompt_template)
+
+        # Create the chain
+        chain = prompt | self.llm | StrOutputParser()
+
+        # Invoke the chain with the HTML
+        raw_output = chain.invoke({"html_content": html_content})
+
+        # Clean the output
+        output = self._clean_llm_output(raw_output)
+        logger.debug(f"Raw output from AI: {output}")
+
+        # Parse the JSON output
+        try:
+            result = json.loads(output)
+            company = result.get('company', 'Company not found')
+            title = result.get('title', 'Title not found')
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decoding failed: {e}")
+            company = 'Company not found'
+            title = 'Title not found'
+
+        logger.debug(f"Extracted company: {company}, title: {title}")
+        return company, title

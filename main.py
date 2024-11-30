@@ -11,7 +11,7 @@ from selenium.common.exceptions import WebDriverException
 from lib_resume_builder_AIHawk import Resume, FacadeManager, ResumeGenerator, StyleManager
 from typing import Optional
 from constants import PLAIN_TEXT_RESUME_YAML, SECRETS_YAML, WORK_PREFERENCES_YAML
-from src.utils.chrome_utils import chrome_browser_options
+from src.utils.chrome_utils import init_browser
 
 from src.job_application_profile import JobApplicationProfile
 from src.logging import logger
@@ -26,6 +26,7 @@ from ai_hawk.authenticator import get_authenticator
 from ai_hawk.bot_facade import AIHawkBotFacade
 from ai_hawk.job_manager import AIHawkJobManager
 from ai_hawk.llm.llm_manager import GPTAnswerer
+from ai_hawk.llm.llm_manager import GPTParser
 
 
 class ConfigError(Exception):
@@ -155,14 +156,6 @@ class FileManager:
 
         return result
 
-def init_browser() -> webdriver.Chrome:
-    try:
-        options = chrome_browser_options()
-        service = ChromeService(ChromeDriverManager().install())
-        return webdriver.Chrome(service=service, options=options)
-    except Exception as e:
-        raise RuntimeError(f"Failed to initialize browser: {str(e)}")
-
 def create_and_run_bot(parameters, llm_api_key):
     try:
         style_manager = StyleManager()
@@ -182,9 +175,10 @@ def create_and_run_bot(parameters, llm_api_key):
         login_component = get_authenticator(driver=browser, platform='linkedin')
         apply_component = AIHawkJobManager(browser)
         gpt_answerer_component = GPTAnswerer(parameters, llm_api_key)
+        gpt_parser_component = GPTParser(parameters, llm_api_key)
         bot = AIHawkBotFacade(login_component, apply_component)
         bot.set_job_application_profile_and_resume(job_application_profile_object, resume_object)
-        bot.set_gpt_answerer_and_resume_generator(gpt_answerer_component, resume_generator_manager)
+        bot.set_gpt_answerer_and_resume_generator(gpt_parser_component, gpt_answerer_component, resume_generator_manager)
         bot.set_parameters(parameters)
         bot.start_login()
         if (parameters['collectMode'] == True):
