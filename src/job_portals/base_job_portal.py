@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from re import A
 
 from constants import LINKEDIN
+from job_portals.application_form_elements import RadioQuestion, TextBoxQuestion
 from src.ai_hawk.authenticator import AIHawkAuthenticator
 from src.job import Job
 from src.jobContext import JobContext
@@ -90,7 +91,7 @@ class BaseApplicationPage(WebPage):
     def handle_errors(self) -> None:
         """this methos is also called as fix errors"""
         pass
-    
+
     @abstractmethod
     def check_for_errors(self) -> None:
         """As the current impl needs this, later when we add retry mechanism, we will be moving to has errors and handle errors"""
@@ -98,14 +99,66 @@ class BaseApplicationPage(WebPage):
 
     @abstractmethod
     def get_input_elements(self) -> List[WebElement]:
-        """ this method will update to Enum / other easy way (in future) instead of webList """
+        """this method will update to Enum / other easy way (in future) instead of webList"""
         pass
 
     @abstractmethod
     def is_upload_field(self, element: WebElement) -> bool:
         pass
-    
-    
+
+    @abstractmethod
+    def get_file_upload_elements(self) -> List[WebElement]:
+        pass
+
+    @abstractmethod
+    def get_upload_element_heading(self, element: WebElement) -> str:
+        pass
+
+    @abstractmethod
+    def upload_file(self, element: WebElement, file_path: str) -> None:
+        pass
+
+    @abstractmethod
+    def get_form_sections(self) -> List[WebElement]:
+        pass
+
+    @abstractmethod
+    def is_terms_of_service(self, section: WebElement) -> bool:
+        pass
+
+    @abstractmethod
+    def accept_terms_of_service(self, section: WebElement) -> None:
+        pass
+
+    @abstractmethod
+    def is_radio_question(self, section: WebElement) -> bool:
+        pass
+
+    @abstractmethod
+    def web_element_to_radio_question(self, section: WebElement) -> RadioQuestion:
+        pass
+
+    @abstractmethod
+    def select_radio_option(
+        self, radio_question_web_element: WebElement, answer: str
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def is_textbox_question(self, section: WebElement) -> bool:
+        pass
+
+    @abstractmethod
+    def web_element_to_textbox_question(self, section: WebElement) -> TextBoxQuestion:
+        pass
+
+    @abstractmethod
+    def fill_textbox_question(self, section: WebElement, answer: str) -> None:
+        pass
+
+    @abstractmethod
+    def is_date_question(self, section: WebElement) -> bool:
+        pass
 
 
 class BaseJobPortal(ABC):

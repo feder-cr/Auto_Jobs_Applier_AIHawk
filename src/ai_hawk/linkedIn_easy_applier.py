@@ -2,12 +2,13 @@ import base64
 from calendar import c
 import json
 from math import log
+from operator import is_
 import os
 import random
 import re
 import time
 import traceback
-from typing import List, Optional, Any, Tuple
+from typing import List, Optional, Any, Text, Tuple
 
 from httpx import HTTPStatusError
 from regex import W
@@ -25,6 +26,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from jobContext import JobContext
 from job_application import JobApplication
 from job_application_saver import ApplicationSaver
+from job_portals.application_form_elements import RadioQuestion, TextBoxQuestionType
 from job_portals.base_job_portal import BaseJobPage, BaseJobPortal
 import src.utils as utils
 from src.logging import logger
@@ -97,7 +99,6 @@ class AIHawkEasyApplier:
                 f"Error loading questions data from JSON file: \nTraceback:\n{tb_str}"
             )
 
-    
     def apply_to_job(self, job: Job) -> None:
         """
         Starts the process of applying to a job.
@@ -119,7 +120,6 @@ class AIHawkEasyApplier:
         job_context.job_application = JobApplication(job)
         self.job_page.goto_job_page(job)
 
-        
         try:
 
             job_description = self.job_page.get_job_description(job)
@@ -138,7 +138,7 @@ class AIHawkEasyApplier:
             # Todo: add this job to skip list with it's reason
             if not self.gpt_answerer.is_job_suitable():
                 return
-            
+
             self.job_page.click_apply_button(job_context)
 
             logger.debug("Filling out application form")
@@ -159,7 +159,6 @@ class AIHawkEasyApplier:
                 f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}"
             )
 
-
     def _fill_application_form(self, job_context: JobContext):
         job = job_context.job
         job_application = job_context.job_application
@@ -171,13 +170,13 @@ class AIHawkEasyApplier:
             self.fill_up(job_context)
             self.job_application_page.click_next_button()
             self.job_application_page.handle_errors()
-        
+
         if self.job_application_page.has_submit_button():
             self.job_application_page.click_submit_button()
             ApplicationSaver.save(job_application)
             logger.debug("Application form submitted")
             return
-        
+
         logger.warning(f"submit button not found, discarding application {job}")
 
     def _discard_application(self) -> None:
@@ -217,8 +216,9 @@ class AIHawkEasyApplier:
                 self._process_form_element(element, job_context)
 
         except Exception as e:
-            logger.error(f"Failed to fill up form sections: {e} {traceback.format_exc()}")
-        
+            logger.error(
+                f"Failed to fill up form sections: {e} {traceback.format_exc()}"
+            )
 
     def _process_form_element(
         self, element: WebElement, job_context: JobContext
@@ -310,44 +310,32 @@ class AIHawkEasyApplier:
     ) -> None:
         logger.debug("Handling upload fields")
 
-        try:
-            show_more_button = self.driver.find_element(
-                By.XPATH, "//button[contains(@aria-label, 'Show more resumes')]"
-            )
-            show_more_button.click()
-            logger.debug("Clicked 'Show more resumes' button")
-        except NoSuchElementException:
-            logger.debug("'Show more resumes' button not found, continuing...")
+        file_upload_elements = self.job_application_page.get_file_upload_elements()
 
-        file_upload_elements = self.driver.find_elements(
-            By.XPATH, "//input[@type='file']"
-        )
         for element in file_upload_elements:
-            parent = element.find_element(By.XPATH, "..")
-            self.driver.execute_script(
-                "arguments[0].classList.remove('hidden')", element
+
+            file_upload_element_heading = (
+                self.job_application_page.get_upload_element_heading(element)
             )
 
-            output = self.gpt_answerer.resume_or_cover(parent.text.lower())
+            output = self.gpt_answerer.determine_resume_or_cover(
+                file_upload_element_heading
+            )
+
             if "resume" in output:
                 logger.debug("Uploading resume")
-                if (
-                    self.resume_path is not None
-                    and self.resume_path.resolve().is_file()
-                ):
-                    element.send_keys(str(self.resume_path.resolve()))
-                    job_context.job.resume_path = str(self.resume_path.resolve())
-                    job_context.job_application.resume_path = str(
-                        self.resume_path.resolve()
-                    )
-                    logger.debug(
-                        f"Resume uploaded from path: {self.resume_path.resolve()}"
-                    )
+                if self.resume_path is not None and os.path.isfile(self.resume_path):
+                    resume_file_path = os.path.abspath(self.resume_path)
+                    self.job_application_page.upload_file(element, resume_file_path)
+                    job_context.job.resume_path = resume_file_path
+                    job_context.job_application.resume_path = str(resume_file_path)
+                    logger.debug(f"Resume uploaded from path: {resume_file_path}")
                 else:
                     logger.debug(
                         "Resume path not found or invalid, generating new resume"
                     )
                     self._create_and_upload_resume(element, job_context)
+
             elif "cover" in output:
                 logger.debug("Uploading cover letter")
                 self._create_and_upload_cover_letter(element, job_context)
@@ -575,9 +563,7 @@ class AIHawkEasyApplier:
 
     def _fill_additional_questions(self, job_context: JobContext) -> None:
         logger.debug("Filling additional questions")
-        form_sections = self.driver.find_elements(
-            By.CLASS_NAME, "jobs-easy-apply-form-section__grouping"
-        )
+        form_sections = self.job_application_page.get_form_sections()
         for section in form_sections:
             self._process_form_section(job_context, section)
 
@@ -585,151 +571,131 @@ class AIHawkEasyApplier:
         self, job_context: JobContext, section: WebElement
     ) -> None:
         logger.debug("Processing form section")
-        if self._handle_terms_of_service(job_context, section):
+        if self.job_application_page.is_terms_of_service(section):
             logger.debug("Handled terms of service")
+            self.job_application_page.accept_terms_of_service(section)
             return
-        if self._find_and_handle_radio_question(job_context, section):
-            logger.debug("Handled radio question")
+
+        if self.job_application_page.is_radio_question(section):
+            radio_question = self.job_application_page.web_element_to_radio_question(
+                section
+            )
+            self._handle_radio_question(job_context, radio_question, section)
+            logger.debug("Handled radio button")
             return
-        if self._find_and_handle_textbox_question(job_context, section):
+
+        if self.job_application_page.is_textbox_question(section):
+            self._handle_textbox_question(job_context, section)
             logger.debug("Handled textbox question")
             return
-        if self._find_and_handle_date_question(job_context, section):
+        
+        if self.job_application_page.is_date_question(section):
+            self._handle_date_question(job_context, section)
             logger.debug("Handled date question")
             return
+
         if self._find_and_handle_dropdown_question(job_context, section):
             logger.debug("Handled dropdown question")
             return
 
-    def _handle_terms_of_service(
-        self, job_context: JobContext, element: WebElement
-    ) -> bool:
-        checkbox = element.find_elements(By.TAG_NAME, "label")
-        if checkbox and any(
-            term in checkbox[0].text.lower()
-            for term in ["terms of service", "privacy policy", "terms of use"]
-        ):
-            checkbox[0].click()
-            logger.debug("Clicked terms of service checkbox")
-            return True
-        return False
-
-    def _find_and_handle_radio_question(
-        self, job_context: JobContext, section: WebElement
-    ) -> bool:
+    def _handle_radio_question(
+        self,
+        job_context: JobContext,
+        radio_question: RadioQuestion,
+        section: WebElement,
+    ) -> None:
         job_application = job_context.job_application
-        question = section.find_element(By.CLASS_NAME, "jobs-easy-apply-form-element")
-        radios = question.find_elements(By.CLASS_NAME, "fb-text-selectable__option")
-        if radios:
-            question_text = section.text.lower()
-            options = [radio.text.lower() for radio in radios]
 
-            existing_answer = None
+        question_text = radio_question.question
+        options = radio_question.options
+
+        existing_answer = None
+        current_question_sanitized = self._sanitize_text(question_text)
+        for item in self.all_data:
+            if (
+                current_question_sanitized in item["question"]
+                and item["type"] == "radio"
+            ):
+                existing_answer = item
+                break
+
+        if existing_answer:
+            self.job_application_page.select_radio_option(
+                section, existing_answer["answer"]
+            )
+            job_application.save_application_data(existing_answer)
+            logger.debug("Selected existing radio answer")
+            return
+
+        answer = self.gpt_answerer.answer_question_from_options(question_text, options)
+        self._save_questions_to_json(
+            {"type": "radio", "question": question_text, "answer": answer}
+        )
+        self.all_data = self._load_questions_from_json()
+        job_application.save_application_data(
+            {"type": "radio", "question": question_text, "answer": answer}
+        )
+        self.job_application_page.select_radio_option(section, answer)
+        logger.debug("Selected new radio answer")
+        return
+
+    def _handle_textbox_question(
+        self, job_context: JobContext, section: WebElement
+    ) -> None:
+ 
+        textbox_question = self.job_application_page.web_element_to_textbox_question(
+            section
+        )
+
+        is_cover_letter = textbox_question.is_cover_letter
+        question_text = textbox_question.question
+        question_type = textbox_question.type.value
+        is_numeric = textbox_question.type is TextBoxQuestionType.NUMERIC
+
+        # Look for existing answer if it's not a cover letter field
+        existing_answer = None
+        if not is_cover_letter:
             current_question_sanitized = self._sanitize_text(question_text)
             for item in self.all_data:
                 if (
-                    current_question_sanitized in item["question"]
-                    and item["type"] == "radio"
+                    item["question"] == current_question_sanitized
+                    and item.get("type") == question_type
                 ):
-                    existing_answer = item
-
+                    existing_answer = item["answer"]
+                    logger.debug(f"Found existing answer: {existing_answer}")
                     break
 
-            if existing_answer:
-                self._select_radio(radios, existing_answer["answer"])
-                job_application.save_application_data(existing_answer)
-                logger.debug("Selected existing radio answer")
-                return True
-
-            answer = self.gpt_answerer.answer_question_from_options(
-                question_text, options
-            )
-            self._save_questions_to_json(
-                {"type": "radio", "question": question_text, "answer": answer}
-            )
-            self.all_data = self._load_questions_from_json()
-            job_application.save_application_data(
-                {"type": "radio", "question": question_text, "answer": answer}
-            )
-            self._select_radio(radios, answer)
-            logger.debug("Selected new radio answer")
-            return True
-        return False
-
-    def _find_and_handle_textbox_question(
-        self, job_context: JobContext, section: WebElement
-    ) -> bool:
-        logger.debug("Searching for text fields in the section.")
-        text_fields = section.find_elements(
-            By.TAG_NAME, "input"
-        ) + section.find_elements(By.TAG_NAME, "textarea")
-
-        if text_fields:
-            text_field = text_fields[0]
-            question_text = (
-                section.find_element(By.TAG_NAME, "label").text.lower().strip()
-            )
-            logger.debug(f"Found text field with label: {question_text}")
-
-            is_numeric = self._is_numeric_field(text_field)
-            logger.debug(f"Is the field numeric? {'Yes' if is_numeric else 'No'}")
-
-            question_type = "numeric" if is_numeric else "textbox"
-
-            # Check if it's a cover letter field (case-insensitive)
-            is_cover_letter = "cover letter" in question_text.lower()
-            logger.debug(f"question: {question_text}")
-            # Look for existing answer if it's not a cover letter field
-            existing_answer = None
-            if not is_cover_letter:
-                current_question_sanitized = self._sanitize_text(question_text)
-                for item in self.all_data:
-                    if (
-                        item["question"] == current_question_sanitized
-                        and item.get("type") == question_type
-                    ):
-                        existing_answer = item["answer"]
-                        logger.debug(f"Found existing answer: {existing_answer}")
-                        break
-
-            if existing_answer and not is_cover_letter:
-                answer = existing_answer
-                logger.debug(f"Using existing answer: {answer}")
+        if existing_answer and not is_cover_letter:
+            answer = existing_answer
+            logger.debug(f"Using existing answer: {answer}")
+        else:
+            if is_numeric:
+                answer = self.gpt_answerer.answer_question_numeric(question_text)
+                logger.debug(f"Generated numeric answer: {answer}")
             else:
-                if is_numeric:
-                    answer = self.gpt_answerer.answer_question_numeric(question_text)
-                    logger.debug(f"Generated numeric answer: {answer}")
-                else:
-                    answer = self.gpt_answerer.answer_question_textual_wide_range(
-                        question_text
-                    )
-                    logger.debug(f"Generated textual answer: {answer}")
+                answer = self.gpt_answerer.answer_question_textual_wide_range(
+                    question_text
+                )
+                logger.debug(f"Generated textual answer: {answer}")
 
-            self._enter_text(text_field, answer)
-            logger.debug("Entered answer into the textbox.")
-
-            job_context.job_application.save_application_data(
+        # Save non-cover letter answers
+        if not is_cover_letter and not existing_answer:
+            self._save_questions_to_json(
                 {"type": question_type, "question": question_text, "answer": answer}
             )
+            self.all_data = self._load_questions_from_json()
+            logger.debug("Saved non-cover letter answer to JSON.")
 
-            # Save non-cover letter answers
-            if not is_cover_letter and not existing_answer:
-                self._save_questions_to_json(
-                    {"type": question_type, "question": question_text, "answer": answer}
-                )
-                self.all_data = self._load_questions_from_json()
-                logger.debug("Saved non-cover letter answer to JSON.")
+        self.job_application_page.fill_textbox_question(section, answer)
+        logger.debug("Entered answer into the textbox.")
 
-            time.sleep(1)
-            text_field.send_keys(Keys.ARROW_DOWN)
-            text_field.send_keys(Keys.ENTER)
-            logger.debug("Selected first option from the dropdown.")
-            return True
+        job_context.job_application.save_application_data(
+            {"type": question_type, "question": question_text, "answer": answer}
+        )
 
-        logger.debug("No text fields found in the section.")
-        return False
+        return
 
-    def _find_and_handle_date_question(
+    def _handle_date_question(
         self, job_context: JobContext, section: WebElement
     ) -> bool:
         job_application = job_context.job_application
@@ -863,32 +829,6 @@ class AIHawkEasyApplier:
                 f"Failed to handle dropdown or combobox question: {e}", exc_info=True
             )
             return False
-
-    def _is_numeric_field(self, field: WebElement) -> bool:
-        field_type = field.get_attribute("type").lower()
-        field_id = field.get_attribute("id").lower()
-        is_numeric = (
-            "numeric" in field_id
-            or field_type == "number"
-            or ("text" == field_type and "numeric" in field_id)
-        )
-        logger.debug(
-            f"Field type: {field_type}, Field ID: {field_id}, Is numeric: {is_numeric}"
-        )
-        return is_numeric
-
-    def _enter_text(self, element: WebElement, text: str) -> None:
-        logger.debug(f"Entering text: {text}")
-        element.clear()
-        element.send_keys(text)
-
-    def _select_radio(self, radios: List[WebElement], answer: str) -> None:
-        logger.debug(f"Selecting radio option: {answer}")
-        for radio in radios:
-            if answer in radio.text.lower():
-                radio.find_element(By.TAG_NAME, "label").click()
-                return
-        radios[-1].find_element(By.TAG_NAME, "label").click()
 
     def _select_dropdown_option(self, element: WebElement, text: str) -> None:
         logger.debug(f"Selecting dropdown option: {text}")
