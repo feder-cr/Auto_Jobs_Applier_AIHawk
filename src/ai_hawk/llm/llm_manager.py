@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
 
+
 import httpx
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage
@@ -505,7 +506,7 @@ class GPTAnswerer:
 
     def _clean_llm_output(self, output: str) -> str:
         return output.replace("*", "").replace("#", "").strip()
-    
+
     def summarize_job_description(self, text: str) -> str:
         logger.debug(f"Summarizing job description: {text}")
         prompts.summarize_prompt_template = self._preprocess_template_string(
@@ -708,11 +709,7 @@ class GPTAnswerer:
             logger.debug(f"Job is not suitable: {reasoning}")
         return int(score) >= JOB_SUITABILITY_SCORE
 
-import re
-import json
-import logging
 
-logger = logging.getLogger(__name__)
 
 class GPTParser:
     def __init__(self, config, llm_api_key):
