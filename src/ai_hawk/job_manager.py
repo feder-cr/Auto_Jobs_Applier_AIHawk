@@ -306,7 +306,6 @@ class AIHawkJobManager:
         job_list = [self.job_tile_to_job(job_element) for job_element in job_element_list]
 
         for job in job_list:
-
             logger.debug(f"Starting applicant for job: {job.title} at {job.company}")
             # TODO fix apply threshold
             """
@@ -479,23 +478,22 @@ class AIHawkJobManager:
         except NoSuchElementException:
             logger.warning("Job link is missing.")
 
-        # Extract Company Name
+        # Extract company name and location
         try:
-            job.company = job_tile.find_element(
+            # contains both with a delimter '·'
+            company_location = job_tile.find_element(
                 By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
-            ).text.split('·')[0].strip()
+            ).text
+            company, location = company_location.split('·')
+            job.company = company.strip()
             logger.debug(f"Job company extracted: {job.company}")
-        except NoSuchElementException as e:
-            logger.warning(f"Job company is missing. {e} {traceback.format_exc()}")
-
-        # Extract job Location
-        try:
-            job.location = job_tile.find_element(
-                By.XPATH, ".//div[contains(@class, 'artdeco-entity-lockup__subtitle')]//span"
-            ).text.split('·')[1].strip()
+            job.location = location.strip()
             logger.debug(f"Job location extracted: {job.location}")
+        except ValueError:
+            logger.debug(f"Could not find the company and location, trying original method...")
+
         except NoSuchElementException:
-            logger.warning("Job location is missing.")
+            logger.warning(f"Job comapy and location are missing. {e} {traceback.format.exc()}")
 
         # Extract job State
         try:
