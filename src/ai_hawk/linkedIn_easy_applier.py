@@ -26,7 +26,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from jobContext import JobContext
 from job_application import JobApplication
 from job_application_saver import ApplicationSaver
-from job_portals.application_form_elements import RadioQuestion, TextBoxQuestionType
+from job_portals.application_form_elements import SelectQuestion, TextBoxQuestionType
 from job_portals.base_job_portal import BaseJobPage, BaseJobPortal
 import src.utils as utils
 from src.logging import logger
@@ -69,7 +69,7 @@ class AIHawkEasyApplier:
         self.gpt_answerer = gpt_answerer
         self.resume_generator_manager = resume_generator_manager
         self.all_data = self._load_questions_from_json()
-        self.current_job = None
+        self.current_job : Job | None = None
 
         logger.debug("AIHawkEasyApplier initialized successfully")
 
@@ -153,7 +153,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to apply to job: {job}, error: {tb_str}")
 
             logger.debug("Saving application process due to failure")
-            self._save_job_application_process()
+            self.job_application_page.save()
 
             raise Exception(
                 f"Failed to apply to job! Original exception:\nTraceback:\n{tb_str}"
@@ -178,32 +178,6 @@ class AIHawkEasyApplier:
             return
 
         logger.warning(f"submit button not found, discarding application {job}")
-
-    def _discard_application(self) -> None:
-        logger.debug("Discarding application")
-        try:
-            self.driver.find_element(By.CLASS_NAME, "artdeco-modal__dismiss").click()
-            utils.time_utils.medium_sleep()
-            self.driver.find_elements(
-                By.CLASS_NAME, "artdeco-modal__confirm-dialog-btn"
-            )[0].click()
-            utils.time_utils.medium_sleep()
-        except Exception as e:
-            logger.warning(f"Failed to discard application: {e}")
-
-    def _save_job_application_process(self) -> None:
-        logger.debug(
-            "Application not completed. Saving job to My Jobs, In Progess section"
-        )
-        try:
-            self.driver.find_element(By.CLASS_NAME, "artdeco-modal__dismiss").click()
-            utils.time_utils.medium_sleep()
-            self.driver.find_elements(
-                By.CLASS_NAME, "artdeco-modal__confirm-dialog-btn"
-            )[1].click()
-            utils.time_utils.medium_sleep()
-        except Exception as e:
-            logger.error(f"Failed to save application process: {e}")
 
     def fill_up(self, job_context: JobContext) -> None:
         job = job_context.job
@@ -513,14 +487,15 @@ class AIHawkEasyApplier:
             logger.debug("Handled textbox question")
             return
 
-        if self._find_and_handle_dropdown_question(job_context, section):
+        if self.job_application_page.is_dropdown_question(section):
+            self._handle_dropdown_question(job_context, section)
             logger.debug("Handled dropdown question")
             return
 
     def _handle_radio_question(
         self,
         job_context: JobContext,
-        radio_question: RadioQuestion,
+        radio_question: SelectQuestion,
         section: WebElement,
     ) -> None:
         job_application = job_context.job_application
@@ -561,14 +536,14 @@ class AIHawkEasyApplier:
     def _handle_textbox_question(
         self, job_context: JobContext, section: WebElement
     ) -> None:
- 
+
         textbox_question = self.job_application_page.web_element_to_textbox_question(
             section
         )
 
-        is_cover_letter = textbox_question.is_cover_letter
         question_text = textbox_question.question
         question_type = textbox_question.type.value
+        is_cover_letter = "cover letter" in question_text.lower()
         is_numeric = textbox_question.type is TextBoxQuestionType.NUMERIC
 
         # Look for existing answer if it's not a cover letter field
@@ -614,106 +589,66 @@ class AIHawkEasyApplier:
 
         return
 
-    def _find_and_handle_dropdown_question(
+    def _handle_dropdown_question(
         self, job_context: JobContext, section: WebElement
-    ) -> bool:
+    ) -> None:
         job_application = job_context.job_application
-        try:
-            question = section.find_element(
-                By.CLASS_NAME, "jobs-easy-apply-form-element"
+
+        dropdown = self.job_application_page.web_element_to_dropdown_question(section)
+
+        question_text = dropdown.question
+        existing_answer = None
+        current_question_sanitized = self._sanitize_text(question_text)
+        options = dropdown.options
+
+        for item in self.all_data:
+            if (
+                current_question_sanitized in item["question"]
+                and item["type"] == "dropdown"
+            ):
+                existing_answer = item["answer"]
+                break
+
+        if existing_answer:
+            logger.debug(
+                f"Found existing answer for question '{question_text}': {existing_answer}"
+            )
+            job_application.save_application_data(
+                {
+                    "type": "dropdown",
+                    "question": question_text,
+                    "answer": existing_answer,
+                }
             )
 
-            dropdowns = question.find_elements(By.TAG_NAME, "select")
-            if not dropdowns:
-                dropdowns = section.find_elements(
-                    By.CSS_SELECTOR, "[data-test-text-entity-list-form-select]"
-                )
+            answer = existing_answer
 
-            if dropdowns:
-                dropdown = dropdowns[0]
-                select = Select(dropdown)
-                options = [option.text for option in select.options]
-
-                logger.debug(f"Dropdown options found: {options}")
-
-                question_text = question.find_element(By.TAG_NAME, "label").text.lower()
-                logger.debug(
-                    f"Processing dropdown or combobox question: {question_text}"
-                )
-
-                current_selection = select.first_selected_option.text
-                logger.debug(f"Current selection: {current_selection}")
-
-                existing_answer = None
-                current_question_sanitized = self._sanitize_text(question_text)
-                for item in self.all_data:
-                    if (
-                        current_question_sanitized in item["question"]
-                        and item["type"] == "dropdown"
-                    ):
-                        existing_answer = item["answer"]
-                        break
-
-                if existing_answer:
-                    logger.debug(
-                        f"Found existing answer for question '{question_text}': {existing_answer}"
-                    )
-                    job_application.save_application_data(
-                        {
-                            "type": "dropdown",
-                            "question": question_text,
-                            "answer": existing_answer,
-                        }
-                    )
-                    if current_selection != existing_answer:
-                        logger.debug(f"Updating selection to: {existing_answer}")
-                        self._select_dropdown_option(dropdown, existing_answer)
-                else:
-                    logger.debug(
-                        f"No existing answer found, querying model for: {question_text}"
-                    )
-                    answer = self.gpt_answerer.answer_question_from_options(
-                        question_text, options
-                    )
-                    self._save_questions_to_json(
-                        {
-                            "type": "dropdown",
-                            "question": question_text,
-                            "answer": answer,
-                        }
-                    )
-                    self.all_data = self._load_questions_from_json()
-                    job_application.save_application_data(
-                        {
-                            "type": "dropdown",
-                            "question": question_text,
-                            "answer": answer,
-                        }
-                    )
-                    self._select_dropdown_option(dropdown, answer)
-                    logger.debug(f"Selected new dropdown answer: {answer}")
-
-                return True
-
-            else:
-
-                logger.debug(f"No dropdown found. Logging elements for debugging.")
-                elements = section.find_elements(By.XPATH, ".//*")
-                logger.debug(
-                    f"Elements found: {[element.tag_name for element in elements]}"
-                )
-                return False
-
-        except Exception as e:
-            logger.warning(
-                f"Failed to handle dropdown or combobox question: {e}", exc_info=True
+        else:
+            logger.debug(
+                f"No existing answer found, querying model for: {question_text}"
             )
-            return False
+            answer = self.gpt_answerer.answer_question_from_options(
+                question_text, options
+            )
+            self._save_questions_to_json(
+                {
+                    "type": "dropdown",
+                    "question": question_text,
+                    "answer": answer,
+                }
+            )
+            self.all_data = self._load_questions_from_json()
+            job_application.save_application_data(
+                {
+                    "type": "dropdown",
+                    "question": question_text,
+                    "answer": answer,
+                }
+            )
 
-    def _select_dropdown_option(self, element: WebElement, text: str) -> None:
-        logger.debug(f"Selecting dropdown option: {text}")
-        select = Select(element)
-        select.select_by_visible_text(text)
+        self.job_application_page.select_dropdown_option(section, answer)
+        logger.debug(f"Selected new dropdown answer: {answer}")
+        return
 
     def _save_questions_to_json(self, question_data: dict) -> None:
         output_file = "answers.json"
@@ -779,6 +714,7 @@ class AIHawkEasyApplier:
     def answer_contians_company_name(self, answer: Any) -> bool:
         return (
             isinstance(answer, str)
-            and not self.current_job.company is None
+            and self.current_job is not None
+            and self.current_job.company is not None
             and self.current_job.company in answer
         )

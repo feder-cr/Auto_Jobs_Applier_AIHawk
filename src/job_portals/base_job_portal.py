@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from re import A
 
 from constants import LINKEDIN
-from job_portals.application_form_elements import RadioQuestion, TextBoxQuestion
+from src.job_portals.application_form_elements import SelectQuestion, TextBoxQuestion
 from src.ai_hawk.authenticator import AIHawkAuthenticator
 from src.job import Job
 from src.jobContext import JobContext
@@ -135,7 +135,7 @@ class BaseApplicationPage(WebPage):
         pass
 
     @abstractmethod
-    def web_element_to_radio_question(self, section: WebElement) -> RadioQuestion:
+    def web_element_to_radio_question(self, section: WebElement) -> SelectQuestion:
         pass
 
     @abstractmethod
@@ -157,7 +157,24 @@ class BaseApplicationPage(WebPage):
         pass
 
     @abstractmethod
-    def is_date_question(self, section: WebElement) -> bool:
+    def is_dropdown_question(self, section: WebElement) -> bool:
+        pass
+
+    @abstractmethod
+    def web_element_to_dropdown_question(self, section: WebElement) -> SelectQuestion:
+        pass
+
+    @abstractmethod
+    def select_dropdown_option(self, section: WebElement, answer: str) -> None:
+        pass
+
+    @abstractmethod
+    def discard(self) -> None:
+        pass
+
+    @abstractmethod
+    def save(self) -> None:
+        """ this can be also be considered as save draft / save progress """
         pass
 
 

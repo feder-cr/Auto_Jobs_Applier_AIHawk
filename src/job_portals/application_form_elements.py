@@ -7,15 +7,18 @@ class TextBoxQuestionType(Enum):
     NUMERIC = "numeric"
     TEXTBOX = "textbox"
 
+class SelectQuestionType(Enum):
+    SINGLE_SELECT = "single_select"
+    MULTI_SELECT = "multi_select"
 
 @dataclass
-class RadioQuestion:
+class SelectQuestion:
     question: str
     options: list[str]
+    type: SelectQuestionType
 
 
 @dataclass
 class TextBoxQuestion:
     question: str
     type: TextBoxQuestionType
-    is_cover_letter: bool
