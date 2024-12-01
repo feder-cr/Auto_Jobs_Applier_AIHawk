@@ -474,27 +474,33 @@ class AIHawkJobManager:
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
+            title_element = None  # Ensure title_element is defined even if missing
+        except Exception as e:
+            logger.error(f"Error finding job title element: {e}", exc_info=True)
+            title_element = None
 
         # Extract job Link
         try:
-            job.link = title_element.get_attribute("href").split("?")[0]
-            logger.debug(f"Job link extracted: {job.link}")
-        except NoSuchElementException:
-            logger.warning("Job link is missing.")
+            if title_element:
+                job.link = title_element.get_attribute("href").split("?")[0]
+                logger.debug(f"Job link extracted: {job.link}")
+            else:
+                job.link = None
+                logger.warning("Job link cannot be extracted as title_element is missing.")
+        except Exception as e:
+            logger.error(f"Error extracting job link: {e}", exc_info=True)
 
         # Extract company name and location
         try:
-            # contains both with a delimter '·'
             company, location = self.gpt_parser.extract_company_and_title(job_tile.get_attribute("outerHTML"))
             job.company = company.strip()
             logger.debug(f"Job company extracted: {job.company}")
             job.location = location.strip()
             logger.debug(f"Job location extracted: {job.location}")
         except ValueError as e:
-            logger.warning(f"Could not find the company and location. {e} {traceback.format.exc()}")
-
-        except NoSuchElementException as e:
-            logger.warning(f"Job comapy and location are missing. {e} {traceback.format.exc()}")
+            logger.warning(f"Could not find the company and location: {e}")
+        except Exception as e:
+            logger.warning(f"Error extracting company and location: {e}", exc_info=True)
 
         # Extract job State
         try:
@@ -502,23 +508,27 @@ class AIHawkJobManager:
                 By.XPATH,
                 ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__footer-item')]",
             ).text
-            logger.debug(f"Job state extracted: {job_state}")
             job.apply_method = job_state
-        except NoSuchElementException as e:
-            logger.warning(f"Apply method and state not found. {e} {traceback.format_exc()}")
-
-        # Extract job ID from job url
-        try:
-            match = re.search(r'/jobs/view/(\d+)/', job.link)
-            if match:
-                job.id = match.group(1)
-            else:
-                logger.warning(f"Job ID not found in link: {job.link}")
-            logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
+            logger.debug(f"Job state extracted: {job_state}")
+        except NoSuchElementException:
+            logger.warning("Apply method and state not found.")
         except Exception as e:
-            logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
+            logger.error(f"Error extracting job state: {e}", exc_info=True)
+
+        # Extract job ID from job URL
+        try:
+            if job.link:
+                match = re.search(r'/jobs/view/(\d+)/', job.link)
+                if match:
+                    job.id = match.group(1)
+                    logger.debug(f"Job ID extracted: {job.id}")
+                else:
+                    logger.warning(f"Job ID not found in link: {job.link}")
+        except Exception as e:
+            logger.error(f"Error extracting job ID: {e}", exc_info=True)
 
         return job
+
 
     def is_blacklisted(self, job_title, company, link, job_location):
         logger.debug(f"Checking if job is blacklisted: {job_title} at {company} in {job_location}")
