@@ -8,7 +8,7 @@ import traceback
 
 from inputimeout import inputimeout, TimeoutOccurred
 
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
+from ai_hawk.job_applier import AIHawkJobApplier
 from config import JOB_MAX_APPLICATIONS, JOB_MIN_APPLICATIONS, MINIMUM_WAIT_TIME_IN_SECONDS
 
 from job_portals.base_job_portal import BaseJobPortal, get_job_portal
@@ -129,7 +129,7 @@ class AIHawkJobManager:
 
     def start_applying(self):
         logger.debug("Starting job application process")
-        self.easy_applier_component = AIHawkEasyApplier(self.job_portal, self.resume_path, self.set_old_answers,
+        self.easy_applier_component = AIHawkJobApplier(self.job_portal, self.resume_path, self.set_old_answers,
                                                           self.gpt_answerer, self.resume_generator_manager)
         searches = list(product(self.positions, self.locations))
         random.shuffle(searches)

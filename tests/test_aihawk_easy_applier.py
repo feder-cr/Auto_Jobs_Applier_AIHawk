@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from ai_hawk.linkedIn_easy_applier import AIHawkEasyApplier
+from ai_hawk.job_applier import AIHawkJobApplier
 
 
 
@@ -26,7 +26,7 @@ def mock_resume_generator_manager():
 @pytest.fixture
 def easy_applier(mock_driver, mock_gpt_answerer, mock_resume_generator_manager):
     """Fixture to initialize AIHawkEasyApplier with mocks."""
-    return AIHawkEasyApplier(
+    return AIHawkJobApplier(
         driver=mock_driver,
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],
@@ -40,7 +40,7 @@ def test_initialization(mocker, easy_applier):
     # Mock os.path.exists to return True
     mocker.patch('os.path.exists', return_value=True)
 
-    easy_applier = AIHawkEasyApplier(
+    easy_applier = AIHawkJobApplier(
         driver=mocker.Mock(),
         resume_dir="/path/to/resume",
         set_old_answers=[('Question 1', 'Answer 1', 'Type 1')],

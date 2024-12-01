@@ -14,26 +14,20 @@ from httpx import HTTPStatusError
 from regex import W
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from jobContext import JobContext
 from job_application import JobApplication
 from job_application_saver import ApplicationSaver
 from job_portals.application_form_elements import SelectQuestion, TextBoxQuestionType
 from job_portals.base_job_portal import BaseJobPage, BaseJobPortal
-import src.utils as utils
+
 from src.logging import logger
 from src.job import Job
 from src.ai_hawk.llm.llm_manager import GPTAnswerer
-from utils import browser_utils
-import utils.time_utils
 
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
@@ -50,7 +44,7 @@ def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
     return any(item["question"] == question for item in data)
 
 
-class AIHawkEasyApplier:
+class AIHawkJobApplier:
     def __init__(
         self,
         job_portal: BaseJobPortal,
