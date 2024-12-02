@@ -6,6 +6,7 @@ from itertools import product
 from pathlib import Path
 from datetime import datetime
 
+
 from inputimeout import inputimeout, TimeoutOccurred
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
