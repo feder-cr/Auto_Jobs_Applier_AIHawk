@@ -1,5 +1,5 @@
 [project]
-name = "auto-jobs-applier-aihawk"
+name = "job-applier"
 version = "0.1.0"
 description = "Auto_Jobs_Applier_AIHawk is a tool that automates the jobs application process. Utilizing artificial intelligence, it enables users to apply for multiple job offers in an automated and personalized way."
 readme = "README.md"
