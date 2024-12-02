@@ -22,6 +22,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from jobContext import JobContext
 from job_application import JobApplication
 from job_application_saver import ApplicationSaver
+from src.custom_exception import JobNotSuitableException
 import src.utils as utils
 from src.logging import logger
 from src.job import Job
@@ -157,7 +158,7 @@ class AIHawkEasyApplier:
             
             # Todo: add this job to skip list with it's reason
             if not self.gpt_answerer.is_job_suitable():
-                return
+                raise JobNotSuitableException("LLM score determined this job is not suitable for you")
 
             logger.debug("Attempting to click 'Easy Apply' button")
             actions = ActionChains(self.driver)
