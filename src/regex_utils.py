@@ -1,6 +1,6 @@
 import re
 
-def generate_regex_patterns_for_blacklisting(blacklist):
+def look_ahead_patterns(keyword_list):
         # Converts each blacklist entry to a regex pattern that ensures all words appear, in any order
         #
         # Example of pattern for job title:
@@ -13,7 +13,7 @@ def generate_regex_patterns_for_blacklisting(blacklist):
         #   '\b{WORD}\b' => Regex expression for a word boundry, that the WORD is treated as whole words
         #                    rather than as parts of other words.
         patterns = []
-        for term in blacklist:
+        for term in keyword_list:
             # Split term into individual words
             words = term.split()
             # Create a lookahead for each word to ensure it appears independently
