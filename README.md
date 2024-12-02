@@ -19,8 +19,8 @@ Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) |
 
 </div>
 
-**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of Ai Hawk </br>
-As AI Hawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
+**Creator** [feder-cr](https://github.com/feder-cr), Co-Founder of AIHawk </br>
+As AIHawk is focusing on their proprietary product - solving problems in hiring for companies, currently this project is led, managed, and maintained by a group of open-source contributors, with a focus on building tools to help job seekers land the jobs they deserve.
 
 **Project Maintainers / Leads**: [surapuramakhil](https://github.com/surapuramakhil), [sarob](https://github.com/sarob), [cjbbb](https://github.com/cjbbb)
 
@@ -225,6 +225,17 @@ This file defines your job search parameters and bot behavior. Each section cont
     positions:
       - Software Developer
       - Data Scientist
+    ```
+
+- `keywords_whitelist:`
+  - List keywords to look for in the job description, for example, "chromium browser". This field is optional.
+  - Only use this field to find jobs that require specific technologies, products, or skills that is not mentioned in the job title.
+  - Warning: Any jobs without matching keywords in the job description will be skipped.
+  - Example:
+
+    ```yaml
+    keywords_whitelist:
+      - chromium browser
     ```
 
 - `locations:`
@@ -730,7 +741,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ### For Developers
 
-- [Contribution Guidelines](CONTRIBUTING.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
 
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
@@ -763,7 +774,12 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-This project is licensed under the  MIT + Commons Clause License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL License. Documentation is licensed under CC BY - see the [AGPL LICENSE](LICENSE) and [CC BY LICENSE](docs/LICENSE) files for details.
+
+The AGPL License requires that any derivative work must also be open source and distributed under the same license.
+
+The CC BY License permits others to distribute, remix, adapt, and build upon your work, even for commercial purposes, as long as they credit you for the original creation. 
+ 
 
 ## Disclaimer
 
