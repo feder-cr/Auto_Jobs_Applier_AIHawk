@@ -75,7 +75,7 @@ def test_scroll_slow_element_not_scrollable(mocker):
 
 # Test chrome_browser_options function
 def test_chrome_browser_options(mocker):
-    mocker.patch("os.path.dirname", return_value="/mocked/path")
+    mocker.patch("os.path.dirname", return_value="mocked/path")
     mocker.patch("os.path.basename", return_value="profile_directory")
 
     mock_options = mocker.Mock()

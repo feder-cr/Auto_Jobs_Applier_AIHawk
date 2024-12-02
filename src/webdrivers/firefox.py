@@ -36,8 +36,7 @@ class Firefox(Browser):
             options.set_preference(key, value)
 
         if self.profile.profile_path:
-            profile = webdriver.FirefoxProfile(self.profile.profile_path)
-            options.profile = profile
+            options.set_preference("profile", self.profile.profile_path)
             logger.debug(f"Using Firefox profile directory: {self.profile.profile_path}")
         else:
             options.set_preference("browser.privatebrowsing.autostart", True)
