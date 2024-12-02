@@ -1,0 +1,50 @@
+name: Add Co-Authors
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  add-coauthors:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Add co-authors
+        run: |
+          # Get the merge commit SHA
+          MERGE_COMMIT_SHA=$(git rev-parse HEAD)
+          
+          # Get the base branch (target of PR)
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          
+          # Find merge base
+          MERGE_BASE=$(git merge-base HEAD $BASE_BRANCH)
+          
+          # Extract unique contributors
+          CONTRIBUTORS=$(git log $MERGE_BASE..$MERGE_COMMIT_SHA --format='%aN <%aE>' | sort -u | grep -v 'GitHub Actions')
+          
+          # Get the current commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          
+          # Create new commit message with co-authors
+          NEW_MSG="$COMMIT_MSG"$'\n\n'
+          while IFS= read -r contributor; do
+            NEW_MSG+="Co-authored-by: $contributor"$'\n'
+          done <<< "$CONTRIBUTORS"
+          
+          # Amend the merge commit with updated message
+          echo "$NEW_MSG" | git commit --amend -F -
+          
+          # Force push the changes
+          git push --force

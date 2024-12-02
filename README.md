@@ -734,6 +734,26 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 - Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features make it into the main branch.
 
+## Git Co-Authors Feature
+
+This repository includes an automated GitHub Action that preserves contributor attribution when PRs are squashed and merged. The workflow automatically adds `Co-authored-by` lines to the squashed commit message, ensuring that all contributors get proper credit for their work.
+
+### How it works
+
+1. When a PR is merged, the GitHub Action triggers automatically
+2. It identifies all unique contributors who made commits in the PR
+3. It adds their names and emails as `Co-authored-by` lines to the final squashed commit message
+
+### Example co-authored commit message:
+```
+feat: Add new feature
+
+Co-authored-by: John Doe <john@example.com>
+Co-authored-by: Jane Smith <jane@example.com>
+```
+
+The workflow is configured in `.github/workflows/add-coauthors.yml`.
+
 ## Conclusion
 
 Auto_Jobs_Applier_AIHawk provides a significant advantage in the modern job market by automating and enhancing the job application process. With features like dynamic resume generation and AI-powered personalization, it offers unparalleled flexibility and efficiency. Whether you're a job seeker aiming to maximize your chances of landing a job, a recruiter looking to streamline application submissions, or a career advisor seeking to offer better services, Auto_Jobs_Applier_AIHawk is an invaluable resource. By leveraging cutting-edge automation and artificial intelligence, this tool not only saves time but also significantly increases the effectiveness and quality of job applications in today's competitive landscape.
