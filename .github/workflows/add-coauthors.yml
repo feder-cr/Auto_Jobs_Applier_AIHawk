@@ -2,13 +2,33 @@ name: Add Co-Authors
 on:
   pull_request:
     types: [closed]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
+  check-approval:
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    steps:
+      - name: Add approval status comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `✅ PR has been approved! CI process initiated.\nCI Run: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+            });
+
   add-coauthors:
+    needs: check-approval
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,7 +38,7 @@ jobs:
       - name: Setup Git
         run: |
           git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.email "noreply@github.com"
 
       - name: Add co-authors
         run: |
@@ -31,20 +51,35 @@ jobs:
           # Find merge base
           MERGE_BASE=$(git merge-base HEAD $BASE_BRANCH)
           
-          # Extract unique contributors
-          CONTRIBUTORS=$(git log $MERGE_BASE..$MERGE_COMMIT_SHA --format='%aN <%aE>' | sort -u | grep -v 'GitHub Actions')
+          # Get list of commits in PR
+          COMMITS=$(git log --format="%H" $MERGE_BASE..$MERGE_COMMIT_SHA)
           
-          # Get the current commit message
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          # Initialize co-authors list
+          CO_AUTHORS=""
           
-          # Create new commit message with co-authors
-          NEW_MSG="$COMMIT_MSG"$'\n\n'
-          while IFS= read -r contributor; do
-            NEW_MSG+="Co-authored-by: $contributor"$'\n'
-          done <<< "$CONTRIBUTORS"
+          # Loop through commits
+          for commit in $COMMITS; do
+            # Get commit author email and name
+            AUTHOR_EMAIL=$(git log -1 --format="%ae" $commit)
+            AUTHOR_NAME=$(git log -1 --format="%an" $commit)
+            
+            # Add to co-authors if not already present
+            AUTHOR_LINE="Co-authored-by: $AUTHOR_NAME <$AUTHOR_EMAIL>"
+            if [[ ! $CO_AUTHORS =~ $AUTHOR_LINE ]]; then
+              CO_AUTHORS="$CO_AUTHORS\n$AUTHOR_LINE"
+            fi
+          done
           
-          # Amend the merge commit with updated message
-          echo "$NEW_MSG" | git commit --amend -F -
-          
-          # Force push the changes
-          git push --force
+          # Amend the merge commit with co-authors
+          if [ ! -z "$CO_AUTHORS" ]; then
+            git fetch origin $BASE_BRANCH
+            git checkout $BASE_BRANCH
+            git pull origin $BASE_BRANCH
+            echo -e "\n$CO_AUTHORS" | git commit --amend -F -
+            git push origin $BASE_BRANCH
+
+            # Add comment to PR
+            gh pr comment ${{ github.event.pull_request.number }} --body "✨ Added co-authors to merge commit.\nCI Status: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
