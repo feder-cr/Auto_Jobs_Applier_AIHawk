@@ -15,7 +15,7 @@
 Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/MYYwG8JyrQ) (for Open Source contributors)
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity)
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/MYYwG8JyrQ)
 
 </div>
 
@@ -26,7 +26,7 @@ As AIHawk is focusing on their proprietary product - solving problems in hiring 
 
 We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and buidling better version of this product.
 
-reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/mMZcMTH9K6). [Special thanks](#special-thanks) 
+reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/MYYwG8JyrQ). [Special thanks](#special-thanks) 
 
 Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk a powerful tool for job seekers worldwide.
 
