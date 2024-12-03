@@ -12,7 +12,7 @@
 
 **🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
 
-Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/mMZcMTH9K6) (for Open Source contributors)
+Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/MYYwG8JyrQ) (for Open Source contributors)
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity)
 [![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
