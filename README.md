@@ -6,7 +6,7 @@
 
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
 
-# Auto_Jobs_Applier_AIHawk
+# AIHawk the first Jobs Applier AI Agent
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
@@ -616,7 +616,7 @@ Using this folder as a guide can be particularly helpful for:
   python main.py --resume /path/to/your/resume.pdf
   ```
 
-- **Using the colled mode:**
+- **Using the collect mode:**
   If you want to collect job data only to perform any type of data analytics you can use the bot with the `--collect` option. This will store in output/data.json file all data found from linkedin jobs offers.
 
   ```bash

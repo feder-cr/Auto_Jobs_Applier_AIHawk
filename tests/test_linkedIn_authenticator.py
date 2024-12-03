@@ -4,8 +4,11 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from ai_hawk.authenticator import AIHawkAuthenticator, LinkedInAuthenticator, get_authenticator
+from ai_hawk.authenticator import AIHawkAuthenticator
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
+from job_portals.base_job_portal import get_authenticator
+from job_portals.linkedIn.authenticator import LinkedInAuthenticator
 
 
 

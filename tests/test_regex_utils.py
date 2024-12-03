@@ -1,6 +1,6 @@
 import pytest
 from ai_hawk.job_manager import AIHawkJobManager
-from src.regex_utils import generate_regex_patterns_for_blacklisting
+from src.regex_utils import look_ahead_patterns
 
 apply_component = AIHawkJobManager(None) # For this test we dont need the web driver
 
@@ -11,9 +11,9 @@ location_blacklist = ["Brazil"]
 seen_jobs = set()
 
 # Creating regex patterns
-apply_component.title_blacklist_patterns = generate_regex_patterns_for_blacklisting(title_blacklist)
-apply_component.company_blacklist_patterns = generate_regex_patterns_for_blacklisting(company_blacklist)
-apply_component.location_blacklist_patterns = generate_regex_patterns_for_blacklisting(location_blacklist)
+apply_component.title_blacklist_patterns = look_ahead_patterns(title_blacklist)
+apply_component.company_blacklist_patterns = look_ahead_patterns(company_blacklist)
+apply_component.location_blacklist_patterns = look_ahead_patterns(location_blacklist)
 apply_component.seen_jobs = seen_jobs
 apply_component.seen_jobs.add("link14") # added link for 'seen link' test
 
