@@ -6,7 +6,7 @@
 
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
 
-# Auto_Jobs_Applier_AIHawk
+# AIHawk the first Jobs Applier AI Agent
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
