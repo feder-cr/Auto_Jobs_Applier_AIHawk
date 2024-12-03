@@ -665,7 +665,7 @@ class GPTAnswerer:
         logger.debug(f"Best option determined: {best_option}")
         return best_option
 
-    def resume_or_cover(self, phrase: str) -> str:
+    def determine_resume_or_cover(self, phrase: str) -> str:
         logger.debug(
             f"Determining if phrase refers to resume or cover letter: {phrase}"
         )

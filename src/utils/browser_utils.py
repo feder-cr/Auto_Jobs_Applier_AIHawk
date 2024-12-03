@@ -80,3 +80,7 @@ def scroll_slow(driver, scrollable_element, start=0, end=3600, step=300, reverse
             logger.warning("The element is not visible.")
     except Exception as e:
         logger.error(f"Exception occurred during scrolling: {e}")
+
+def remove_focus_active_element(driver):
+    driver.execute_script("document.activeElement.blur();")
+    logger.debug("Removed focus from active element.")

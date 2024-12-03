@@ -1,3 +1,10 @@
+DATE_ALL_TIME = "all_time"
+DATE_MONTH = "month"
+DATE_WEEK = "week"
+DATE_24_HOURS = "24_hours"
+
+LINKEDIN = "linkedin"
+
 # constants used in application
 SECRETS_YAML = "secrets.yaml"
 WORK_PREFERENCES_YAML = "work_preferences.yaml"

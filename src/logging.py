@@ -1,7 +1,6 @@
 import logging.handlers
 import os
 import sys
-import time
 import logging
 from loguru import logger
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
