@@ -25,7 +25,6 @@ regex==2024.7.24
 reportlab==4.2.2
 selenium==4.9.1
 webdriver-manager==4.0.2
-pytest
 pytest-mock
 pytest-cov
 undetected-chromedriver==3.5.5
