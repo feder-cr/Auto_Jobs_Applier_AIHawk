@@ -241,9 +241,9 @@ def init_uc_browser() -> webdriver.Chrome:
     try:
         options = uc.ChromeOptions()
         # Add any additional options you need
-        options.add_argument(
-            "--blink-settings=imagesEnabled=false"
-        )  # Optional: disable images
+        # options.add_argument(
+        #     "--blink-settings=imagesEnabled=false"
+        # )  # Optional: disable images
         return uc.Chrome(options=options)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize browser: {str(e)}")
