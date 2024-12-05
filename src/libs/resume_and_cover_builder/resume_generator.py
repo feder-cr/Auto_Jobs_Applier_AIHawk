@@ -19,9 +19,25 @@ class ResumeGenerator:
          
 
     def _create_resume(self, gpt_answerer: Any, style_path):
+        # Imposta il resume nell'oggetto gpt_answerer
         gpt_answerer.set_resume(self.resume_object)
+        
+        # Leggi il template HTML
         template = Template(global_config.html_template)
-        return template.substitute(body=gpt_answerer.generate_html_resume(), style_path=style_path)
+        
+        try:
+            with open(style_path, "r") as f:
+                style_css = f.read()  # Correzione: chiama il metodo `read` con le parentesi
+        except FileNotFoundError:
+            raise ValueError(f"Il file di stile non è stato trovato nel percorso: {style_path}")
+        except Exception as e:
+            raise RuntimeError(f"Errore durante la lettura del file CSS: {e}")
+        
+        # Genera l'HTML del resume
+        body_html = gpt_answerer.generate_html_resume()
+        
+        # Applica i contenuti al template
+        return template.substitute(body=body_html, style_css=style_css)
 
     def create_resume(self, style_path):
         strings = load_module(global_config.STRINGS_MODULE_RESUME_PATH, global_config.STRINGS_MODULE_NAME)
@@ -41,7 +57,9 @@ class ResumeGenerator:
         gpt_answerer.set_job_description_from_text(job_description_text)
         cover_letter_html = gpt_answerer.generate_cover_letter()
         template = Template(global_config.html_template)
-        return template.substitute(body=cover_letter_html, style_path=style_path)
+        with open(style_path, "r") as f:
+            style_css = f.read()
+        return template.substitute(body=cover_letter_html, style_css=style_css)
     
     
     

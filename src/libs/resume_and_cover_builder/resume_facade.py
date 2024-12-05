@@ -105,10 +105,10 @@ class ResumeFacade:
         Returns:
             tuple: A tuple containing the PDF content as bytes and the unique filename.
         """
+        style_path = self.style_manager.get_style_path()
         if self.selected_style is None:
             raise ValueError("You must choose a style before generating the PDF.")
-        
-        style_path = self.style_manager.get_style_path(self.selected_style)
+
 
         html_resume = self.resume_generator.create_resume_job_description_text(style_path, self.job.description)
 
@@ -130,16 +130,14 @@ class ResumeFacade:
         Returns:
             tuple: A tuple containing the PDF content as bytes and the unique filename.
         """
-        
-        if self.selected_style is None:
+        style_path = self.style_manager.get_style_path()
+        if style_path is None:
             raise ValueError("You must choose a style before generating the PDF.")
         
-        style_path = self.style_manager.get_style_path(self.selected_style)
         html_resume = self.resume_generator.create_resume(style_path)
-        suggested_name = hashlib.md5(self.job.link.encode()).hexdigest()[:10]
         result = HTML_to_PDF(html_resume, self.driver)
         self.driver.quit()
-        return result, suggested_name
+        return result
 
     def create_cover_letter(self) -> tuple[bytes, str]:
         """

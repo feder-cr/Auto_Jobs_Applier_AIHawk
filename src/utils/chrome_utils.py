@@ -15,7 +15,7 @@ def chrome_browser_options():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--disable-extensions")
-    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-gpu")  # Opzionale, utile in alcuni ambienti
     options.add_argument("window-size=1200x800")
     options.add_argument("--disable-background-timer-throttling")
     options.add_argument("--disable-backgrounding-occluded-windows")
@@ -29,6 +29,8 @@ def chrome_browser_options():
     options.add_argument("--disable-animations")
     options.add_argument("--disable-cache")
     options.add_argument("--incognito")
+    options.add_argument("--allow-file-access-from-files")  # Consente l'accesso ai file locali
+    options.add_argument("--disable-web-security")         # Disabilita la sicurezza web
     logger.debug("Using Chrome in incognito mode")
     
     return options
