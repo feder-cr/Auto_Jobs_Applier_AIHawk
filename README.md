@@ -46,48 +46,12 @@ Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestion
 
 ## Introduction
 
-Auto_Jobs_Applier_AIHawk is a cutting-edge, automated tool designed to revolutionize the job search and application process. In today's fiercely competitive job market, where opportunities can vanish in the blink of an eye, this program offers job seekers a significant advantage. By leveraging the power of automation and artificial intelligence, Auto_Jobs_Applier_AIHawk enables users to apply to a vast number of relevant positions efficiently and in a personalized manner, maximizing their chances of landing their dream job.
+Auto_Jobs_Applier_AIHawk is a cutting-edge, automated tool designed to revolutionize the job search and application process. In today's fiercely competitive job market, where opportunities can vanish in the blink of an eye, this program offers job seekers a significant advantage. By leveraging the power of automation and artificial intelligence.
 
 ### The Challenge of Modern Job Hunting
 
 In the digital age, the job search landscape has undergone a dramatic transformation. While online platforms have opened up a world of opportunities, they have also intensified competition. Job seekers often find themselves spending countless hours scrolling through listings, tailoring applications, and repetitively filling out forms. This process can be not only time-consuming but also emotionally draining, leading to job search fatigue and missed opportunities.
 
-### Enter Auto_Jobs_Applier_AIHawk: Your Personal Job Search Assistant
-
-Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenges. It's not just a tool; it's your tireless, 24/7 job search partner. By automating the most time-consuming aspects of the job search process, it allows you to focus on what truly matters - preparing for interviews and developing your professional skills.
-
-## Features
-
-1. **Intelligent Job Search Automation**
-   - Customizable search criteria
-   - Continuous scanning for new openings
-   - Smart filtering to exclude irrelevant listings
-
-2. **Rapid and Efficient Application Submission**
-   - One-click applications
-   - Form auto-fill using your profile information
-   - Automatic document attachment (resume, cover letter)
-
-3. **AI-Powered Personalization**
-   - Dynamic response generation for employer-specific questions
-   - Tone and style matching to fit company culture
-   - Keyword optimization for improved application relevance
-
-4. **Volume Management with Quality**
-   - Bulk application capability
-   - Quality control measures
-   - Detailed application tracking
-
-5. **Intelligent Filtering and Blacklisting**
-   - Company blacklist to avoid unwanted employers
-   - Title filtering to focus on relevant positions
-
-6. **Dynamic Resume Generation**
-   - Automatically creates tailored resumes for each application
-   - Customizes resume content based on job requirements
-
-7. **Secure Data Handling**
-   - Manages sensitive information securely using YAML files
 
 ## Installation
 
@@ -144,34 +108,6 @@ Auto_Jobs_Applier_AIHawk steps in as a game-changing solution to these challenge
    pip install -r requirements.txt
    ```
 
-### Option 2: Using Conda 
-
-1. **Install Conda:**
-   - Download and install Miniconda from the [official website](https://docs.conda.io/en/latest/miniconda.html)
-   - Or install Anaconda from the [Anaconda website](https://www.anaconda.com/download)
-
-2. **Create and activate conda environment:**
-   ```bash
-   # Create new environment
-   conda create -n aihawk python=3.11
-
-   # Activate environment
-   conda activate aihawk
-   ```
-
-3. **Clone the repository:**
-   ```bash
-   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
-   cd Auto_Jobs_Applier_AIHawk
-   ```
-
-4. **Install dependencies:**
-   ```bash
-   # Install from requirements.txt
-   pip install -r requirements.txt
-   ```
- 
-
 ## Configuration
 
 ### 1. secrets.yaml
@@ -189,80 +125,8 @@ This file contains sensitive information. Never share or commit this file to ver
     You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
-### 2. work_preferences.yaml
 
-This file defines your job search parameters and bot behavior. Each section contains options that you can customize:
-
-- `remote: [true/false]`
-
-  - Set to `true` to include remote jobs, `false` to exclude them
-
-- `hybrid: [true/false]`
-
-  - Set to `true` to include hybrid jobs, `false` to exclude them
-
-- `onsite: [true/false]`
-
-  - Set to `true` to include onsite jobs, `false` to exclude them
-
-- `experience_level:`
-
-  - Set desired experience levels to `true`, others to `false`
-
-- `job_types:`
-  - Set desired job types to `true`, others to `false`
-
-- `date:`
-  - Choose one time range for job postings by setting it to `true`, others to `false`
-
-- `positions:`
-  - List job titles you're interested in, one per line
-  - Example:
-
-    ```yaml
-    positions:
-      - Software Developer
-      - Data Scientist
-    ```
-
-- `locations:`
-  - List locations you want to search in, one per line
-  - Example:
-
-    ```yaml
-    locations:
-      - Italy
-      - London
-    ```
-
-- `apply_once_at_company: [True/False]`
-  - Set to `True` to apply only once per company, `False` to allow multiple applications per company
-
-- `distance: [number]`
-  - Set the radius for your job search in miles
-  - Example: `distance: 50`
-
-- `companyBlacklist:`
-  - List companies you want to exclude from your search, one per line
-  - Example:
-
-    ```yaml
-    companyBlacklist:
-      - Company X
-      - Company Y
-    ```
-
-- `titleBlacklist:`
-  - List keywords in job titles you want to avoid, one per line
-  - Example:
-
-    ```yaml
-    titleBlacklist:
-      - Sales
-      - Marketing
-    ```
-
-#### 2.1 config.py - Customize LLM model endpoint
+#### 1.1 config.py - Customize LLM model endpoint
 
 - `LLM_MODEL_TYPE`:
   - Choose the model type, supported: openai / ollama / claude / gemini
@@ -280,7 +144,7 @@ This file defines your job search parameters and bot behavior. Each section cont
     - gemini: <https://aistudio.google.com/app/apikey>
 - Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
   
-### 3. plain_text_resume.yaml
+### 2. plain_text_resume.yaml
 
 This file contains your resume information in a structured format. Fill it out with your personal details, education, work experience, and skills. This information is used to auto-fill application forms and generate customized resumes.
 
@@ -579,9 +443,6 @@ Using this folder as a guide can be particularly helpful for:
 
 ## Usage
 
-0. **Account language**
-   To ensure the bot works, your account language must be set to English.
-
 1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
@@ -590,38 +451,20 @@ Using this folder as a guide can be particularly helpful for:
 
 2. **Output Folder:**
     Contains the output of the bot.
-    - `data.json` results of the --collect mode
-    - `failed.json` failed applications
-    - `open_ai_calls.json` all the calls made to the LLM model
-    - `skipped.json` applications that were skipped
-    - `success.json` successful applications
+    TODO
 
-    **Note:** `answers.json` is not part of the output folder and can be found in the root of the project. It is used to store the answers of the questions asked to the user. Can be used to update the bot with corrected answers. Search for `Select an option`, `0`, `Authorized`, and `how many years of` to verify correct answers.
+
 
 3. **Run the Bot:**
 
    Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your pdf resume:
 
-- **Dynamic Resume Generation:**
-  If you don't use the `--resume` option, the bot will automatically generate a unique resume for each application. This feature uses the information from your `plain_text_resume.yaml` file and tailors it to each specific job application, potentially increasing your chances of success by customizing your resume for each position.
+- **Resume and Cover Letter Generation:**
 
    ```bash
    python main.py
    ```
 
-- **Using a Specific Resume:**
-  If you want to use a specific PDF resume for all applications, place your resume PDF in the `data_folder` directory and run the bot with the `--resume` option:
-
-  ```bash
-  python main.py --resume /path/to/your/resume.pdf
-  ```
-
-- **Using the collect mode:**
-  If you want to collect job data only to perform any type of data analytics you can use the bot with the `--collect` option. This will store in output/data.json file all data found from linkedin jobs offers.
-
-  ```bash
-  python main.py --collect
-  ```
 
 ### Troubleshooting
 
@@ -639,20 +482,7 @@ openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded you
 - If you've recently added funds or upgraded, wait 12-24 hours for changes to take effect
 - Free tier has a 3 RPM limit; spend at least $5 on API usage to increase
 
-#### 2. Easy Apply Button Not Found
-
-**Error Message:**
-
-Exception: No clickable 'Easy Apply' button found
-
-**Solution:**
-
-- Ensure that you're logged properly
-- Check if the job listings you're targeting actually have the "Easy Apply" option
-- Verify that your search parameters in the `config.yaml` file are correct and returning jobs with the "Easy Apply" button
-- Try increasing the wait time for page loading in the script to ensure all elements are loaded before searching for the button
-
-#### 3. Incorrect Information in Job Applications
+#### 2. Incorrect Information in Job Applications
 
 **Issue:** Bot provides inaccurate data for experience, CTC, and notice period
 
@@ -662,7 +492,7 @@ Exception: No clickable 'Easy Apply' button found
 - Add fields in `config.yaml` for current CTC, expected CTC, and notice period
 - Modify bot logic to use these new config fields
 
-#### 4. YAML Configuration Errors
+#### 3. YAML Configuration Errors
 
 **Error Message:**
 
@@ -675,16 +505,6 @@ yaml.scanner.ScannerError: while scanning a simple key
 - Use a YAML validator tool
 - Avoid unnecessary special characters or quotes
 
-#### 5. Bot Logs In But Doesn't Apply to Jobs
-
-**Issue:** Bot searches for jobs but continues scrolling without applying
-
-**Solution:**
-
-- Check for security checks or CAPTCHAs
-- Verify `config.yaml` job search parameters
-- Ensure your account profile meets job requirements
-- Review console output for error messages
 
 ### General Troubleshooting Tips
 
@@ -726,7 +546,6 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 - [Lang Chain Developer Documentation](https://python.langchain.com/v0.2/docs/integrations/components/)
 
-- [Workflow diagrams](docs/workflow_diagrams.md)
 
 - If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
   Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
