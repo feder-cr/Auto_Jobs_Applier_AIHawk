@@ -67,17 +67,6 @@ class ResumeFacade:
         ]
         return inquirer.prompt(questions)['text']
 
-    def choose_style(self) -> None:
-        """
-        Prompt the user to choose a style for the resume.
-        """
-        styles = self.style_manager.get_styles()
-        if not styles:
-            print("No styles available")
-            return None
-        formatted_choices = self.style_manager.format_choices(styles)
-        selected_choice = self.prompt_user(formatted_choices, "Which style would you like to adopt?")
-        self.selected_style = selected_choice.split(' (')[0]
         
     def link_to_job(self, job_url):
         self.driver.get(job_url)
@@ -106,7 +95,7 @@ class ResumeFacade:
             tuple: A tuple containing the PDF content as bytes and the unique filename.
         """
         style_path = self.style_manager.get_style_path()
-        if self.selected_style is None:
+        if style_path is None:
             raise ValueError("You must choose a style before generating the PDF.")
 
 
@@ -148,10 +137,11 @@ class ResumeFacade:
         Returns:
             tuple: A tuple containing the PDF content as bytes and the unique filename.
         """
-        if self.selected_style is None:
+        style_path = self.style_manager.get_style_path()
+        if style_path is None:
             raise ValueError("You must choose a style before generating the PDF.")
         
-        style_path = self.style_manager.get_style_path()
+        
         cover_letter_html = self.resume_generator.create_cover_letter_job_description(style_path, self.job.description)
 
         # Generate a unique name using the job URL hash

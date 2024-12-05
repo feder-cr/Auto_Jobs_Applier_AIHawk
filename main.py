@@ -229,7 +229,31 @@ def create_cover_letter(parameters: dict, llm_api_key: str):
             plain_text_resume = file.read()
 
         style_manager = StyleManager()
-        style_manager.choose_style()
+        style_manager = StyleManager()
+        available_styles = style_manager.get_styles()
+
+        if not available_styles:
+            logger.warning("No styles available. Proceeding without style selection.")
+        else:
+            # Present style choices to the user
+            choices = style_manager.format_choices(available_styles)
+            questions = [
+                inquirer.List(
+                    "style",
+                    message="Select a style for the resume:",
+                    choices=choices,
+                )
+            ]
+            style_answer = inquirer.prompt(questions)
+            if style_answer and "style" in style_answer:
+                selected_choice = style_answer["style"]
+                for style_name, (file_name, author_link) in available_styles.items():
+                    if selected_choice.startswith(style_name):
+                        style_manager.set_selected_style(style_name)
+                        logger.info(f"Selected style: {style_name}")
+                        break
+            else:
+                logger.warning("No style selected. Proceeding with default style.")
         questions = [
     inquirer.Text('job_url', message="Please enter the URL of the job description:")
         ]
@@ -293,6 +317,30 @@ def create_resume_pdf_job_tailored(parameters: dict, llm_api_key: str):
             plain_text_resume = file.read()
 
         style_manager = StyleManager()
+        available_styles = style_manager.get_styles()
+
+        if not available_styles:
+            logger.warning("No styles available. Proceeding without style selection.")
+        else:
+            # Present style choices to the user
+            choices = style_manager.format_choices(available_styles)
+            questions = [
+                inquirer.List(
+                    "style",
+                    message="Select a style for the resume:",
+                    choices=choices,
+                )
+            ]
+            style_answer = inquirer.prompt(questions)
+            if style_answer and "style" in style_answer:
+                selected_choice = style_answer["style"]
+                for style_name, (file_name, author_link) in available_styles.items():
+                    if selected_choice.startswith(style_name):
+                        style_manager.set_selected_style(style_name)
+                        logger.info(f"Selected style: {style_name}")
+                        break
+            else:
+                logger.warning("No style selected. Proceeding with default style.")
         questions = [inquirer.Text('job_url', message="Please enter the URL of the job description:")]
         answers = inquirer.prompt(questions)
         job_url = answers.get('job_url')
@@ -307,7 +355,6 @@ def create_resume_pdf_job_tailored(parameters: dict, llm_api_key: str):
             resume_object=resume_object,
             output_path=Path("data_folder/output"),
         )
-        resume_facade.choose_style()
         resume_facade.set_driver(driver)
         resume_facade.link_to_job(job_url)
         result_base64, suggested_name = resume_facade.create_resume_pdf_job_tailored()         
@@ -432,15 +479,15 @@ def handle_inquiries(selected_actions: List[str], parameters: dict, llm_api_key:
     """
     try:
         if selected_actions:
-            if "Generate Resume" in selected_actions:
+            if "Generate Resume" == selected_actions:
                 logger.info("Crafting a standout professional resume...")
                 create_resume_pdf(parameters, llm_api_key)
                 
-            if "Generate Resume Tailored for Job Description" in selected_actions:
+            if "Generate Resume Tailored for Job Description" == selected_actions:
                 logger.info("Customizing your resume to enhance your job application...")
                 create_resume_pdf_job_tailored(parameters, llm_api_key)
                 
-            if "Generate Tailored Cover Letter for Job Description" in selected_actions:
+            if "Generate Tailored Cover Letter for Job Description" == selected_actions:
                 logger.info("Designing a personalized cover letter to enhance your job application...")
                 create_cover_letter(parameters, llm_api_key)
 
