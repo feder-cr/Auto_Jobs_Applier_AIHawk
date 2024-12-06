@@ -253,24 +253,27 @@ class AIHawkJobManager:
             pass
 
         try:
-            # XPath query to find the ul tag with class scaffold-layout__list-container
-            jobs_xpath_query = "//ul[contains(@class, 'scaffold-layout__list-container')]"
-            jobs_container = self.driver.find_element(By.XPATH, jobs_xpath_query)
+            # Updated XPath to directly locate the ul element containing job list items
+            ul_xpath_query = "//div[contains(@class, 'scaffold-layout__list')]//ul"
+            jobs_list_ul = self.driver.find_element(By.XPATH, ul_xpath_query)
 
             if scroll:
-                jobs_container_scrolableElement = jobs_container.find_element(By.XPATH,"..")
-                logger.warning(f'is scrollable: {browser_utils.is_scrollable(jobs_container_scrolableElement)}')
+                # Target the scrollable parent of the ul element
+                jobs_container_scrollable_element = jobs_list_ul.find_element(By.XPATH, "..")
+                logger.warning(f"is scrollable: {browser_utils.is_scrollable(jobs_container_scrollable_element)}")
 
-                browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement)
-                browser_utils.scroll_slow(self.driver, jobs_container_scrolableElement, step=300, reverse=True)
+                browser_utils.scroll_slow(self.driver, jobs_container_scrollable_element)
+                browser_utils.scroll_slow(self.driver, jobs_container_scrollable_element, step=300, reverse=True)
 
-            job_element_list = jobs_container.find_elements(By.XPATH, ".//li[contains(@class, 'jobs-search-results__list-item') and contains(@class, 'ember-view')]")
+            # Locate the job elements within the ul
+            job_element_list = jobs_list_ul.find_elements(By.XPATH, "./li[contains(@class, 'scaffold-layout__list-item') and contains(@class, 'ember-view')]")
 
             if not job_element_list:
                 logger.debug("No job class elements found on page, skipping.")
                 return []
 
             return job_element_list
+
 
         except NoSuchElementException as e:
             logger.warning(f'No job results found on the page. \n expection: {traceback.format_exc()}')
@@ -461,13 +464,13 @@ class AIHawkJobManager:
         job = Job()
 
         try:
-            job.title = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').find_element(By.TAG_NAME, 'strong').text
+            job.title = job_tile.find_element(By.CLASS_NAME, 'artdeco-entity-lockup__title').find_element(By.TAG_NAME, 'a').find_element(By.TAG_NAME, 'strong').text
             logger.debug(f"Job title extracted: {job.title}")
         except NoSuchElementException:
             logger.warning("Job title is missing.")
         
         try:
-            job.link = job_tile.find_element(By.CLASS_NAME, 'job-card-list__title').get_attribute('href').split('?')[0]
+            job.link = job_tile.find_element(By.CLASS_NAME, 'artdeco-entity-lockup__title').find_element(By.TAG_NAME, 'a').get_attribute('href')
             logger.debug(f"Job link extracted: {job.link}")
         except NoSuchElementException:
             logger.warning("Job link is missing.")
@@ -478,25 +481,26 @@ class AIHawkJobManager:
         except NoSuchElementException as e:
             logger.warning(f'Job company is missing. {e} {traceback.format_exc()}')
         
-        # Extract job ID from job url
+        # Extract job ID from current URL
         try:
-            match = re.search(r'/jobs/view/(\d+)/', job.link)
+            current_url = self.driver.current_url
+            match = re.search(r'currentJobId=(\d+)&', current_url)
             if match:
                 job.id = match.group(1)
             else:
-                logger.warning(f"Job ID not found in link: {job.link}")
-            logger.debug(f"Job ID extracted: {job.id} from url:{job.link}") if match else logger.warning(f"Job ID not found in link: {job.link}")
+                logger.warning(f"Job ID not found in current URL: {current_url}")
+            logger.debug(f"Job ID extracted: {job.id} from current URL: {current_url}") if match else logger.warning(f"Job ID not found in current URL: {current_url}")
         except Exception as e:
-            logger.warning(f"Failed to extract job ID: {e}", exc_info=True)
+            logger.warning(f"Failed to extract job ID from current URL: {e}", exc_info=True)
 
         try:
-            job.location = job_tile.find_element(By.CLASS_NAME, 'job-card-container__metadata-item').text
+            job.location = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-container__metadata-wrapper')]//li//span").text
         except NoSuchElementException:
             logger.warning("Job location is missing.")
         
 
         try:
-            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[contains(@class, 'job-card-container__apply-method')]").text
+            job_state = job_tile.find_element(By.XPATH, ".//ul[contains(@class, 'job-card-list__footer-wrapper')]//li[2]//span").text
         except NoSuchElementException as e:
             try:
                 # Fetching state when apply method is not found

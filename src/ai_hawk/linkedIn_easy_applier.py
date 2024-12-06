@@ -30,17 +30,17 @@ from utils import browser_utils
 import utils.time_utils
 
 def question_already_exists_in_data(question: str, data: List[dict]) -> bool:
-        """
-        Check if a question already exists in the data list.
+    """
+    Check if a question already exists in the data list.
+    
+    Args:
+        question: The question text to search for
+        data: List of question dictionaries to search through
         
-        Args:
-            question: The question text to search for
-            data: List of question dictionaries to search through
-            
-        Returns:
-            bool: True if question exists, False otherwise
-        """
-        return any(item['question'] == question for item in data)
+    Returns:
+        bool: True if question exists, False otherwise
+    """
+    return any(item['question'] == question for item in data)
 
 class AIHawkEasyApplier:
     def __init__(self, driver: Any, resume_dir: Optional[str], set_old_answers: List[Tuple[str, str, str]],
@@ -98,7 +98,7 @@ class AIHawkEasyApplier:
             logger.error(f"Failed to return to job page after {max_attempts} attempts. Cannot apply for the job.")
             raise Exception(
                 f"Redirected to linkedIn Premium page and failed to return after {max_attempts} attempts. Job application aborted.")
-            
+
     def apply_to_job(self, job: Job) -> None:
         """
         Starts the process of applying to a job.
@@ -149,13 +149,11 @@ class AIHawkEasyApplier:
             job.set_recruiter_link(recruiter_link)
             logger.debug(f"Recruiter link set: {recruiter_link}")
 
-
             self.current_job = job
 
             logger.debug("Passing job information to GPT Answerer")
             self.gpt_answerer.set_job(job)
             
-            # Todo: add this job to skip list with it's reason
             if not self.gpt_answerer.is_job_suitable():
                 return
 
@@ -259,7 +257,7 @@ class AIHawkEasyApplier:
                 logger.debug("See more button not found, skipping")
 
             try:
-                description = self.driver.find_element(By.CLASS_NAME, 'jobs-description-content__text').text
+                description = self.driver.find_element(By.CLASS_NAME, 'jobs-description-content__text--stretch').text
             except NoSuchElementException:
                 logger.debug("First class not found, checking for second class for premium members")
                 description = self.driver.find_element(By.CLASS_NAME, 'job-details-about-the-job-module__description').text
@@ -373,11 +371,12 @@ class AIHawkEasyApplier:
 
         try:
             easy_apply_content = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-content'))
+                EC.presence_of_element_located((By.CLASS_NAME, 'jobs-easy-apply-modal'))
             )
 
-            input_elements = easy_apply_content.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
-            for element in input_elements:
+            # Changed this to rely on data-test-form-element instead of a specific class
+            form_elements = easy_apply_content.find_elements(By.CSS_SELECTOR, "[data-test-form-element]")
+            for element in form_elements:
                 self._process_form_element(element, job_context)
         except Exception as e:
             logger.error(f"Failed to find form elements: {e}")
@@ -387,6 +386,7 @@ class AIHawkEasyApplier:
         if self._is_upload_field(element):
             self._handle_upload_fields(element, job_context)
         else:
+            # If it's not an upload field, handle additional questions
             self._fill_additional_questions(job_context)
 
     def _handle_dropdown_fields(self, element: WebElement) -> None:
@@ -466,11 +466,11 @@ class AIHawkEasyApplier:
             output = self.gpt_answerer.resume_or_cover(parent.text.lower())
             if 'resume' in output:
                 logger.debug("Uploading resume")
-                if self.resume_path is not None and self.resume_path.resolve().is_file():
-                    element.send_keys(str(self.resume_path.resolve()))
-                    job_context.job.resume_path = str(self.resume_path.resolve())
-                    job_context.job_application.resume_path = str(self.resume_path.resolve())
-                    logger.debug(f"Resume uploaded from path: {self.resume_path.resolve()}")
+                if self.resume_path is not None and os.path.exists(self.resume_path):
+                    element.send_keys(os.path.abspath(self.resume_path))
+                    job_context.job.resume_path = os.path.abspath(self.resume_path)
+                    job_context.job_application.resume_path = os.path.abspath(self.resume_path)
+                    logger.debug(f"Resume uploaded from path: {self.resume_path}")
                 else:
                     logger.debug("Resume path not found or invalid, generating new resume")
                     self._create_and_upload_resume(element, job_context)
@@ -501,7 +501,7 @@ class AIHawkEasyApplier:
                 logger.debug(f"Generated file path for resume: {file_path_pdf}")
 
                 logger.debug(f"Generating resume for job: {job.title} at {job.company}")
-                resume_pdf_base64 = self.resume_generator_manager.pdf_base64(job_description_text=job.description)
+                resume_pdf_base64 = self.gpt_answerer.pdf_base64(job_description_text=job.description)
                 with open(file_path_pdf, "xb") as f:
                     f.write(base64.b64decode(resume_pdf_base64))
                 logger.debug(f"Resume successfully generated and saved to: {file_path_pdf}")
@@ -509,7 +509,6 @@ class AIHawkEasyApplier:
                 break
             except HTTPStatusError as e:
                 if e.response.status_code == 429:
-
                     retry_after = e.response.headers.get('retry-after')
                     retry_after_ms = e.response.headers.get('retry-after-ms')
 
@@ -573,7 +572,6 @@ class AIHawkEasyApplier:
         folder_path = 'generated_cv'
 
         try:
-
             if not os.path.exists(folder_path):
                 logger.debug(f"Creating directory at path: {folder_path}")
             os.makedirs(folder_path, exist_ok=True)
@@ -621,7 +619,6 @@ class AIHawkEasyApplier:
                     if text_height > bottom_margin:
                         text_object.textLine(line)
                     else:
-
                         c.drawText(text_object)
                         c.showPage()
                         text_object = c.beginText(50, page_height - 50)
@@ -654,7 +651,6 @@ class AIHawkEasyApplier:
             raise ValueError("Cover letter file format is not allowed. Only PDF, DOC, and DOCX formats are supported.")
 
         try:
-
             logger.debug(f"Uploading cover letter from path: {file_path_pdf}")
             element.send_keys(os.path.abspath(file_path_pdf))
             job.cover_letter_path = os.path.abspath(file_path_pdf)
@@ -668,7 +664,8 @@ class AIHawkEasyApplier:
 
     def _fill_additional_questions(self, job_context : JobContext) -> None:
         logger.debug("Filling additional questions")
-        form_sections = self.driver.find_elements(By.CLASS_NAME, 'jobs-easy-apply-form-section__grouping')
+        # Changed this to rely on data-test-form-element instead of a specific class
+        form_sections = self.driver.find_elements(By.CSS_SELECTOR, "[data-test-form-element]")
         for section in form_sections:
             self._process_form_section(job_context,section)
 
@@ -701,8 +698,12 @@ class AIHawkEasyApplier:
 
     def _find_and_handle_radio_question(self,job_context : JobContext, section: WebElement) -> bool:
         job_application = job_context.job_application
-        question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
-        radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
+        try:
+            question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
+            radios = question.find_elements(By.CLASS_NAME, 'fb-text-selectable__option')
+        except NoSuchElementException:
+            radios = []
+
         if radios:
             question_text = section.text.lower()
             options = [radio.text.lower() for radio in radios]
@@ -712,7 +713,6 @@ class AIHawkEasyApplier:
             for item in self.all_data:
                 if current_question_sanitized in item['question'] and item['type'] == 'radio':
                     existing_answer = item
-
                     break
 
             if existing_answer:
@@ -730,13 +730,18 @@ class AIHawkEasyApplier:
             return True
         return False
 
-    def _find_and_handle_textbox_question(self,job_context : JobContext, section: WebElement) -> bool:
+    def _find_and_handle_textbox_question(self, job_context: JobContext, section: WebElement) -> bool:
         logger.debug("Searching for text fields in the section.")
         text_fields = section.find_elements(By.TAG_NAME, 'input') + section.find_elements(By.TAG_NAME, 'textarea')
 
         if text_fields:
             text_field = text_fields[0]
-            question_text = section.find_element(By.TAG_NAME, 'label').text.lower().strip()
+            label_elements = section.find_elements(By.TAG_NAME, 'label')
+            if label_elements:
+                question_text = label_elements[0].text.lower().strip()
+            else:
+                question_text = "unknown"
+
             logger.debug(f"Found text field with label: {question_text}")
 
             is_numeric = self._is_numeric_field(text_field)
@@ -744,13 +749,11 @@ class AIHawkEasyApplier:
 
             question_type = 'numeric' if is_numeric else 'textbox'
 
-            # Check if it's a cover letter field (case-insensitive)
             is_cover_letter = 'cover letter' in question_text.lower()
             logger.debug(f"question: {question_text}")
-            # Look for existing answer if it's not a cover letter field
             existing_answer = None
             if not is_cover_letter:
-                current_question_sanitized = self._sanitize_text(question_text) 
+                current_question_sanitized = self._sanitize_text(question_text)
                 for item in self.all_data:
                     if item['question'] == current_question_sanitized and item.get('type') == question_type:
                         existing_answer = item['answer']
@@ -762,31 +765,32 @@ class AIHawkEasyApplier:
                 logger.debug(f"Using existing answer: {answer}")
             else:
                 if is_numeric:
+                    # Ensure we get a numeric answer for numeric fields
                     answer = self.gpt_answerer.answer_question_numeric(question_text)
-                    logger.debug(f"Generated numeric answer: {answer}")
                 else:
                     answer = self.gpt_answerer.answer_question_textual_wide_range(question_text)
-                    logger.debug(f"Generated textual answer: {answer}")
+                logger.debug(f"Generated {question_type} answer: {answer}")
 
+            # Enter the answer directly
             self._enter_text(text_field, answer)
             logger.debug("Entered answer into the textbox.")
 
             job_context.job_application.save_application_data({'type': question_type, 'question': question_text, 'answer': answer})
 
-            # Save non-cover letter answers
+            # Save new answer if it wasn't a cover letter and didn't exist before
             if not is_cover_letter and not existing_answer:
                 self._save_questions_to_json({'type': question_type, 'question': question_text, 'answer': answer})
                 self.all_data = self._load_questions_from_json()
                 logger.debug("Saved non-cover letter answer to JSON.")
 
-            time.sleep(1)
-            text_field.send_keys(Keys.ARROW_DOWN)
-            text_field.send_keys(Keys.ENTER)
-            logger.debug("Selected first option from the dropdown.")
+            # Remove arrow key navigation and enter presses to avoid invalid element state errors
+            # Some fields do not need or support this behavior.
+
             return True
 
         logger.debug("No text fields found in the section.")
         return False
+
 
     def _find_and_handle_date_question(self, job_context : JobContext, section: WebElement) -> bool:
         job_application = job_context.job_application
@@ -818,61 +822,60 @@ class AIHawkEasyApplier:
             return True
         return False
 
-    def _find_and_handle_dropdown_question(self,job_context : JobContext, section: WebElement) -> bool:
+    def _find_and_handle_dropdown_question(self, job_context: JobContext, section: WebElement) -> bool:
         job_application = job_context.job_application
         try:
-            question = section.find_element(By.CLASS_NAME, 'jobs-easy-apply-form-element')
-
-            dropdowns = question.find_elements(By.TAG_NAME, 'select')
+            # First look for dropdowns using the data-test-text-entity-list-form-select attribute
+            dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
             if not dropdowns:
-                dropdowns = section.find_elements(By.CSS_SELECTOR, '[data-test-text-entity-list-form-select]')
+                # If not found by attribute, fallback to regular <select> elements
+                dropdowns = section.find_elements(By.TAG_NAME, 'select')
 
             if dropdowns:
                 dropdown = dropdowns[0]
                 select = Select(dropdown)
-                options = [option.text for option in select.options]
-
+                options = [opt.text.strip() for opt in select.options if opt.text.strip()]
                 logger.debug(f"Dropdown options found: {options}")
 
-                question_text = question.find_element(By.TAG_NAME, 'label').text.lower()
-                logger.debug(f"Processing dropdown or combobox question: {question_text}")
-
-                current_selection = select.first_selected_option.text
-                logger.debug(f"Current selection: {current_selection}")
+                # Attempt to find the associated label for the question
+                label_element = section.find_element(By.TAG_NAME, 'label')
+                question_text = label_element.text.strip().lower()
+                logger.debug(f"Processing dropdown question: {question_text}")
 
                 existing_answer = None
-                current_question_sanitized = self._sanitize_text(question_text) 
+                current_question_sanitized = self._sanitize_text(question_text)
                 for item in self.all_data:
-                    if current_question_sanitized in item['question'] and item['type'] == 'dropdown':
+                    if current_question_sanitized == item['question'] and item['type'] == 'dropdown':
                         existing_answer = item['answer']
                         break
 
-                if existing_answer:
-                    logger.debug(f"Found existing answer for question '{question_text}': {existing_answer}")
-                    job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': existing_answer})
-                    if current_selection != existing_answer:
-                        logger.debug(f"Updating selection to: {existing_answer}")
-                        self._select_dropdown_option(dropdown, existing_answer)
-                else:
-                    logger.debug(f"No existing answer found, querying model for: {question_text}")
+                # If no existing answer, ask the model
+                if not existing_answer:
                     answer = self.gpt_answerer.answer_question_from_options(question_text, options)
                     self._save_questions_to_json({'type': 'dropdown', 'question': question_text, 'answer': answer})
                     self.all_data = self._load_questions_from_json()
-                    job_application.save_application_data({'type': 'dropdown', 'question': question_text, 'answer': answer})
-                    self._select_dropdown_option(dropdown, answer)
-                    logger.debug(f"Selected new dropdown answer: {answer}")
+                    existing_answer = answer
+
+                # Validate and select answer
+                if existing_answer in options:
+                    select.select_by_visible_text(existing_answer)
+                    job_application.save_application_data({
+                        'type': 'dropdown',
+                        'question': question_text,
+                        'answer': existing_answer
+                    })
+                    logger.debug(f"Selected dropdown answer: {existing_answer}")
+                else:
+                    logger.error(f"Invalid dropdown option: {existing_answer} for question {question_text}")
+                    raise Exception(f"Invalid option selected: {existing_answer}")
 
                 return True
 
-            else:
-
-                logger.debug(f"No dropdown found. Logging elements for debugging.")
-                elements = section.find_elements(By.XPATH, ".//*")
-                logger.debug(f"Elements found: {[element.tag_name for element in elements]}")
-                return False
+            logger.debug("No dropdown found in this section.")
+            return False
 
         except Exception as e:
-            logger.warning(f"Failed to handle dropdown or combobox question: {e}", exc_info=True)
+            logger.warning(f"Failed to handle dropdown question: {e}", exc_info=True)
             return False
 
     def _is_numeric_field(self, field: WebElement) -> bool:
@@ -950,4 +953,3 @@ class AIHawkEasyApplier:
 
     def answer_contians_company_name(self,answer:Any)->bool:
         return isinstance(answer,str) and not self.current_job.company is None and self.current_job.company in answer
-
