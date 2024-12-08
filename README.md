@@ -2,20 +2,16 @@
 <div align="center">
 <img src="./assets/AIHawk.png">
 
-<!-- At first glance, the branding and messaging clearly convey what to expect -->
-
-  <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
-
 # AIHawk the first Jobs Applier AI Agent
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
 **🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations and land your dream job faster.**
 
-Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/mMZcMTH9K6) (for Open Source contributors)
+Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal users) | Discord (for Open Source contributors)
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity)
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mMZcMTH9K6)
+![Discord badge](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)
 
 </div>
 
@@ -26,7 +22,7 @@ As AIHawk is focusing on their proprietary product - solving problems in hiring 
 
 We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and building a better version of this product.
 
-reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/mMZcMTH9K6). [Special thanks](#special-thanks) 
+reach out to [surapuramakhil](https://github.com/surapuramakhil) on Discord. [Special thanks](#special-thanks) 
 
 Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestions, and contributions are highly valued. Feel free to open issues, suggest enhancements, or submit pull requests to help improve the project. Let's work together to make Auto_Jobs_Applier_AIHawk a powerful tool for job seekers worldwide.
 
@@ -104,6 +100,7 @@ In the digital age, the job search landscape has undergone a dramatic transforma
    ```
 
 5. **Install the required packages:**
+
    Before installing the required packages, make sure to install https://visualstudio.microsoft.com/visual-cpp-build-tools/ and select "Desktop development with C++".
 
    ```bash
@@ -522,15 +519,15 @@ For further assistance, please create an issue on the [GitHub repository](https:
 - Ollama Setup
   - Follow the instructions beloe to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
   - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
-  - Step 1: Make sure that your system meets the requirements for Ollama. If meet, install Ollama from the following URL https://ollama.com/download.
+  - Step 1: If your system meets the requirements for Ollama, install it from the following URL https://ollama.com/download.
   - Step 2: Verify Ollama is Running 
     - Open a browser and navigate to localhost:11434  to confirm Ollama is running
-   - If Ollama is running correctly, you'll see confirmation in the browser.
-  -  Step 3: Edit Configuration in VS Code 
-   - Edit the file config.py located at Auto_Jobs_Applier_AIHawk\config.py with the following
-   - llm_model_type: ollama 
-   - llm_model: 'llama3.2:1b' 
-   - llm_api_url: 'http://127.0.0.1:11434/'
+   - If Ollama runs correctly, you'll see confirmation in the browser.
+   - Step 3: Edit Configuration in VS Code
+     - Edit the file config.py located at Auto_Jobs_Applier_AIHawk\config.py with the following
+     - llm_model_type: ollama 
+     - llm_model: 'llama3.2:1b' 
+     - llm_api_url: 'http://127.0.0.1:11434/'
      
 - Gemini Setup
   - Follow the instructions beloe to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
@@ -547,12 +544,12 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 - Editing YAML Files
   - For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
-  - [Download YAML Editing Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_yaml_sections.pdf)
+  - [Download YAML Editing Guide (PDF)](https://www.scribd.com/document/788427840/Guide-Yaml-Sections)
   - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
 - Auto-start AIHawk
   - To make **AIHawk** automatically start when your system boots, follow the steps in this guide:
-  - [Download Auto-start AIHawk Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_autostart_aihawk.pdf)
+  - [Download Auto-start AIHawk Guide (PDF)](https://www.scribd.com/document/788427278/guide-to-autostart-aihawk)
   - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
 
 - Video Tutorial
@@ -572,7 +569,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
   Please add valuable details to the subject and to the description. If you need a new feature then please reflect this.  
   I'll be more than happy to assist you!
 
-- Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features make it into the main branch.
+- Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features are included in the main branch.
 
 ## Conclusion
 
