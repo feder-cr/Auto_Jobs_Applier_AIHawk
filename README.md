@@ -2,7 +2,7 @@
 <div align="center">
 <img src="./assets/AIHawk.png">
 
-<!-- At first glance, the branding and messaging clearly conveys what to expect -->
+<!-- At first glance, the branding and messaging clearly convey what to expect -->
 
   <!-- [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/AIhawkCommunity) -->
 
@@ -10,7 +10,7 @@
 
   ![CI](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/actions/workflows/ci.yml/badge.svg)
 
-**🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations, and land your dream job faster.**
+**🤖🔍 Your AI-powered job search assistant. Automate applications, get personalized recommendations and land your dream job faster.**
 
 Join our community: [Telegram](https://t.me/AIhawkCommunity) (for Normal user) | [Discord](https://discord.gg/mMZcMTH9K6) (for Open Source contributors)
 
@@ -24,7 +24,7 @@ As AIHawk is focusing on their proprietary product - solving problems in hiring 
 
 **Project Maintainers / Leads**: [surapuramakhil](https://github.com/surapuramakhil), [sarob](https://github.com/sarob), [cjbbb](https://github.com/cjbbb)
 
-We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and buidling better version of this product.
+We are looking to expand our FOSS maintainers team! If you are from a non-technical background, you can be part of the project management team, triaging issues, and shaping the project. If you are a technical person, you can join in doing code reviews, participating in releases, and building a better version of this product.
 
 reach out to [surapuramakhil](https://github.com/surapuramakhil) on [Discord](https://discord.gg/mMZcMTH9K6). [Special thanks](#special-thanks) 
 
@@ -46,7 +46,7 @@ Auto_Jobs_Applier_AIHawk is continuously evolving, and your feedback, suggestion
 
 ## Introduction
 
-Auto_Jobs_Applier_AIHawk is a cutting-edge, automated tool designed to revolutionize the job search and application process. In today's fiercely competitive job market, where opportunities can vanish in the blink of an eye, this program offers job seekers a significant advantage. By leveraging the power of automation and artificial intelligence.
+Auto_Jobs_Applier_AIHawk is a cutting-edge, automated tool designed to revolutionize the job search and application process. In today's fiercely competitive job market, where opportunities can vanish in the blink of an eye, this program offers job seekers a significant advantage by leveraging the power of automation and artificial intelligence.
 
 ### The Challenge of Modern Job Hunting
 
@@ -76,7 +76,7 @@ In the digital age, the job search landscape has undergone a dramatic transforma
    - [How to Download and Install Python on macOS](https://www.geeksforgeeks.org/how-to-download-and-install-python-latest-version-on-macos-mac-os-x/)
 
 2. **Download and Install Google Chrome:**
-   - Download and install the latest version of Google Chrome in its default location from the [official website](https://www.google.com/chrome).
+   - Download and install the latest version of Google Chrome from its default location on the [official website](https://www.google.com/chrome).
 
 3. **Clone the repository:**
 
@@ -88,6 +88,7 @@ In the digital age, the job search landscape has undergone a dramatic transforma
 
 4. **Activate virtual environment:**
 
+   For Unix-based machines -
    ```bash
    python3 -m venv virtual
    ```
@@ -103,6 +104,7 @@ In the digital age, the job search landscape has undergone a dramatic transforma
    ```
 
 5. **Install the required packages:**
+   Before installing the required packages, make sure to install https://visualstudio.microsoft.com/visual-cpp-build-tools/ and select "Desktop development with C++".
 
    ```bash
    pip install -r requirements.txt
@@ -122,7 +124,7 @@ This file contains sensitive information. Never share or commit this file to ver
     `Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. ...}}`  
     `{'error': {'message': 'Rate limit reached for gpt-4o-mini in organization <org> on requests per day (RPD): Limit 200, Used 200, Requested 1.}}`  
     OpenAI will update your account automatically, but it might take some time, ranging from a couple of hours to a few days.  
-    You can find more about your organization limits on the [official page](https://platform.openai.com/settings/organization/limits).
+    You can find more about your organization's limits on the [official page](https://platform.openai.com/settings/organization/limits).
   - For obtaining Gemini API key visit [Google AI for Devs](https://ai.google.dev/gemini-api/docs/api-key)
 
 
@@ -142,7 +144,7 @@ This file contains sensitive information. Never share or commit this file to ver
     - ollama: <http://127.0.0.1:11434/>
     - claude: <https://api.anthropic.com/v1>
     - gemini: <https://aistudio.google.com/app/apikey>
-- Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama)
+- Note: To run local Ollama, follow the guidelines here: [Guide to Ollama deployment](https://github.com/ollama/ollama). The `LLM_API_URL` field is only required for Ollama.
   
 ### 2. plain_text_resume.yaml
 
@@ -428,7 +430,6 @@ The `data_folder_example` folder contains a working example of how the files nec
 Inside this folder, you'll find example versions of the key files:
 
 - `secrets.yaml`
-- `config.yaml`
 - `plain_text_resume.yaml`
 
 These files are already populated with fictitious but realistic data. They show you the correct format and type of information to enter in each file.
@@ -446,7 +447,6 @@ Using this folder as a guide can be particularly helpful for:
 1. **Data Folder:**
    Ensure that your data_folder contains the following files:
    - `secrets.yaml`
-   - `config.yaml`
    - `plain_text_resume.yaml`
 
 2. **Output Folder:**
@@ -457,7 +457,7 @@ Using this folder as a guide can be particularly helpful for:
 
 3. **Run the Bot:**
 
-   Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your pdf resume:
+   Auto_Jobs_Applier_AIHawk offers flexibility in how it handles your PDF resume:
 
 - **Resume and Cover Letter Generation:**
 
@@ -489,7 +489,7 @@ openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded you
 **Solution:**
 
 - Update prompts for professional experience specificity
-- Add fields in `config.yaml` for current CTC, expected CTC, and notice period
+- Add fields in `config.py` for current CTC, expected CTC, and notice period
 - Modify bot logic to use these new config fields
 
 #### 3. YAML Configuration Errors
@@ -519,10 +519,31 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 ### For Users
 
-- Ollama & Gemini Setup
-  - To install and configure **Ollama** and **Gemini**, [Download Ollama and Gemini Setup Guide (PDF)](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/blob/main/docs/guide_to_setup_ollama_and_gemini.pdf)
-  - Follow the instructions in these guides to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+- Ollama Setup
+  - Follow the instructions beloe to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
   - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
+  - Step 1: Make sure that your system meets the requirements for Ollama. If meet, install Ollama from the following URL https://ollama.com/download.
+  - Step 2: Verify Ollama is Running 
+    - Open a browser and navigate to localhost:11434  to confirm Ollama is running
+   - If Ollama is running correctly, you'll see confirmation in the browser.
+  -  Step 3: Edit Configuration in VS Code 
+   - Edit the file config.py located at Auto_Jobs_Applier_AIHawk\config.py with the following
+   - llm_model_type: ollama 
+   - llm_model: 'llama3.2:1b' 
+   - llm_api_url: 'http://127.0.0.1:11434/'
+     
+- Gemini Setup
+  - Follow the instructions beloe to ensure proper configuration of **AIHawk** with **Ollama** and **Gemini**.
+  - Written by Rushi, [Linkedin](https://www.linkedin.com/in/rushichaganti/), support him by following.
+  - Step 1: Get your free API key at https://aistudio.google.com/app/apikey.
+  - Step 2: Verify Ollama is Running 
+    - Replace llm_api_key with your newly created API key on the file secrets.yaml located at Auto_Jobs_Applier_AIHawk\data_folder\secrets.yaml
+  - Step 2: Verify Ollama is Running 
+    - Replace llm_api_key with your newly created API key on the file secrets.yaml located at Auto_Jobs_Applier_AIHawk\data_folder\secrets.yaml
+  - Step 3: Edit Configuration in VS Code
+    - Edit the file config.py located at Auto_Jobs_Applier_AIHawk\config.py with the following 
+    - llm_model_type: gemini 
+    - llm_model: 'gemini-pro'
 
 - Editing YAML Files
   - For detailed instructions on editing YAML configuration sections for **AIHawk**, refer to this document:
@@ -548,7 +569,7 @@ For further assistance, please create an issue on the [GitHub repository](https:
 
 
 - If you encounter any issues, you can open an issue on [GitHub](https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk/issues).
-  Please add valuable details to the subject and to the description. If you need new feature then please reflect this.  
+  Please add valuable details to the subject and to the description. If you need a new feature then please reflect this.  
   I'll be more than happy to assist you!
 
 - Note for Contributors: If you would like to submit a Pull Request (PR), please target the `release` branch instead of `main`. The `release` branch is used for testing new code changes and will be periodically merged into `main` after validation. This approach ensures that only tested features make it into the main branch.
