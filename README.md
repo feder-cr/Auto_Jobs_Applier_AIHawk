@@ -77,9 +77,9 @@ In the digital age, the job search landscape has undergone a dramatic transforma
 3. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/feder-cr/Auto_Jobs_Applier_AIHawk.git
+   git clone https://github.com/code-infected/Auto_Jobs_Applier_AI_Agent.git
    
-   cd Auto_Jobs_Applier_AIHawk
+   cd Auto_Jobs_Applier_AI_Agent
    ```
 
 4. **Activate virtual environment:**
